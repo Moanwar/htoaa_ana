@@ -12,3 +12,7 @@ htoaa_predict.py: run this to use the trained model to predict data. Change file
 
 XGB_classifier_8Var.pkl: the pickle file of the Trained BDT. This one corresponds to ntrees = 1000, depth = 2, lr = 0.05, min child weight = 1
 
+To run the BDT pickle: 
+1. must have these packages installed: xgboost, pandas, numpy, munch, uproot, sklearn
+2. go into htoaa_predict.py and change `'GGH_HPT'` to the name of the datafile you want to test (without the .root extension)
+3. run `python htoaa_predict.py`
