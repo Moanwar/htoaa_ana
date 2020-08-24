@@ -15,4 +15,5 @@ XGB_classifier_8Var.pkl: the pickle file of the Trained BDT. This one correspond
 To run the BDT pickle: 
 1. must have these packages installed: xgboost, pandas, numpy, munch, uproot, sklearn
 2. go into htoaa_predict.py and change `'GGH_HPT'` to the name of the datafile you want to test (without the .root extension)
-3. run `python htoaa_predict.py`
+3. make a folder called 'loadedModel'
+4. run `python htoaa_predict.py`
