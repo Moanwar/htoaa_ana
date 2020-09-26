@@ -53,7 +53,6 @@ data = data.dropna(how = 'all')
 data = data.fillna(0)
 
 
-
 ## get column names (without the weight, target)
 # colNames = list(data.columns)
 # colNames = colNames[:-2]
