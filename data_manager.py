@@ -46,7 +46,10 @@ def processData (fileName):
             maxPtData['target'] = 1
         else: 
             maxPtData['target'] = 0
-        
+
+        return maxPtData
+    except:
+        print('in except')
         return maxPtData
         
         
@@ -102,8 +105,7 @@ def processData (fileName):
         #     wideData['target'] = 0
     
         # return wideData
-    except : 
-        print('in except')
+
         
         
 # def main():

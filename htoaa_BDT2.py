@@ -44,6 +44,7 @@ data = pd.DataFrame()
 
 for fileName in fileNames: 
     tmpData = processData(fileName)
+    print(tmpData)
     data = data.append(tmpData, ignore_index=True, sort = False)
 
 ## drop all columns and rows that all nan
