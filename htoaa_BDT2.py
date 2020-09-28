@@ -227,7 +227,7 @@ plt.clf()
 for colName in trainVars:
     hist_params = {'density': True, 'histtype': 'bar', 'fill': True , 'lw':3, 'alpha' : 0.4}
     nbins = 40
-    min_valueS, max_valueS = np.percentile(dataSig[colName], [0, 99.8])        
+    min_valueS, max_valueS = np.percentile(dataSig[colName], [0, 99.8])
     min_valueB, max_valueB = np.percentile(dataBg[colName], [0, 99.8])
     range_local = (min(min_valueS,min_valueB),  max(max_valueS,max_valueB))
     valuesS, binsS, _ = plt.hist(
@@ -250,10 +250,13 @@ for colName in trainVars:
     to_ymin  = max([to_ymin2, to_ymin])
     plt.ylim(ymin=to_ymin*0.1, ymax=to_ymax*1.2)
     plt.legend(loc='best')
-    plt.xlabel(colName)
+
+
+    sting = '_BGenFilter'
+    plt.xlabel(colName + sting)
     if not os.path.exists('{}distributions/'.format(folderName)):
         os.makedirs('{}distributions/'.format(folderName))
-    plt.savefig("{}distributions/plot_{}.png".format(folderName, colName))
+    plt.savefig("{}distributions/plot_{}{}".format(folderName, colName, sting))
     plt.clf()
 
 
