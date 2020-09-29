@@ -1,35 +1,37 @@
-import uproot
+f = uproot.open(fileName + '.root')import uproot
 import pandas as pd
 from analib import PhysObj, Event
 from info import allVars, cutVars, cutDict, weightDict
 
 def processData (fileName): 
-    try: 
-        ## open file, get events
-        f = uproot.open(fileName + '.root')
-        events = f.get('Events')
-        ## make PhysObj of the event
-        data = PhysObj('data_' + fileName)
-        for var in allVars: 
-            data[var] = pd.DataFrame(events.array(var))
-            ## makes eta positive only
-            if 'eta' in var: 
-                data[var] = data[var].abs()
-    
-            
-        ## make event object
-        ev = Event(data)
-        
-        ## apply cuts
-        for cutVar in cutVars: 
-            data.cut(data[cutVar] > cutDict[cutVar])
-            if (cutVar == 'FatJet_mass' or cutVar == 'FatJet_msoftdrop'):
-                data.cut(data[cutVar] < 200)
-                
-        
-        ## sync Events
-        ev.sync()
+    ## open file, get events
+    f = uproot.open(fileName + '.root')
+    events = f.get('Events')
+    ## make PhysObj of the event
+    data = PhysObj('data_' + fileName)
+    for var in allVars: 
+        data[var] = pd.DataFrame(events.array(var))
+        ## makes eta positive only
+        if 'eta' in var: 
+            data[var] = data[var].abs()
 
+    ## make event object
+    ev = Event(data)
+    
+    ## apply cuts
+    for cutVar in cutVars: 
+        data.cut(data[cutVar] > cutDict[cutVar])
+        if (cutVar == 'FatJet_mass' or cutVar == 'FatJet_msoftdrop'):
+            data.cut(data[cutVar] < 200)
+            
+    ## sync Events
+    ev.sync()
+
+    
+    print(data)
+        
+    if not (data.FatJet_pt.empty):
+        print('dataframe not empty')
         ## get the max pt index for each event
         ## then just loop through the PhysicsObjs and extract the 
         ## ones that matches that index. Not 
@@ -46,12 +48,16 @@ def processData (fileName):
             maxPtData['target'] = 1
         else: 
             maxPtData['target'] = 0
-
-        return maxPtData
-    except:
-        print('in except')
-        return maxPtData
+    else: 
+        print('dataframe is empty')
+        maxPtData = pd.DataFrame()
         
+    print(maxPtData)
+    return maxPtData
+#     except:
+#         print('in except')
+#         return maxPtData
+#         
         
     
         
