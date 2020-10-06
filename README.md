@@ -2,7 +2,7 @@
 
 ## Running Trained BDT
 
-`htoaa_predict.py` will create plots of BDTScore + distribution from the root file it analyses. Variables that get turned into distribution plots can be found in `info.py` under the variable trainVars. Ability to process multiple root files at once will be added in the future.
+`htoaa_predict.py` will create plots of BDTScore and distribution from the root file it analyses, as well as print out how many events it thought was signal or background onto the console. Variables that get turned into distribution plots can be found in `info.py` under the variable trainVars. Ability to process multiple root files at once will be added in the future.
 
 **required packages**: xgboost, pandas, numpy, munch, uproot, sklearn
 
