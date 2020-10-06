@@ -1,4 +1,4 @@
-f = uproot.open(fileName + '.root')import uproot
+import uproot
 import pandas as pd
 from analib import PhysObj, Event
 from info import allVars, cutVars, cutDict, weightDict
@@ -27,11 +27,8 @@ def processData (fileName):
     ## sync Events
     ev.sync()
 
-    
-    print(data)
-        
+
     if not (data.FatJet_pt.empty):
-        print('dataframe not empty')
         ## get the max pt index for each event
         ## then just loop through the PhysicsObjs and extract the 
         ## ones that matches that index. Not 
@@ -49,10 +46,8 @@ def processData (fileName):
         else: 
             maxPtData['target'] = 0
     else: 
-        print('dataframe is empty')
         maxPtData = pd.DataFrame()
-        
-    print(maxPtData)
+
     return maxPtData
 #     except:
 #         print('in except')
@@ -61,7 +56,7 @@ def processData (fileName):
         
     
         
-        ## what if instead, cut it using max??? 
+        ## what if instead, cut it using max???
         ## that didn't work lol
         # data.cut(data.FatJet_pt.max())
         # print(data.FatJet_pt)
