@@ -13,17 +13,24 @@ fileNames = [
     QCDType + 'QCD_HT2000toInf'
     ]
 
+signalFileName = ['GGH_HPT.root']
+bg = ['QCD_HT200to300', 'QCD_HT300to500', 'QCD_HT500to700', 'QCD_HT700to1000',
+      'QCD_HT1000to1500', 'QCD_HT1500to2000', 'QCD_HT2000toInf']
+backgroundFileNames = [QCDType + i + '.root' for i in bg]
+
+fileNames = signalFileName + backgroundFileNames
+
 ## QCD_BGenFilter
-weight = [
-    1, 
-    1, 
-    0.259, 
-    0.0515, 
-    0.01666, 
-    0.00905, 
-    0.003594, 
-    0.001401
-    ]
+# weight = [
+#     1, 
+#     1, 
+#     0.259, 
+#     0.0515, 
+#     0.01666, 
+#     0.00905, 
+#     0.003594, 
+#     0.001401
+#     ]
 
 ## QCD_bEnriched
 # weight = [
@@ -37,7 +44,7 @@ weight = [
 #     0.00044
 #     ]
 
-weightDict = dict(zip(fileNames, weight))
+#weightDict = dict(zip(fileNames, weight))
 
 ## vars for training and cutting data
 trainVars = [
@@ -57,10 +64,37 @@ cutVars = [
     'FatJet_msoftdrop', 
     'FatJet_pt'
     ]
+# extraVars = ['LHE_HT',
+#              'PV_npvs',
+#              'PV_npvsGood',
+#              'Muon_pt',
+#              'Muon_eta',
+#              'Muon_ip3d',
+#              'Muon_dxy',
+#              'Muon_dxyErr']
+
 allVars = list(set(cutVars + trainVars))
 
-## making cuts, in order of cutVars. should I make this a dict instead? is
-## it safer?
+## making cuts, in order of cutVars
 cutValues = [0.8, 0.4184, 90, 90, 240]
 
 cutDict = dict(zip(cutVars, cutValues))
+
+
+## for htoaaPredict2
+setnames = ['QCD_HT200to300', 'QCD_HT300to500', 'QCD_HT500to700',
+            'QCD_HT700to1000','QCD_HT1000to1500', 'QCD_HT1500to2000',
+            'QCD_HT2000toInf']
+BGenFileNames = ['QCD_BGenFilter/' + i + '.root' for i in setnames]
+bEnrFileNames = ['QCD_bEnriched/' + i+ '.root' for i in setnames]
+BGenWeight = [1,0.259,0.0515,0.01666,0.00905,0.003594,0.001401]
+bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.0024, 0.00024, 0.00044]
+BGenWeightDict = dict(zip(BGenFileNames, BGenWeight))
+bEnrWeightDict = dict(zip(bEnrFileNames, bEnrWeight))
+ggHWeightdict = {'GGH_HPT' : 1}
+
+#weightDict = BGenWeightDict
+#weightDict.update(bEnrWeightDict)
+weightDict = bEnrWeightDict
+weightDict.update(BGenWeightDict)
+weightDict.update(ggHWeightdict)
