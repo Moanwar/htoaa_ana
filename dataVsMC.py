@@ -4,7 +4,7 @@ import pandas as pd
 from analib import PhysObj, Event
 from info import BGenFileNames, bEnrFileNames
 
-from data_managerDataVsMC import processData, BGenWeight, bEnrWeight, trainVars, extraVars, allVars, plotVars
+from data_managerDataVsMC import processData, BGenWeight, bEnrWeight, trainVars, extraVars, allVars, plotVars, dataPath, ggHPath, bEnrPath, BGenPath
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import mplhep as hep
@@ -15,40 +15,36 @@ plt.style.use(hep.style.CMS)
 
 
 ## uncomment when upload to kodiak
-'''
-f = uproot.open('QCD_BGenFilter/QCD_HT200to300.root')
-events = f.get('Events')
-jetPt = pd.DataFrame(events.array('FatJet_pt'))
-muonPt = pd.DataFrame(events.array('Muon_pt'))
-
 
 ## monte carlo ggH signal
-ggHDf = processData('GGH_HPT.root', 'data')
+ggHDf = processData(ggHPath, 'ggH')
 
 ## monte carlo backgrounds
 BGenDf = pd.DataFrame()
-for fileName in BGenFileNames:
-    tmpDf = processData(fileName, 'BGen')
-    BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
+BGenDf = processData(BGenPath, 'BGen')
+#for fileName in BGenFileNames:
+#    tmpDf = processData(fileName, 'BGen')
+#    BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
 
 bEnrDf = pd.DataFrame()
-for fileName in bEnrFileNames:
-    tmpDf = processData(fileName, 'bEnr')
-    bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
-
+bEnrDf = processData(bEnrPath, 'bEnr')
+#for fileName in bEnrFileNames:
+#    tmpDf = processData(fileName, 'bEnr')
+#    bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
+#
 ## datafile
-dataDf = processData('GGH_HPT.root', 'data')
+dataDf = processData(dataPath, 'data')
 
-pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
-pickle.dump(BGenDf, open('dataVsMC/BGenDf.pkl', 'wb'))
-pickle.dump(bEnrDf, open('dataVsMC/bEnrDf.pkl', 'wb'))
-pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
-'''
+#pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
+#pickle.dump(BGenDf, open('dataVsMC/BGenDf.pkl', 'wb'))
+#pickle.dump(bEnrDf, open('dataVsMC/bEnrDf.pkl', 'wb'))
+#pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
 
-ggHDf = pickle.load(open('dataVsMC/ggHDf.pkl', 'rb'))
-BGenDf = pickle.load(open('dataVsMC/BGenDf.pkl', 'rb'))
-bEnrDf = pickle.load(open('dataVsMC/bEnrDf.pkl', 'rb'))
-dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
+
+#ggHDf = pickle.load(open('dataVsMC/ggHDf.pkl', 'rb'))
+#BGenDf = pickle.load(open('dataVsMC/BGenDf.pkl', 'rb'))
+#bEnrDf = pickle.load(open('dataVsMC/bEnrDf.pkl', 'rb'))
+#dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
 
 for var in trainVars + plotVars:
     print(var)
@@ -71,8 +67,8 @@ for var in trainVars + plotVars:
     ax.set_title(var + ' BGen vs Data')
     ax.legend(loc='best', frameon=True)
     ax.grid()
-    plt.savefig('dataVsMCDist/BGenVsData.png')
-    fig.clf()
+    plt.savefig('dataVsMCDist/{}_BGenVsData.png'.format(var))
+    plt.close()
 
     fig, ax = plt.subplots(figsize=(10,8))
     minbEnr, maxbEnr = np.percentile(bEnrDf[var], [0, 99.8])
@@ -87,8 +83,8 @@ for var in trainVars + plotVars:
     ax.legend(loc='best', frameon=True)
     ax.set_title(var + ' bEnr vs Data')
     ax.grid()
-    plt.savefig('dataVsMCDist/bEnrVsData.png')
-
+    plt.savefig('dataVsMCDist/{}_bEnrVsData.png'.format(var))
+    plt.close()
     
 
 

@@ -4,6 +4,13 @@ from analib import PhysObj, Event
 #from info import allVars, cutVars, cutDict, weightDict
 import sys
 import os
+import pickle 
+
+dataPath = '/home/chosila/Projects/htoaa/data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+ggHPath = '/home/chosila/Projects/htoaa/MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
+#ggHPath = 'GGH_HPT.root'
+BGenPath = '/home/chosila/Projects/htoaa/MC/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+bEnrPath = '/home/chosila/Projects/htoaa/MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
 
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
@@ -44,12 +51,18 @@ cutValues = [0.8, 0.4184, 90, 90, 240, 6]
 
 cutDict = dict(zip(cutVars, cutValues))
 
+muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
+muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
+
+ptkeys = list(muonL.keys())
+ipkeys = list(muonL[ptkeys[1]].keys())
+
+
 def processData (filePath, tag):
     ## open file, get events
     fileName, fileExtension = os.path.splitext(filePath)
-
+    
     print(fileName)
-    print(fileExtension)
 
     if fileExtension != '.root':
         print('this program only supports .root  files')
@@ -59,12 +72,16 @@ def processData (filePath, tag):
     events = f.get('Events')
     ## make PhysObj of the event
     data = PhysObj('data_' + fileName)
+    
+
+    if tag == 'data':
+        allVars.remove('LHE_HT')
     for var in allVars: 
         data[var] = pd.DataFrame(events.array(var))
         ## makes eta positive only
         if 'eta' in var: 
             data[var] = data[var].abs()
-
+    
     ## make event object
     ev = Event(data)
     
@@ -77,28 +94,28 @@ def processData (filePath, tag):
     data.cut(data['Muon_ip3d'] < 0.5)
     data.cut((data['Muon_dxy']/data['Muon_dxyErr']).abs() > 2)
 
-
-
-
     ## sync Events
     ev.sync()
-
 
     if not (data.FatJet_pt.empty):
         ## get the max pt index for each event
         ## then just loop through the PhysicsObjs and extract the 
         ## ones that matches that index. Not 
+
         colidx = data['FatJet_pt'].idxmax(axis = 1).to_numpy()
         rowidx = list(range(len(colidx)))
         maxPtData = pd.DataFrame()
-        for var in allVars: 
+
+        for var in allVars:
             npArr = data[var].to_numpy()
             maxPtData[var] = npArr[rowidx, colidx]
 
-
-        ## if do this then should be able to let people see weights too
-        if tag == 'data':
-            maxPtData['LHE_weights'] = 1
+        
+        ## LHE weights
+        #if tag == 'data':
+        #    maxPtData['LHE_weights'] = 1
+        if tag == 'ggH':
+            maxPtData['LHE_weights'] = 43920/999000
         elif tag == 'BGen':
             maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
                           'LHE_weights'] = BGenWeight[0]
@@ -132,17 +149,22 @@ def processData (filePath, tag):
             maxPtData.loc[maxPtData['LHE_HT']>2000,
                           'LHE_weights'] = bEnrWeight[6]
 
+        ## Muon weights 
+        if tag != 'data': 
+            for ptIdx, pt in enumerate(ptkeys):
+                if pt == 'meta':
+                    continue
+                for ipIdx, ip in enumerate(ipkeys): 
+                    maxPtData.loc[(maxPtData.Muon_pt > pt) & (maxPtData < ptkeys[ptIdx+1]) &
+                                  (maxPtData.Muon_ip3d > ip) & (maxPtData.Muon_ip3d < ipkeys[ipIdx +1]) &
+                                  (maxPtData.Muon_eta < 1.5), 'muon_weights'] = muonR[pt][ip]['L']
+                    maxPtData.loc[(maxPtData.Muon_pt > pt) & (maxPtData < ptkeys[ptIdx+1]) &
+                                  (maxPtData.Muon_ip3d > ip) & (maxPtData.Muon_ip3d < ipkeys[ipIdx +1]) &
+                                  (maxPtData.Muon_eta > 1.5), 'muon_weights'] = muonR[pt][ip]['H']
 
-        ## !!! exaple of how the weights could be done
-        # data.loc[(data['LHE_HT']>350) & (data['LHE_HT']<400), 'weights'] = 0.5
 
-
-    ## !!! TODO:: redo weighing
-        # maxPtData['weights'] = weightDict[fileName]
-        # if fileName == 'GGH_HPT':
-        #     maxPtData['target'] = 1
-        # else: 
-        #     maxPtData['target'] = 0
+        #### !!!!! TODO !!!! #####
+        ## lumi weights
 
 
     else:
