@@ -6,11 +6,11 @@ import sys
 import os
 import pickle 
 
-dataPath = '/home/chosila/Projects/htoaa/data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-ggHPath = '/home/chosila/Projects/htoaa/MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
+dataPath = 'data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+ggHPath = 'MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
 #ggHPath = 'GGH_HPT.root'
-BGenPath = '/home/chosila/Projects/htoaa/MC/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-bEnrPath = '/home/chosila/Projects/htoaa/MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+BGenPath = 'MC/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+bEnrPath = 'MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
 
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
@@ -54,9 +54,11 @@ cutDict = dict(zip(cutVars, cutValues))
 muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
 muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
 
-ptkeys = list(muonL.keys())
-ipkeys = list(muonL[ptkeys[1]].keys())
-
+## also added on a 999999 treated as infinity
+ptkeys = list(muonL.keys()) + [999999]
+ptkeys.remove('meta')
+ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
+npvsGkeys = muonR[6][2]['H']
 
 def processData (filePath, tag):
     ## open file, get events
@@ -81,7 +83,8 @@ def processData (filePath, tag):
         ## makes eta positive only
         if 'eta' in var: 
             data[var] = data[var].abs()
-    
+    data['IP'] = (data['Muon_dxy']/data['Muon_dxyErr']).abs()
+
     ## make event object
     ev = Event(data)
     
@@ -92,7 +95,9 @@ def processData (filePath, tag):
             data.cut(data[cutVar] < 200)
     data.cut(data['Muon_eta'] < 2.4)
     data.cut(data['Muon_ip3d'] < 0.5)
-    data.cut((data['Muon_dxy']/data['Muon_dxyErr']).abs() > 2)
+    data.cut(data['IP'] > 2)
+    
+
 
     ## sync Events
     ev.sync()
@@ -106,9 +111,10 @@ def processData (filePath, tag):
         rowidx = list(range(len(colidx)))
         maxPtData = pd.DataFrame()
 
-        for var in allVars:
+        for var in allVars + ['IP']:
             npArr = data[var].to_numpy()
             maxPtData[var] = npArr[rowidx, colidx]
+
 
         
         ## LHE weights
@@ -131,7 +137,6 @@ def processData (filePath, tag):
                           'LHE_weights'] = BGenWeight[5]
             maxPtData.loc[maxPtData['LHE_HT']>2000,
                           'LHE_weights'] = BGenWeight[6]
-            print(BGenWeight[6])
 
         elif tag == 'bEnr':
             maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
@@ -149,23 +154,54 @@ def processData (filePath, tag):
             maxPtData.loc[maxPtData['LHE_HT']>2000,
                           'LHE_weights'] = bEnrWeight[6]
 
-        ## Muon weights 
-        if tag != 'data': 
-            for ptIdx, pt in enumerate(ptkeys):
-                if pt == 'meta':
-                    continue
-                for ipIdx, ip in enumerate(ipkeys): 
-                    maxPtData.loc[(maxPtData.Muon_pt > pt) & (maxPtData < ptkeys[ptIdx+1]) &
-                                  (maxPtData.Muon_ip3d > ip) & (maxPtData.Muon_ip3d < ipkeys[ipIdx +1]) &
-                                  (maxPtData.Muon_eta < 1.5), 'muon_weights'] = muonR[pt][ip]['L']
-                    maxPtData.loc[(maxPtData.Muon_pt > pt) & (maxPtData < ptkeys[ptIdx+1]) &
-                                  (maxPtData.Muon_ip3d > ip) & (maxPtData.Muon_ip3d < ipkeys[ipIdx +1]) &
-                                  (maxPtData.Muon_eta > 1.5), 'muon_weights'] = muonR[pt][ip]['H']
+        ## npvs Ratio weights
+        if tag != 'data':
+            for i in range(len(ptkeys)-1):
+                for j in range(len(ipkeys)-1):
+                    for k in range(len(npvsGkeys)):
+                        #print('{} {} {}'.format(ptkeys[i],ipkeys[j],npvsGkeys[k]))
+                        maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                      (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                      (maxPtData.IP >= ipkeys[j]) &
+                                      (maxPtData.IP < ipkeys[j+1]) &
+                                      (maxPtData.Muon_eta < 1.5) &
+                                      (maxPtData.PV_npvsGood == k+1),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
+                        maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                      (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                      (maxPtData.IP >= ipkeys[j]) &
+                                      (maxPtData.IP < ipkeys[j +1]) &
+                                      (maxPtData.Muon_eta >= 1.5) &
+                                      (maxPtData.PV_npvsGood == k+1),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
 
+            maxPtData = maxPtData.fillna(0)
+            print(maxPtData.iloc[0])
 
-        #### !!!!! TODO !!!! #####
-        ## lumi weights
+        # lumi weights
+            for i in range(len(ptkeys)-1):
+                for j in range(len(ipkeys)-1):
+                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                  (maxPtData.IP >= ipkeys[j]) &
+                                  (maxPtData.IP < ipkeys[j+1]) &
+                                  (maxPtData.Muon_eta < 1.5),
+                                  'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['L']
+                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                  (maxPtData.IP >= ipkeys[j]) &
+                                  (maxPtData.IP < ipkeys[j +1]) &
+                                  (maxPtData.Muon_eta >= 1.5),
+                                  'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
 
+            
+            maxPtData = maxPtData.fillna(0)
+
+    ## ultimate weight
+            maxPtData = maxPtData.assign(final_weights =
+                                         maxPtData['lumi_weights']*
+                                         maxPtData['PU_weights']*
+                                         maxPtData['LHE_weights'])
 
     else:
         maxPtData = pd.DataFrame()
