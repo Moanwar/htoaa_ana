@@ -21,11 +21,11 @@ from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, tra
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.model_selection import train_test_split
 
-ntreeslist = [400, 800, 1000, 1500, 2000, 2500, 3000]
-treedepthlist = [2,3,4,6,8,10]
-mcwlist = [1,2,3,4,5]
-lrlist = [0.005, 0.01, 0.05, 0.1, 0.2]
-earlystoplist = [100, 200, 300, 400, 500]
+ntreeslist = [400, 800, 1000]#, 1500, 2000, 2500, 3000]
+treedepthlist = [2,3,4,6]#,8,10]
+mcwlist = [1,2,3]#,4,5]
+lrlist = [0.005, 0.01, 0.05]#, 0.1, 0.2]
+earlystoplist = [100]#, 200, 300, 400, 500]
 
 data = pickle.load(open('data.pkl', 'rb'))
 ## normalizing the weights

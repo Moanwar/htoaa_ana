@@ -12,6 +12,7 @@ from analib import PhysObj, Event
 import sys
 import os
 import pickle
+import numpy as np
 
 
 dataPath = 'data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
@@ -29,6 +30,9 @@ bEnrPaths = ['QCD_bEnriched/' + i + '.root' for i in setnames]
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
 bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.024, 0.0024, 0.00044]
 
+BGenDict = dict(zip(BGenPaths, BGenWeight))
+bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
+
 trainVars = [
     'FatJet_pt', 
     'FatJet_eta', 
@@ -37,25 +41,34 @@ trainVars = [
     'FatJet_btagDeepB', 
     'FatJet_msoftdrop', 
     'FatJet_btagDDBvL',
-    'FatJet_deepTagMD_H4qvsQCD'
+    'FatJet_deepTagMD_H4qvsQCD',
+    ## high discriminatroy
+#    'FatJet_n2b1',
+#    'SubJet_mass',
+ #   'SubJet_mass',
+ #   'SubJet_tau1',
+#    'SV_pt',
+#    'SV_eta',
+#    'SV_phi',
+#    'SV_mass'
 ]
 trainVars.sort()
 
 otherVars = [
-    'Muon_softId',
-    'Muon_eta',
-    'Muon_pt',
-    'Muon_dxy',
-    'Muon_dxyErr',
-    'Muon_ip3d',
+    # 'Muon_softId',
+    # 'Muon_eta',
+    # 'Muon_pt',
+    # 'Muon_dxy',
+    # 'Muon_dxyErr',
+    # 'Muon_ip3d',
     'FatJet_pt',
     'FatJet_eta',
     'FatJet_btagDDBvL',
     'FatJet_btagDeepB',
     'FatJet_msoftdrop',
     'FatJet_mass',
-    'PV_npvsGood',
-    'PV_npvs',
+    # 'PV_npvsGood',
+    # 'PV_npvs',
     'LHE_HT'
 ]
 otherVars.sort()
@@ -63,14 +76,14 @@ otherVars.sort()
 allVars = list(set(trainVars + otherVars))
 allVars.sort()
 
-muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
-muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
+#muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
+#muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
 
 ## also added on a 999999 treated as infinity
-ptkeys = list(muonL.keys()) + [999999]
-ptkeys.remove('meta')
-ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
-npvsGkeys = muonR[6][2]['H']
+#ptkeys = list(muonL.keys()) + [999999]
+#ptkeys.remove('meta')
+#ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
+#npvsGkeys = muonR[6][2]['H']
 
 tags = ['ggH', 'BGen', 'bEnr', 'data']
 
@@ -93,7 +106,7 @@ def processData(filePath, tag):
     f = uproot.open(fileName + '.root')
     events = f.get('Events')
     ## make PhysObj of the event
-    data = PhysObj('data_' + fileName)
+    data = PhysObj('Jet' + fileName)
 
     if tag == 'data':
         allVars.remove('LHE_HT')
@@ -102,19 +115,19 @@ def processData(filePath, tag):
         ## makes eta positive only
         if 'eta' in var: 
             data[var] = data[var].abs()
-    data['Muon_IP'] = (data['Muon_dxy']/data['Muon_dxyErr']).abs()
+    # data['Muon_IP'] = (data['Muon_dxy']/data['Muon_dxyErr']).abs()
 
     ## make event object
     ev = Event(data)
 
     ## apply cuts
     # data.cut(data[cutVar] > cutDict[cutVar])
-    data.cut((data['Muon_softId'] == True))
-    data.cut(data['Muon_eta'] < 2.4)
-    data.cut(data['Muon_pt'] > 7)
-    data.cut(data['Muon_IP'] > 2)
-    data.cut(data['Muon_ip3d'] < 0.5)
-    data.cut(data['FatJet_pt'] > 240)
+    # data.cut((data['Muon_softId'] == True))
+    # data.cut(data['Muon_eta'] < 2.4)
+    # data.cut(data['Muon_pt'] > 7)
+    # data.cut(data['Muon_IP'] > 2)
+    # data.cut(data['Muon_ip3d'] < 0.5)
+    data.cut(data['FatJet_pt'] > 170) # 240)
     data.cut(data['FatJet_eta'] < 2.4)
     data.cut(data['FatJet_btagDDBvL'] > 0.8)
     data.cut(data['FatJet_btagDeepB'] > 0.4184)
@@ -122,7 +135,7 @@ def processData(filePath, tag):
     data.cut(data['FatJet_msoftdrop'] <= 200)
     data.cut(data['FatJet_mass'] > 90)
     data.cut(data['FatJet_mass'] <= 200)
-    data.cut(data['PV_npvsGood'] > 0)
+    # data.cut(data['PV_npvsGood'] > 0)
 
     ev.sync()
 
@@ -139,7 +152,7 @@ def processData(filePath, tag):
 
     maxPtData = pd.DataFrame()
 
-    for var in allVars + ['Muon_IP']:
+    for var in allVars: 
         npArr = data[var].to_numpy()
         maxPtData[var] = npArr[rowidx, colidx]
 
@@ -160,9 +173,22 @@ def processData(filePath, tag):
     #if tag == 'data':
     #    maxPtData['LHE_weights'] = 1
     if tag == 'ggH':
-        maxPtData['LHE_weights'] = 43920/999000
+        maxPtData['LHE_weights'] = 1#43920/999000
+        wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
+        wgt[wgt<0.1] = 0.1
+        maxPtData['ggH_weights'] = wgt
+        maxPtData['final_weights'] = maxPtData['LHE_weights'] * maxPtData['ggH_weights']
     elif tag == 'BGen':
-        maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
+        maxPtData['LHE_weights'] = BGenDict[filePath]
+
+        wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+        wgt[wgt<0.1] = 0.1
+        maxPtData['QCD_correction'] = wgt
+
+        maxPtData = maxPtData.assign(final_weights=
+                                     maxPtData['LHE_weights']*
+                                     maxPtData['QCD_correction'])
+        '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
                       'LHE_weights'] = BGenWeight[0]
         maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<500),
                       'LHE_weights'] = BGenWeight[1]
@@ -175,10 +201,19 @@ def processData(filePath, tag):
         maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<2000),
                       'LHE_weights'] = BGenWeight[5]
         maxPtData.loc[maxPtData['LHE_HT']>2000,
-                      'LHE_weights'] = BGenWeight[6]
+                      'LHE_weights'] = BGenWeight[6]'''
 
     elif tag == 'bEnr':
-        maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
+        maxPtData['LHE_weights'] = bEnrDict[filePath]
+
+        wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+        wgt[wgt<0.1] = 0.1
+        maxPtData['QCD_correction'] = wgt
+
+        maxPtData = maxPtData.assign(final_weights=
+                                     maxPtData['LHE_weights']*
+                                     maxPtData['QCD_correction'])
+        '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
                       'LHE_weights'] = bEnrWeight[0]
         maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<500),
                       'LHE_weights'] = bEnrWeight[1]
@@ -191,10 +226,11 @@ def processData(filePath, tag):
         maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<2000),
                       'LHE_weights'] = bEnrWeight[5]
         maxPtData.loc[maxPtData['LHE_HT']>2000,
-                      'LHE_weights'] = bEnrWeight[6]
+                      'LHE_weights'] = bEnrWeight[6]'''
 
     ## npvs Ratio weights
-    if tag != 'data':
+    ## we only need pileup and lumi for dataVsMC
+    '''if tag != 'data':
         for i in range(len(ptkeys)-1):
             for j in range(len(ipkeys)-1):
                 for k in range(len(npvsGkeys)):
@@ -235,13 +271,15 @@ def processData(filePath, tag):
         maxPtData = maxPtData.assign(final_weights =
                                      maxPtData['lumi_weights']*
                                      maxPtData['PU_weights']*
-                                     maxPtData['LHE_weights'])
+                                     maxPtData['LHE_weights'])'''
+
+
+    #maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
 
 
     maxPtData = maxPtData.dropna(axis = 1, how = 'all')
     maxPtData = maxPtData.dropna(how = 'all')
     maxPtData = maxPtData.fillna(0)
-
 
 
     return maxPtData
