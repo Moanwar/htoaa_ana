@@ -33,7 +33,7 @@ bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.024, 0.0024, 0.00044]
 BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
 
-trainVars = [
+JetVars = [
     'FatJet_pt', 
     'FatJet_eta', 
     'FatJet_mass', 
@@ -43,16 +43,19 @@ trainVars = [
     'FatJet_btagDDBvL',
     'FatJet_deepTagMD_H4qvsQCD',
     ## high discriminatroy
-#    'FatJet_n2b1',
-#    'SubJet_mass',
- #   'SubJet_mass',
- #   'SubJet_tau1',
-#    'SV_pt',
-#    'SV_eta',
-#    'SV_phi',
-#    'SV_mass'
+    'FatJet_n2b1',
+    'SubJet_mass1',
+    'SubJet_mass2',
+    'SubJet_tau1',
+    ## medium
+    'FatJet_n3b1',
+    'FatJet_tau2',
+    'SubJet_n2b1',
+    'SubJet_pt',
+    'SubJet_btagDeepB',
+    'SubJet_tau1',
 ]
-trainVars.sort()
+JetVars.sort()
 
 otherVars = [
     # 'Muon_softId',
@@ -73,8 +76,49 @@ otherVars = [
 ]
 otherVars.sort()
 
-allVars = list(set(trainVars + otherVars))
+allVars = list(set(JetVars + otherVars))
 allVars.sort()
+
+## for when plot
+## disc is the discriminatory variables
+##    None = standard vars (default for now)
+##    h = standard + high
+##    m = standard + high + medium
+disc = 'h'
+standardVars = [
+    'FatJet_pt',
+    'FatJet_eta', 
+    'FatJet_mass', 
+    'FatJet_btagCSVV2', 
+    'FatJet_btagDeepB', 
+    'FatJet_msoftdrop', 
+    'FatJet_btagDDBvL',
+    'FatJet_deepTagMD_H4qvsQCD'
+    ]
+highDiscVars = [
+    'FatJet_n2b1',
+    'SubJet_mass(1)',
+    'SubJet_mass(2)',
+    'SubJet_tau1(1)',
+    'FatJet_nSV'
+    ]
+mediumDiscVars = [
+    'FatJet_n3b1',
+    'FatJet_tau2',
+    'SubJet_n2b1(1)',
+    'SubJet_pt(1)/FatJet_pt',
+    'SubJet_pt(2)/FatJet_pt',
+    'SubJet_btagDeepB(2)',
+    'SubJet_tau1(2)'
+    ]
+
+
+if disc == None:
+    trainVars = standardVars
+elif disc == 'h':
+    trainVars = standardVars + highDiscVars
+elif disc == 'm':
+    trainVars = standardVars + highDiscVars + mediumDiscVars
 
 #muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
 #muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
@@ -86,6 +130,26 @@ allVars.sort()
 #npvsGkeys = muonR[6][2]['H']
 
 tags = ['ggH', 'BGen', 'bEnr', 'data']
+
+def getSubJetData(subjetnum, subjetvarname, events):
+    '''idxa1 = events.array('FatJet_subJetIdx1')
+    idxa2 = events.array('FatJet_subJetIdx2')
+    idxa1f = pd.DataFrame(idxa1)
+    idxa2f = pd.DataFrame(idxa2)
+    submass = events.array('SubJet_mass')
+    subtau = events.array('SubJet_tau1')
+    data['SubJet_mass(1)'] = pd.DataFrame(submass[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+    data['SubJet_mass2'] = pd.DataFrame(submass[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
+    data['SubJet_tau1'] = pd.DataFrame(subtau[ idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+    '''
+    subjetidx = events.array(f'FatJet_subJetIdx{subjetnum}')
+    subjetidxDF = pd.DataFrame(subjetidx)
+    subjetvar = events.array(subjetvarname)
+
+    return pd.DataFrame(subjetvar[subjetidx[subjetidx!=-1]]).add(subjetidxDF[subjetidxDF==-1]*0,fill_value=0)
+
+
+## makes the DF for putting into the BDT
 
 def processData(filePath, tag):
 
@@ -108,14 +172,91 @@ def processData(filePath, tag):
     ## make PhysObj of the event
     data = PhysObj('Jet' + fileName)
 
-    if tag == 'data':
+    ############## filling ##############
+    ## filling the dataframe with events
+    '''if tag == 'data':
         allVars.remove('LHE_HT')
-    for var in allVars: 
-        data[var] = pd.DataFrame(events.array(var))
-        ## makes eta positive only
-        if 'eta' in var: 
-            data[var] = data[var].abs()
-    # data['Muon_IP'] = (data['Muon_dxy']/data['Muon_dxyErr']).abs()
+    for var in allVars:
+        ## in try because some in trainVars don't exist in the root file
+        ## but i need to have it when training
+        try:
+            data[var] = pd.DataFrame(events.array(var))
+            ## makes eta positive only
+            if 'eta' in var: 
+                data[var] = data[var].abs()
+        except:
+            continue'''
+
+    ## standard
+    data['FatJet_pt'] = pd.DataFrame(events.array('FatJet_pt'))
+    data['FatJet_eta'] = pd.DataFrame(np.abs(events.array('FatJet_eta')))
+    data['FatJet_mass'] = pd.DataFrame(events.array('FatJet_mass'))
+    data['FatJet_btagCSVV2'] = pd.DataFrame(events.array('FatJet_btagCSVV2'))
+    data['FatJet_btagDeepB'] = pd.DataFrame(events.array('FatJet_btagDeepB'))
+    data['FatJet_msoftdrop'] = pd.DataFrame(events.array('FatJet_msoftdrop'))
+    data['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
+    data['FatJet_deepTagMD_H4qvsQCD'] = pd.DataFrame(events.array('FatJet_deepTagMD_H4qvsQCD'))
+
+    if tag != 'data':
+        data['LHE_HT'] = pd.DataFrame(events.array('LHE_HT'))
+
+    if disc == 'h' or disc == 'm':
+        ## high-disc
+        data['FatJet_n2b1'] = pd.DataFrame(events.array('FatJet_n2b1'))
+        ## high-disc subjets
+        data['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
+        data['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
+        data['SubJet_tau1(1)'] = getSubJetData(1, 'SubJet_tau1', events)
+
+    if disc == 'm':
+        ## medium-disc
+        data['FatJet_n3b1'] = pd.DataFrame(events.array('FatJet_n3b1'))
+        data['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
+        ## midium subjets
+        data['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
+        data['SubJet_pt(1)/FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/data.FatJet_pt
+        data['SubJet_pt(2)/FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/data.FatJet_pt
+        data['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
+        data['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
+
+    #####################################
+
+    ############### filling subjet variables#################
+    ############### moved to above so can turn onn/off with iffs#######
+
+    ## subjetmasss
+    # idxa1 = events.array('FatJet_subJetIdx1')
+    # idxa2 = events.array('FatJet_subJetIdx2')
+    # idxa1f = pd.DataFrame(idxa1)
+    # idxa2f = pd.DataFrame(idxa2)
+    # submass = events.array('SubJet_mass')
+    # subtau = events.array('SubJet_tau1')
+    #pd.DataFrame(submass[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+    #pd.DataFrame(submass[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
+    #pd.DataFrame(subtau[ idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+    #jets.subtau2  = pd.DataFrame(subtau[ idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
+
+    ## SubJetn2b1[1]
+    #subjetn2b1 = events.array('SubJet_n2b1')
+
+    #data['SubJet_n2b11'] = pd.DataFrame(subjetn2b1[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+
+    ## SubJet_pt[1]/FatJet_pt and pt[2]
+    #subjetpt = events.array('SubJet_pt')
+
+    #data['SubJet_pt1/FatJet_pt'] = pd.DataFrame(subjetpt[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)/data.FatJet_pt
+    #data['SubJet_pt2/FatJet_pt'] = pd.DataFrame(subjetpt[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)/data.FatJet_pt
+
+    ## SubJet_btagDeepB[2]
+    #subjetbtagdeepb = events.array('SubJet_btagDeepB')
+    #data['SubJet_btagDeepB2'] = pd.DataFrame(subjetbtagdeepb[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
+
+
+    ## SubJet_tau1[2]
+    #subjettau = events.array('SubJet_tau1')
+    #data['SubJet_tau12'] = pd.DataFrame(subjettau[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
+    ########################################################
+
 
     ## make event object
     ev = Event(data)
@@ -151,11 +292,34 @@ def processData(filePath, tag):
 
 
     maxPtData = pd.DataFrame()
+    toiter = (trainVars + ['LHE_HT'])
+    if disc != None:
+        toiter.remove('FatJet_nSV')
 
-    for var in allVars: 
+    for var in toiter:
+        print(var)
         npArr = data[var].to_numpy()
         maxPtData[var] = npArr[rowidx, colidx]
 
+
+
+    ############# Secondary Vertex stuff ################
+    ## get phi and eta for the situation
+    if disc != None:
+        eventidx = data.FatJet_pt.index
+        maxptjetidx = colidx
+    
+        jeteta = events.array('FatJet_eta')[eventidx, maxptjetidx]
+        jetphi = events.array('FatJet_phi')[eventidx, maxptjetidx]
+        sveta = events.array('SV_eta')[eventidx]
+        svphi = events.array('SV_phi')[eventidx]
+    
+        dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
+        dr = pd.DataFrame(dr)
+        nSVcounts = (dr < 0.8).sum(axis=1)
+        maxPtData['FatJet_nSV'] = nSVcounts
+
+    #######################################################
 
     ## define target to distinguish between signal and background
     ## during training
@@ -180,14 +344,6 @@ def processData(filePath, tag):
         maxPtData['final_weights'] = maxPtData['LHE_weights'] * maxPtData['ggH_weights']
     elif tag == 'BGen':
         maxPtData['LHE_weights'] = BGenDict[filePath]
-
-        wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
-        wgt[wgt<0.1] = 0.1
-        maxPtData['QCD_correction'] = wgt
-
-        maxPtData = maxPtData.assign(final_weights=
-                                     maxPtData['LHE_weights']*
-                                     maxPtData['QCD_correction'])
         '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
                       'LHE_weights'] = BGenWeight[0]
         maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<500),
@@ -203,9 +359,6 @@ def processData(filePath, tag):
         maxPtData.loc[maxPtData['LHE_HT']>2000,
                       'LHE_weights'] = BGenWeight[6]'''
 
-    elif tag == 'bEnr':
-        maxPtData['LHE_weights'] = bEnrDict[filePath]
-
         wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
         wgt[wgt<0.1] = 0.1
         maxPtData['QCD_correction'] = wgt
@@ -213,6 +366,9 @@ def processData(filePath, tag):
         maxPtData = maxPtData.assign(final_weights=
                                      maxPtData['LHE_weights']*
                                      maxPtData['QCD_correction'])
+
+    elif tag == 'bEnr':
+        maxPtData['LHE_weights'] = bEnrDict[filePath]
         '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<300),
                       'LHE_weights'] = bEnrWeight[0]
         maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<500),
@@ -227,6 +383,14 @@ def processData(filePath, tag):
                       'LHE_weights'] = bEnrWeight[5]
         maxPtData.loc[maxPtData['LHE_HT']>2000,
                       'LHE_weights'] = bEnrWeight[6]'''
+
+        wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+        wgt[wgt<0.1] = 0.1
+        maxPtData['QCD_correction'] = wgt
+
+        maxPtData = maxPtData.assign(final_weights=
+                                     maxPtData['LHE_weights']*
+                                     maxPtData['QCD_correction'])
 
     ## npvs Ratio weights
     ## we only need pileup and lumi for dataVsMC
@@ -283,6 +447,8 @@ def processData(filePath, tag):
 
 
     return maxPtData
+
+
 
 
 

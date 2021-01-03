@@ -15,7 +15,7 @@ import random
 import os
 from sklearn.model_selection import GridSearchCV
 
-from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, trainVars#, BGenPath, bEnrPath
+from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, trainVars, disc#, BGenPath, bEnrPath
 
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.model_selection import train_test_split
@@ -33,11 +33,16 @@ parser.add_option("--dist", action='store_true', dest='dist', default = False)
 parser.add_option("--randInt", type='int', dest='randInt', default=1)
 (options, args) = parser.parse_args()
 
-#hyppar= "ntrees_"+str(options.ntrees)+"_deph_"+str(options.treeDeph)+"_mcw_"+str(options.mcw)+"_lr_"+str(options.lr)
-hyppar = 'ggH_unweighted ' + ' randInt '+str(options.randInt)
+hyppar= "ntrees_"+str(options.ntrees)+"_deph_"+str(options.treeDeph)+"_mcw_"+str(options.mcw)+"_lr_"+str(options.lr)
+#hyppar = 'ggH_unweighted ' + ' randInt '+str(options.randInt)
 print(hyppar)
 
-condition = ''#'high discriminatory'
+if disc == None:
+    condition = ''
+elif disc == 'h':
+    condition = 'high disc'
+elif disc == 'm':
+    condition = 'high+medium disc'
 
 if options.HypOpt:
     test_size = 0.4
@@ -48,39 +53,42 @@ else:
 ## commend this out after the first round of running this script
 ## it will dump the processed datafram to a pickle. Next time, don't have to
 ## reload the data from ROOT, can just open pickle
-
-data = pd.DataFrame()
-data = data.append(processData(ggHPath, 'ggH'), ignore_index=True, sort=False)
-#data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
-#data = data.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort = False)
-
-BGenData = pd.DataFrame()
-bEnrData = pd.DataFrame()
-
-## getting the BGen, bEnr data into DataFrame format
-for BGenPath in BGenPaths:
-    BGenData = BGenData.append(processData(BGenPath, 'BGen'), ignore_index=True, sort=False)
-for bEnrPath in bEnrPaths:
-    bEnrData = bEnrData.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort=False)
-
-## reshape them so they are the same size
-replace=False
-BGenLength = BGenData.shape[0]
-bEnrLength = bEnrData.shape[0]
-if BGenLength > bEnrLength:
-    BGenData = BGenData.sample(frac=bEnrLength/BGenLength, replace=replace)
-else:
-    bEnrData = bEnrData.sample(frac=BGenLength/bEnrLength, replace=replace)
-
-
-data = data.append(BGenData, ignore_index=True, sort=False)
-data = data.append(bEnrData, ignore_index=True, sort=False)
-pickle.dump(data, open('data.pkl', 'wb'))
+## read determines if you want to load data from a root or pikl
+root = False
+if root == True:
+    data = pd.DataFrame()
+    data = data.append(processData(ggHPath, 'ggH'), ignore_index=True, sort=False)
+    #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
+    #data = data.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort = False)
+    
+    BGenData = pd.DataFrame()
+    bEnrData = pd.DataFrame()
+    
+    ## getting the BGen, bEnr data into DataFrame format
+    for BGenPath in BGenPaths:
+        BGenData = BGenData.append(processData(BGenPath, 'BGen'), ignore_index=True, sort=False)
+    for bEnrPath in bEnrPaths:
+        bEnrData = bEnrData.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort=False)
+    
+    ## reshape them so they are the same size
+    replace=False
+    BGenLength = BGenData.shape[0]
+    bEnrLength = bEnrData.shape[0]
+    if BGenLength > bEnrLength:
+        BGenData = BGenData.sample(frac=bEnrLength/BGenLength, replace=replace)
+    else:
+        bEnrData = bEnrData.sample(frac=BGenLength/bEnrLength, replace=replace)
+    
+    
+    data = data.append(BGenData, ignore_index=True, sort=False)
+    data = data.append(bEnrData, ignore_index=True, sort=False)
+    pickle.dump(data, open('data.pkl', 'wb'))
 
 ##############
 
 ## uncomment this after first round of running script to load the pickle
-#data = pickle.load(open('data.pkl', 'rb'))
+if root == False:
+    data = pickle.load(open('data.pkl', 'rb'))
 
 
 
@@ -209,7 +217,7 @@ print("XGBoost test accuracy - {}".format(accuracy))
 
 
 ## draw them rocs
-fig, ax = plt.subplots(figsize=(8, 8))
+fig, ax = plt.subplots(figsize=(8,8))
 train_auc = auc(fpr, tpr)
 ax.plot(fpr, tpr, lw=1, color='g',label='XGB train (area = %0.5f)'%(train_auc))
 ax.plot(fprt, tprt, lw=1, ls='--',color='g',label='XGB test (area = %0.5f)'%(test_auc) )
@@ -237,16 +245,50 @@ ax.hist(trainData.BDTScore.loc[trainData.target == 0], weights=trainData.final_w
 ax.hist(testData.BDTScore.loc[testData.target == 1], weights=testData.final_weights.loc[testData.target == 1], bins=20, histtype='step', stacked=True, label='test signal', fill=False, density=density)
 ax.hist(testData.BDTScore.loc[testData.target == 0], weights=testData.final_weights.loc[testData.target == 0], bins=20, histtype='step', stacked=True, label='test background', fill=False, density=density)
 ax.legend(loc='lower right')
-ax.set_title('BDT score {}'.format(hyppar))
+ax.set_title('BDT score {} {}'.format(hyppar, condition))
 ax.set_xlabel('BDT Score')
 fig.savefig("plots/BDTScore_{} {}.png".format(hyppar, condition))
 plt.show()
 plt.clf()
 
-## feature importance plot
+
+################### sensitivity plots ####################
+sortedData = testData.loc[testData.target==1].sort_values(by='BDTScore', axis=0, kind='mergesort')
+histHeight = sortedData.final_weights.sum()/10
+edges = [0]
+cumuSum = 0
+edgesloc = []
+for i in range(sortedData.BDTScore.size):
+    cumuSum = cumuSum + sortedData.final_weights.iloc[i]
+    if cumuSum > histHeight:
+        edges.append(sortedData.BDTScore.iloc[i-1])
+        cumuSum = sortedData.final_weights.iloc[i]
+        edgesloc.append(i-1)
+
+#edges.append(sortedData.BDTScore.iloc[sortedData.BDTScore.size-1])
+fig, ax = plt.subplots(figsize=(8,8))
+sighist = ax.hist(sortedData.BDTScore, bins=edges,
+                  weights=sortedData.final_weights, histtype='step',
+                  label='signal', log=True)
+bghist = ax.hist(testData.loc[testData.target==0].BDTScore, bins=edges,
+                 weights=testData.loc[testData.target==0].final_weights,
+                 histtype='step', label='background', log=True)
+sighistval = sighist[0]/np.sum(sighist[0])
+bghistval = bghist[0]/np.sum(bghist[0])
+sensitivity = np.sqrt(np.sum(np.power(sighistval,2)/bghistval))
+ax.legend(loc='best')
+
+ax.set_title(f'sensitivity = {sensitivity:.4f}')
+plt.show()
+
+
+
+
+
+############ feature importance plot #############
 #fig, ax = plt.subplots()
-f_score_dict = cls.get_booster().get_fscore()
-print("f_score_dict: {}".format(f_score_dict))
+#f_score_dict = cls.get_booster().get_fscore()
+#print("f_score_dict: {}".format(f_score_dict))
 #f_score_dict = {trainVars[int(k[1:])] : v for k,v in f_score_dict.items()}
 #feat_imp = pd.Series(f_score_dict).sort_values(ascending=True)
 #feat_imp.plot(kind='barh', title='Feature Importances')
@@ -257,7 +299,7 @@ print("f_score_dict: {}".format(f_score_dict))
 
 ## distributions of things yeah
 if options.dist:
-    for colName in allVars:
+    for colName in dataSig.columns:
         hist_params = {'density': True, 'histtype': 'bar', 'fill': True , 'lw':3, 'alpha' : 0.4}
         nbins = 40
         minval = 0
@@ -302,18 +344,18 @@ if options.doXML==True :
 
 
 
-## plotting signal with bdtscore > 0.5 to see what's up
-highBDTScore = testData[testData.BDTScore > 0.5]
-nbins = 20
-for var in allVars:
-    if 'pt' in var:
-        plt.hist2d(highBDTScore.BDTScore, highBDTScore[var], bins=nbins, range=[[0.5,1],[200,600]])
-    else:
-        plt.hist2d(highBDTScore.BDTScore, highBDTScore[var], bins=nbins)
-    plt.xlabel('BDTScore unweighted')
-    plt.ylabel(var)
-    plt.title(var)
-    plt.show()
+# ## plotting signal with bdtscore > 0.5 to see what's up
+# highBDTScore = testData[testData.BDTScore > 0.5]
+# nbins = 20
+# for var in allVars:
+#     if 'pt' in var:
+#         plt.hist2d(highBDTScore.BDTScore, highBDTScore[var], bins=nbins, range=[[0.5,1],[200,600]])
+#     else:
+#         plt.hist2d(highBDTScore.BDTScore, highBDTScore[var], bins=nbins)
+#     plt.xlabel('BDTScore unweighted')
+#     plt.ylabel(var)
+#     plt.title(var)
+#     plt.show()
 
 #for colName in allVars:
 
