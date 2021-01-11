@@ -15,7 +15,7 @@ import random
 import os
 from sklearn.model_selection import GridSearchCV
 
-from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, trainVars, disc#, BGenPath, bEnrPath
+from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths#, BGenPath, bEnrPath
 
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.model_selection import train_test_split
@@ -29,7 +29,7 @@ parser.add_option("--lr", type="float", dest="lr", help="hyp", default = 0.01)
 parser.add_option("--mcw", type="float", dest="mcw", help="hyp", default = 3)
 parser.add_option("--doXML", action="store_true", dest="doXML", help="Do save not write the xml file", default=False)
 parser.add_option("--HypOpt", action="store_true", dest="HypOpt", help="If you call this will not do plots with repport", default=False)
-parser.add_option("--dist", action='store_true', dest='dist', default = False)
+parser.add_option("--dist", action='store_true', dest='dist', default=False)
 parser.add_option("--randInt", type='int', dest='randInt', default=1)
 (options, args) = parser.parse_args()
 
@@ -54,8 +54,8 @@ else:
 ## it will dump the processed datafram to a pickle. Next time, don't have to
 ## reload the data from ROOT, can just open pickle
 ## read determines if you want to load data from a root or pikl
-root = False
-if root == True:
+root = True
+if root:
     data = pd.DataFrame()
     data = data.append(processData(ggHPath, 'ggH'), ignore_index=True, sort=False)
     #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
@@ -63,31 +63,36 @@ if root == True:
     
     BGenData = pd.DataFrame()
     bEnrData = pd.DataFrame()
-    
+    TTJetsData = pd.DataFrame()
+    WJetsData = pd.DataFrame()
+    ZJetsData = pd.DataFrame()
+
     ## getting the BGen, bEnr data into DataFrame format
     for BGenPath in BGenPaths:
         BGenData = BGenData.append(processData(BGenPath, 'BGen'), ignore_index=True, sort=False)
     for bEnrPath in bEnrPaths:
         bEnrData = bEnrData.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort=False)
-    
+    for TTJetsPath in TTJetsPaths:
+        TTJetsData = TTJetsData.append(processData(TTJetsPath, 'TTJets'), ignore_index=True, sort=False)
+    for WJetsPath in WJetsPaths:
+        WJetsData = WJetsData.append(processData(WJetsPath, 'WJets'), ignore_index=True, sort=False)
+    for ZJetsPath in ZJetsPaths:
+        ZJetsData = ZJetsData.append(processData(ZJetsPath, 'ZJets'), ignore_index=True, sort=False)
+
+
     ## reshape them so they are the same size
-    replace=False
-    BGenLength = BGenData.shape[0]
-    bEnrLength = bEnrData.shape[0]
-    if BGenLength > bEnrLength:
-        BGenData = BGenData.sample(frac=bEnrLength/BGenLength, replace=replace)
-    else:
-        bEnrData = bEnrData.sample(frac=BGenLength/bEnrLength, replace=replace)
-    
-    
+    bEnrData.final_weights = bEnrData.final_weights*np.sum(bEnrData.final_weights)/np.sum(BGenData.final_weights)
+
     data = data.append(BGenData, ignore_index=True, sort=False)
     data = data.append(bEnrData, ignore_index=True, sort=False)
+    data = data.append(TTJetsData, ignore_index=True, sort=False)
+    data = data.append(WJetsData, ignore_index=True, sort=False)
+    data = data.append(ZJetsData, ignore_index=True, sort=False)
     pickle.dump(data, open('data.pkl', 'wb'))
 
 ##############
 
-## uncomment this after first round of running script to load the pickle
-if root == False:
+if not root:
     data = pickle.load(open('data.pkl', 'rb'))
 
 
@@ -203,6 +208,8 @@ accuracy = accuracy_score(testData['target'], prediction)
 print("XGBoost test accuracy - {}".format(accuracy))
 
 
+
+
 ## put the train and test auroc in a file so i can see all the stuff
 # bdtscorefile = open('bdtScores.txt', 'a')
 # bdtscorefile.write('\n')
@@ -264,6 +271,8 @@ for i in range(sortedData.BDTScore.size):
         edges.append(sortedData.BDTScore.iloc[i-1])
         cumuSum = sortedData.final_weights.iloc[i]
         edgesloc.append(i-1)
+edges.pop()
+edges.append(sortedData.BDTScore.iloc[-1])
 
 #edges.append(sortedData.BDTScore.iloc[sortedData.BDTScore.size-1])
 fig, ax = plt.subplots(figsize=(8,8))
@@ -330,8 +339,21 @@ if options.dist:
         plt.legend(loc='best')
     
         plt.xlabel(colName)
-        plt.savefig("distributions/dist_{}".format(colName))
+        plt.savefig("distributions/dist_{}.png".format(colName))
         plt.clf()
+
+    ## lhe ht plots by bg type
+    # trainData.BDTScore.loc[trainData.target == 1]
+hist_params = {'density': True, 'histtype': 'step', 'bins': 40}
+plt.hist(TTJetsData.LHE_HT, weights=TTJetsData.final_weights, label='TTBar', color='b', **hist_params)
+plt.hist(ZJetsData.LHE_HT, weights=ZJetsData.final_weights, label='ZJets', color='r', **hist_params)
+plt.hist(WJetsData.LHE_HT, weights=WJetsData.final_weights, label='WJets', color='g', **hist_params)
+plt.hist(BGenData.LHE_HT, weights=BGenData.LHE_weights, label='BGen', color='k', **hist_params)
+plt.hist(bEnrData.LHE_HT, weights=bEnrData.LHE_weights, label='bEnr', color='m', **hist_params)
+plt.legend(loc='best')
+plt.savefig('distributions/dist_LHT_HT.png')
+plt.xlabel('LHE_HT')
+plt.show()
 
 
 ## save model to pickle
