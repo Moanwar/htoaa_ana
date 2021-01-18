@@ -288,8 +288,10 @@ sensitivity = np.sqrt(np.sum(np.power(sighistval,2)/bghistval))
 ax.legend(loc='best')
 
 ax.set_title(f'sensitivity = {sensitivity:.4f}')
+fig.savefig("plots/Sensitivity_{} {}.png".format(hyppar, condition))
 plt.show()
 
+##########################################################
 
 
 
@@ -351,7 +353,7 @@ plt.hist(WJetsData.LHE_HT, weights=WJetsData.final_weights, label='WJets', color
 plt.hist(BGenData.LHE_HT, weights=BGenData.LHE_weights, label='BGen', color='k', **hist_params)
 plt.hist(bEnrData.LHE_HT, weights=bEnrData.LHE_weights, label='bEnr', color='m', **hist_params)
 plt.legend(loc='best')
-plt.savefig('distributions/dist_LHT_HT.png')
+plt.savefig("plots/LHE HT_{} {}.png".format(hyppar, condition))
 plt.xlabel('LHE_HT')
 plt.show()
 

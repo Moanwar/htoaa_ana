@@ -30,8 +30,8 @@ BGenPaths = ['QCD_BGenFilter/' + i + '.root' for i in setnames]
 bEnrPaths = ['QCD_bEnriched/' + i + '.root' for i in setnames]
 
 TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',]
-              # 'TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
+              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
 
 WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
@@ -172,8 +172,27 @@ def getSubJetData(subjetnum, subjetvarname, events):
     return pd.DataFrame(subjetvar[subjetidx[subjetidx!=-1]]).add(subjetidxDF[subjetidxDF==-1]*0,fill_value=0)
 
 
-## makes the DF for putting into the BDT
+## get secondary vertex info
+## takes the idx of the max pt fatjet and index idx. get eta and phi of the corresponding
+## fatjet and SV. Takes the original PhysObj or jet PhysObj and the opened root file
+def getnSVCounts(data, events):
+    eventidx = data.FatJet_pt.index
+    maxptjetidx = data['FatJet_pt'].idxmax(axis = 1).to_numpy() #same as colidx
 
+    jeteta = events.array('FatJet_eta')[eventidx, maxptjetidx]
+    jetphi = events.array('FatJet_phi')[eventidx, maxptjetidx]
+    ## sveta and svphi are arrays of values corresponding to the event
+    sveta = events.array('SV_eta')[eventidx]
+    svphi = events.array('SV_phi')[eventidx]
+    
+    dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
+    dr = pd.DataFrame(dr)
+    nSVcounts = (dr < 0.8).sum(axis=1)
+    return nSVcounts
+
+
+
+## makes the DF for putting into the BDT
 def processData(filePath, tag):
 
     if tag not in tags:
@@ -242,44 +261,6 @@ def processData(filePath, tag):
         data['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
         data['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
-    #####################################
-
-    ############### filling subjet variables#################
-    ############### moved to above so can turn onn/off with iffs#######
-
-    ## subjetmasss
-    # idxa1 = events.array('FatJet_subJetIdx1')
-    # idxa2 = events.array('FatJet_subJetIdx2')
-    # idxa1f = pd.DataFrame(idxa1)
-    # idxa2f = pd.DataFrame(idxa2)
-    # submass = events.array('SubJet_mass')
-    # subtau = events.array('SubJet_tau1')
-    #pd.DataFrame(submass[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
-    #pd.DataFrame(submass[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
-    #pd.DataFrame(subtau[ idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
-    #jets.subtau2  = pd.DataFrame(subtau[ idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
-
-    ## SubJetn2b1[1]
-    #subjetn2b1 = events.array('SubJet_n2b1')
-
-    #data['SubJet_n2b11'] = pd.DataFrame(subjetn2b1[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
-
-    ## SubJet_pt[1]/FatJet_pt and pt[2]
-    #subjetpt = events.array('SubJet_pt')
-
-    #data['SubJet_pt1/FatJet_pt'] = pd.DataFrame(subjetpt[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)/data.FatJet_pt
-    #data['SubJet_pt2/FatJet_pt'] = pd.DataFrame(subjetpt[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)/data.FatJet_pt
-
-    ## SubJet_btagDeepB[2]
-    #subjetbtagdeepb = events.array('SubJet_btagDeepB')
-    #data['SubJet_btagDeepB2'] = pd.DataFrame(subjetbtagdeepb[idxa2[idxa2!=-1]]).add(idxa2f[idxa2f==-1]*0,fill_value=0)
-
-
-    ## SubJet_tau1[2]
-    #subjettau = events.array('SubJet_tau1')
-    #data['SubJet_tau12'] = pd.DataFrame(subjettau[idxa1[idxa1!=-1]]).add(idxa1f[idxa1f==-1]*0,fill_value=0)
-    ########################################################
-
 
     ## make event object
     ev = Event(data)
@@ -320,7 +301,7 @@ def processData(filePath, tag):
         toiter.remove('FatJet_nSV')
 
     for var in toiter:
-        print(var)
+        #print(var)
         npArr = data[var].to_numpy()
         maxPtData[var] = npArr[rowidx, colidx]
 
@@ -329,18 +310,18 @@ def processData(filePath, tag):
     ############# Secondary Vertex stuff ################
     ## get phi and eta for the situation
     if disc != None:
-        eventidx = data.FatJet_pt.index
-        maxptjetidx = colidx
+        # eventidx = data.FatJet_pt.index
+        # maxptjetidx = colidx
     
-        jeteta = events.array('FatJet_eta')[eventidx, maxptjetidx]
-        jetphi = events.array('FatJet_phi')[eventidx, maxptjetidx]
-        sveta = events.array('SV_eta')[eventidx]
-        svphi = events.array('SV_phi')[eventidx]
+        # jeteta = events.array('FatJet_eta')[eventidx, maxptjetidx]
+        # jetphi = events.array('FatJet_phi')[eventidx, maxptjetidx]
+        # sveta = events.array('SV_eta')[eventidx]
+        # svphi = events.array('SV_phi')[eventidx]
     
-        dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
-        dr = pd.DataFrame(dr)
-        nSVcounts = (dr < 0.8).sum(axis=1)
-        maxPtData['FatJet_nSV'] = nSVcounts
+        # dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
+        # dr = pd.DataFrame(dr)
+        # nSVcounts = (dr < 0.8).sum(axis=1)
+        maxPtData['FatJet_nSV'] = getnSVCounts(data, events)
 
     #######################################################
 
@@ -418,7 +399,7 @@ def processData(filePath, tag):
                                      8.20)
 
     elif tag == 'TTJets':
-        maxPtData = maxPtData.assign(final_weights=831760.0)
+        maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
 
     elif tag == 'ZJets':
         maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
