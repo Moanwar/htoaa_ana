@@ -90,6 +90,12 @@ dfdict = {'BGenDf': BGenDf,
           'WJetsDf': WJetsDf,
           'JetHTDf': JetHTDf}
 
+print('BGenDf ', BGenDf.columns)
+print('bEnrDf', bEnrDf.columns)
+print('TTJetsDf', TTJetsDf.columns)
+print('ZJetsDf', ZJetsDf.columns)
+print('WJetsDf', WJetsDf.columns)
+print('JetHTDf', JetHTDf.columns)
 
 for var in JetHTDf.columns:
     if 'pt' in var:

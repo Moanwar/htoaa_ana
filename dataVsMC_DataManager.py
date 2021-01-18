@@ -30,19 +30,22 @@ BGenPaths = ['QCD_BGenFilter/QCD_HT200to300.root',
              'QCD_BGenFilter/QCD_HT700to1000.root',
              'QCD_BGenFilter/QCD_HT1000to1500.root',
              'QCD_BGenFilter/QCD_HT1500to2000.root',
-             'QCD_BGenFilter/QCD_HT2000toInf.root']
+             'QCD_BGenFilter/QCD_HT2000toInf.root'
+             ]
 
 bEnrPaths = ['QCD_bEnriched/QCD_HT200to300.root',
-             'QCD_bEnriched/QCD_HT300to500.root'],
+             'QCD_bEnriched/QCD_HT300to500.root',
              'QCD_bEnriched/QCD_HT500to700.root',
              'QCD_bEnriched/QCD_HT700to1000.root',
              'QCD_bEnriched/QCD_HT1000to1500.root',
              'QCD_bEnriched/QCD_HT1500to2000.root',
-             'QCD_bEnriched/QCD_HT2000toInf.root']
+             'QCD_bEnriched/QCD_HT2000toInf.root'
+             ]
 
 TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
+              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+              ]
 
 WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
@@ -50,7 +53,8 @@ WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_7
               'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
               'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',]
+              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+              ]
 
 ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
@@ -79,7 +83,20 @@ jetVars = ['FatJet_pt',
            'FatJet_btagDeepB',
            'FatJet_msoftdrop',
            'FatJet_btagDDBvL',
-           'FatJet_deepTagMD_H4qvsQCD']
+           'FatJet_deepTagMD_H4qvsQCD',
+           'FatJet_n2b1',
+           'SubJet_mass(1)',
+           'SubJet_mass(2)',
+           'SubJet_tau1(1)',
+           'FatJet_n3b1',
+           'FatJet_tau2',
+           'FatJet_tau2',
+           'SubJet_n2b1(1)',
+           'SubJet_pt(1)|FatJet_pt',
+           'SubJet_pt(2)|FatJet_pt',
+           'SubJet_btagDeepB(2)',
+           'SubJet_tau1(2)',
+           'FatJet_nSV']
 
 muonVars = ['Muon_pt',
             'Muon_eta',
@@ -103,11 +120,15 @@ tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets']
 
 
 def getMaxPt(physobj, col, varlist):
+    varlistcopy = varlist
+    if 'FatJet_nSV' in varlist:
+        varlistcopy.remove('FatJet_nSV')
     colidx = physobj[col].idxmax(axis=1).to_numpy()
     rowidx = list(range(len(colidx)))
     maxPtData = pd.DataFrame()
 
-    for var in varlist:
+    for var in varlistcopy:
+
         npArr = physobj[var].to_numpy()
 
         maxPtData[var] = npArr[rowidx, colidx]
@@ -158,8 +179,8 @@ def processData (filePath, tag): #JetHT=False):
     jets['FatJet_n3b1'] = pd.DataFrame(events.array('FatJet_n3b1'))
     jets['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
     jets['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
-    jets['SubJet_pt(1)/FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/jets.FatJet_pt
-    jets['SubJet_pt(2)/FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/jets.FatJet_pt
+    jets['SubJet_pt(1)|FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/jets.FatJet_pt
+    jets['SubJet_pt(2)|FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/jets.FatJet_pt
     jets['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
     jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
@@ -247,7 +268,6 @@ def processData (filePath, tag): #JetHT=False):
         if JetHT:
             maxPtData = maxPtJets
         if not JetHT:
-
             maxPtMuons = getMaxPt(muons, 'Muon_pt', muonVars + ['Muon_IP'])#.reindex(muons.Muon_pt.index)
             maxPtData = pd.concat([maxPtJets,
                                maxPtMuons], axis=1)
@@ -377,15 +397,12 @@ def processData (filePath, tag): #JetHT=False):
                                              maxPtData['final_weights'])
 
 
+    maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
     maxPtData = maxPtData.dropna(how='all')
     maxPtData = maxPtData.fillna(0)
 
     return maxPtData
 
-def main():
-    processData(BGenPath, 'BGen')
 
-if __name__ == "__main__":
-    main()
 
