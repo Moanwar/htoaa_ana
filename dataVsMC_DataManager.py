@@ -25,47 +25,47 @@ BGenPath = 'MC/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_2
 bEnrPath = 'MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
 
 BGenPaths = ['QCD_BGenFilter/QCD_HT200to300.root',
-             'QCD_BGenFilter/QCD_HT300to500.root']#,
-             # 'QCD_BGenFilter/QCD_HT500to700.root',
-             # 'QCD_BGenFilter/QCD_HT700to1000.root',
-             # 'QCD_BGenFilter/QCD_HT1000to1500.root',
-             # 'QCD_BGenFilter/QCD_HT1500to2000.root',
-             # 'QCD_BGenFilter/QCD_HT2000toInf.root']
+             'QCD_BGenFilter/QCD_HT300to500.root',
+             'QCD_BGenFilter/QCD_HT500to700.root',
+             'QCD_BGenFilter/QCD_HT700to1000.root',
+             'QCD_BGenFilter/QCD_HT1000to1500.root',
+             'QCD_BGenFilter/QCD_HT1500to2000.root',
+             'QCD_BGenFilter/QCD_HT2000toInf.root']
 
 bEnrPaths = ['QCD_bEnriched/QCD_HT200to300.root',
-             'QCD_bEnriched/QCD_HT300to500.root']#,
-             # 'QCD_bEnriched/QCD_HT500to700.root',
-             # 'QCD_bEnriched/QCD_HT700to1000.root',
-             # 'QCD_bEnriched/QCD_HT1000to1500.root',
-             # 'QCD_bEnriched/QCD_HT1500to2000.root',
-             # 'QCD_bEnriched/QCD_HT2000toInf.root']
+             'QCD_bEnriched/QCD_HT300to500.root'],
+             'QCD_bEnriched/QCD_HT500to700.root',
+             'QCD_bEnriched/QCD_HT700to1000.root',
+             'QCD_bEnriched/QCD_HT1000to1500.root',
+             'QCD_bEnriched/QCD_HT1500to2000.root',
+             'QCD_bEnriched/QCD_HT2000toInf.root']
 
 TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root']#,
-              #'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
+              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
 
 WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root']#,
-              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',]
+              'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',]
 
 ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root']#,
-              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
-              # ]
+              'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
+              ]
 
 JetHTPaths = ['data/JetHT/2018A_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'data/JetHT/2018B_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root']#,
-              #'data/JetHT/2018C_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              #'data/JetHT/2018D_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              #]
+              'data/JetHT/2018B_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'data/JetHT/2018C_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'data/JetHT/2018D_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              ]
 
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
