@@ -337,28 +337,46 @@ def processData (filePath, tag): #JetHT=False):
                                              maxPtData['QCD_correction'])
                 maxPtData['final_weights'] = maxPtData['final_weights']*(8.20/maxPtData['final_weights'].sum())
 
-
             elif tag == 'WJets':
-                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                              'LHE_weights'] = 315600/10071273
-                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                              'LHE_weights'] = 68570/15298056
-                maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                              'LHE_weights'] = 34900/14627242
+                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                                  'LHE_weights'] = 315600/10071273/length
+
+                length =len(maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                                  'LHE_weights'] = 68570/15298056/length
+    
+                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=800)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                                  'LHE_weights'] = 34900/14627242/length
 
                 maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
+
             elif tag == 'ZJets':
-                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                              'LHE_weights'] = 145400/16704355
-                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                              'LHE_weights'] = 34000/14642701
-                maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                              'LHE_weights'] = 145400/16704355/length
+
+                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                              'LHE_weights'] = 34000/14642701/length
+
+                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=800)])
+                if length != 0:
+                    maxPtData.loc[(maxPtData['LHE_HT']>=800),
                               'LHE_weights'] = 18670/10561192
 
                 maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
+
             elif tag == 'TTJets':
-                maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
+                length = len(maxPtData)
+                maxPtData = maxPtData.assign(final_weights=831760.0/10244307/length)
 
             if not JetHT:
                 ## npvs Ratio weights
