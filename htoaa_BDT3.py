@@ -222,6 +222,14 @@ print("XGBoost test accuracy - {}".format(accuracy))
 # bdtscorefile.write('Diff: {} '.format(str(test_auc-train_auc)))
 # bdtscorefile.write('\n')
 
+if disc == 'h':
+    dest = 'plots/high'
+if disc == 'm':
+    dest = 'plots/high+medium'
+else:
+    dest = 'plots'
+
+
 
 ## draw them rocs
 fig, ax = plt.subplots(figsize=(8,8))
@@ -235,7 +243,7 @@ ax.set_ylabel('True Positive Rate')
 ax.legend(loc="lower right")
 ax.grid()
 ax.set_title(hyppar + ' ' + condition)
-fig.savefig("plots/roc_{} {}.png".format(hyppar, condition))
+fig.savefig("{}/roc_{} {}.png".format(dest, hyppar, condition))
 #plt.show()
 plt.clf()
 
@@ -254,7 +262,7 @@ ax.hist(testData.BDTScore.loc[testData.target == 0], weights=testData.final_weig
 ax.legend(loc='lower right')
 ax.set_title('BDT score {} {}'.format(hyppar, condition))
 ax.set_xlabel('BDT Score')
-fig.savefig("plots/BDTScore_{} {}.png".format(hyppar, condition))
+fig.savefig("{}/BDTScore_{} {}.png".format(dest, hyppar, condition))
 #plt.show()
 plt.clf()
 
@@ -288,7 +296,7 @@ sensitivity = np.sqrt(np.sum(np.power(sighistval,2)/bghistval))
 ax.legend(loc='best')
 
 ax.set_title(f'sensitivity = {sensitivity:.4f}')
-fig.savefig("plots/Sensitivity_{} {}.png".format(hyppar, condition))
+fig.savefig("{}/Sensitivity_{} {}.png".format(dest, hyppar, condition))
 #plt.show()
 plt.clf()
 
@@ -354,14 +362,14 @@ plt.hist(WJetsData.LHE_HT, weights=WJetsData.final_weights, label='WJets', color
 plt.hist(BGenData.LHE_HT, weights=BGenData.LHE_weights, label='BGen', color='k', **hist_params)
 plt.hist(bEnrData.LHE_HT, weights=bEnrData.LHE_weights, label='bEnr', color='m', **hist_params)
 plt.legend(loc='best')
-plt.savefig("plots/LHE HT_{} {}.png".format(hyppar, condition))
+plt.savefig("{}/LHE HT_{} {}.png".format(dest, hyppar, condition))
 plt.xlabel('LHE_HT')
 #plt.show()
 plt.clf()
 
 
 ## save model to pickle
-pklpath="XGB_classifier_bothBg"
+pklpath="XGB_classifier"
 if options.doXML==True :
     pickle.dump(cls, open(pklpath+".pkl", 'wb'))
     file = open(pklpath+"pkl.log","w")
