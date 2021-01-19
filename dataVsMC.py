@@ -13,8 +13,7 @@ import uproot
 ## get that sweet CMS style plots
 plt.style.use(hep.style.CMS)
 
-## monte carlo ggH signal
-#ggHDf = processData(ggHPath, 'ggH')
+
 
 ## monte carlo backgrounds
 #BGenDf = processData(BGenPath, 'BGen')
@@ -23,6 +22,10 @@ plt.style.use(hep.style.CMS)
 root = True
 
 if root:
+    ## monte carlo ggH signal
+    ggHDf = DM.processData(DM.ggHPath, 'ggH')
+
+
     BGenDf = pd.DataFrame()
     for fileName in DM.BGenPaths:
         tmpDf = DM.processData(fileName, 'BGen')
@@ -63,7 +66,7 @@ if root:
     
     
     
-    #pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
+    pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
     pickle.dump(BGenDf, open('dataVsMC/BGenDf.pkl', 'wb'))
     pickle.dump(bEnrDf, open('dataVsMC/bEnrDf.pkl', 'wb'))
     #pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
@@ -73,7 +76,7 @@ if root:
     pickle.dump(JetHTDf, open('dataVsMC/JetHTDf.pkl', 'wb'))
 
 else:
-    #ggHDf = pickle.load(open('dataVsMC/ggHDf.pkl', 'rb'))
+    ggHDf = pickle.load(open('dataVsMC/ggHDf.pkl', 'rb'))
     BGenDf = pickle.load(open('dataVsMC/BGenDf.pkl', 'rb'))
     bEnrDf = pickle.load(open('dataVsMC/bEnrDf.pkl', 'rb'))
     #dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
@@ -143,6 +146,7 @@ for var in JetHTDf.columns:
 
     ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, **hist_params)
     ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
+    ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
 
     #ax.hist(BGenDf[var], label='BGen', weights=BGenDf['final_weights'],
             #**hist_params)
@@ -151,8 +155,8 @@ for var in JetHTDf.columns:
     ax.legend(loc='best', frameon=True)
     ax.grid()
     plt.savefig('dataVsMCDist/JetHT/{}.png'.format(var))
-    plt.clf()
-    #plt.show()
+    #plt.clf()
+    plt.show()
 
 
     ## when used to do bEnr and BGen separately
