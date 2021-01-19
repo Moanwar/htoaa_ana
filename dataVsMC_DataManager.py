@@ -306,10 +306,8 @@ def processData (filePath, tag): #JetHT=False):
                 maxPtData['QCD_correction'] = wgt
 
                 ## scale total weight to match the Xsec weight of 21.56
-                maxPtData = maxPtData.assign(final_weights=
-                                             maxPtData['LHE_weights']*
-                                             maxPtData['QCD_correction'])
-                maxPtData['final_weights'] = maxPtData['final_weights']*(21.56/maxPtData['final_weights'].sum())
+                LHE_QCD = maxPtData['LHE_weights'] * maxPtData['QCD_corrections']
+                maxPtData['final_weights'] = LHE_QCD*(21.56/np.sum(LHE_QCD))
 
             elif tag == 'bEnr':
                 maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
@@ -332,10 +330,8 @@ def processData (filePath, tag): #JetHT=False):
                 maxPtData['QCD_correction'] = wgt
 
                 ## scale total weight to match the Xsec weight of 8.20
-                maxPtData = maxPtData.assign(final_weights=
-                                             maxPtData['LHE_weights']*
-                                             maxPtData['QCD_correction'])
-                maxPtData['final_weights'] = maxPtData['final_weights']*(8.20/maxPtData['final_weights'].sum())
+                LHE_QCD = maxPtData['LHE_weights'] * maxPtData['QCD_corrections']
+                maxPtData['final_weights'] = LHE_QCD*(8.20/np.sum(LHE_QCD))
 
             elif tag == 'WJets':
                 length = len(maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600)])
