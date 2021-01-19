@@ -369,7 +369,7 @@ def processData (filePath, tag): #JetHT=False):
                 length = len(maxPtData.loc[(maxPtData['LHE_HT']>=800)])
                 if length != 0:
                     maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                              'LHE_weights'] = 18670/10561192
+                              'LHE_weights'] = 18670/10561192/length
 
                 maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
