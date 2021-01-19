@@ -236,7 +236,7 @@ ax.legend(loc="lower right")
 ax.grid()
 ax.set_title(hyppar + ' ' + condition)
 fig.savefig("plots/roc_{} {}.png".format(hyppar, condition))
-plt.show()
+#plt.show()
 plt.clf()
 
 
@@ -255,7 +255,7 @@ ax.legend(loc='lower right')
 ax.set_title('BDT score {} {}'.format(hyppar, condition))
 ax.set_xlabel('BDT Score')
 fig.savefig("plots/BDTScore_{} {}.png".format(hyppar, condition))
-plt.show()
+#plt.show()
 plt.clf()
 
 
@@ -289,7 +289,8 @@ ax.legend(loc='best')
 
 ax.set_title(f'sensitivity = {sensitivity:.4f}')
 fig.savefig("plots/Sensitivity_{} {}.png".format(hyppar, condition))
-plt.show()
+#plt.show()
+plt.clf()
 
 ##########################################################
 
@@ -355,7 +356,8 @@ plt.hist(bEnrData.LHE_HT, weights=bEnrData.LHE_weights, label='bEnr', color='m',
 plt.legend(loc='best')
 plt.savefig("plots/LHE HT_{} {}.png".format(hyppar, condition))
 plt.xlabel('LHE_HT')
-plt.show()
+#plt.show()
+plt.clf()
 
 
 ## save model to pickle

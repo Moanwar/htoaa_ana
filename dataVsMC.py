@@ -83,25 +83,26 @@ else:
     JetHTDf = pickle.load(open('dataVsMC/JetHTDf.pkl', 'rb'))
 
 
-dfdict = {'BGenDf': BGenDf,
-          'bEnrDf': bEnrDf,
-          'TTJetsDf': TTJetsDf,
-          'ZJetsDf': ZJetsDf,
-          'WJetsDf': WJetsDf,
-          'JetHTDf': JetHTDf}
+dfdict = {'BGen': BGenDf,
+          'bEnr': bEnrDf,
+          'TTJets': TTJetsDf,
+          'ZJets': ZJetsDf,
+          'WJets': WJetsDf,
+          #'JetHT': JetHTDf
+          }
 
-print('BGenDf ', BGenDf.columns)
-print('bEnrDf', bEnrDf.columns)
-print('TTJetsDf', TTJetsDf.columns)
-print('ZJetsDf', ZJetsDf.columns)
-print('WJetsDf', WJetsDf.columns)
-print('JetHTDf', JetHTDf.columns)
+print('BGen', BGenDf.columns)
+print('bEnr', bEnrDf.columns)
+print('TTJets', TTJetsDf.columns)
+print('ZJets', ZJetsDf.columns)
+print('WJets', WJetsDf.columns)
+print('JetHT', JetHTDf.columns)
 
 for var in JetHTDf.columns:
     if 'pt' in var:
-        nbins = 80
-    else:
         nbins = 40
+    else:
+        nbins = 20
 
     fig, ax = plt.subplots(figsize=(10,8))
 
@@ -141,6 +142,7 @@ for var in JetHTDf.columns:
         toplotlabel.append(dfkey)
 
     ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, **hist_params)
+    ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
 
     #ax.hist(BGenDf[var], label='BGen', weights=BGenDf['final_weights'],
             #**hist_params)
@@ -149,7 +151,8 @@ for var in JetHTDf.columns:
     ax.legend(loc='best', frameon=True)
     ax.grid()
     plt.savefig('dataVsMCDist/JetHT/{}.png'.format(var))
-    plt.show()
+    plt.clf()
+    #plt.show()
 
 
     ## when used to do bEnr and BGen separately

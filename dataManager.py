@@ -129,8 +129,8 @@ mediumDiscVars = [
     'FatJet_n3b1',
     'FatJet_tau2',
     'SubJet_n2b1(1)',
-    'SubJet_pt(1)/FatJet_pt',
-    'SubJet_pt(2)/FatJet_pt',
+    'SubJet_pt(1)|FatJet_pt',
+    'SubJet_pt(2)|FatJet_pt',
     'SubJet_btagDeepB(2)',
     'SubJet_tau1(2)'
     ]
@@ -256,8 +256,8 @@ def processData(filePath, tag):
         data['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
         ## midium subjets
         data['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
-        data['SubJet_pt(1)/FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/data.FatJet_pt
-        data['SubJet_pt(2)/FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/data.FatJet_pt
+        data['SubJet_pt(1)|FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/data.FatJet_pt
+        data['SubJet_pt(2)|FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/data.FatJet_pt
         data['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
         data['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
@@ -367,10 +367,13 @@ def processData(filePath, tag):
         wgt[wgt<0.1] = 0.1
         maxPtData['QCD_correction'] = wgt
 
+
+
         maxPtData = maxPtData.assign(final_weights=
                                      maxPtData['LHE_weights']*
-                                     maxPtData['QCD_correction']
-                                     *21.56) # this is Xsec weight
+                                     maxPtData['QCD_correction'])
+        maxPtData['final_weights'] = maxPtData['final_weights']*(21.56/maxPtData['final_weights'].sum())
+
 
     elif tag == 'bEnr':
         maxPtData['LHE_weights'] = bEnrDict[filePath]
@@ -395,8 +398,8 @@ def processData(filePath, tag):
 
         maxPtData = maxPtData.assign(final_weights=
                                      maxPtData['LHE_weights']*
-                                     maxPtData['QCD_correction']*
-                                     8.20)
+                                     maxPtData['QCD_correction'])
+        maxPtData['final_weights'] = maxPtData['final_weights']*(8.20/maxPtData['final_weights'].sum())
 
     elif tag == 'TTJets':
         maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
