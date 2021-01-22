@@ -32,7 +32,7 @@ if root:
         BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
     ## calculate Xsec weights for each event
     LHE_QCD_corrections = BGenDf.LHE_weights * BGenDf.QCD_correction
-    BGenDf['final_weights'] = LHE_QCD_corrections * 21.56/np.sum(LHE_QCD_corrections)
+    BGenDf['final_weights'] = LHE_QCD_corrections * 21.56/np.sum(LHE_QCD_corrections) * 100000
     ###################################
 
     ############## bEnr ##############
@@ -43,7 +43,7 @@ if root:
         tmpDf = DM.processData(fileName, 'bEnr')
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
     LHE_QCD_corrections = bEnrDf.LHE_weights * BGenDf.QCD_correction
-    bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections)
+    bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections) * 100000
     ###################################
 
     ############## TTJets ##############
@@ -53,7 +53,7 @@ if root:
         TTJetsDf = TTJetsDf.append(tmpdf, ignore_index=True, sort=False)
 
     length = len(TTJetsDf)
-    TTJetsDf = TTJetsDf.assign(final_weights=831760.0/10244307/length)
+    TTJetsDf = TTJetsDf.assign(final_weights=831760.0/10244307/length* 100000)
     ###################################
 
     ############## ZJets ##############
@@ -74,7 +74,7 @@ if root:
     if length != 0:
         ZJetsDf.loc[(ZJetsDf['LHE_HT']>=800), 'LHE_weights'] = 18670/10561192/length
 
-    ZJetsDf = ZJetsDf.assign(final_weights = ZJetsDf['LHE_weights'])
+    ZJetsDf = ZJetsDf.assign(final_weights = ZJetsDf['LHE_weights']* 100000)
     ###################################
 
     ############## WJets ##############
@@ -95,7 +95,7 @@ if root:
     if length != 0:
         WJetsDf.loc[(WJetsDf['LHE_HT']>=800), 'LHE_weights'] = 34900/14627242/length
 
-    WJetsDf = WJetsDf.assign(final_weights = WJetsDf['LHE_weights'])
+    WJetsDf = WJetsDf.assign(final_weights = WJetsDf['LHE_weights']* 100000)
     ######################################
 
 
@@ -222,7 +222,7 @@ for var in JetHTDf.columns:
     # plt.savefig('dataVsMCDist_fixed/bEnr/{}_bEnrVsData.png'.format(var))
     # plt.close()
 
-nbins=80
+nbins=40
 fig, ax = plt.subplots(figsize=(10,8))
 
 #del dfdict['JetHTDf']
