@@ -25,35 +25,82 @@ if root:
     ## monte carlo ggH signal
     ggHDf = DM.processData(DM.ggHPath, 'ggH')
 
-
+    ############## BGen ##############
     BGenDf = pd.DataFrame()
     for fileName in DM.BGenPaths:
         tmpDf = DM.processData(fileName, 'BGen')
         BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
-    
+    ## calculate Xsec weights for each event
+    LHE_QCD_corrections = BGenDf.LHE_weights * BGenDf.QCD_correction
+    BGenDf['final_weights'] = LHE_QCD_corrections * 21.56/np.sum(LHE_QCD_corrections)
+    ###################################
+
+    ############## bEnr ##############
     #bEnrDf = processData(bEnrPath, 'bEnr')
     ## uncommend below if using multiple bg MC files
     bEnrDf = pd.DataFrame()
     for fileName in DM.bEnrPaths:
         tmpDf = DM.processData(fileName, 'bEnr')
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
-    
+    LHE_QCD_corrections = bEnrDf.LHE_weights * BGenDf.QCD_correction
+    bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections)
+    ###################################
+
+    ############## TTJets ##############
     TTJetsDf = pd.DataFrame()
     for fileName in DM.TTJetsPaths:
         tmpdf = DM.processData(fileName, 'TTJets')
         TTJetsDf = TTJetsDf.append(tmpdf, ignore_index=True, sort=False)
-    
+
+    length = len(TTJetsDf)
+    TTJetsDf = TTJetsDf.assign(final_weights=831760.0/10244307/length)
+    ###################################
+
+    ############## ZJets ##############
     ZJetsDf = pd.DataFrame()
     for fileName in DM.ZJetsPaths:
         tmpdf = DM.processData(fileName, 'ZJets')
         ZJetsDf = ZJetsDf.append(tmpdf, ignore_index=True, sort=False)
-    
+
+    length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=400) & (ZJetsDf['LHE_HT']<600)])
+    if length != 0:
+        ZJetsDf.loc[(ZJetsDf['LHE_HT']>=400) & (ZJetsDf['LHE_HT']<600), 'LHE_weights'] = 145400/16704355/length
+
+    length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=600) & (ZJetsDf['LHE_HT']<800)])
+    if length != 0:
+        ZJetsDf.loc[(ZJetsDf['LHE_HT']>=600) & (ZJetsDf['LHE_HT']<800), 'LHE_weights'] = 34000/14642701/length
+
+    length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=800)])
+    if length != 0:
+        ZJetsDf.loc[(ZJetsDf['LHE_HT']>=800), 'LHE_weights'] = 18670/10561192/length
+
+    ZJetsDf = ZJetsDf.assign(final_weights = ZJetsDf['LHE_weights'])
+    ###################################
+
+    ############## WJets ##############
     WJetsDf = pd.DataFrame()
     for fileName in DM.WJetsPaths:
         tmpdf = DM.processData(fileName, 'WJets')
         WJetsDf = WJetsDf.append(tmpdf, ignore_index=True, sort=False)
+
+    length = len(WJetsDf.loc[(WJetsDf['LHE_HT']>=400) & (WJetsDf['LHE_HT']<600)])
+    if length != 0:
+        WJetsDf.loc[(WJetsDf['LHE_HT']>=400) & (WJetsDf['LHE_HT']<600), 'LHE_weights'] = 315600/10071273/length
+
+    length =len(WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800)])
+    if length != 0:
+        WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800), 'LHE_weights'] = 68570/15298056/length
     
-    ## datafile
+    length = len(WJetsDf.loc[(WJetsDf['LHE_HT']>=800)])
+    if length != 0:
+        WJetsDf.loc[(WJetsDf['LHE_HT']>=800), 'LHE_weights'] = 34900/14627242/length
+
+    WJetsDf = WJetsDf.assign(final_weights = WJetsDf['LHE_weights'])
+    ######################################
+
+
+    
+    # datafile
     if not DM.JetHT:
         dataDf = DM.processData(DM.dataPath, 'data')
     
@@ -62,7 +109,7 @@ if root:
         for fileName in DM.JetHTPaths:
             tmpdf = DM.processData(fileName, 'JetHT')
             JetHTDf = JetHTDf.append(tmpdf, ignore_index=True, sort=False)
-    
+
     
     
     
@@ -93,13 +140,13 @@ dfdict = {'BGen': BGenDf,
           'WJets': WJetsDf,
           #'JetHT': JetHTDf
           }
+'''
+LHE_QCDcorr = BGenDf['LHE_weights']*BGenDf['QCD_correction']
+BGenDf['final_weights'] = LHE_QCDcorr * (21.56/np.sum(LHE_QCDcorr))
 
-print('BGen', BGenDf.columns)
-print('bEnr', bEnrDf.columns)
-print('TTJets', TTJetsDf.columns)
-print('ZJets', ZJetsDf.columns)
-print('WJets', WJetsDf.columns)
-print('JetHT', JetHTDf.columns)
+LHE_QCDcorr = bEnrDf['LHE_weights']*bEnrDf['QCD_correction']
+bEnrDf['final_weights'] = LHE_QCDcorr * (8.2/np.sum(LHE_QCDcorr))'''
+
 
 for var in JetHTDf.columns:
     if 'pt' in var:
@@ -148,15 +195,14 @@ for var in JetHTDf.columns:
     ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
     ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
 
-    #ax.hist(BGenDf[var], label='BGen', weights=BGenDf['final_weights'],
-            #**hist_params)
+
     #ax.hist(dataDf[var], label='Data',
-    ax.set_title(var + ' JetHT')
+    ax.set_title(var )# + ' JetHT')
     ax.legend(loc='best', frameon=True)
     ax.grid()
     plt.savefig('dataVsMCDist/JetHT/{}.png'.format(var))
-    #plt.clf()
-    plt.show()
+    plt.clf()
+    #plt.show()
 
 
     ## when used to do bEnr and BGen separately
@@ -176,11 +222,11 @@ for var in JetHTDf.columns:
     # plt.savefig('dataVsMCDist_fixed/bEnr/{}_bEnrVsData.png'.format(var))
     # plt.close()
 
-# nbins=80
-'''fig, ax = plt.subplots(figsize=(10,8))
+nbins=80
+fig, ax = plt.subplots(figsize=(10,8))
 
-del dfdict['JetHTDf']
-del dfdict['TTJetsDf']
+#del dfdict['JetHTDf']
+del dfdict['TTJets']
 
 for dfkey, dfvalue in dfdict.items():
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])
@@ -189,8 +235,8 @@ for dfkey, dfvalue in dfdict.items():
     ax.set_title('LHE_HT ' + dfkey)
     ax.grid()
     plt.savefig(f'dataVsMCDist/JetHT/LHE_HT_{dfkey}.png')
-    plt.show()'''
-
+    #plt.show()
+    plt.clf()
 
 
 ## old way when bgen benr plotted separate
