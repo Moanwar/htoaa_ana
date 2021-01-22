@@ -10,6 +10,8 @@ from matplotlib.colors import LogNorm
 import mplhep as hep
 import uproot
 
+#np.seterr(divide='ignore', invalid='ignore')
+
 ## get that sweet CMS style plots
 plt.style.use(hep.style.CMS)
 
@@ -42,7 +44,7 @@ if root:
     for fileName in DM.bEnrPaths:
         tmpDf = DM.processData(fileName, 'bEnr')
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
-    LHE_QCD_corrections = bEnrDf.LHE_weights * BGenDf.QCD_correction
+    LHE_QCD_corrections = bEnrDf.LHE_weights * bEnrDf.QCD_correction
     bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections) * 100000
     ###################################
 
@@ -90,7 +92,7 @@ if root:
     length =len(WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800)])
     if length != 0:
         WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800), 'LHE_weights'] = 68570/15298056/length
-    
+
     length = len(WJetsDf.loc[(WJetsDf['LHE_HT']>=800)])
     if length != 0:
         WJetsDf.loc[(WJetsDf['LHE_HT']>=800), 'LHE_weights'] = 34900/14627242/length
@@ -99,20 +101,20 @@ if root:
     ######################################
 
 
-    
+
     # datafile
     if not DM.JetHT:
         dataDf = DM.processData(DM.dataPath, 'data')
-    
+
     if DM.JetHT:
         JetHTDf = pd.DataFrame()
         for fileName in DM.JetHTPaths:
             tmpdf = DM.processData(fileName, 'JetHT')
             JetHTDf = JetHTDf.append(tmpdf, ignore_index=True, sort=False)
 
-    
-    
-    
+
+
+
     pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
     pickle.dump(BGenDf, open('dataVsMC/BGenDf.pkl', 'wb'))
     pickle.dump(bEnrDf, open('dataVsMC/bEnrDf.pkl', 'wb'))
@@ -133,19 +135,27 @@ else:
     JetHTDf = pickle.load(open('dataVsMC/JetHTDf.pkl', 'rb'))
 
 
-dfdict = {'BGen': BGenDf,
-          'bEnr': bEnrDf,
-          'TTJets': TTJetsDf,
-          'ZJets': ZJetsDf,
-          'WJets': WJetsDf,
-          #'JetHT': JetHTDf
-          }
+# dfdict = {'BGen': BGenDf,
+#         'bEnr': bEnrDf,
+#         'TTJets': TTJetsDf,
+#         'ZJets': ZJetsDf,
+#         'WJets': WJetsDf,
+#         #'JetHT': JetHTDf
+#         }
+
+dfdict = { 'WJets': WJetsDf,
+           'ZJets': ZJetsDf,
+           'TTJets': TTJetsDf,
+           'bEnr': bEnrDf,
+           'BGen': BGenDf,
+           }
 '''
 LHE_QCDcorr = BGenDf['LHE_weights']*BGenDf['QCD_correction']
 BGenDf['final_weights'] = LHE_QCDcorr * (21.56/np.sum(LHE_QCDcorr))
 
 LHE_QCDcorr = bEnrDf['LHE_weights']*bEnrDf['QCD_correction']
 bEnrDf['final_weights'] = LHE_QCDcorr * (8.2/np.sum(LHE_QCDcorr))'''
+
 
 
 for var in JetHTDf.columns:
@@ -177,7 +187,7 @@ for var in JetHTDf.columns:
         range_local = (min(xmin), max(xmax))
 
 
-    hist_params = {'density': True, 'histtype': 'barstacked', 'range' : range_local, 'bins':nbins}
+    hist_params = {'density': True, 'histtype': 'barstacked', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
 
     toplot = pd.DataFrame()
@@ -192,17 +202,20 @@ for var in JetHTDf.columns:
         toplotlabel.append(dfkey)
 
     ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, **hist_params)
+    #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
+    #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
+    #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
     ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
     ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
-
 
     #ax.hist(dataDf[var], label='Data',
     ax.set_title(var )# + ' JetHT')
     ax.legend(loc='best', frameon=True)
     ax.grid()
     plt.savefig('dataVsMCDist/JetHT/{}.png'.format(var))
-    plt.clf()
-    #plt.show()
+    #plt.clf()
+    plt.show()
+    plt.close()
 
 
     ## when used to do bEnr and BGen separately
@@ -223,20 +236,22 @@ for var in JetHTDf.columns:
     # plt.close()
 
 nbins=40
-fig, ax = plt.subplots(figsize=(10,8))
+
 
 #del dfdict['JetHTDf']
 del dfdict['TTJets']
 
 for dfkey, dfvalue in dfdict.items():
+    fig, ax = plt.subplots(figsize=(10,8))
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])
     ax.hist(dfvalue['LHE_HT'], weights=dfvalue['LHE_weights'], label=dfkey,
             **hist_params)
     ax.set_title('LHE_HT ' + dfkey)
     ax.grid()
     plt.savefig(f'dataVsMCDist/JetHT/LHE_HT_{dfkey}.png')
-    #plt.show()
-    plt.clf()
+    plt.show()
+    plt.close()
+    #plt.clf()
 
 
 ## old way when bgen benr plotted separate
