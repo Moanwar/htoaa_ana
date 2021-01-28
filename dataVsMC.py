@@ -203,7 +203,11 @@ for var in cols:
     ax.set_title(var )# + ' JetHT')
     ax.legend(loc='best', frameon=True)
     ax.grid()
-    plt.savefig('dataVsMCDist/JetHT/{}.png'.format(var))
+    if DM.JetHT:
+        filedest = 'dataVsMCDist/JetHT/{}.png'
+    else:
+        filedest = 'dataVsMCDist/Parked/{}.png'
+    plt.savefig(filedest.format(var))
     #plt.clf()
     plt.show()
     plt.close()
