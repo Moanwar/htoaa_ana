@@ -21,7 +21,7 @@ plt.style.use(hep.style.CMS)
 #BGenDf = processData(BGenPath, 'BGen')
 ## uncomment below if using multiple bg MC files
 
-root = True
+root = False
 
 if root:
     ## monte carlo ggH signal
@@ -112,6 +112,7 @@ if root:
         for fileName in DM.JetHTPaths:
             tmpdf = DM.processData(fileName, 'JetHT')
             JetHTDf = JetHTDf.append(tmpdf, ignore_index=True, sort=False)
+        JetHTDf['final_weights'] = 1
         pickle.dump(JetHTDf, open('dataVsMC/JetHTDf.pkl', 'wb'))
 
 
@@ -178,13 +179,12 @@ for var in cols:
         range_local = (min(xmin), max(xmax))
 
 
-    hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
+    hist_params = {'density': True, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
 
     toplot = pd.DataFrame()
     toplotweights = pd.DataFrame()
     toplotlabel = list()
-    JetHTDf['final_weights'] = 1
     for dfkey, df in dfdict.items():
         #toplot = np.append(toplot, df[var], 1)
         #toplotweights = np.append(toplotweights, df['final_weights'], 1)
@@ -196,8 +196,11 @@ for var in cols:
     #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
     #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
     #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
-    #ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
-    #ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
+    ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
+    if DM.JetHT:
+        ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
+    else:
+        ax.hist(dataDf[var].values, label='parkedData', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
 
     #ax.hist(dataDf[var], label='Data',
     ax.set_title(var )# + ' JetHT')

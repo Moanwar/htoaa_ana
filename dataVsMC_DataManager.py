@@ -26,43 +26,43 @@ bEnrPath = 'MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200
 
 BGenPaths = ['QCD_BGenFilter/QCD_HT200to300.root',
              'QCD_BGenFilter/QCD_HT300to500.root',
-             'QCD_BGenFilter/QCD_HT500to700.root',
-             'QCD_BGenFilter/QCD_HT700to1000.root',
-             'QCD_BGenFilter/QCD_HT1000to1500.root',
-             'QCD_BGenFilter/QCD_HT1500to2000.root',
-             'QCD_BGenFilter/QCD_HT2000toInf.root'
+             # 'QCD_BGenFilter/QCD_HT500to700.root',
+             # 'QCD_BGenFilter/QCD_HT700to1000.root',
+             # 'QCD_BGenFilter/QCD_HT1000to1500.root',
+             # 'QCD_BGenFilter/QCD_HT1500to2000.root',
+             # 'QCD_BGenFilter/QCD_HT2000toInf.root'
              ]
 
 bEnrPaths = ['QCD_bEnriched/QCD_HT200to300.root',
              'QCD_bEnriched/QCD_HT300to500.root',
-             'QCD_bEnriched/QCD_HT500to700.root',
-             'QCD_bEnriched/QCD_HT700to1000.root',
-             'QCD_bEnriched/QCD_HT1000to1500.root',
-             'QCD_bEnriched/QCD_HT1500to2000.root',
-             'QCD_bEnriched/QCD_HT2000toInf.root'
+             # 'QCD_bEnriched/QCD_HT500to700.root',
+             # 'QCD_bEnriched/QCD_HT700to1000.root',
+             # 'QCD_bEnriched/QCD_HT1000to1500.root',
+             # 'QCD_bEnriched/QCD_HT1500to2000.root',
+             # 'QCD_bEnriched/QCD_HT2000toInf.root'
              ]
 
 TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+              # 'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              # 'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
               ]
 
 WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              # 'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
               ]
 
 ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
+              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              # 'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
               ]
 
 JetHTPaths = ['data/JetHT/2018A_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
@@ -287,12 +287,13 @@ def processData (filePath, tag): #JetHT=False):
 
 
         if tag != 'data' and tag != 'JetHT':
+
             maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())#pd.concat([maxPtData, other.LHE_HT], axis=1)
             #maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT)
 
             ## LHE_weights
             if tag == 'ggH':
-                 maxPtData['LHE_weights'] = 1
+                 maxPtData['final_weights'] = 1
             elif tag == 'BGen':
                 maxPtData['LHE_weights'] = BGenDict[filePath]
                 '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
@@ -345,7 +346,7 @@ def processData (filePath, tag): #JetHT=False):
                 wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
                 wgt[wgt<0.1] = 0.1
                 maxPtData['QCD_correction'] = wgt
-                Xsec_wgt
+                Xsec_wgt = 8.2
 
                 maxPtData = maxPtData.assign(final_weights=
                                              maxPtData['LHE_HT']*
@@ -438,7 +439,9 @@ def processData (filePath, tag): #JetHT=False):
                                              maxPtData['PU_weights']*
                                              maxPtData['final_weights'])
 
-
+        else:
+            maxPtData['final_weights'] = 1
+            
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
     maxPtData = maxPtData.dropna(how='all')
