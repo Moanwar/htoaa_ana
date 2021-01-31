@@ -21,7 +21,7 @@ plt.style.use(hep.style.CMS)
 #BGenDf = processData(BGenPath, 'BGen')
 ## uncomment below if using multiple bg MC files
 
-root = False
+root = True
 
 if root:
     ## monte carlo ggH signal
@@ -146,9 +146,9 @@ dfdict = { 'WJets': WJetsDf,
            }
 
 if DM.JetHT:
-    cols = JetHTDf.columns
+    cols = list(JetHTDf.columns)
 else:
-    cols = dataDf.columns
+    cols = list(dataDf.columns)
 
 cols.remove('final_weights')
 for var in cols:

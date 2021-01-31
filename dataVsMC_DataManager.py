@@ -318,7 +318,7 @@ def processData (filePath, tag): #JetHT=False):
                 Xsec_wgt = 21.56
 
                 maxPtData = maxPtData.assign(final_weights =
-                                             maxPtData['LHE_HT']*
+                                             maxPtData['LHE_weights']* # bitch u dumb
                                              maxPtData['QCD_correction']*
                                              Xsec_wgt)
 
@@ -350,7 +350,7 @@ def processData (filePath, tag): #JetHT=False):
                 Xsec_wgt = 8.2
 
                 maxPtData = maxPtData.assign(final_weights=
-                                             maxPtData['LHE_HT']*
+                                             maxPtData['LHE_weights']*
                                              maxPtData['QCD_correction']*
                                              Xsec_wgt)
 
@@ -360,45 +360,32 @@ def processData (filePath, tag): #JetHT=False):
                 #maxPtData['final_weights'] = LHE_QCD*(8.20/np.sum(LHE_QCD))
 
             elif tag == 'WJets':
-                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                                  'LHE_weights'] = 315600/10071273/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                              'LHE_weights'] = 315600/10071273
 
-                length =len(maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                                  'LHE_weights'] = 68570/15298056/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                              'LHE_weights'] = 68570/15298056
 
-                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=800)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                                  'LHE_weights'] = 34900/14627242/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                              'LHE_weights'] = 34900/14627242
 
                 maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
             elif tag == 'ZJets':
-                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                              'LHE_weights'] = 145400/16704355/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                          'LHE_weights'] = 145400/16704355
 
-                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                              'LHE_weights'] = 34000/14642701/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                          'LHE_weights'] = 34000/14642701
 
-                length = len(maxPtData.loc[(maxPtData['LHE_HT']>=800)])
-                if length != 0:
-                    maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                              'LHE_weights'] = 18670/10561192/length
+                maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                          'LHE_weights'] = 18670/10561192
 
                 maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
 
             elif tag == 'TTJets':
-                length = len(maxPtData)
-                maxPtData = maxPtData.assign(final_weights=831760.0/10244307/length)
+                maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
 
             if not JetHT:
                 ## npvs Ratio weights
