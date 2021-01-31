@@ -150,6 +150,7 @@ if DM.JetHT:
 else:
     cols = dataDf.columns
 
+cols.remove('final_weights')
 for var in cols:
     if 'pt' in var:
         nbins = 40

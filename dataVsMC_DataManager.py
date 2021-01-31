@@ -26,43 +26,43 @@ bEnrPath = 'MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200
 
 BGenPaths = ['QCD_BGenFilter/QCD_HT200to300.root',
              'QCD_BGenFilter/QCD_HT300to500.root',
-             # 'QCD_BGenFilter/QCD_HT500to700.root',
-             # 'QCD_BGenFilter/QCD_HT700to1000.root',
-             # 'QCD_BGenFilter/QCD_HT1000to1500.root',
-             # 'QCD_BGenFilter/QCD_HT1500to2000.root',
-             # 'QCD_BGenFilter/QCD_HT2000toInf.root'
+             'QCD_BGenFilter/QCD_HT500to700.root',
+             'QCD_BGenFilter/QCD_HT700to1000.root',
+             'QCD_BGenFilter/QCD_HT1000to1500.root',
+             'QCD_BGenFilter/QCD_HT1500to2000.root',
+             'QCD_BGenFilter/QCD_HT2000toInf.root'
              ]
 
 bEnrPaths = ['QCD_bEnriched/QCD_HT200to300.root',
              'QCD_bEnriched/QCD_HT300to500.root',
-             # 'QCD_bEnriched/QCD_HT500to700.root',
-             # 'QCD_bEnriched/QCD_HT700to1000.root',
-             # 'QCD_bEnriched/QCD_HT1000to1500.root',
-             # 'QCD_bEnriched/QCD_HT1500to2000.root',
-             # 'QCD_bEnriched/QCD_HT2000toInf.root'
+             'QCD_bEnriched/QCD_HT500to700.root',
+             'QCD_bEnriched/QCD_HT700to1000.root',
+             'QCD_bEnriched/QCD_HT1000to1500.root',
+             'QCD_bEnriched/QCD_HT1500to2000.root',
+             'QCD_bEnriched/QCD_HT2000toInf.root'
              ]
 
 TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+               'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+               'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
               ]
 
 WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
+              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
               ]
 
 ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
               'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              # 'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              # 'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
+              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
+              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
+              'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
               ]
 
 JetHTPaths = ['data/JetHT/2018A_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
@@ -111,6 +111,7 @@ PVVars = ['PV_npvs', 'PV_npvsGood']
 
 allVars = list(jetVars + muonVars + PVVars + ['LHE_HT'])
 allVars.sort()
+
 
 muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
 muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
@@ -213,7 +214,7 @@ def processData (filePath, tag): #JetHT=False):
         other['LHE_HT'] = pd.DataFrame(events.array('LHE_HT'))
     other['PV_npvs'] = pd.DataFrame(events.array('PV_npvs'))
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
-    
+
     ## old way of putting things into the physobj. this is dangerous bc will take
     ## too many info into the DF and bloat it
     '''for var in allVars:
@@ -441,7 +442,7 @@ def processData (filePath, tag): #JetHT=False):
 
         else:
             maxPtData['final_weights'] = 1
-            
+
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
     maxPtData = maxPtData.dropna(how='all')
