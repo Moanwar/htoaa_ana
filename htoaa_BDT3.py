@@ -241,7 +241,7 @@ if options.train:
     ax.grid()
     ax.set_title(hyppar + ' ' + condition)
     fig.savefig("{}/roc_{} {}.png".format(dest, hyppar, condition))
-    #plt.show()
+    plt.show()
     plt.clf()
 
 
@@ -260,7 +260,7 @@ if options.train:
     ax.set_title('BDT score {} {}'.format(hyppar, condition))
     ax.set_xlabel('BDT Score')
     fig.savefig("{}/BDTScore_{} {}.png".format(dest, hyppar, condition))
-    #plt.show()
+    plt.show()
     plt.clf()
 
 
@@ -294,7 +294,7 @@ if options.train:
 
     ax.set_title(f'sensitivity = {sensitivity:.4f}')
     fig.savefig("{}/Sensitivity_{} {}.png".format(dest, hyppar, condition))
-    #plt.show()
+    plt.show()
     plt.clf()
 
     ##########################################################

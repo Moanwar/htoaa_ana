@@ -18,7 +18,7 @@ plt.style.use(hep.style.CMS)
 
 
 ## if reading from rootfiles, set true. if already have pickle of dataframe, set false
-root = False
+root = True
 
 ## function to add a BDTScore column to each of the background/signal/data DF
 loadedModel = pickle.load(open('Htoaa_BDThigh+medium disc.pkl', 'rb'))
@@ -281,7 +281,9 @@ bghist = ax.hist(toplot.values, weights=toplotweights.values, bins=edges,
 
 ax.legend(loc='best')
 ax.set_title('sensitivty')
+plt.savefig(f'dataVsMCDist/Parked/Sensitivity.png')
 plt.show()
+plt.close()
 
 
 ########################################################################
@@ -307,7 +309,9 @@ plt.show()
 nbins=40
 
 #del dfdict['JetHTDf']
-hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
+
+
+hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 for dfkey, dfvalue in dfdict.items():
     fig, ax = plt.subplots(figsize=(10,8))
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])

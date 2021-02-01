@@ -107,7 +107,7 @@ allVars.sort()
 ##    None = standard vars (default for now)
 ##    h = standard + high
 ##    m = standard + high + medium
-disc = 'm'
+disc = 'h'
 standardVars = [
     'FatJet_pt',
     'FatJet_eta',
