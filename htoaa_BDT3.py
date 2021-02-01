@@ -55,7 +55,7 @@ else:
 ## it will dump the processed datafram to a pickle. Next time, don't have to
 ## reload the data from ROOT, can just open pickle
 ## read determines if you want to load data from a root or pikl
-root = False
+root = True
 if root:
     data = pd.DataFrame()
     data = data.append(processData(ggHPath, 'ggH'), ignore_index=True, sort=False)

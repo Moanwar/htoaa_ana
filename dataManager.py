@@ -136,7 +136,7 @@ mediumDiscVars = [
     ]
 
 
-if disc == 'h':
+if disc == None:
     trainVars = standardVars
 elif disc == 'h':
     trainVars = standardVars + highDiscVars
