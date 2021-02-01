@@ -5,6 +5,7 @@ from analib import PhysObj, Event
 from info import BGenFileNames, bEnrFileNames
 
 import dataVsMC_DataManager as DM #import processData, jetVars, muonVars, PVVars, allVars, dataPath, ggHPath, bEnrPaths, BGenPaths, TTJetsPaths,
+from dataManager import trainVars # this is so we can run our thing through the BDT XML correctly
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import mplhep as hep
@@ -16,12 +17,15 @@ import uproot
 plt.style.use(hep.style.CMS)
 
 
+## if reading from rootfiles, set true. if already have pickle of dataframe, set false
+root = False
 
-## monte carlo backgrounds
-#BGenDf = processData(BGenPath, 'BGen')
-## uncomment below if using multiple bg MC files
-
-root = True
+## function to add a BDTScore column to each of the background/signal/data DF
+loadedModel = pickle.load(open('Htoaa_BDThigh+medium disc.pkl', 'rb'))
+def analyze(dataDf):
+    prediction = loadedModel.predict_proba(dataDf[trainVars])
+    dataDf = dataDf.assign(BDTScore=prediction[:,1])
+    return dataDf
 
 if root:
     ## monte carlo ggH signal
@@ -136,6 +140,17 @@ else:
     else:
         dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
 
+ggHDf = analyze(ggHDf)
+BGenDf = analyze(BGenDf)
+bEnrDf = analyze(bEnrDf)
+TTJetsDf = analyze(TTJetsDf)
+ZJetsDf = analyze(ZJetsDf)
+WJetsDf = analyze(WJetsDf)
+if DM.JetHT:
+    JetHTDf = analyze(JetHTDf)
+else:
+    dataDf = analyze(dataDf)
+
 
 
 dfdict = { 'WJets': WJetsDf,
@@ -163,24 +178,26 @@ for var in cols:
     xmin = list()
     xmax = list()
 
-    ## old way. when only doing 1 background
-    #minBGen, maxBGen = np.percentile(BGenDf[var], [0, 99.8])
-    #minData, maxData = np.percentile(dataDf[var], [0, 99.8])
-
     for dfkey, df in dfdict.items():
         xmintmp, xmaxtmp = np.percentile(df[var], [0,99.8])
         xmin.append(xmintmp)
         xmax.append(xmaxtmp)
 
+
     if 'H4qvsQCD' in var:
         #range_local = (0, max(maxBGen, maxData))
         range_local = (0, max(xmax))
+    elif 'FatJet_pt'==var:
+        range_local = (240, 700)
+    elif 'BDTScore'==var:
+        range_local = (0,0.7)
     else:
         #range_local = (min(minBGen, minData), max(maxBGen, maxData))
         range_local = (min(xmin), max(xmax))
 
 
-    hist_params = {'density': True, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
+    density = True
+    hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
 
     toplot = pd.DataFrame()
@@ -193,15 +210,23 @@ for var in cols:
         toplotweights[dfkey] = df['final_weights']
         toplotlabel.append(dfkey)
 
-    ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, **hist_params)
+    if DM.JetHT:
+        ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=density, bins=nbins, linewidth=3, color='k',
+                range=range_local)
+    else:
+        ax.hist(dataDf[var].values, label='parkedData', histtype='step', density=density, bins=nbins, linewidth=3, color='k',
+                range=range_local)
+
+    ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r', range=range_local)
+
+    ## making color palette for the QCD stakcs
+    pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
+    ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, color=pal, **hist_params)
     #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
     #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
     #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
-    ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r')
-    if DM.JetHT:
-        ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
-    else:
-        ax.hist(dataDf[var].values, label='parkedData', histtype='step', density=True, bins=nbins, linewidth=3, color='k')
+
+
 
     #ax.hist(dataDf[var], label='Data',
     ax.set_title(var )# + ' JetHT')
@@ -212,9 +237,54 @@ for var in cols:
     else:
         filedest = 'dataVsMCDist/Parked/{}.png'
     plt.savefig(filedest.format(var))
-    #plt.clf()
     plt.show()
     plt.close()
+
+
+########################### Sensitivity Plots ##########################
+sortedggH = ggHDf.sort_values(by='BDTScore', axis=0, kind='mergesort')
+histHeight = sortedggH.final_weights.sum()/10
+edges = [0]
+cumuSum = 0
+edgesloc = []
+for i in range(sortedggH.BDTScore.size):
+    cumuSum = cumuSum + sortedggH.final_weights.iloc[i]
+    if cumuSum > histHeight:
+        edges.append(sortedggH.BDTScore.iloc[i-1])
+        cumuSum = sortedggH.final_weights.iloc[i]
+        edgesloc.append(i-1)
+edges.pop()
+edges.append(sortedggH.BDTScore.iloc[-1])
+
+fig, ax = plt.subplots(figsize=(8,8))
+sighist = ax.hist(sortedggH.BDTScore, bins=edges,
+                  weights=sortedggH.final_weights, histtype='step',
+                  label='ggH', log=True, color='r', linewidth=3)
+datahist = ax.hist(dataDf.BDTScore, bins=edges, histtype='step',
+                   label='data', log=True, color='k', linewidth=3)
+
+toplot = pd.DataFrame()
+toplotweights = pd.DataFrame()
+toplotlabel = list()
+for dfkey, df in dfdict.items():
+    toplot[dfkey] = df['BDTScore']
+    toplotweights[dfkey] = df['final_weights']
+    toplotlabel.append(dfkey)
+
+
+bghist = ax.hist(toplot.values, weights=toplotweights.values, bins=edges,
+        label=toplotlabel, color=pal, log=True, histtype='bar', stacked=True)
+
+
+# !!! TODO
+## figure out how to compute the sensitivity for the stacked plot bitch
+
+ax.legend(loc='best')
+ax.set_title('sensitivty')
+plt.show()
+
+
+########################################################################
 
 
     ## when used to do bEnr and BGen separately
@@ -234,12 +304,10 @@ for var in cols:
     # plt.savefig('dataVsMCDist_fixed/bEnr/{}_bEnrVsData.png'.format(var))
     # plt.close()
 
-'''nbins=40
-
+nbins=40
 
 #del dfdict['JetHTDf']
-del dfdict['TTJets']
-
+hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 for dfkey, dfvalue in dfdict.items():
     fig, ax = plt.subplots(figsize=(10,8))
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])
@@ -247,10 +315,10 @@ for dfkey, dfvalue in dfdict.items():
             **hist_params)
     ax.set_title('LHE_HT ' + dfkey)
     ax.grid()
-    plt.savefig(f'dataVsMCDist/JetHT/LHE_HT_{dfkey}.png')
+    plt.savefig(f'dataVsMCDist/Parked/LHE_HT_{dfkey}.png')
     plt.show()
     plt.close()
-    #plt.clf()'''
+    #plt.clf()
 
 
 ## old way when bgen benr plotted separate

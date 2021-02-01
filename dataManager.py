@@ -57,12 +57,12 @@ BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
 
 JetVars = [
-    'FatJet_pt', 
-    'FatJet_eta', 
-    'FatJet_mass', 
-    'FatJet_btagCSVV2', 
-    'FatJet_btagDeepB', 
-    'FatJet_msoftdrop', 
+    'FatJet_pt',
+    'FatJet_eta',
+    'FatJet_mass',
+    'FatJet_btagCSVV2',
+    'FatJet_btagDeepB',
+    'FatJet_msoftdrop',
     'FatJet_btagDDBvL',
     'FatJet_deepTagMD_H4qvsQCD',
     ## high discriminatroy
@@ -110,11 +110,11 @@ allVars.sort()
 disc = 'm'
 standardVars = [
     'FatJet_pt',
-    'FatJet_eta', 
-    'FatJet_mass', 
-    'FatJet_btagCSVV2', 
-    'FatJet_btagDeepB', 
-    'FatJet_msoftdrop', 
+    'FatJet_eta',
+    'FatJet_mass',
+    'FatJet_btagCSVV2',
+    'FatJet_btagDeepB',
+    'FatJet_msoftdrop',
     'FatJet_btagDDBvL',
     'FatJet_deepTagMD_H4qvsQCD'
     ]
@@ -136,7 +136,7 @@ mediumDiscVars = [
     ]
 
 
-if disc == None:
+if disc == 'h':
     trainVars = standardVars
 elif disc == 'h':
     trainVars = standardVars + highDiscVars
@@ -184,7 +184,7 @@ def getnSVCounts(data, events):
     ## sveta and svphi are arrays of values corresponding to the event
     sveta = events.array('SV_eta')[eventidx]
     svphi = events.array('SV_phi')[eventidx]
-    
+
     dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
     dr = pd.DataFrame(dr)
     nSVcounts = (dr < 0.8).sum(axis=1)
@@ -224,7 +224,7 @@ def processData(filePath, tag):
         try:
             data[var] = pd.DataFrame(events.array(var))
             ## makes eta positive only
-            if 'eta' in var: 
+            if 'eta' in var:
                 data[var] = data[var].abs()
         except:
             continue'''
@@ -312,12 +312,12 @@ def processData(filePath, tag):
     if disc != None:
         # eventidx = data.FatJet_pt.index
         # maxptjetidx = colidx
-    
+
         # jeteta = events.array('FatJet_eta')[eventidx, maxptjetidx]
         # jetphi = events.array('FatJet_phi')[eventidx, maxptjetidx]
         # sveta = events.array('SV_eta')[eventidx]
         # svphi = events.array('SV_phi')[eventidx]
-    
+
         # dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
         # dr = pd.DataFrame(dr)
         # nSVcounts = (dr < 0.8).sum(axis=1)
@@ -337,11 +337,11 @@ def processData(filePath, tag):
 
 
 
-    ## LHE weights
+    ## assign (where applicable) LHE_weights, QCD_correction, Xsec weights
     #if tag == 'data':
     #    maxPtData['LHE_weights'] = 1
     if tag == 'ggH':
-        maxPtData['LHE_weights'] = 1#43920/999000
+        maxPtData['LHE_weights'] = 1
         wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
         wgt[wgt<0.1] = 0.1
         maxPtData['ggH_weights'] = wgt
@@ -424,53 +424,6 @@ def processData(filePath, tag):
 
         maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
-    ## npvs Ratio weights
-    ## we only need pileup and lumi for dataVsMC
-    '''if tag != 'data':
-        for i in range(len(ptkeys)-1):
-            for j in range(len(ipkeys)-1):
-                for k in range(len(npvsGkeys)):
-                    #print('{} {} {}'.format(ptkeys[i],ipkeys[j],npvsGkeys[k]))
-                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
-                                  (maxPtData.Muon_IP >= ipkeys[j]) &
-                                  (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                  (maxPtData.Muon_eta < 1.5) &
-                                  (maxPtData.PV_npvsGood == k+1),
-                                  'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
-                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
-                                  (maxPtData.Muon_IP >= ipkeys[j]) &
-                                  (maxPtData.Muon_IP < ipkeys[j +1]) &
-                                  (maxPtData.Muon_eta >= 1.5) &
-                                  (maxPtData.PV_npvsGood == k+1),
-                                  'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
-
-
-        ## lumi weights
-        for i in range(len(ptkeys)-1):
-            for j in range(len(ipkeys)-1):
-                maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                             (maxPtData.Muon_pt < ptkeys[i+1]) &
-                             (maxPtData.Muon_IP >= ipkeys[j]) &
-                             (maxPtData.Muon_IP < ipkeys[j+1]) &
-                             (maxPtData.Muon_eta < 1.5),
-                             'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['L']
-                maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                             (maxPtData.Muon_pt < ptkeys[i+1]) &
-                             (maxPtData.Muon_IP >= ipkeys[j]) &
-                             (maxPtData.Muon_IP < ipkeys[j +1]) &
-                             (maxPtData.Muon_eta >= 1.5),
-                             'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
-
-        ## ultimate weight
-        maxPtData = maxPtData.assign(final_weights =
-                                     maxPtData['lumi_weights']*
-                                     maxPtData['PU_weights']*
-                                     maxPtData['LHE_weights'])'''
-
-
-    #maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
 
     # tag the thing
     maxPtData['tag'] = tag
@@ -482,25 +435,6 @@ def processData(filePath, tag):
 
     return maxPtData
 
-
-## cuts
-## On top of the regular selection, you should require the existence of at
-## least one muon passing softId, with |eta| < 2.4, ip3d < 0.5, pT > 6, and
-## (dxy/dxyErr) > 2, in both data and MC.
-
-            # muons.cut(muons.softId > 0.9)
-            # muons.cut(abs(muons.eta) < 2.4)
-            # muons.cut(muons.pt > 7)
-            # muons.cut(muons.ip > 2)
-            #     jets.cut(jets.pt > 170)#240)#170)
-            #     jets.cut(abs(jets.eta)<2.4)
-            #     jets.cut(jets.DDBvL > 0.8)#0.8)#0.6)
-            #     jets.cut(jets.DeepB > 0.4184)
-            #     jets.cut(jets.msoft > 90)#90)#0.25)
-            #     #
-            #     jets.cut(jets.mass > 90)
-            #     jets.cut(jets.msoft < 200)
-            #     jets.cut(jets.npvsG >= 1)
 
 
 
