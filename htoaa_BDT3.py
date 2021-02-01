@@ -367,6 +367,7 @@ if options.train:
 else:
     print('we fc')
     ## this is if you want to use existing BDT to test
+    ## or should i be doing that in datavs mc. no i should do it here too
 
 
 

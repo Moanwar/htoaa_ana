@@ -297,6 +297,10 @@ def processData(filePath, tag):
 
     maxPtData = pd.DataFrame()
     toiter = (trainVars + ['LHE_HT'])
+
+    print(toiter)
+    print(disc)
+
     if disc != None:
         toiter.remove('FatJet_nSV')
 
