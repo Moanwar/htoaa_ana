@@ -294,7 +294,7 @@ def processData (filePath, tag): #JetHT=False):
 
             ## LHE_weights
             if tag == 'ggH':
-                 maxPtData['final_weights'] = 1
+                 maxPtData['LHE_weights'] = 1
                  wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
                  wgt[wgt<0.1] = 0.1
                  maxPtData['ggH_weights'] = wgt
