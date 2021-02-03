@@ -15,7 +15,7 @@ import random
 import os
 from sklearn.model_selection import GridSearchCV
 
-from dataManager import processData, ggHPath, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths#, BGenPath, bEnrPath
+from dataManager import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
 
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.model_selection import train_test_split
@@ -58,7 +58,7 @@ else:
 root = True
 if root:
     data = pd.DataFrame()
-    data = data.append(processData(ggHPath, 'ggH'), ignore_index=True, sort=False)
+    data = data.append(processData(ggHPaths, 'ggH'), ignore_index=True, sort=False)
     #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
     #data = data.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort = False)
 

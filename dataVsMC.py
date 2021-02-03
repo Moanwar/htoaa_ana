@@ -21,7 +21,7 @@ plt.style.use(hep.style.CMS)
 root = True
 
 ## function to add a BDTScore column to each of the background/signal/data DF
-loadedModel = pickle.load(open('Htoaa_BDThigh+medium disc.pkl', 'rb'))
+loadedModel = pickle.load(open('Htoaa_BDThigh disc.pkl', 'rb'))
 def analyze(dataDf):
     prediction = loadedModel.predict_proba(dataDf[trainVars])
     dataDf = dataDf.assign(BDTScore=prediction[:,1])
@@ -29,7 +29,7 @@ def analyze(dataDf):
 
 if root:
     ## monte carlo ggH signal
-    ggHDf = DM.processData(DM.ggHPath, 'ggH')
+    ggHDf = DM.processData(DM.ggHPaths, 'ggH')
 
     ############## BGen ##############
     BGenDf = pd.DataFrame()
@@ -108,8 +108,9 @@ if root:
 
     # datafile
     if not DM.JetHT:
-        dataDf = DM.processData(DM.dataPath, 'data')
+        dataDf = DM.processData(DM.ParkedDataPaths[0], 'data')
         pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
+
 
     if DM.JetHT:
         JetHTDf = pd.DataFrame()
@@ -139,6 +140,7 @@ else:
         JetHTDf = pickle.load(open('dataVsMC/JetHTDf.pkl', 'rb'))
     else:
         dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
+
 
 ggHDf = analyze(ggHDf)
 BGenDf = analyze(BGenDf)
@@ -172,6 +174,8 @@ for var in cols:
     else:
         nbins = 20
 
+    print(var)
+
     fig, ax = plt.subplots(figsize=(10,8))
 
     ## get the min/max value for hists
@@ -196,7 +200,7 @@ for var in cols:
         range_local = (min(xmin), max(xmax))
 
 
-    density = True
+    density = False
     hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
 
@@ -208,16 +212,21 @@ for var in cols:
         #toplotweights = np.append(toplotweights, df['final_weights'], 1)
         toplot[dfkey] = df[var]
         toplotweights[dfkey] = df['final_weights']
-        toplotlabel.append(dfkey)
+        toplotlabel.append(f'{dfkey} ({round(np.sum(df.final_weights))})')
 
     if DM.JetHT:
-        ax.hist(JetHTDf[var].values, label='JetHT', histtype='step', density=density, bins=nbins, linewidth=3, color='k',
-                range=range_local)
+        ax.hist(JetHTDf[var].values, label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
+                density=density, bins=nbins, linewidth=3, color='k',
+                range=range_local, weights=JetHTDf.final_weights)
     else:
-        ax.hist(dataDf[var].values, label='parkedData', histtype='step', density=density, bins=nbins, linewidth=3, color='k',
-                range=range_local)
+        ax.hist(dataDf[var].values, label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
+                histtype='step',
+                density=density, bins=nbins, linewidth=3, color='k',
+                range=range_local, weights=dataDf.final_weights)
 
-    ax.hist(ggHDf[var].values, label='GGH', histtype='step', density=True, bins=nbins, linewidth=3, color='r', range=range_local)
+    ax.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
+            density=density, bins=nbins, linewidth=3, color='r',
+            range=range_local, weights=ggHDf.final_weights)
 
     ## making color palette for the QCD stakcs
     pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
@@ -311,10 +320,11 @@ nbins=40
 #del dfdict['JetHTDf']
 
 
-hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
+
 for dfkey, dfvalue in dfdict.items():
     fig, ax = plt.subplots(figsize=(10,8))
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])
+    hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
     ax.hist(dfvalue['LHE_HT'], weights=dfvalue['final_weights'], label=dfkey,
             **hist_params)
     ax.set_title('LHE_HT ' + dfkey)

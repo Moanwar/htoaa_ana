@@ -14,70 +14,27 @@ import os
 import pickle
 import numpy as np
 from dataManager import getSubJetData, getnSVCounts
-
+from htoaaRootFilesLoc import TTJetsPaths, WJetsPaths, bEnrPaths, BGenPaths, ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths
+#import htoaaRootFilesLoc
 
 JetHT = False
-
-dataPath = 'data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-#ggHPath = 'MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
-ggHPath = 'GGH_HPT.root'
-BGenPath = 'MC/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-bEnrPath = 'MC/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-
-BGenPaths = ['QCD_BGenFilter/QCD_HT200to300.root',
-             'QCD_BGenFilter/QCD_HT300to500.root',
-             'QCD_BGenFilter/QCD_HT500to700.root',
-             'QCD_BGenFilter/QCD_HT700to1000.root',
-             'QCD_BGenFilter/QCD_HT1000to1500.root',
-             'QCD_BGenFilter/QCD_HT1500to2000.root',
-             'QCD_BGenFilter/QCD_HT2000toInf.root'
-             ]
-
-bEnrPaths = ['QCD_bEnriched/QCD_HT200to300.root',
-             'QCD_bEnriched/QCD_HT300to500.root',
-             'QCD_bEnriched/QCD_HT500to700.root',
-             'QCD_bEnriched/QCD_HT700to1000.root',
-             'QCD_bEnriched/QCD_HT1000to1500.root',
-             'QCD_bEnriched/QCD_HT1500to2000.root',
-             'QCD_bEnriched/QCD_HT2000toInf.root'
-             ]
-
-TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-               'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-               'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-              ]
-
-WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-              ]
-
-ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
-              ]
-
-JetHTPaths = ['data/JetHT/2018A_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'data/JetHT/2018B_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'data/JetHT/2018C_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'data/JetHT/2018D_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              ]
 
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
 bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.0024, 0.00024, 0.00044]
-
+ZJetsWeight = [ 145400. / 16704355, 34000. / 14642701, 18670. / 10561192]
+WJetsWeight = [315600. / 10071273, 68570./ 15298056, 34900. / 14627242]
+TJetsWeight = [831760.0 / 10244307]
+ParkedDataWeight = [7.1055]
 
 BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
+ZJetsDict = dict(zip(ZJetsPaths, ZJetsWeight))
+WJetsDict = dict(zip(WJetsPaths, WJetsWeight))
+TTJetsDict = dict(zip(TTJetsPaths, TJetsWeight))
+ParkedDataDict = dict(zip(ParkedDataPaths, ParkedDataWeight))
+
+
 
 jetVars = ['FatJet_pt',
            'FatJet_eta',
@@ -244,6 +201,7 @@ def processData (filePath, tag): #JetHT=False):
     jets.cut(jets['FatJet_msoftdrop'] <= 200)
     jets.cut(jets['FatJet_mass'] > 90)
     jets.cut(jets['FatJet_mass'] <= 200)
+    other.cut(other['PV_npvsGood'] >= 1)
     ## muon cuts
     if not JetHT:
         muons.cut((muons['Muon_softId'] > 0))
@@ -284,155 +242,149 @@ def processData (filePath, tag): #JetHT=False):
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
 
         ## secondary vertex
-        maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+        ## why do ia have 2 points where i do secondary vertex
+        #maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
 
         if tag != 'data' and tag != 'JetHT':
+            maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
 
-            maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())#pd.concat([maxPtData, other.LHE_HT], axis=1)
-            #maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT)
+        ## LHE_weights
+        if tag == 'ggH':
+             maxPtData['LHE_weights'] = 1
+             wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
+             wgt[wgt<0.1] = 0.1
+             maxPtData['ggH_weights'] = wgt
+             maxPtData['final_weights'] = maxPtData['LHE_weights'] * maxPtData['ggH_weights']
+        elif tag == 'BGen':
+            maxPtData['LHE_weights'] = BGenDict[filePath]
+            '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
+                          'LHE_weights'] = BGenWeight[0]
+            maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<=500),
+                          'LHE_weights'] = BGenWeight[1]
+            maxPtData.loc[(maxPtData['LHE_HT']>500) & (maxPtData['LHE_HT']<=700),
+                          'LHE_weights'] = BGenWeight[2]
+            maxPtData.loc[(maxPtData['LHE_HT']>700) & (maxPtData['LHE_HT']<=1000),
+                          'LHE_weights'] = BGenWeight[3]
+            maxPtData.loc[(maxPtData['LHE_HT']>1000) & (maxPtData['LHE_HT']<=1500),
+                          'LHE_weights'] = BGenWeight[4]
+            maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<=2000),
+                          'LHE_weights'] = BGenWeight[5]
+            maxPtData.loc[maxPtData['LHE_HT']>2000,
+                          'LHE_weights'] = BGenWeight[6]'''
 
-            ## LHE_weights
-            if tag == 'ggH':
-                 maxPtData['LHE_weights'] = 1
-                 wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
-                 wgt[wgt<0.1] = 0.1
-                 maxPtData['ggH_weights'] = wgt
-                 maxPtData['final_weights'] = maxPtData['LHE_weights'] * maxPtData['ggH_weights']
-            elif tag == 'BGen':
-                maxPtData['LHE_weights'] = BGenDict[filePath]
-                '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
-                              'LHE_weights'] = BGenWeight[0]
-                maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<=500),
-                              'LHE_weights'] = BGenWeight[1]
-                maxPtData.loc[(maxPtData['LHE_HT']>500) & (maxPtData['LHE_HT']<=700),
-                              'LHE_weights'] = BGenWeight[2]
-                maxPtData.loc[(maxPtData['LHE_HT']>700) & (maxPtData['LHE_HT']<=1000),
-                              'LHE_weights'] = BGenWeight[3]
-                maxPtData.loc[(maxPtData['LHE_HT']>1000) & (maxPtData['LHE_HT']<=1500),
-                              'LHE_weights'] = BGenWeight[4]
-                maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<=2000),
-                              'LHE_weights'] = BGenWeight[5]
-                maxPtData.loc[maxPtData['LHE_HT']>2000,
-                              'LHE_weights'] = BGenWeight[6]'''
+            wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+            wgt[wgt<0.1] = 0.1
+            maxPtData['QCD_correction'] = wgt
+            Xsec_wgt = 21.56
 
-                wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
-                wgt[wgt<0.1] = 0.1
-                maxPtData['QCD_correction'] = wgt
-                Xsec_wgt = 21.56
-
-                maxPtData = maxPtData.assign(final_weights =
-                                             maxPtData['LHE_weights']* # bitch u dumb
-                                             maxPtData['QCD_correction']*
-                                             Xsec_wgt)
-
-                ## wron way of doing Xsec weihgts lol
-                #LHE_QCD = maxPtData['LHE_weights'] * maxPtData['QCD_correction']
-                #maxPtData = maxPtData.assign(final_weights = 100000*LHE_QCD*(21.56/np.sum(LHE_QCD)))
-                #maxPtData['final_weights'] = LHE_QCD*(21.56/np.sum(LHE_QCD))
-
-            elif tag == 'bEnr':
-                maxPtData['LHE_weights'] = bEnrDict[filePath]
-                '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
-                              'LHE_weights'] = bEnrWeight[0]
-                maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<=500),
-                              'LHE_weights'] = bEnrWeight[1]
-                maxPtData.loc[(maxPtData['LHE_HT']>500) & (maxPtData['LHE_HT']<=700),
-                              'LHE_weights'] = bEnrWeight[2]
-                maxPtData.loc[(maxPtData['LHE_HT']>700) & (maxPtData['LHE_HT']<=1000),
-                              'LHE_weights'] = bEnrWeight[3]
-                maxPtData.loc[(maxPtData['LHE_HT']>1000) & (maxPtData['LHE_HT']<=1500),
-                              'LHE_weights'] = bEnrWeight[4]
-                maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<=2000),
-                              'LHE_weights'] = bEnrWeight[5]
-                maxPtData.loc[maxPtData['LHE_HT']>2000,
-                              'LHE_weights'] = bEnrWeight[6]'''
-
-                wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
-                wgt[wgt<0.1] = 0.1
-                maxPtData['QCD_correction'] = wgt
-                Xsec_wgt = 8.2
-
-                maxPtData = maxPtData.assign(final_weights=
-                                             maxPtData['LHE_weights']*
-                                             maxPtData['QCD_correction']*
-                                             Xsec_wgt)
-
-                ## scale total weight to match the Xsec weight of 8.20
-                # LHE_QCD = maxPtData['LHE_weights'] * maxPtData['QCD_correction']
-                # maxPtData = maxPtData.assign(final_weights = LHE_QCD*(8.20/np.sum(LHE_QCD)))
-                #maxPtData['final_weights'] = LHE_QCD*(8.20/np.sum(LHE_QCD))
-
-            elif tag == 'WJets':
-                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                              'LHE_weights'] = 315600/10071273
-
-                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                              'LHE_weights'] = 68570/15298056
-
-                maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                              'LHE_weights'] = 34900/14627242
-
-                maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
-
-            elif tag == 'ZJets':
-                maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                          'LHE_weights'] = 145400/16704355
-
-                maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                          'LHE_weights'] = 34000/14642701
-
-                maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                          'LHE_weights'] = 18670/10561192
-
-                maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
+            maxPtData = maxPtData.assign(final_weights =
+                                         maxPtData['LHE_weights']*
+                                         maxPtData['QCD_correction']*
+                                         Xsec_wgt)
 
 
-            elif tag == 'TTJets':
-                maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
+        elif tag == 'bEnr':
+            maxPtData['LHE_weights'] = bEnrDict[filePath]
+            '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
+                          'LHE_weights'] = bEnrWeight[0]
+            maxPtData.loc[(maxPtData['LHE_HT']>300) & (maxPtData['LHE_HT']<=500),
+                          'LHE_weights'] = bEnrWeight[1]
+            maxPtData.loc[(maxPtData['LHE_HT']>500) & (maxPtData['LHE_HT']<=700),
+                          'LHE_weights'] = bEnrWeight[2]
+            maxPtData.loc[(maxPtData['LHE_HT']>700) & (maxPtData['LHE_HT']<=1000),
+                          'LHE_weights'] = bEnrWeight[3]
+            maxPtData.loc[(maxPtData['LHE_HT']>1000) & (maxPtData['LHE_HT']<=1500),
+                          'LHE_weights'] = bEnrWeight[4]
+            maxPtData.loc[(maxPtData['LHE_HT']>1500) & (maxPtData['LHE_HT']<=2000),
+                          'LHE_weights'] = bEnrWeight[5]
+            maxPtData.loc[maxPtData['LHE_HT']>2000,
+                          'LHE_weights'] = bEnrWeight[6]'''
 
-            if not JetHT and tag != 'ggH':
-                ## npvs Ratio weights
-                for i in range(len(ptkeys)-1):
-                    for j in range(len(ipkeys)-1):
-                        for k in range(len(npvsGkeys)):
-                            maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                                          (maxPtData.Muon_pt < ptkeys[i+1]) &
-                                          (maxPtData.Muon_IP >= ipkeys[j]) &
-                                          (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                          (maxPtData.Muon_eta < 1.5) &
-                                          (maxPtData.PV_npvsGood == k+1),
-                                          'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
-                            maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
-                                          (maxPtData.Muon_pt < ptkeys[i+1]) &
-                                          (maxPtData.Muon_IP >= ipkeys[j]) &
-                                          (maxPtData.Muon_IP < ipkeys[j +1]) &
-                                          (maxPtData.Muon_eta >= 1.5) &
-                                          (maxPtData.PV_npvsGood == k+1),
-                                          'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
-                # lumi weights
-                for i in range(len(ptkeys)-1):
-                    for j in range(len(ipkeys)-1):
+            wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+            wgt[wgt<0.1] = 0.1
+            maxPtData['QCD_correction'] = wgt
+            Xsec_wgt = 8.2
+
+            maxPtData = maxPtData.assign(final_weights=
+                                         maxPtData['LHE_weights']*
+                                         maxPtData['QCD_correction']*
+                                         Xsec_wgt)
+
+
+        elif tag == 'WJets':
+            maxPtData['LHE_weights'] = WJetsDict[filePath]
+            '''maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                          'LHE_weights'] = 315600/10071273
+
+            maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                          'LHE_weights'] = 68570/15298056
+
+            maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                          'LHE_weights'] = 34900/14627242'''
+
+            maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
+
+        elif tag == 'ZJets':
+            maxPtData['LHE_weights'] = ZJetsDict[filePath]
+            '''maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+                      'LHE_weights'] = 145400/16704355
+
+            maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+                      'LHE_weights'] = 34000/14642701
+
+            maxPtData.loc[(maxPtData['LHE_HT']>=800),
+                      'LHE_weights'] = 18670/10561192'''
+
+            maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
+
+
+        elif tag == 'TTJets':
+            maxPtData['LHE_weights'] = TTJetsDict[filePath]
+            maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
+
+        if not JetHT and tag != 'ggH' and tag!='data':
+            ## npvs Ratio weights
+            for i in range(len(ptkeys)-1):
+                for j in range(len(ipkeys)-1):
+                    for k in range(len(npvsGkeys)):
                         maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
                                       (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                      (maxPtData.Muon_eta < 1.5),
-                                      'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['L']
+                                      (maxPtData.Muon_eta < 1.5) &
+                                      (maxPtData.PV_npvsGood == k+1),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
                         maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
-                                      (maxPtData.Muon_IP  < ipkeys[j +1]) &
-                                      (maxPtData.Muon_eta >= 1.5),
-                                      'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
+                                      (maxPtData.Muon_IP < ipkeys[j +1]) &
+                                      (maxPtData.Muon_eta >= 1.5) &
+                                      (maxPtData.PV_npvsGood == k+1),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
+            # lumi weights
+            for i in range(len(ptkeys)-1):
+                for j in range(len(ipkeys)-1):
+                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                  (maxPtData.Muon_IP >= ipkeys[j]) &
+                                  (maxPtData.Muon_IP < ipkeys[j+1]) &
+                                  (maxPtData.Muon_eta < 1.5),
+                                  'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['L']
+                    maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                  (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                  (maxPtData.Muon_IP >= ipkeys[j]) &
+                                  (maxPtData.Muon_IP  < ipkeys[j +1]) &
+                                  (maxPtData.Muon_eta >= 1.5),
+                                  'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
 
-                maxPtData = maxPtData.assign(final_weights =
-                                             maxPtData['lumi_weights']*
-                                             maxPtData['PU_weights']*
-                                             maxPtData['final_weights'])
+            maxPtData = maxPtData.assign(final_weights =
+                                         maxPtData['lumi_weights']*
+                                         maxPtData['PU_weights']*
+                                         maxPtData['final_weights'])
 
-        else:
-            maxPtData['final_weights'] = 1
+        if tag == 'data':
+            maxPtData['final_weights'] = ParkedDataDict[filePath]
 
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 

@@ -13,48 +13,22 @@ import sys
 import os
 import pickle
 import numpy as np
+from htoaaRootFilesLoc import TTJetsPaths, WJetsPaths, bEnrPaths, BGenPaths, ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths
 
-
-dataPath = 'data/2018D_Parked_promptD-v1_200218_214714_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-#ggHPath = 'MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
-BGenPath = 'MC/QCD/QCD_BGen_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-bEnrPath = 'MC/QCD/QCD_bEnriched_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root'
-
-
-ggHPath = 'GGH_HPT.root'
-#ggHPath ='MC/nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId_999k.root'
-setnames = ['QCD_HT200to300', 'QCD_HT300to500', 'QCD_HT500to700',
-            'QCD_HT700to1000','QCD_HT1000to1500', 'QCD_HT1500to2000',
-            'QCD_HT2000toInf']
-BGenPaths = ['QCD_BGenFilter/' + i + '.root' for i in setnames]
-bEnrPaths = ['QCD_bEnriched/' + i + '.root' for i in setnames]
-
-TTJetsPaths = ['MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/TTJets/TTJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root']
-
-WJetsPaths = ['MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/WJets/WJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/WJets/WJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',]
-
-ZJetsPaths = ['MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT-800toInf_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT400to600_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-              'MC/ZJets/ZJets_HT600to800_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root',
-              'MC/ZJets/ZJets_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240_Mu_pT_6_IP_2_softId.root',
-              ]
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
 bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.024, 0.0024, 0.00044]
+ZJetsWeight = [ 145400. / 16704355, 34000. / 14642701, 18670. / 10561192]
+WJetsWeight = [315600. / 10071273, 68570./ 15298056, 34900. / 14627242]
+TJetsWeight = [831760.0 / 10244307]
+ParkedDataWeight = [7.1055]
 
 BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
+ZJetsDict = dict(zip(ZJetsPaths, ZJetsWeight))
+WJetsDict = dict(zip(WJetsPaths, WJetsWeight))
+TTJetsDict = dict(zip(TTJetsPaths, TJetsWeight))
+ParkedDataDict = dict(zip(ParkedDataPaths, ParkedDataWeight))
 
 JetVars = [
     'FatJet_pt',
@@ -298,8 +272,6 @@ def processData(filePath, tag):
     maxPtData = pd.DataFrame()
     toiter = (trainVars + ['LHE_HT'])
 
-    print(toiter)
-    print(disc)
 
     if disc != None:
         toiter.remove('FatJet_nSV')
@@ -406,25 +378,27 @@ def processData(filePath, tag):
         maxPtData['final_weights'] = maxPtData['final_weights']*(8.20/maxPtData['final_weights'].sum())
 
     elif tag == 'TTJets':
-        maxPtData = maxPtData.assign(final_weights=831760.0/10244307)
+        maxPtData['LHE_weights'] = TTJetsDict[filePath]
 
     elif tag == 'ZJets':
-        maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                      'LHE_weights'] = 145400/16704355
-        maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                      'LHE_weights'] = 34000/14642701
-        maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                      'LHE_weights'] = 18670/10561192
+        maxPtData['LHE_weights'] = ZJetsDict[filePath]
+        # maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+        #               'LHE_weights'] = 145400/16704355
+        # maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+        #               'LHE_weights'] = 34000/14642701
+        # maxPtData.loc[(maxPtData['LHE_HT']>=800),
+        #               'LHE_weights'] = 18670/10561192
 
         maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
     elif tag == 'WJets':
-        maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
-                      'LHE_weights'] = 315600/10071273
-        maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
-                      'LHE_weights'] = 68570/15298056
-        maxPtData.loc[(maxPtData['LHE_HT']>=800),
-                      'LHE_weights'] = 34900/14627242
+        maxPtData['LHE_weights'] = WJetsDict[filePath]
+        # maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
+        #               'LHE_weights'] = 315600/10071273
+        # maxPtData.loc[(maxPtData['LHE_HT']>=600) & (maxPtData['LHE_HT']<800),
+        #               'LHE_weights'] = 68570/15298056
+        # maxPtData.loc[(maxPtData['LHE_HT']>=800),
+        #               'LHE_weights'] = 34900/14627242
 
         maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
