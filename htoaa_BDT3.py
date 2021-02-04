@@ -265,7 +265,7 @@ if options.train:
 
 
     ################### sensitivity plots ####################
-    sortedData = testData.loc[testData.target==1].sort_values(by='BDTScore', axis=0, kind='mergesort')
+    '''sortedData = testData.loc[testData.target==1].sort_values(by='BDTScore', axis=0, kind='mergesort')
     histHeight = sortedData.final_weights.sum()/10
     edges = [0]
     cumuSum = 0
@@ -295,7 +295,7 @@ if options.train:
     ax.set_title(f'sensitivity = {sensitivity:.4f}')
     fig.savefig("{}/Sensitivity_{} {}.png".format(dest, hyppar, condition))
     plt.show()
-    plt.clf()
+    plt.clf()'''
 
     ##########################################################
 
