@@ -163,12 +163,19 @@ dfdict = { 'WJets': WJetsDf,
            'BGen': BGenDf,
            }
 
+## define variables to plot, which is all of them but weights and LHE_HT
 if DM.JetHT:
     cols = list(JetHTDf.columns)
 else:
     cols = list(dataDf.columns)
 
 cols.remove('final_weights')
+cols.remove('LHE_HT')
+cols.remove('QCD_corrections')
+cols.remove('lumi_weights')
+cols.remove('PU_weights')
+cols.remove('LHE_weights')
+
 for var in cols:
     if 'pt' in var:
         nbins = 40
@@ -215,6 +222,17 @@ for var in cols:
         toplotweights[dfkey] = df['final_weights']
         toplotlabel.append(f'{dfkey} ({round(np.sum(df.final_weights))})')
 
+    ## making color palette for the QCD stakcs
+    pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
+    ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, color=pal, **hist_params)
+    #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
+    #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
+    #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
+
+    ax.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
+            density=density, bins=nbins, linewidth=3, color='r',
+            range=range_local, weights=ggHDf.final_weights)
+
     if DM.JetHT:
         ax.hist(JetHTDf[var].values, label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
                 density=density, bins=nbins, linewidth=3, color='k',
@@ -224,19 +242,6 @@ for var in cols:
                 histtype='step',
                 density=density, bins=nbins, linewidth=3, color='k',
                 range=range_local, weights=dataDf.final_weights)
-
-    ax.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
-            density=density, bins=nbins, linewidth=3, color='r',
-            range=range_local, weights=ggHDf.final_weights)
-
-    ## making color palette for the QCD stakcs
-    pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
-    ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, color=pal, **hist_params)
-    #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
-    #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
-    #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
-
-
 
     #ax.hist(dataDf[var], label='Data',
     ax.set_title(var )# + ' JetHT')

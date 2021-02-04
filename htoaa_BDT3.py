@@ -51,10 +51,9 @@ else:
     test_size = 0.4
 
 ##############
-## commend this out after the first round of running this script
-## it will dump the processed datafram to a pickle. Next time, don't have to
 ## reload the data from ROOT, can just open pickle
 ## read determines if you want to load data from a root or pikl
+
 root = True
 if root:
     data = pd.DataFrame()
