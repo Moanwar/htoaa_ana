@@ -10,7 +10,7 @@ WJetsPaths = [ '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/WJets/WJetsToQQ_qc
 bEnrPaths = ['/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT200to300_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
              '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT300to500_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
              '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT500to700_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
-             '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT700to1000_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root'
+             '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT700to1000_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
              '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT1000to1500_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
              '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT1500to2000_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
              '/cms/data/store/user/abrinke1/NanoAOD/2018/MC/QCD/QCD_bEnriched/Nano25Oct2019/SkimsFatJet/QCD_bEnriched_HT2000toInf_nFat1_doubB_0p8_deepB_Med_massH_70_msoft_70.root',
