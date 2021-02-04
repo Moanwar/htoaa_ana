@@ -146,6 +146,7 @@ def processData (filePath, tag): #JetHT=False):
     jets['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
     jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
+
     ## JetHT triggers
     ## add them all up, so passing at least one is just see if event has trig > 0
     if JetHT:
@@ -171,6 +172,7 @@ def processData (filePath, tag): #JetHT=False):
         other['LHE_HT'] = pd.DataFrame(events.array('LHE_HT'))
     other['PV_npvs'] = pd.DataFrame(events.array('PV_npvs'))
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
+    #other['Generator_weight'] = pd.DataFrame(events.array('Generator_weight'))
 
     ## old way of putting things into the physobj. this is dangerous bc will take
     ## too many info into the DF and bloat it
@@ -223,7 +225,7 @@ def processData (filePath, tag): #JetHT=False):
         other.LHE_HT = other.LHE_HT.rename({0:'LHE_HT'}, axis='columns')
     other.PV_npvs = other.PV_npvs.rename({0:'PV_npvs'}, axis='columns')
     other.PV_npvsGood =other.PV_npvsGood.rename({0:'PV_npvsGood'}, axis='columns')
-
+    #other.Generator_weight = other.Generator_weight.rename({0:'Generator_weight'}, axis='columns')
 
     ## if nothing's left after cut, return empty dataframe
     if (jets.FatJet_pt.empty):
@@ -240,6 +242,7 @@ def processData (filePath, tag): #JetHT=False):
 
         maxPtData = maxPtData.assign(PV_npvs=other.PV_npvs.to_numpy())
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
+        #maxPtData = maxPtData.assign(Generator_weight=other.Generator_weight.to_numpy())
 
         ## secondary vertex
         ## why do ia have 2 points where i do secondary vertex
@@ -255,7 +258,9 @@ def processData (filePath, tag): #JetHT=False):
              wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
              wgt[wgt<0.1] = 0.1
              maxPtData['ggH_weights'] = wgt
-             maxPtData['final_weights'] = maxPtData['LHE_weights'] * maxPtData['ggH_weights']
+             maxPtData['final_weights'] = (maxPtData['LHE_weights'] *
+                                           maxPtData['ggH_weights'])
+
         elif tag == 'BGen':
             maxPtData['LHE_weights'] = BGenDict[filePath]
             '''maxPtData.loc[(maxPtData['LHE_HT']>200) & (maxPtData['LHE_HT']<=300),
@@ -325,6 +330,7 @@ def processData (filePath, tag): #JetHT=False):
 
             maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
+
         elif tag == 'ZJets':
             maxPtData['LHE_weights'] = ZJetsDict[filePath]
             '''maxPtData.loc[(maxPtData['LHE_HT']>=400) & (maxPtData['LHE_HT']<600),
@@ -339,9 +345,12 @@ def processData (filePath, tag): #JetHT=False):
             maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
 
 
+
         elif tag == 'TTJets':
             maxPtData['LHE_weights'] = TTJetsDict[filePath]
             maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
+
+
 
         if not JetHT and tag != 'ggH' and tag!='data':
             ## npvs Ratio weights
