@@ -195,7 +195,7 @@ def processData (filePath, tag): #JetHT=False):
 
     ## cutting events
     ## jet cuts
-    jets.cut(jets['FatJet_pt'] > 170)
+    jets.cut(jets['FatJet_pt'] > 240)#170)
     jets.cut(jets['FatJet_eta'] < 2.4)
     jets.cut(jets['FatJet_btagDDBvL'] > 0.8)
     jets.cut(jets['FatJet_btagDeepB'] > 0.4184)
@@ -229,7 +229,7 @@ def processData (filePath, tag): #JetHT=False):
 
     ## if nothing's left after cut, return empty dataframe
     if (jets.FatJet_pt.empty):
-        maxPtData = pd.DataFrame()
+       return pd.DataFrame()
 
     else:
         maxPtJets = getMaxPt(jets, 'FatJet_pt', jetVars)#.reindex(jets.FatJet_pt.index)

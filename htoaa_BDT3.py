@@ -15,8 +15,8 @@ import random
 import os
 from sklearn.model_selection import GridSearchCV
 
-from dataManager import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
-
+#from dataManager import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
+from datamanager_fixed import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
 from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.model_selection import train_test_split
 
@@ -57,7 +57,7 @@ else:
 root = True
 if root:
     data = pd.DataFrame()
-    data = data.append(processData(ggHPaths, 'ggH'), ignore_index=True, sort=False)
+    data = data.append(processData(ggHPaths, 'ggH', True), ignore_index=True, sort=False)
     #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
     #data = data.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort = False)
 
@@ -69,15 +69,15 @@ if root:
 
     ## getting the BGen, bEnr data into DataFrame format
     for BGenPath in BGenPaths:
-        BGenData = BGenData.append(processData(BGenPath, 'BGen'), ignore_index=True, sort=False)
+        BGenData = BGenData.append(processData(BGenPath, 'BGen', True), ignore_index=True, sort=False)
     for bEnrPath in bEnrPaths:
-        bEnrData = bEnrData.append(processData(bEnrPath, 'bEnr'), ignore_index=True, sort=False)
+        bEnrData = bEnrData.append(processData(bEnrPath, 'bEnr', True), ignore_index=True, sort=False)
     for TTJetsPath in TTJetsPaths:
-        TTJetsData = TTJetsData.append(processData(TTJetsPath, 'TTJets'), ignore_index=True, sort=False)
+        TTJetsData = TTJetsData.append(processData(TTJetsPath, 'TTJets', True), ignore_index=True, sort=False)
     for WJetsPath in WJetsPaths:
-        WJetsData = WJetsData.append(processData(WJetsPath, 'WJets'), ignore_index=True, sort=False)
+        WJetsData = WJetsData.append(processData(WJetsPath, 'WJets', True), ignore_index=True, sort=False)
     for ZJetsPath in ZJetsPaths:
-        ZJetsData = ZJetsData.append(processData(ZJetsPath, 'ZJets'), ignore_index=True, sort=False)
+        ZJetsData = ZJetsData.append(processData(ZJetsPath, 'ZJets', True), ignore_index=True, sort=False)
 
 
     ## reshape them so they are the same size

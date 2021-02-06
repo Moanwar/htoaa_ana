@@ -169,12 +169,14 @@ if DM.JetHT:
 else:
     cols = list(dataDf.columns)
 
-cols.remove('final_weights')
-cols.remove('LHE_HT')
-cols.remove('QCD_corrections')
-cols.remove('lumi_weights')
-cols.remove('PU_weights')
-cols.remove('LHE_weights')
+
+## remove things i don't want plotted
+toremove = ['final_weights', 'LHE_HT', 'QCD_corrections', 'lumi_weights',
+            'PU_weights', 'LHE_weights']
+
+for i in toremove:
+    if i in cols: cols.remove(i)
+
 
 for var in cols:
     if 'pt' in var:
@@ -191,7 +193,7 @@ for var in cols:
     xmax = list()
 
     for dfkey, df in dfdict.items():
-        xmintmp, xmaxtmp = np.percentile(df[var], [0,99.8])
+        xmintmp, xmaxtmp = np.percentile(df[var], [0,100])
         xmin.append(xmintmp)
         xmax.append(xmaxtmp)
 
@@ -199,10 +201,10 @@ for var in cols:
     if 'H4qvsQCD' in var:
         #range_local = (0, max(maxBGen, maxData))
         range_local = (0, max(xmax))
-    elif 'FatJet_pt'==var:
-        range_local = (240, 700)
+    #elif 'FatJet_pt'==var:
+    #    range_local = (240, 700)
     elif 'BDTScore'==var:
-        range_local = (0,0.7)
+        range_local = (0,0.8)
     else:
         #range_local = (min(minBGen, minData), max(maxBGen, maxData))
         range_local = (min(xmin), max(xmax))
@@ -212,36 +214,49 @@ for var in cols:
     hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
 
+
+    ## plotting background MC
     toplot = pd.DataFrame()
     toplotweights = pd.DataFrame()
     toplotlabel = list()
     for dfkey, df in dfdict.items():
-        #toplot = np.append(toplot, df[var], 1)
-        #toplotweights = np.append(toplotweights, df['final_weights'], 1)
-        toplot[dfkey] = df[var]
-        toplotweights[dfkey] = df['final_weights']
+        #toplot[dfkey] = df[var]
+        #toplotweights[dfkey] = df['final_weights']
+        toplot = pd.concat([toplot, df[var]], ignore_index=False, axis=1)
+        toplotweights = pd.concat([toplotweights, df['final_weights']], ignore_index=False,
+                  axis=1)
+
+        toplotweights = toplotweights.rename({'final_weights': dfkey})
         toplotlabel.append(f'{dfkey} ({round(np.sum(df.final_weights))})')
 
     ## making color palette for the QCD stakcs
     pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
-    ax.hist(toplot.values, weights=toplotweights.values,label=toplotlabel, color=pal, **hist_params)
-    #ax.hist(BGenDf[var].values, weights=BGenDf['final_weights'].values, label='BGen', **hist_params)
-    #ax.hist(bEnrDf[var].values, weights=bEnrDf['final_weights'].values, label='bEnr', **hist_params)
-    #ax.hist(TTJetsDf[var].values, weights=TTJetsDf['final_weights'].values, label='TTJets', **hist_params)
+    bgvals, bgbins, _ = ax.hist(toplot.values.astype(float),
+                                weights=toplotweights.values.astype(float),
+                                label=toplotlabel,
+                                color=pal, **hist_params)
 
+
+    ## plotting signal MC
+    ## scaling GGH area to equal bg area
+    gghweights = ggHDf['final_weights']*np.nansum(toplotweights)/np.sum(ggHDf.final_weights)
+    ggHDf['final_weights'] = gghweights
     ax.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
             density=density, bins=nbins, linewidth=3, color='r',
-            range=range_local, weights=ggHDf.final_weights)
+            range=range_local, weights=ggHDf['final_weights'])
 
+
+    ## plotting data
     if DM.JetHT:
         ax.hist(JetHTDf[var].values, label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
                 density=density, bins=nbins, linewidth=3, color='k',
                 range=range_local, weights=JetHTDf.final_weights)
     else:
-        ax.hist(dataDf[var].values, label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
-                histtype='step',
-                density=density, bins=nbins, linewidth=3, color='k',
-                range=range_local, weights=dataDf.final_weights)
+        datavals, databins, _ = ax.hist(dataDf[var].values, label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
+                histtype='step', density=density, bins=nbins, linewidth=3,
+                color='k',range=range_local, weights=dataDf.final_weights)
+
+
 
     #ax.hist(dataDf[var], label='Data',
     ax.set_title(var )# + ' JetHT')
@@ -254,6 +269,10 @@ for var in cols:
     plt.savefig(filedest.format(var))
     plt.show()
     plt.close()
+
+
+dataarea = np.sum(datavals)
+bgarea = np.sum(bgvals.flatten())
 
 
 ########################### Sensitivity Plots ##########################
@@ -282,13 +301,17 @@ toplot = pd.DataFrame()
 toplotweights = pd.DataFrame()
 toplotlabel = list()
 for dfkey, df in dfdict.items():
-    toplot[dfkey] = df['BDTScore']
-    toplotweights[dfkey] = df['final_weights']
+    #Wtoplot[dfkey] = df['BDTScore']
+    #toplotweights[dfkey] = df['final_weights']
+    toplot = pd.concat([toplot, df['BDTScore']], ignore_index=False, axis=1)
+    toplotweights = pd.concat([toplotweights, df['final_weights']], ignore_index=False,
+                              axis=1)
     toplotlabel.append(dfkey)
 
 
-bghist = ax.hist(toplot.values, weights=toplotweights.values, bins=edges,
-        label=toplotlabel, color=pal, log=True, histtype='bar', stacked=True)
+bghist = ax.hist(toplot.values, weights=toplotweights.values,
+                 bins=edges,label=toplotlabel, color=pal, log=True,
+                 histtype='bar', stacked=True)
 
 
 # !!! TODO
@@ -330,7 +353,8 @@ nbins=40
 for dfkey, dfvalue in dfdict.items():
     fig, ax = plt.subplots(figsize=(10,8))
     range_local = np.percentile(dfvalue['LHE_HT'], [0,99.8])
-    hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
+    hist_params = {'density': False, 'histtype': 'bar', 'range' : range_local,
+                   'bins':nbins, 'stacked':True}
     ax.hist(dfvalue['LHE_HT'], weights=dfvalue['final_weights'], label=dfkey,
             **hist_params)
     ax.set_title('LHE_HT ' + dfkey)
