@@ -271,10 +271,6 @@ for var in cols:
     plt.close()
 
 
-dataarea = np.sum(datavals)
-bgarea = np.sum(bgvals.flatten())
-
-
 ########################### Sensitivity Plots ##########################
 sortedggH = ggHDf.sort_values(by='BDTScore', axis=0, kind='mergesort')
 histHeight = sortedggH.final_weights.sum()/10
