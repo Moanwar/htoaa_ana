@@ -73,9 +73,18 @@ allVars.sort()
 muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
 muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
 
-ptkeys = list(muonL.keys()) + [999999]
+
+
+
+#ptkeys = list(muonL.keys()) + [999999]
+ptkeys = list(muonL.keys())
+ptkeys.append(999999)
 ptkeys.remove('meta')
-ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
+
+#ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
+ipkeys = list(muonL[ptkeys[0]].keys())
+ipkeys.append(999999)
+
 npvsGkeys = muonR[6][2]['H']
 
 tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets', 'ggH']
@@ -195,14 +204,14 @@ def processData (filePath, tag): #JetHT=False):
 
     ## cutting events
     ## jet cuts
-    jets.cut(jets['FatJet_pt'] > 240)#170)
+    jets.cut(jets['FatJet_pt'] > 170)
     jets.cut(jets['FatJet_eta'] < 2.4)
     jets.cut(jets['FatJet_btagDDBvL'] > 0.8)
     jets.cut(jets['FatJet_btagDeepB'] > 0.4184)
     jets.cut(jets['FatJet_msoftdrop'] > 90)
-    jets.cut(jets['FatJet_msoftdrop'] <= 200)
+    jets.cut(jets['FatJet_msoftdrop'] < 200)#<= 200)
     jets.cut(jets['FatJet_mass'] > 90)
-    jets.cut(jets['FatJet_mass'] <= 200)
+    #jets.cut(jets['FatJet_mass'] <= 200)
     other.cut(other['PV_npvsGood'] >= 1)
     ## muon cuts
     if not JetHT:
@@ -258,6 +267,7 @@ def processData (filePath, tag): #JetHT=False):
              wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
              wgt[wgt<0.1] = 0.1
              maxPtData['ggH_weights'] = wgt
+
              maxPtData['final_weights'] = (maxPtData['LHE_weights'] *
                                            maxPtData['ggH_weights'])
 
@@ -353,7 +363,7 @@ def processData (filePath, tag): #JetHT=False):
 
 
         if not JetHT and tag != 'ggH' and tag!='data':
-            ## npvs Ratio weights
+            ## npvs Ratio (PU) weights
             for i in range(len(ptkeys)-1):
                 for j in range(len(ipkeys)-1):
                     for k in range(len(npvsGkeys)):
@@ -371,6 +381,7 @@ def processData (filePath, tag): #JetHT=False):
                                       (maxPtData.Muon_eta >= 1.5) &
                                       (maxPtData.PV_npvsGood == k+1),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
+
             # lumi weights
             for i in range(len(ptkeys)-1):
                 for j in range(len(ipkeys)-1):
@@ -387,6 +398,11 @@ def processData (filePath, tag): #JetHT=False):
                                   (maxPtData.Muon_eta >= 1.5),
                                   'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
 
+
+            ### !!! add this to the datamanager fixed too
+            maxPtData.PU_weights.fillna(1, inplace=True)
+            maxPtData.lumi_weights.fillna(1, inplace=True)
+
             maxPtData = maxPtData.assign(final_weights =
                                          maxPtData['lumi_weights']*
                                          maxPtData['PU_weights']*
@@ -397,8 +413,8 @@ def processData (filePath, tag): #JetHT=False):
 
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
-    maxPtData = maxPtData.dropna(how='all')
-    maxPtData = maxPtData.fillna(0)
+    #maxPtData = maxPtData.dropna(how='all')
+    #maxPtData = maxPtData.fillna(0)
 
     return maxPtData
 

@@ -20,6 +20,7 @@ plt.style.use(hep.style.CMS)
 
 ## if reading from rootfiles, set true. if already have pickle of dataframe, set false
 root = True
+## test
 
 ## function to add a BDTScore column to each of the background/signal/data DF
 loadedModel = pickle.load(open('Htoaa_BDThigh disc.pkl', 'rb'))
@@ -45,10 +46,14 @@ if root:
     ############## bEnr ##############
     #bEnrDf = processData(bEnrPath, 'bEnr')
     ## uncommend below if using multiple bg MC files
+
+
     bEnrDf = pd.DataFrame()
     for fileName in DM.bEnrPaths:
         tmpDf = DM.processData(fileName, 'bEnr')
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
+
+
     #LHE_QCD_corrections = bEnrDf.LHE_weights * bEnrDf.QCD_correction
     #bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections)
     ###################################
