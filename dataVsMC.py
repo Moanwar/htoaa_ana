@@ -19,7 +19,7 @@ plt.style.use(hep.style.CMS)
 
 
 ## if reading from rootfiles, set true. if already have pickle of dataframe, set false
-root = True
+root = False
 ## test
 
 ## function to add a BDTScore column to each of the background/signal/data DF
@@ -28,6 +28,14 @@ def analyze(dataDf):
     prediction = loadedModel.predict_proba(dataDf[trainVars])
     dataDf = dataDf.assign(BDTScore=prediction[:,1])
     return dataDf
+
+
+## function to get center of ins given binedges as np array
+def getBinCenter(arr):
+    arrCen = list()
+    for i in range(len(arr)-1):
+        arrCen.append((arr[i+1]+arr[i])/2)
+    return arrCen
 
 if root:
     ## monte carlo ggH signal
@@ -191,23 +199,22 @@ for var in cols:
 
     print(var)
 
-    fig, ax = plt.subplots(figsize=(10,8))
+    fig, (ax0, ax1) = plt.subplots(nrows = 2, gridspec_kw={'height_ratios': [3, 1]})
+    ax0.set_ylabel('events')
+    ax1.set_ylabel('ratio')
 
-    ## get the min/max value for hists
+    ## get the get range for histograms
     xmin = list()
     xmax = list()
-
     for dfkey, df in dfdict.items():
         xmintmp, xmaxtmp = np.percentile(df[var], [0,100])
         xmin.append(xmintmp)
         xmax.append(xmaxtmp)
 
-
+    ## h41 and bdt score needs its own range tho
     if 'H4qvsQCD' in var:
         #range_local = (0, max(maxBGen, maxData))
         range_local = (0, max(xmax))
-    #elif 'FatJet_pt'==var:
-    #    range_local = (240, 700)
     elif 'BDTScore'==var:
         range_local = (0,0.8)
     else:
@@ -218,9 +225,7 @@ for var in cols:
     density = False
     hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbins, 'stacked':True}
 
-
-
-    ## plotting background MC
+    ## prep backgroudn MC for plotting
     toplot = pd.DataFrame()
     toplotweights = pd.DataFrame()
     toplotlabel = list()
@@ -236,7 +241,9 @@ for var in cols:
 
     ## making color palette for the QCD stakcs
     pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
-    bgvals, bgbins, _ = ax.hist(toplot.values.astype(float),
+
+    ## plotting background MC
+    bgvals, bgbins, _ = ax0.hist(toplot.values.astype(float),
                                 weights=toplotweights.values.astype(float),
                                 label=toplotlabel,
                                 color=pal, **hist_params)
@@ -246,27 +253,42 @@ for var in cols:
     ## scaling GGH area to equal bg area
     gghweights = ggHDf['final_weights']*np.nansum(toplotweights)/np.sum(ggHDf.final_weights)
     ggHDf['final_weights'] = gghweights
-    ax.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
+    ax0.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
             density=density, bins=nbins, linewidth=3, color='r',
             range=range_local, weights=ggHDf['final_weights'])
 
 
     ## plotting data
     if DM.JetHT:
-        ax.hist(JetHTDf[var].values, label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
+        datavals, databins, _ = ax0.hist(JetHTDf[var].values,
+                label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
                 density=density, bins=nbins, linewidth=3, color='k',
                 range=range_local, weights=JetHTDf.final_weights)
     else:
-        datavals, databins, _ = ax.hist(dataDf[var].values, label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
+        datavals, databins, _ = ax0.hist(dataDf[var].values,
+                label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
                 histtype='step', density=density, bins=nbins, linewidth=3,
                 color='k',range=range_local, weights=dataDf.final_weights)
 
+    ax0.set_title(var )# + ' JetHT')
+    ax0.legend(loc='best', frameon=True)
+    ax0.grid()
 
 
-    #ax.hist(dataDf[var], label='Data',
-    ax.set_title(var )# + ' JetHT')
-    ax.legend(loc='best', frameon=True)
-    ax.grid()
+
+    ## making ratio plots
+    totalbgvals = bgvals.sum(axis=0)
+    y = np.divide((totalbgvals-datavals), totalbgvals, out = np.zeros_like(totalbgvals),
+                  where=(totalbgvals>0))
+    x = getBinCenter(bgbins)
+    ax1.grid()
+    ymax = max(abs(y))
+    ymax = ymax + 0.25*ymax
+    ax1.set_ylim(bottom=-ymax, top=ymax)
+    ax1.scatter(x,y, color='k')
+
+
+    ## saving da plots
     if DM.JetHT:
         filedest = 'dataVsMCDist/JetHT/{}.png'
     else:
@@ -326,28 +348,10 @@ plt.close()
 
 
 ########################################################################
+## LHE_HT plots for sanity check
 
-
-    ## when used to do bEnr and BGen separately
-    # fig, ax = plt.subplots(figsize=(10,8))
-    # minbEnr, maxbEnr = np.percentile(bEnrDf[var], [0, 99.8])
-    # if 'H4qvsQCD' in var:
-    #     range_local = (0, max(maxbEnr, maxData))
-    # else:
-    #     range_local = (min(minbEnr, minData), max(maxbEnr, maxData))
-    # ax.hist(bEnrDf[var], bins=nbins, label='bEnr', color='b', range=range_local,
-    #         weights=bEnrDf['final_weights'], histtype=chart, density=d)
-    # ax.hist(dataDf[var], bins=nbins, label='Data', color='r', range = range_local,
-    #         histtype=chart, density=d)
-    # ax.legend(loc='best', frameon=True)
-    # ax.set_title(var + ' bEnr vs Data')
-    # ax.grid()
-    # plt.savefig('dataVsMCDist_fixed/bEnr/{}_bEnrVsData.png'.format(var))
-    # plt.close()
 
 nbins=40
-
-#del dfdict['JetHTDf']
 
 
 
@@ -365,18 +369,6 @@ for dfkey, dfvalue in dfdict.items():
     plt.close()
     #plt.clf()
 
-
-## old way when bgen benr plotted separate
-# minbEnr, maxbEnr = np.percentile(bEnrDf['LHE_HT'], [0, 99.8])
-# minBGen, maxBGen = np.percentile(BGenDf['LHE_HT'], [0, 99.8])
-# range_local = (min(minbEnr, minBGen), max(maxbEnr, maxBGen))
-# ax.hist(bEnrDf['LHE_HT'], weights=bEnrDf['LHE_weights'], label=bEnr, **hist_params)
-# ax.hist(BGenDf['LHE_HT'], weights=BGenDf['LHE_weights'], label=bEnr, **hist_params)
-# ax.legend(loc='best', frameon=True)
-# ax.set_title( 'LHE_HT bEnr vs BGen')
-# ax.grid()
-# plt.savefig('dataVsMCDist/JetHT/LHE_HT.png')
-# plt.close()
 
 
 

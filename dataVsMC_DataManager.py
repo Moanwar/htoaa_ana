@@ -21,7 +21,7 @@ JetHT = False
 
 
 BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
-bEnrWeight =[ 1, 0.33, 0.034, 0.034, 0.0024, 0.00024, 0.00044]
+bEnrWeight =[ 1.0, 0.33, 0.034, 0.034, 0.024, 0.0024, 0.00044]
 ZJetsWeight = [ 145400. / 16704355, 34000. / 14642701, 18670. / 10561192]
 WJetsWeight = [315600. / 10071273, 68570./ 15298056, 34900. / 14627242]
 TJetsWeight = [831760.0 / 10244307]
@@ -178,7 +178,7 @@ def processData (filePath, tag): #JetHT=False):
 
     ## other vars
     if tag != 'data' and tag != 'JetHT':
-        other['LHE_HT'] = pd.DataFrame(events.array('LHE_HT'))
+        other['LHE_HT'] = pd.DataFrame(events.array('LHE_HT')).astype(np.float64)
     other['PV_npvs'] = pd.DataFrame(events.array('PV_npvs'))
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
     #other['Generator_weight'] = pd.DataFrame(events.array('Generator_weight'))
@@ -264,7 +264,7 @@ def processData (filePath, tag): #JetHT=False):
         ## LHE_weights
         if tag == 'ggH':
              maxPtData['LHE_weights'] = 1
-             wgt = 3.9 - 0.4*np.log(maxPtData.FatJet_pt)/np.log(2)
+             wgt = 3.9 - 0.4*np.log2(maxPtData.FatJet_pt)
              wgt[wgt<0.1] = 0.1
              maxPtData['ggH_weights'] = wgt
 
@@ -288,7 +288,8 @@ def processData (filePath, tag): #JetHT=False):
             maxPtData.loc[maxPtData['LHE_HT']>2000,
                           'LHE_weights'] = BGenWeight[6]'''
 
-            wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+            #wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+            wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
             wgt[wgt<0.1] = 0.1
             maxPtData['QCD_correction'] = wgt
             Xsec_wgt = 21.56
@@ -316,7 +317,7 @@ def processData (filePath, tag): #JetHT=False):
             maxPtData.loc[maxPtData['LHE_HT']>2000,
                           'LHE_weights'] = bEnrWeight[6]'''
 
-            wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
+            wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
             wgt[wgt<0.1] = 0.1
             maxPtData['QCD_correction'] = wgt
             Xsec_wgt = 8.2
@@ -367,6 +368,7 @@ def processData (filePath, tag): #JetHT=False):
             for i in range(len(ptkeys)-1):
                 for j in range(len(ipkeys)-1):
                     for k in range(len(npvsGkeys)):
+                        ## for places where npvs good is in range
                         maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
@@ -380,6 +382,21 @@ def processData (filePath, tag): #JetHT=False):
                                       (maxPtData.Muon_IP < ipkeys[j +1]) &
                                       (maxPtData.Muon_eta >= 1.5) &
                                       (maxPtData.PV_npvsGood == k+1),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
+                        ## for places npvs good is out of range
+                        maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                      (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                      (maxPtData.Muon_IP >= ipkeys[j]) &
+                                      (maxPtData.Muon_IP < ipkeys[j+1]) &
+                                      (maxPtData.Muon_eta < 1.5) &
+                                      (maxPtData.PV_npvsGood > len(npvsGkeys)),
+                                      'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
+                        maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
+                                      (maxPtData.Muon_pt < ptkeys[i+1]) &
+                                      (maxPtData.Muon_IP >= ipkeys[j]) &
+                                      (maxPtData.Muon_IP < ipkeys[j +1]) &
+                                      (maxPtData.Muon_eta >= 1.5) &
+                                      (maxPtData.PV_npvsGood > len(npvsGkeys)),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
 
             # lumi weights
@@ -400,18 +417,33 @@ def processData (filePath, tag): #JetHT=False):
 
 
             ### !!! add this to the datamanager fixed too
-            maxPtData.PU_weights.fillna(1, inplace=True)
-            maxPtData.lumi_weights.fillna(1, inplace=True)
+            ## no do not add this.
+            #maxPtData.PU_weights.fillna(1, inplace=True)
+            #maxPtData.lumi_weights.fillna(1, inplace=True)
+
+
 
             maxPtData = maxPtData.assign(final_weights =
                                          maxPtData['lumi_weights']*
                                          maxPtData['PU_weights']*
                                          maxPtData['final_weights'])
 
+        ## wrong because only BGen and bEnr needs the correction
+        '''if tag != 'data' and tag!= 'JetHT':
+            wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
+            wgt[wgt<0.1] = 0.1
+            maxPtData['QCD_correction'] = wgt
+            maxPtData = maxPtData.assign(final_weights =
+                                         maxPtData['final_weights']*
+                                         maxPtData['QCD_correction'])
+        '''
+
         if tag == 'data':
             maxPtData['final_weights'] = ParkedDataDict[filePath]
 
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+    maxPtData['Muon_softId'] = maxPtData['Muon_softId'].astype(int)
+
 
     #maxPtData = maxPtData.dropna(how='all')
     #maxPtData = maxPtData.fillna(0)
