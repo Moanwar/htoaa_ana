@@ -46,24 +46,13 @@ if root:
     for fileName in DM.BGenPaths:
         tmpDf = DM.processData(fileName, 'BGen')
         BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
-    ## calculate Xsec weights for each event
-    #LHE_QCD_corrections = BGenDf.LHE_weights * BGenDf.QCD_correction
-    #BGenDf['final_weights'] = LHE_QCD_corrections * 21.56/np.sum(LHE_QCD_corrections) * 1043278
     ###################################
 
     ############## bEnr ##############
-    #bEnrDf = processData(bEnrPath, 'bEnr')
-    ## uncommend below if using multiple bg MC files
-
-
     bEnrDf = pd.DataFrame()
     for fileName in DM.bEnrPaths:
         tmpDf = DM.processData(fileName, 'bEnr')
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
-
-
-    #LHE_QCD_corrections = bEnrDf.LHE_weights * bEnrDf.QCD_correction
-    #bEnrDf['final_weights'] = LHE_QCD_corrections * 8.20/np.sum(LHE_QCD_corrections)
     ###################################
 
     ############## TTJets ##############
@@ -71,9 +60,6 @@ if root:
     for fileName in DM.TTJetsPaths:
         tmpdf = DM.processData(fileName, 'TTJets')
         TTJetsDf = TTJetsDf.append(tmpdf, ignore_index=True, sort=False)
-
-    #length = len(TTJetsDf)
-    #TTJetsDf = TTJetsDf.assign(final_weights=831760.0/10244307/length)
     ###################################
 
     ############## ZJets ##############
@@ -81,20 +67,6 @@ if root:
     for fileName in DM.ZJetsPaths:
         tmpdf = DM.processData(fileName, 'ZJets')
         ZJetsDf = ZJetsDf.append(tmpdf, ignore_index=True, sort=False)
-
-    # length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=400) & (ZJetsDf['LHE_HT']<600)])
-    # if length != 0:
-    #     ZJetsDf.loc[(ZJetsDf['LHE_HT']>=400) & (ZJetsDf['LHE_HT']<600), 'LHE_weights'] = 145400/16704355/length
-
-    # length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=600) & (ZJetsDf['LHE_HT']<800)])
-    # if length != 0:
-    #     ZJetsDf.loc[(ZJetsDf['LHE_HT']>=600) & (ZJetsDf['LHE_HT']<800), 'LHE_weights'] = 34000/14642701/length
-
-    # length = len(ZJetsDf.loc[(ZJetsDf['LHE_HT']>=800)])
-    # if length != 0:
-    #     ZJetsDf.loc[(ZJetsDf['LHE_HT']>=800), 'LHE_weights'] = 18670/10561192/length
-
-    # ZJetsDf = ZJetsDf.assign(final_weights = ZJetsDf['LHE_weights'])
     ###################################
 
     ############## WJets ##############
@@ -103,19 +75,6 @@ if root:
         tmpdf = DM.processData(fileName, 'WJets')
         WJetsDf = WJetsDf.append(tmpdf, ignore_index=True, sort=False)
 
-    # length = len(WJetsDf.loc[(WJetsDf['LHE_HT']>=400) & (WJetsDf['LHE_HT']<600)])
-    # if length != 0:
-    #     WJetsDf.loc[(WJetsDf['LHE_HT']>=400) & (WJetsDf['LHE_HT']<600), 'LHE_weights'] = 315600/10071273/length
-
-    # length =len(WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800)])
-    # if length != 0:
-    #     WJetsDf.loc[(WJetsDf['LHE_HT']>=600) & (WJetsDf['LHE_HT']<800), 'LHE_weights'] = 68570/15298056/length
-
-    # length = len(WJetsDf.loc[(WJetsDf['LHE_HT']>=800)])
-    # if length != 0:
-    #     WJetsDf.loc[(WJetsDf['LHE_HT']>=800), 'LHE_weights'] = 34900/14627242/length
-
-    # WJetsDf = WJetsDf.assign(final_weights = WJetsDf['LHE_weights'])
     ######################################
 
 
@@ -190,7 +149,6 @@ toremove = ['final_weights', 'LHE_HT', 'QCD_corrections', 'lumi_weights',
 for i in toremove:
     if i in cols: cols.remove(i)
 
-
 for var in cols:
     if 'pt' in var:
         nbins = 40
@@ -199,7 +157,8 @@ for var in cols:
 
     print(var)
 
-    fig, (ax0, ax1) = plt.subplots(nrows = 2, gridspec_kw={'height_ratios': [3, 1]})
+    fig, (ax0, ax1) = plt.subplots(nrows=2, gridspec_kw={'height_ratios': [3, 1]},
+                                   sharex=True)
     ax0.set_ylabel('events')
     ax1.set_ylabel('ratio')
 
@@ -207,7 +166,7 @@ for var in cols:
     xmin = list()
     xmax = list()
     for dfkey, df in dfdict.items():
-        xmintmp, xmaxtmp = np.percentile(df[var], [0,100])
+        xmintmp, xmaxtmp = np.percentile(df[var], [0,99.8])
         xmin.append(xmintmp)
         xmax.append(xmaxtmp)
 
@@ -277,13 +236,14 @@ for var in cols:
 
 
     ## making ratio plots
-    totalbgvals = bgvals.sum(axis=0)
+    totalbgvals = bgvals[-1]
     y = np.divide((totalbgvals-datavals), totalbgvals, out = np.zeros_like(totalbgvals),
                   where=(totalbgvals>0))
     x = getBinCenter(bgbins)
     ax1.grid()
-    ymax = max(abs(y))
-    ymax = ymax + 0.25*ymax
+    # ymax = max(abs(y))
+    # ymax = ymax + 0.25*ymax
+    ymax = 0.5
     ax1.set_ylim(bottom=-ymax, top=ymax)
     ax1.scatter(x,y, color='k')
 
@@ -296,6 +256,8 @@ for var in cols:
     plt.savefig(filedest.format(var))
     plt.show()
     plt.close()
+
+
 
 
 ########################### Sensitivity Plots ##########################
