@@ -39,40 +39,40 @@ def getBinCenter(arr):
 
 if root:
     ## monte carlo ggH signal
-    ggHDf = DM.processData(DM.ggHPaths, 'ggH')
+    ggHDf = DM.processData(DM.ggHPaths, 'ggH', 'Parked', True)
 
     ############## BGen ##############
     BGenDf = pd.DataFrame()
     for fileName in DM.BGenPaths:
-        tmpDf = DM.processData(fileName, 'BGen')
+        tmpDf = DM.processData(fileName, 'BGen', 'Parked', True)
         BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
     ###################################
 
     ############## bEnr ##############
     bEnrDf = pd.DataFrame()
     for fileName in DM.bEnrPaths:
-        tmpDf = DM.processData(fileName, 'bEnr')
+        tmpDf = DM.processData(fileName, 'bEnr', 'Parked', True)
         bEnrDf = bEnrDf.append(tmpDf, ignore_index=True, sort=False)
     ###################################
 
     ############## TTJets ##############
     TTJetsDf = pd.DataFrame()
     for fileName in DM.TTJetsPaths:
-        tmpdf = DM.processData(fileName, 'TTJets')
+        tmpdf = DM.processData(fileName, 'TTJets', 'Parked', True)
         TTJetsDf = TTJetsDf.append(tmpdf, ignore_index=True, sort=False)
     ###################################
 
     ############## ZJets ##############
     ZJetsDf = pd.DataFrame()
     for fileName in DM.ZJetsPaths:
-        tmpdf = DM.processData(fileName, 'ZJets')
+        tmpdf = DM.processData(fileName, 'ZJets', 'Parked', True)
         ZJetsDf = ZJetsDf.append(tmpdf, ignore_index=True, sort=False)
     ###################################
 
     ############## WJets ##############
     WJetsDf = pd.DataFrame()
     for fileName in DM.WJetsPaths:
-        tmpdf = DM.processData(fileName, 'WJets')
+        tmpdf = DM.processData(fileName, 'WJets', 'Parked', True)
         WJetsDf = WJetsDf.append(tmpdf, ignore_index=True, sort=False)
 
     ######################################
@@ -80,11 +80,11 @@ if root:
 
 
     # datafile
-    if not DM.JetHT:
-        dataDf = DM.processData(DM.ParkedDataPaths[0], 'data')
-        pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
+    dataDf = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', False)
+    pickle.dump(dataDf, open('dataVsMC/dataDf.pkl', 'wb'))
 
 
+    '''    
     if DM.JetHT:
         JetHTDf = pd.DataFrame()
         for fileName in DM.JetHTPaths:
@@ -92,7 +92,7 @@ if root:
             JetHTDf = JetHTDf.append(tmpdf, ignore_index=True, sort=False)
         JetHTDf['final_weights'] = 1
         pickle.dump(JetHTDf, open('dataVsMC/JetHTDf.pkl', 'wb'))
-
+    '''
 
     pickle.dump(ggHDf, open('dataVsMC/ggHDf.pkl', 'wb'))
     pickle.dump(BGenDf, open('dataVsMC/BGenDf.pkl', 'wb'))
