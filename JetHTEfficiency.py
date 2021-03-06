@@ -69,9 +69,9 @@ demParked, demParkedEdge = np.histogram(parkedDf.FatJet_pt,
 numParked, numParkedEdge = np.histogram(parkedDftrig.FatJet_pt,
                                         weights=parkedDftrig.final_weights,
                                         **hist_params)
-ParkedErrup, ParkedErrdown = normalError(total = demParked,
-                                         passed = numParked,
-                                         totalWeights = parkedDf.final_weights)
+#ParkedErrup, ParkedErrdown = normalError(total = demParked,
+#                                         passed = numParked,
+#                                         totalWeights = parkedDf.final_weights)
 quotParked = np.divide(numParked, demParked, where=demParked!=0)
 
 #%%
