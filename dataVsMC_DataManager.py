@@ -112,7 +112,7 @@ def getMaxPt(physobj, col):
 ## tag: (str) what dataset the root file is (BGen, GGH..) check list of valid tags
 ## dataset: (str) what kind of cuts you want to be making. check list of valid datasets
 ## MC: (bool) is this file MC or not
-## trigger: (bool) turn on or off trigger cuts for JetHT efficiency testing
+## trigger: (bool) on for have trigger info in the resulting dataframe
 def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## open file, get events
     fileName, fileExtension = os.path.splitext(filePath)
@@ -237,10 +237,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     ## make Event object
     ev = Event(jets, muons, other, trig, electrons)
-    #ev = Event(jets, other)
-
-
-    print('before cut: ', jets['FatJet_pt'].dropna(how='all').shape)
 
 
     ## cutting events
@@ -267,10 +263,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         other.cut(other['HLT_trigger'] > 0)
 
     ## include or exclude triggers for trigger efficiency study for JetHT
-    if trigger:
+    '''if trigger:
         print('in trig')
         trig.cut(trig['L1_SingleJet180'] == True)
-        trig.cut(trig['HLT_AK8PFJet500'] == True)
+        trig.cut(trig['HLT_AK8PFJet500'] == True)'''
 
     if 'MuonEG'==dataSet:
         trig.cut(trig['MuonEGTriggers'] == True)
@@ -293,6 +289,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         other.LHE_HT = other.LHE_HT.rename({0:'LHE_HT'}, axis='columns')
     other.PV_npvs = other.PV_npvs.rename({0:'PV_npvs'}, axis='columns')
     other.PV_npvsGood =other.PV_npvsGood.rename({0:'PV_npvsGood'}, axis='columns')
+
     #other.Generator_weight = other.Generator_weight.rename({0:'Generator_weight'}, axis='columns')
 
     ## if nothing's left after cut, return empty dataframe
@@ -314,6 +311,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         maxPtData = maxPtData.assign(PV_npvs=other.PV_npvs.to_numpy())
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
+        if trigger:
+            maxPtData = maxPtData.assign(L1_SingleJet180=trig['L1_SingleJet180'].to_numpy().flatten())
+            maxPtData = maxPtData.assign(HLT_AK8PFJet500=trig['HLT_AK8PFJet500'].to_numpy().flatten())
+
 
         #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
         if 'MuonEG'==dataSet:
