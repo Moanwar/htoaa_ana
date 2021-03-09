@@ -10,6 +10,7 @@ import pandas as pd
 import sys
 import pickle
 from scipy.special import ndtri
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 import dataVsMC_DataManager as DM
 
@@ -69,7 +70,7 @@ class EfficiencyInfo(object) :
         jitter = avgWgt/total
         average = passed/total
         sigma = np.sqrt(avgWgt*(average+jitter)*(1+jitter-average)/total)
-        delta = -sigma*ndtri(1-alpha)
+        delta = norm.ppf(1-alpha,0,sigma)#delta = -sigma*ndtri(1-alpha)
 
         upper = min(delta,1-average)#(average + delta) if ((average + delta) < 1) else 1
         lower = min(delta,average)#(average - delta) if ((average - delta) > 0) else 0
@@ -87,7 +88,7 @@ class EfficiencyInfo(object) :
                 wgts = df.final_weights.loc[(df.FatJet_pt > edges[i])
                                             & (df.FatJet_pt < edges[i+1])]
             else:
-                wgts = 1
+                wgts = 0
 
             tmpUp, tmpLow = self.normalError(self.dem[i], self.num[i], wgts)
             upperError.append(tmpUp)
@@ -98,13 +99,17 @@ class EfficiencyInfo(object) :
     def plot(self, ):
         edge = self.demEdge[1:]
         #edge = self.demEdge
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(11.2,6.8))
         ax.grid()
         #ax.scatter(edge, self.quot, linestyle='None')
         ax.set_ylim([0,1.05])
         ax.set_title(self.name)
-        ax.errorbar(edge, self.quot, yerr=(self.upErr, self.lowErr),
+
+        ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)
+        xerr = np.zeros((2, len(self.quot)))
+        xerr[0, :] = 50 # the hwole thing would b 25 when i get center bin working
+        ax.errorbar(edge, self.quot, xerr=xerr, linestyle='None', fmt='k')
 
         plotdir = 'JetHTTrigEff/plots/'
         #plt.savefig(f'{plotdir}{self.name}.png')
@@ -114,7 +119,7 @@ class EfficiencyInfo(object) :
 
 
 pickledir = 'JetHTTrigEff/pickles/'
-root = True
+root = False
 hist_params = {'bins':30, 'range':(0,1500)}
 append_params = {'ignore_index':True, 'sort':False}
 
@@ -146,7 +151,7 @@ else:
 
 MuonEGDf['final_weights'] = 1
 muonEG = EfficiencyInfo(demDf=MuonEGDf, name='MuonEG')
-
+#%%
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
 if root:
