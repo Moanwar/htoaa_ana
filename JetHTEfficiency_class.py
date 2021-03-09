@@ -25,13 +25,12 @@ class EfficiencyInfo(object) :
         self.demDf = demDf
         self.numDf = self.getNumDf(demDf)
         self.dem, self.demEdge = self.hist(demDf)
-        self.num, self.numEdge = self.hist(self.numDf)#self.hist(numDf)
-        #self.numEdge = self.getBinCenter(self.numEdge)
+        self.num, self.numEdge = self.hist(self.numDf)
         self.quot = np.divide(self.num, self.dem, where=self.dem!=0)
         self.upErr, self.lowErr = self.computeError()
 
 
-        self.plot()
+        #self.plot()
 
 
     ## makes the pt into histograms
@@ -83,6 +82,7 @@ class EfficiencyInfo(object) :
         df = self.demDf
         upperError = list()
         lowerError = list()
+
         for i in range(len(edges)-1):
             if self.hasWeights:
                 wgts = df.final_weights.loc[(df.FatJet_pt > edges[i])
@@ -97,22 +97,20 @@ class EfficiencyInfo(object) :
         return np.array(upperError), np.array(lowerError)
 
     def plot(self, ):
-        edge = self.demEdge[1:]
-        #edge = self.demEdge
+        edge = self.getBinCenter(self.demEdge)
+
         fig, ax = plt.subplots(figsize=(11.2,6.8))
         ax.grid()
-        #ax.scatter(edge, self.quot, linestyle='None')
         ax.set_ylim([0,1.05])
         ax.set_title(self.name)
 
         ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)
-        xerr = np.zeros((2, len(self.quot)))
-        xerr[0, :] = 50 # the hwole thing would b 25 when i get center bin working
+        xerr = np.ones((2, len(self.quot)))*25
         ax.errorbar(edge, self.quot, xerr=xerr, linestyle='None', fmt='k')
 
         plotdir = 'JetHTTrigEff/plots/'
-        #plt.savefig(f'{plotdir}{self.name}.png')
+        plt.savefig(f'{plotdir}{self.name}.png')
 
 
 
@@ -134,6 +132,7 @@ else:
     parkedDf = pickle.load(open(pickledir + 'parkedDf.pkl', 'rb'))
 
 parked = EfficiencyInfo(parkedDf, 'Parking data')
+parked.plot()
 
 
 #------------------------------------------------------------------------------
@@ -151,7 +150,8 @@ else:
 
 MuonEGDf['final_weights'] = 1
 muonEG = EfficiencyInfo(demDf=MuonEGDf, name='MuonEG')
-#%%
+muonEG.plot()
+
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
 if root:
@@ -171,6 +171,7 @@ else:
     QCDParkingDf = pickle.load(open(pickledir + 'QCDParkingDf.pkl', 'rb'))
 
 QCD_parking = EfficiencyInfo(demDf=QCDParkingDf, name='QCD (parking selection)')
+QCD_parking.plot()
 
 #-------------------------------------------------------------------------
 #--------------- QCD MC with no offline muon or pt/IP/PU weights -------------
@@ -192,6 +193,7 @@ else:
     QCDBaseDf = pickle.load(open(pickledir + 'QCDBaseDf.pkl', 'rb'))
 
 QCD_base = EfficiencyInfo(demDf=QCDBaseDf, name='QCD (base selection)')
+QCD_base.plot()
 
 #------------------------------------------------------------------------------------
 #---------------- ggH with parking selections and weights ---------------------
@@ -204,6 +206,8 @@ else:
     ggHParkingDf = pickle.load(open(pickledir + 'ggHParkingDf.pkl', 'rb'))
 
 ggH_parking = EfficiencyInfo(demDf=ggHParkingDf, name='GGH (parking selection)')
+ggH_parking.plot()
+
 #--------------------------------------------------------------------------------
 #---------------- ggH without muon selection or pT/IP/PU weights --------------
 
@@ -214,6 +218,7 @@ if root==True:
 else:
     ggHBaseDf = pickle.load(open(pickledir + 'ggHBaseDf.pkl', 'rb'))
 ggH_base = EfficiencyInfo(demDf=ggHBaseDf, name='GGH (base selection)')
+ggH_base.plot()
 
 #--------------------------------------------------------------------------------
 #---------------------- ttbar MC with muon selection --------------------------
@@ -224,6 +229,8 @@ else:
     TTBarMuonEG = pickle.load(open(pickledir + 'TTBarMuonEG.pkl', 'rb'))
 
 TTBar_muonEG = EfficiencyInfo(demDf=TTBarMuonEG, name='TTBar (MuonEG selection)')
+TTBar_muonEG.plot()
+
 #----------------------------------------------------------------------------------------
 #----------------------- ttbar mc without muon selection ---------------------
 if root==True:
@@ -234,6 +241,7 @@ else:
     TTBarBaseDf = pickle.load(open(pickledir + 'TTBarBaseDf.pkl', 'rb'))
 
 TTBar_base = EfficiencyInfo(demDf=TTBarBaseDf, name='TTBar (base selection)')
+TTBar_base.plot()
 
 #--------------------------------------------------------------------------------
 
