@@ -163,27 +163,26 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
     jets['FatJet_deepTagMD_H4qvsQCD'] = pd.DataFrame(events.array('FatJet_deepTagMD_H4qvsQCD'))
     jets['FatJet_n2b1'] = pd.DataFrame(events.array('FatJet_n2b1'))
-    jets['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
-    jets['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
-    jets['SubJet_tau1(1)'] = getSubJetData(1, 'SubJet_tau1', events)
-    jets['FatJet_n3b1'] = pd.DataFrame(events.array('FatJet_n3b1'))
-    jets['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
-    jets['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
-    jets['SubJet_pt(1)|FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/jets.FatJet_pt
-    jets['SubJet_pt(2)|FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/jets.FatJet_pt
-    jets['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
-    jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
+    # jets['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
+    # jets['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
+    # jets['SubJet_tau1(1)'] = getSubJetData(1, 'SubJet_tau1', events)
+    # jets['FatJet_n3b1'] = pd.DataFrame(events.array('FatJet_n3b1'))
+    # jets['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
+    # jets['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
+    # jets['SubJet_pt(1)|FatJet_pt'] = getSubJetData(1, 'SubJet_pt', events)/jets.FatJet_pt
+    # jets['SubJet_pt(2)|FatJet_pt'] = getSubJetData(2, 'SubJet_pt', events)/jets.FatJet_pt
+    # jets['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
+    # jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
     ## JetHT triggers
     ## add them all up, so passing at least one is just see if event has trig > 0
-    '''
-    if JetHT:
+    '''if JetHT:
         trig1 = events.array('HLT_AK8PFJet500')
         trig2 = events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')
         trig3 = events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
         trig4 = events.array('HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5')
-        other['HLT_trigger'] = pd.DataFrame(trig1+trig2+trig3+trig4)
-        '''
+        other['HLT_trigger'] = pd.DataFrame(trig1+trig2+trig3+trig4)'''
+
     ## muons
     if 'Parked'==dataSet:
         muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
@@ -238,6 +237,11 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     ## make Event object
     ev = Event(jets, muons, other, trig, electrons)
+    #ev = Event(jets, other)
+
+
+    print('before cut: ', jets['FatJet_pt'].dropna(how='all').shape)
+
 
     ## cutting events
     ## jet cuts
@@ -250,6 +254,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     jets.cut(jets['FatJet_mass'] > 90)
     #jets.cut(jets['FatJet_mass'] <= 200)
     other.cut(other['PV_npvsGood'] >= 1)
+
+
     ## muon cuts
     if 'Parked'==dataSet:
         muons.cut((muons['Muon_softId'] > 0))
@@ -262,6 +268,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     ## include or exclude triggers for trigger efficiency study for JetHT
     if trigger:
+        print('in trig')
         trig.cut(trig['L1_SingleJet180'] == True)
         trig.cut(trig['HLT_AK8PFJet500'] == True)
 
@@ -277,6 +284,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
+    pickle.dump(ev.frame, open('JetHTTrigEff/frames/frame.pkl', 'wb'))
 
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
@@ -320,7 +328,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         ## LHE_weights
         if 'ggH'==tag:
-             maxPtData['LHE_weights'] = 1
+             maxPtData['LHE_weights'] = 0.0046788#1
              wgt = 3.9 - 0.4*np.log2(maxPtData.FatJet_pt)
              wgt[wgt<0.1] = 0.1
              maxPtData['ggH_weights'] = wgt
@@ -443,8 +451,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
-
-    #maxPtData = maxPtData.dropna(how='all')
+    maxPtData = maxPtData.dropna(how='all')
     #maxPtData = maxPtData.fillna(0)
 
     return maxPtData
