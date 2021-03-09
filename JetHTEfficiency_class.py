@@ -26,7 +26,7 @@ class EfficiencyInfo(object) :
         self.numDf = self.getNumDf(demDf)
         self.dem, self.demEdge = self.hist(demDf)
         self.num, self.numEdge = self.hist(self.numDf)#self.hist(numDf)
-        #self.numEdge = self.getBinCenter(self.numEdge)
+        #self.demEdge = self.getBinCenter(self.demEdge)
         self.quot = np.divide(self.num, self.dem, where=self.dem!=0)
         self.upErr, self.lowErr = self.computeError()
 
@@ -97,8 +97,13 @@ class EfficiencyInfo(object) :
         return np.array(upperError), np.array(lowerError)
 
     def plot(self, ):
-        edge = self.demEdge[1:]
-        #edge = self.demEdge
+        #edge = self.demEdge[1:]
+        edge = self.getBinCenter(self.demEdge)
+        print(edge)
+        print('edge: ', len(self.demEdge))
+        print('quot: ', len(self.quot))
+
+        edge = self.demEdge
         fig, ax = plt.subplots(figsize=(11.2,6.8))
         ax.grid()
         #ax.scatter(edge, self.quot, linestyle='None')
@@ -151,7 +156,7 @@ else:
 
 MuonEGDf['final_weights'] = 1
 muonEG = EfficiencyInfo(demDf=MuonEGDf, name='MuonEG')
-#%%
+
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
 if root:
