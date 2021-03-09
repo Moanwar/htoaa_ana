@@ -14,24 +14,17 @@ import matplotlib.pyplot as plt
 import dataVsMC_DataManager as DM
 
 class EfficiencyInfo(object) :
-    def __init__(self, demDf, numDf, name):
-        if not (isinstance(demDf, pd.DataFrame) or isinstance(numDf, pd.DataFrame)):
+    def __init__(self, demDf, name):
+        if not (isinstance(demDf, pd.DataFrame)):
             print('init error: input needs to be dataframes')
             sys.exit()
 
         self.hasWeights = ('final_weights' in demDf)
         self.name = name
         self.demDf = demDf
+        self.numDf = self.getNumDf(demDf)
         self.dem, self.demEdge = self.hist(demDf)
-        self.num, self.numEdge = self.hist(numDf)
-
-        #print(len(self.demEdge))
-
-
-        #self.demEdge = self.getBinCenter(self.demEdge)
-
-
-        #print(len(self.demEdge))
+        self.num, self.numEdge = self.hist(self.numDf)#self.hist(numDf)
         #self.numEdge = self.getBinCenter(self.numEdge)
         self.quot = np.divide(self.num, self.dem, where=self.dem!=0)
         self.upErr, self.lowErr = self.computeError()
@@ -47,6 +40,10 @@ class EfficiencyInfo(object) :
                                 bins = 30, range = (0,1500))
         else:
             return np.histogram(df['FatJet_pt'], bins=30, range=(0,1500))
+
+    def getNumDf(self, df):
+        return df.loc[(df.L1_SingleJet180==True) & (df.HLT_AK8PFJet500==True)]
+
 
     def getBinCenter(self, arr):
         arrCen = list()
@@ -110,7 +107,7 @@ class EfficiencyInfo(object) :
                     linestyle='None',fmt='ok', capsize=5)
 
         plotdir = 'JetHTTrigEff/plots/'
-        plt.savefig(f'{plotdir}{self.name}.png')
+        #plt.savefig(f'{plotdir}{self.name}.png')
 
 
 
@@ -124,60 +121,52 @@ append_params = {'ignore_index':True, 'sort':False}
 #-------------------------- ParkingBPH data -----------------------------------
 
 if root:
-    parkedDf = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', False, False)
-    parkedDftrig = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', False, True)
+    parkedDf = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', MC=False, trigger=True)
     
     pickle.dump(parkedDf, open(pickledir + 'parkedDf.pkl', 'wb'))
-    pickle.dump(parkedDftrig, open(pickledir + 'parkedDftrig.pkl', 'wb'))
+
 else:
     parkedDf = pickle.load(open(pickledir + 'parkedDf.pkl', 'rb'))
-    parkedDftrig = pickle.load(open(pickledir + 'parkedDftrig.pkl', 'rb'))
-parked = EfficiencyInfo(parkedDf, parkedDftrig, 'Parking data')
+
+parked = EfficiencyInfo(parkedDf, 'Parking data')
+
+
 #------------------------------------------------------------------------------
 #------------------------------ MuonEG data -----------------------------------
 if root:
     MuonEGDf = pd.DataFrame()
     for fileName in DM.MuonEGPaths:
-        tmpDf = DM.processData(fileName, 'MuonEG', 'MuonEG', MC=False, trigger=False)
-        MuonEGDf = MuonEGDf.append(tmpDf, **append_params)
-    MuonEGDftrig = pd.DataFrame()
-    for fileName in DM.MuonEGPaths:
         tmpDf = DM.processData(fileName, 'MuonEG', 'MuonEG', MC=False, trigger=True)
-        MuonEGDftrig = MuonEGDftrig.append(tmpDf, **append_params)
-    
+        MuonEGDf = MuonEGDf.append(tmpDf, **append_params)
+
     pickle.dump(MuonEGDf, open(pickledir + 'MuonEGDf.pkl', 'wb'))
-    pickle.dump(MuonEGDftrig, open(pickledir + 'MuonEGDftrig.pkl', 'wb'))
+
 else:
     MuonEGDf = pickle.load(open(pickledir + 'MuonEGDf.pkl', 'rb'))
-    MuonEGDftrig = pickle.load(open(pickledir + 'MuonEGDftrig.pkl', 'rb'))
+
 MuonEGDf['final_weights'] = 1
-MuonEGDftrig['final_weights'] = 1
-muonEG = EfficiencyInfo(demDf=MuonEGDf, numDf=MuonEGDftrig, name='MuonEG')
+muonEG = EfficiencyInfo(demDf=MuonEGDf, name='MuonEG')
+
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
 if root:
     QCDParkingDf = pd.DataFrame()
     QCDParkingDftrig = pd.DataFrame()
     for fileName in DM.BGenPaths:
-        tmpDf = DM.processData(fileName, 'BGen', 'Parked', MC=True, trigger=False)
-        QCDParkingDf = QCDParkingDf.append(tmpDf, **append_params)
-    
         tmpDf = DM.processData(fileName, 'BGen', 'Parked', MC=True, trigger=True)
-        QCDParkingDftrig = QCDParkingDftrig.append(tmpDf, **append_params)
-    
-    for fileName in DM.bEnrPaths:
-        tmpDf = DM.processData(fileName, 'bEnr', 'Parked', MC=True, trigger=False)
         QCDParkingDf = QCDParkingDf.append(tmpDf, **append_params)
-    
+
+    for fileName in DM.bEnrPaths:
         tmpDf = DM.processData(fileName, 'bEnr', 'Parked', MC=True, trigger=True)
-        QCDParkingDftrig = QCDParkingDftrig.append(tmpDf, **append_params)
-    
+        QCDParkingDf = QCDParkingDf.append(tmpDf, **append_params)
+
     pickle.dump(QCDParkingDf, open(pickledir + 'QCDParkingDf.pkl', 'wb'))
-    pickle.dump(QCDParkingDftrig, open(pickledir + 'QCDParkingDftrig.pkl', 'wb'))
+
 else:
     QCDParkingDf = pickle.load(open(pickledir + 'QCDParkingDf.pkl', 'rb'))
-    QCDParkingDftrig = pickle.load(open(pickledir + 'QCDParkingDftrig.pkl', 'rb'))
-QCD_parking = EfficiencyInfo(demDf=QCDParkingDf, numDf=QCDParkingDftrig, name='QCD (parking selection)')
+
+QCD_parking = EfficiencyInfo(demDf=QCDParkingDf, name='QCD (parking selection)')
+
 #-------------------------------------------------------------------------
 #--------------- QCD MC with no offline muon or pt/IP/PU weights -------------
 
@@ -185,72 +174,62 @@ if root:
     QCDBaseDf = pd.DataFrame()
     QCDBaseDftrig = pd.DataFrame()
     for fileName in DM.BGenPaths:
-        tmpDf = DM.processData(fileName, 'BGen', 'Base', MC=True, trigger=False)
+        tmpDf = DM.processData(fileName, 'BGen', 'Base', MC=True, trigger=True)
         QCDBaseDf = QCDBaseDf.append(tmpDf, **append_params)
 
-        tmpDf = DM.processData(fileName, 'BGen', 'Base', MC=True, trigger=True)
-        QCDBaseDftrig = QCDBaseDftrig.append(tmpDf, **append_params)
     for fileName in DM.bEnrPaths:
-        tmpDf = DM.processData(fileName, 'bEnr', 'Base', MC=True, trigger=False)
-        QCDBaseDf = QCDBaseDf.append(tmpDf, **append_params)
-    
         tmpDf = DM.processData(fileName, 'bEnr', 'Base', MC=True, trigger=True)
-        QCDBaseDftrig = QCDBaseDftrig.append(tmpDf, **append_params)
+        QCDBaseDf = QCDBaseDf.append(tmpDf, **append_params)
+
     pickle.dump(QCDBaseDf, open(pickledir + 'QCDBaseDf.pkl', 'wb'))
-    pickle.dump(QCDBaseDftrig, open(pickledir + 'QCDBaseDftrig.pkl', 'wb'))
+
 else:
     QCDBaseDf = pickle.load(open(pickledir + 'QCDBaseDf.pkl', 'rb'))
-    QCDBaseDftrig = pickle.load(open(pickledir + 'QCDBaseDftrig.pkl', 'rb'))
-QCD_base = EfficiencyInfo(demDf=QCDBaseDf, numDf=QCDBaseDftrig, name='QCD (base selection)')
+
+QCD_base = EfficiencyInfo(demDf=QCDBaseDf, name='QCD (base selection)')
+
 #------------------------------------------------------------------------------------
 #---------------- ggH with parking selections and weights ---------------------
 
 if root==True:
-    ggHParkingDf = DM.processData(DM.ggHPaths, 'ggH', 'Parked', MC=True, trigger=False)
-    ggHParkingDftrig = DM.processData(DM.ggHPaths, 'ggH', 'Parked', MC=True, trigger=True)
+    ggHParkingDf = DM.processData(DM.ggHPaths, 'ggH', 'Parked', MC=True, trigger=True)
     pickle.dump(ggHParkingDf, open(pickledir + 'ggHParkingDf.pkl', 'wb'))
-    pickle.dump(ggHParkingDftrig, open(pickledir + 'ggHParkingDftrig.pkl', 'wb'))
+
 else:
     ggHParkingDf = pickle.load(open(pickledir + 'ggHParkingDf.pkl', 'rb'))
-    ggHParkingDftrig = pickle.load(open(pickledir + 'ggHParkingDftrig.pkl', 'rb'))
-ggH_parking = EfficiencyInfo(demDf=ggHParkingDf, numDf=ggHParkingDftrig, name='GGH (parking selection)')
+
+ggH_parking = EfficiencyInfo(demDf=ggHParkingDf, name='GGH (parking selection)')
 #--------------------------------------------------------------------------------
 #---------------- ggH without muon selection or pT/IP/PU weights --------------
 
 
 if root==True:
-    ggHBaseDf = DM.processData(DM.ggHPaths, 'ggH', 'Base', MC=True, trigger=False)
-    ggHBaseDftrig = DM.processData(DM.ggHPaths, 'ggH', 'Base', MC=True, trigger=True)
+    ggHBaseDf = DM.processData(DM.ggHPaths, 'ggH', 'Base', MC=True, trigger=True)
     pickle.dump(ggHBaseDf, open(pickledir + 'ggHBaseDf.pkl', 'wb'))
-    pickle.dump(ggHBaseDftrig, open(pickledir + 'ggHBaseDftrig.pkl', 'wb'))
-
 else:
     ggHBaseDf = pickle.load(open(pickledir + 'ggHBaseDf.pkl', 'rb'))
-    ggHBaseDftrig = pickle.load(open(pickledir + 'ggHBaseDftrig.pkl', 'rb'))
-ggH_base = EfficiencyInfo(demDf=ggHBaseDf, numDf=ggHBaseDftrig, name='GGH (base selection)')
+ggH_base = EfficiencyInfo(demDf=ggHBaseDf, name='GGH (base selection)')
 
 #--------------------------------------------------------------------------------
 #---------------------- ttbar MC with muon selection --------------------------
 if root==True:
-    TTBarMuonEG = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'MuonEG', MC=True, trigger=False)
-    TTBarMuonEGtrig = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'MuonEG', MC=True, trigger=True)
+    TTBarMuonEG = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'MuonEG', MC=True, trigger=True)
     pickle.dump(TTBarMuonEG, open(pickledir + 'TTBarMuonEG.pkl', 'wb'))
-    pickle.dump(TTBarMuonEGtrig, open(pickledir + 'TTBarMuonEGtrig.pkl', 'wb'))
 else:
     TTBarMuonEG = pickle.load(open(pickledir + 'TTBarMuonEG.pkl', 'rb'))
-    TTBarMuonEGtrig = pickle.load(open(pickledir + 'TTBarMuonEGtrig.pkl', 'rb'))
-TTBar_muonEG = EfficiencyInfo(demDf=TTBarMuonEG, numDf=TTBarMuonEGtrig, name='TTBar (MuonEG selection)')
+
+TTBar_muonEG = EfficiencyInfo(demDf=TTBarMuonEG, name='TTBar (MuonEG selection)')
 #----------------------------------------------------------------------------------------
 #----------------------- ttbar mc without muon selection ---------------------
 if root==True:
-    TTBarBaseDf = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'Base', MC=True, trigger=False)
-    TTBarBaseDftrig = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'Base', MC=True, trigger=True)
+    TTBarBaseDf = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'Base', MC=True, trigger=True)
     pickle.dump(TTBarBaseDf, open(pickledir + 'TTBarBaseDf.pkl', 'wb'))
-    pickle.dump(TTBarBaseDftrig, open(pickledir + 'TTBarBaseDftrig.pkl', 'wb'))
+
 else:
     TTBarBaseDf = pickle.load(open(pickledir + 'TTBarBaseDf.pkl', 'rb'))
-    TTBarBaseDftrig = pickle.load(open(pickledir + 'TTBarBaseDftrig.pkl', 'rb'))
-TTBar_base = EfficiencyInfo(demDf=TTBarBaseDf, numDf=TTBarBaseDftrig, name='TTBar (base selection)')
+
+TTBar_base = EfficiencyInfo(demDf=TTBarBaseDf, name='TTBar (base selection)')
+
 #--------------------------------------------------------------------------------
 
-pickle.dump(ggH_base, open('JetHTTrigEff/pickles/histpickls/ggH_base.pkl', 'wb'))
+#pickle.dump(ggH_base, open('JetHTTrigEff/pickles/histpickls/ggH_base.pkl', 'wb'))
