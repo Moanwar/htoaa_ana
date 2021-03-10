@@ -99,14 +99,14 @@ class EfficiencyInfo(object) :
     def plot(self, ):
         edge = self.getBinCenter(self.demEdge)
 
-        fig, ax = plt.subplots(figsize=(11.2,6.8))
+        fig, ax = plt.subplots(figsize=(10,6))
         ax.grid()
-        ax.set_ylim([0,1.05])
+        ax.set_ylim([-0.05,1.05])
         ax.set_title(self.name)
 
         ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)
-        xerr = np.ones((2, len(self.quot)))*25
+        xerr = np.ones((2, len(self.quot)))*26
         ax.errorbar(edge, self.quot, xerr=xerr, linestyle='None', fmt='k')
 
         plotdir = 'JetHTTrigEff/plots/'
@@ -121,12 +121,14 @@ root = False
 hist_params = {'bins':30, 'range':(0,1500)}
 append_params = {'ignore_index':True, 'sort':False}
 
+#%%
+
 #-------------------------- ParkingBPH data -----------------------------------
 
 if root:
     parkedDf = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', MC=False, trigger=True)
     
-    pickle.dump(parkedDf, open(pickledir + 'parkedDf.pkl', 'wb'))
+    #pickle.dump(parkedDf, open(pickledir + 'parkedDf.pkl', 'wb'))
 
 else:
     parkedDf = pickle.load(open(pickledir + 'parkedDf.pkl', 'rb'))
@@ -134,7 +136,7 @@ else:
 parked = EfficiencyInfo(parkedDf, 'Parking data')
 parked.plot()
 
-
+#%%
 #------------------------------------------------------------------------------
 #------------------------------ MuonEG data -----------------------------------
 if root:
@@ -154,6 +156,8 @@ muonEG.plot()
 
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
+#%%
+#root = True
 if root:
     QCDParkingDf = pd.DataFrame()
     QCDParkingDftrig = pd.DataFrame()
@@ -172,7 +176,7 @@ else:
 
 QCD_parking = EfficiencyInfo(demDf=QCDParkingDf, name='QCD (parking selection)')
 QCD_parking.plot()
-
+#%%
 #-------------------------------------------------------------------------
 #--------------- QCD MC with no offline muon or pt/IP/PU weights -------------
 
@@ -244,5 +248,78 @@ TTBar_base = EfficiencyInfo(demDf=TTBarBaseDf, name='TTBar (base selection)')
 TTBar_base.plot()
 
 #--------------------------------------------------------------------------------
+#%%
 
-#pickle.dump(ggH_base, open('JetHTTrigEff/pickles/histpickls/ggH_base.pkl', 'wb'))
+#------------------ overlays - parking + QCD --------------------------------------
+figdir = 'JetHTTrigEff/plots/overlays'
+plot_params = {'fmt':'o', 'capsize':5, 'linestyle':'None',}# 'xerr':'xerr'}
+fig, ax = plt.subplots(figsize=(12,7.2))
+xerr = np.ones((2, 30))*26
+edge = parked.getBinCenter(parked.demEdge)
+ax.grid()
+ax.set_ylim([-0.05, 1.05])
+ax.errorbar(edge, parked.quot, yerr=(parked.lowErr, parked.upErr),
+            xerr=xerr,label='Parking BPH',**plot_params)
+ax.errorbar(edge, QCD_base.quot, yerr=(QCD_base.lowErr, QCD_base.upErr),
+            xerr=xerr, label='QCD (base)', **plot_params)
+ax.errorbar(edge, QCD_parking.quot, yerr=(QCD_parking.lowErr, QCD_parking.upErr),
+            xerr=xerr, label='QCD (parking)', **plot_params)
+ax.set_title('Efficiency Parking BPH + QCD')
+ax.set_xlabel('L1_SingleJet180 and HLT_AK8PFJet500')
+ax.set_ylabel('ratio')
+ax.legend(loc='upper left')
+plt.savefig(f'{figdir}/Parking_QCD_Overlay.png')
+plt.show()
+plt.close()
+
+#------------------- overlays - parking + ggH --------------------------------
+fig, ax = plt.subplots(figsize=(12,7.2))
+ax.errorbar(edge, parked.quot, yerr=(parked.lowErr, parked.upErr),
+            xerr=xerr,label='Parking BPH',**plot_params)
+ax.errorbar(edge, ggH_base.quot, yerr=(ggH_base.lowErr, ggH_base.upErr),
+            xerr=xerr, label='GGH', **plot_params)
+ax.errorbar(edge, ggH_parking.quot, yerr=(ggH_parking.lowErr, ggH_parking.upErr),
+            xerr=xerr, label='GGH (parking)', **plot_params)
+ax.set_title('Efficiency Parking BPH + GGH')
+ax.set_xlabel('L1_SingleJet180 and HLT_AK8PFJet500')
+ax.set_ylabel('ratio')
+ax.legend(loc='upper left')
+plt.savefig(f'{figdir}/Parking_ggH_Overlay.png')
+plt.show()
+plt.close()
+
+
+#------------------- overlays = muonEG + ttbar ------------------------------
+fig, ax = plt.subplots(figsize=(12,7.2))
+ax.errorbar(edge, muonEG.quot, yerr=(muonEG.lowErr, muonEG.upErr),
+            xerr=xerr, label='MuonEG', **plot_params)
+ax.errorbar(edge, TTBar_base.quot, yerr=(TTBar_base.lowErr, TTBar_base.upErr),
+            xerr=xerr, label='TTBar', **plot_params)
+ax.errorbar(edge, TTBar_muonEG.quot, yerr=(TTBar_muonEG.lowErr, TTBar_muonEG.upErr),
+            xerr=xerr, label='TTBar (muonEG)', **plot_params)
+ax.set_title('Efficiency MuonEG + TTBar')
+ax.set_xlabel('L1_SingleJet180 and HLT_AK8PFJet500')
+ax.set_ylabel('ratio')
+ax.legend(loc='upper left')
+plt.savefig(f'{figdir}/muonEG_TTBar_Overlay.png')
+plt.show()
+plt.close()
+
+#---------------------
+fig, ax = plt.subplots(figsize=(12,7.2))
+ax.errorbar(edge, QCD_base.quot, yerr=(QCD_base.lowErr, QCD_base.upErr),
+            xerr=xerr, label='QCD', **plot_params)
+ax.errorbar(edge, TTBar_base.quot, yerr=(TTBar_base.lowErr, TTBar_base.upErr),
+            xerr=xerr, label='TTBar', **plot_params)
+ax.errorbar(edge, ggH_base.quot, yerr=(ggH_base.lowErr, ggH_base.upErr),
+            xerr=xerr, label='ggH', **plot_params)
+ax.set_title('Efficiency QCD + TTBar + ggH')
+ax.set_xlabel('L1_SingleJet180 and HLT_AK8PFJet500')
+ax.set_ylabel('ratio')
+ax.legend(loc='upper left')
+plt.savefig(f'{figdir}/QCD_TTBar_ggH_Overlay.png')
+plt.show()
+plt.close()
+
+#----------------------------------------------------------------------------
+#pickle.dump(QCD_parking, open('JetHTTrigEff/pickles/histpickls/QCD_parking.pkl', 'wb'))
