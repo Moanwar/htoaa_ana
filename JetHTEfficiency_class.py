@@ -37,9 +37,9 @@ class EfficiencyInfo(object) :
     def hist(self, df):
         if self.hasWeights:
             return np.histogram(df['FatJet_pt'], weights=df['final_weights'],
-                                bins = 30, range = (0,1500))
+                                bins = 27, range = (150,1500))
         else:
-            return np.histogram(df['FatJet_pt'], bins=30, range=(0,1500))
+            return np.histogram(df['FatJet_pt'], bins=27, range=(150,1500))
 
     def getNumDf(self, df):
         return df.loc[(df.L1_SingleJet180==True) & (df.HLT_AK8PFJet500==True)]
@@ -59,17 +59,17 @@ class EfficiencyInfo(object) :
             return 0,0
         if self.hasWeights:
             totalErr = np.sqrt((weights*weights).sum())
-        else:
-            totalErr =  np.sqrt(len(total))
-
+        #else:
+        #    totalErr =  np.sqrt(len(total))
 
         level = 0.68
         alpha = (1-level)/2
         avgWgt = np.power(totalErr,2)/total
         jitter = avgWgt/total
         average = passed/total
-        sigma = np.sqrt(avgWgt*(average+jitter)*(1+jitter-average)/total)
-        delta = norm.ppf(1-alpha,0,sigma)#delta = -sigma*ndtri(1-alpha)
+        sigma = np.sqrt((avgWgt*(average+jitter)*(1+jitter-average))/total)
+        delta = norm.ppf(1-alpha,0,sigma)
+        #delta = -sigma*ndtri(1-alpha)
 
         upper = min(delta,1-average)#(average + delta) if ((average + delta) < 1) else 1
         lower = min(delta,average)#(average - delta) if ((average - delta) > 0) else 0
@@ -79,20 +79,21 @@ class EfficiencyInfo(object) :
     ## compute error for whole histogram
     def computeError(self, ):
         edges = self.demEdge
-        df = self.demDf
+        demdf = self.demDf
         upperError = list()
         lowerError = list()
 
         for i in range(len(edges)-1):
             if self.hasWeights:
-                wgts = df.final_weights.loc[(df.FatJet_pt > edges[i])
-                                            & (df.FatJet_pt < edges[i+1])]
+                wgts = demdf.final_weights.loc[(demdf.FatJet_pt >= edges[i])
+                                            & (demdf.FatJet_pt < edges[i+1])]
             else:
                 wgts = 0
 
             tmpUp, tmpLow = self.normalError(self.dem[i], self.num[i], wgts)
             upperError.append(tmpUp)
             lowerError.append(tmpLow)
+
 
         return np.array(upperError), np.array(lowerError)
 
@@ -117,11 +118,11 @@ class EfficiencyInfo(object) :
 
 
 pickledir = 'JetHTTrigEff/pickles/'
-root = False
-hist_params = {'bins':30, 'range':(0,1500)}
+root = True
+hist_params = {'bins':27, 'range':(150,1500)}
 append_params = {'ignore_index':True, 'sort':False}
 
-#%%
+
 
 #-------------------------- ParkingBPH data -----------------------------------
 
@@ -136,27 +137,28 @@ else:
 parked = EfficiencyInfo(parkedDf, 'Parking data')
 parked.plot()
 
-#%%
+
 #------------------------------------------------------------------------------
 #------------------------------ MuonEG data -----------------------------------
+
 if root:
     MuonEGDf = pd.DataFrame()
     for fileName in DM.MuonEGPaths:
         tmpDf = DM.processData(fileName, 'MuonEG', 'MuonEG', MC=False, trigger=True)
         MuonEGDf = MuonEGDf.append(tmpDf, **append_params)
 
+    MuonEGDf['final_weights'] = 1
     pickle.dump(MuonEGDf, open(pickledir + 'MuonEGDf.pkl', 'wb'))
 
 else:
     MuonEGDf = pickle.load(open(pickledir + 'MuonEGDf.pkl', 'rb'))
 
-MuonEGDf['final_weights'] = 1
+
 muonEG = EfficiencyInfo(demDf=MuonEGDf, name='MuonEG')
 muonEG.plot()
 
 #-------------------------------------------------------------------------
 #--------------------- QCD MC with ParkingBPH selection and weights -----------
-#%%
 #root = True
 if root:
     QCDParkingDf = pd.DataFrame()
@@ -176,7 +178,7 @@ else:
 
 QCD_parking = EfficiencyInfo(demDf=QCDParkingDf, name='QCD (parking selection)')
 QCD_parking.plot()
-#%%
+
 #-------------------------------------------------------------------------
 #--------------- QCD MC with no offline muon or pt/IP/PU weights -------------
 
@@ -226,6 +228,8 @@ ggH_base.plot()
 
 #--------------------------------------------------------------------------------
 #---------------------- ttbar MC with muon selection --------------------------
+
+
 if root==True:
     TTBarMuonEG = DM.processData(DM.TTJetsPaths[0], 'TTJets', 'MuonEG', MC=True, trigger=True)
     pickle.dump(TTBarMuonEG, open(pickledir + 'TTBarMuonEG.pkl', 'wb'))
@@ -248,13 +252,14 @@ TTBar_base = EfficiencyInfo(demDf=TTBarBaseDf, name='TTBar (base selection)')
 TTBar_base.plot()
 
 #--------------------------------------------------------------------------------
-#%%
+
+
 
 #------------------ overlays - parking + QCD --------------------------------------
 figdir = 'JetHTTrigEff/plots/overlays'
 plot_params = {'fmt':'o', 'capsize':5, 'linestyle':'None',}# 'xerr':'xerr'}
 fig, ax = plt.subplots(figsize=(12,7.2))
-xerr = np.ones((2, 30))*26
+xerr = np.ones((2, 27))*26
 edge = parked.getBinCenter(parked.demEdge)
 ax.grid()
 ax.set_ylim([-0.05, 1.05])
@@ -322,4 +327,5 @@ plt.show()
 plt.close()
 
 #----------------------------------------------------------------------------
-#pickle.dump(QCD_parking, open('JetHTTrigEff/pickles/histpickls/QCD_parking.pkl', 'wb'))
+
+#pickle.dump(muonEG, open('JetHTTrigEff/pickles/histpickls/muonEG.pkl', 'wb'))

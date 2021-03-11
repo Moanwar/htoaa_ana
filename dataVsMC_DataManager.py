@@ -206,11 +206,11 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## then triggers are added together and what is > 0 is true
     ## this is safe to do becuase the array is 1 col, and no nan/None
     if 'MuonEG'==dataSet:
-        trig1 = (events.array('L1_Mu7_EG23er2p5')
-                 +events.array('L1_Mu7_LooseIsoEG20er2p5')
+        trig1 = ((events.array('L1_Mu7_EG23er2p5')
+                  +events.array('L1_Mu7_LooseIsoEG20er2p5'))
                  *events.array('HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ'))
-        trig2 = (events.array('L1_Mu20_EG10er2p5')
-                 +events.array('L1_SingleMu22')
+        trig2 = ((events.array('L1_Mu20_EG10er2p5')
+                  +events.array('L1_SingleMu22'))
                  *events.array('HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL'))
         trig3 = (events.array('L1_SingleMu25')
                  *events.array('HLT_Mu27_Ele37_CaloIdL_MW'))
@@ -269,8 +269,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         trig.cut(trig['HLT_AK8PFJet500'] == True)'''
 
     if 'MuonEG'==dataSet:
+
         trig.cut(trig['MuonEGTriggers'] == True)
-        electrons.cut(electrons['Electron_pt'] > 25)
+        electrons.cut(electrons['Electron_pt'] > 15)
         electrons.cut(electrons['Electron_eta'] < 2.5)
         electrons.cut(electrons['Electron_mvaFall17V2Iso_WP90'] == 1)
         muons.cut(muons['Muon_pt'] > 10)
@@ -278,9 +279,18 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         muons.cut(muons['Muon_mediumPromptId'] == 1)
         muons.cut(muons['Muon_miniIsoId'] >= 2)
 
+        #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
+        passf = electrons['Electron_pt'].combine(muons['Muon_pt'], np.maximum, fill_value=0)
+        passf = passf[passf>25]
+        passf = passf.dropna(how='all')
+        electrons.trimTo(passf)
+
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
-    pickle.dump(ev.frame, open('JetHTTrigEff/frames/frame.pkl', 'wb'))
+    #pickle.dump(ev.frame, open('JetHTTrigEff/frames/frame.pkl', 'wb'))
+    pklname = 'TTJets_MuonEG'#fileName[-21:-16]
+    print(pklname)
+    pickle.dump(ev, open(f'JetHTTrigEff/frames/{pklname}.pkl', 'wb'))
 
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
@@ -311,15 +321,17 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         maxPtData = maxPtData.assign(PV_npvs=other.PV_npvs.to_numpy())
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
+        if 'MuonEG' == dataSet:
+            maxPtData = maxPtData.assign(MuonEGTriggers=trig['MuonEGTriggers'])
         if trigger:
             maxPtData = maxPtData.assign(L1_SingleJet180=trig['L1_SingleJet180'].to_numpy().flatten())
             maxPtData = maxPtData.assign(HLT_AK8PFJet500=trig['HLT_AK8PFJet500'].to_numpy().flatten())
 
 
         #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
-        if 'MuonEG'==dataSet:
+        '''if 'MuonEG'==dataSet:
             maxPtData = maxPtData[(maxPtData['Electron_pt'] > 25) |
-                                  (maxPtData['Muon_pt'] > 25)]
+                                  (maxPtData['Muon_pt'] > 25)]'''
 
         #------------------------------------------------------------------
 
