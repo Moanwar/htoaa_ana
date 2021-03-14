@@ -237,7 +237,7 @@ for var in cols:
 
     ## making ratio plots
     totalbgvals = bgvals[-1]
-    y = np.divide((totalbgvals-datavals), totalbgvals, out = np.zeros_like(totalbgvals),
+    y = np.divide((datavals-totalbgvals), totalbgvals, out = np.zeros_like(totalbgvals),
                   where=(totalbgvals>0))
     x = getBinCenter(bgbins)
     ax1.grid()

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 10 20:01:45 2021
+Created on Thu Mar 11 14:10:21 2021
 
 @author: si_sutantawibul1
 """
+
 import numpy as np
 import pandas as pd
 import sys
@@ -13,40 +14,46 @@ from scipy.special import ndtri
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 import dataVsMC_DataManager as DM
+#from EfficiencyInfo import EfficiencyInfo
+import mplhep as hep
+#hep.set_style(hep.style.ROOT)
+plt.style.use(hep.style.ROOT)
 
-class EfficiencyInfo(object) :
-    def __init__(self, demDf, name, var='' ,nbins=27, histrange=(150, 1500)):
+
+class EfficiencyInfoB(object):
+    def __init__(self, demDf, name, var, nbins, histrange):
         if not (isinstance(demDf, pd.DataFrame)):
             print('init error: input needs to be dataframes')
             sys.exit()
 
+        self.var = var
         self.hasWeights = ('final_weights' in demDf)
         self.nbins = nbins
         self.range = histrange
         self.name = name
         self.demDf = demDf
         self.numDf = self.getNumDf(demDf)
-        self.dem, self.demEdge = self.hist(demDf)
-        self.num, self.numEdge = self.hist(self.numDf)
+        self.dem, self.demEdge = self.hist(demDf, var)
+        self.num, self.numEdge = self.hist(self.numDf, var)
         self.quot = np.divide(self.num, self.dem, where=self.dem!=0)
         self.upErr, self.lowErr = self.computeError()
-        self.plotdir = 'JetHTTrigEff/plots/A/'
-
-
-
-        #self.plot()
+        self.plotdir = 'JetHTTrigEff/plots/B/'
 
 
     ## makes the pt into histograms
-    def hist(self, df):
+    def hist(self, df, var):
         if self.hasWeights:
-            return np.histogram(df['FatJet_pt'], weights=df['final_weights'],
+            return np.histogram(df[var], weights=df['final_weights'],
                                 bins = self.nbins, range=self.range)
-        else:
-            return np.histogram(df['FatJet_pt'], bins=self.nbins, range=self.range)
+            #return np.histogram(df[var], weights=df['final_weights'],
+            #                    bins = self.nbins, range=self.range)
+
+        #else:
+        #    return np.histogram(df[var], bins=self.nbins, range=self.range)
 
     def getNumDf(self, df):
-        return df.loc[(df.L1_SingleJet180==True) & (df.HLT_AK8PFJet500==True)]
+        return df.loc[(df.L1_SingleJet180==True) &
+                      (df.HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4==True)]
 
 
     def getBinCenter(self, arr):
@@ -63,8 +70,6 @@ class EfficiencyInfo(object) :
             return 0,0
         if self.hasWeights:
             totalErr = np.sqrt((weights*weights).sum())
-        #else:
-        #    totalErr =  np.sqrt(len(total))
 
         level = 0.68
         alpha = (1-level)/2
@@ -89,8 +94,8 @@ class EfficiencyInfo(object) :
 
         for i in range(len(edges)-1):
             if self.hasWeights:
-                wgts = demdf.final_weights.loc[(demdf.FatJet_pt >= edges[i])
-                                            & (demdf.FatJet_pt < edges[i+1])]
+                wgts = demdf.final_weights.loc[(demdf[self.var] >= edges[i])
+                                            & (demdf[self.var] < edges[i+1])]
             else:
                 wgts = 0
 
@@ -101,18 +106,20 @@ class EfficiencyInfo(object) :
 
         return np.array(upperError), np.array(lowerError)
 
-    def plotpt(self, ):
+    def plot(self, ylim = [-0.05, 1.05]):
         edge = self.getBinCenter(self.demEdge)
 
         fig, ax = plt.subplots(figsize=(10,6))
         ax.grid()
-        ax.set_ylim([-0.05,1.05])
+        ax.set_ylim(ylim)
         ax.set_title(self.name)
-
+        ax.set_xlabel(self.var)
         ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)
-        xerr = np.ones((2, len(self.quot)))*26
+        xerr = np.ones((2, len(self.quot)))*(edge[1]-edge[0])/2
         ax.errorbar(edge, self.quot, xerr=xerr, linestyle='None', fmt='k')
 
         #plotdir = 'JetHTTrigEff/plots/'
-        plt.savefig(f'{self.plotdir}{self.name}-pt.png')
+        savefigdir = f'{self.plotdir}{self.name} ({self.var}).png'
+        print(savefigdir)
+        plt.savefig(savefigdir)

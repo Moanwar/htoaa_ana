@@ -92,6 +92,7 @@ npvsGkeys = muonR[6][2]['H']
 
 tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets', 'ggH', 'MuonEG']
 dataSetList = ['Base', 'Parked', 'JetHT', 'MuonEG']
+triggerSetList = ['A', 'B']
 
 def getMaxPt(physobj, col):
     colidx = physobj[col].idxmax(axis=1).to_numpy()
@@ -135,8 +136,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         print('MC needs to be set true/false')
         sys.exit()
 
-    if type(trigger) != bool:
-        print('trigger needs to be set true/false')
+    if trigger not in triggerSetList:
+        print('trigger needs to be set to A/B/C/D')
         sys.exit()
 
     f = uproot.open(fileName + '.root')
@@ -194,9 +195,14 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     #-------------- Jet HT Trigger efficiency vals ---------------------------
 
     #L1_SingleJet180 and HLT_AK8PFJet500
-    if trigger:
+    if 'A'==trigger:
         trig['L1_SingleJet180'] = pd.DataFrame(events.array('L1_SingleJet180')).fillna(0)
         trig['HLT_AK8PFJet500'] = pd.DataFrame(events.array('HLT_AK8PFJet500')).fillna(0)
+
+    #L1_SingleJet180 and HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4
+    if 'B' ==trigger:
+        trig['L1_SingleJet180'] = pd.DataFrame(events.array('L1_SingleJet180')).fillna(0)
+        trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')).fillna(0)
     #-------------------------------------------------------------------------
 
     #--------------- Calculate MuonEG pass triggers --------------------------
@@ -288,9 +294,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
     #pickle.dump(ev.frame, open('JetHTTrigEff/frames/frame.pkl', 'wb'))
-    pklname = 'TTJets_MuonEG'#fileName[-21:-16]
-    print(pklname)
-    pickle.dump(ev, open(f'JetHTTrigEff/frames/{pklname}.pkl', 'wb'))
+    #pklname = 'TTJets_MuonEG'#fileName[-21:-16]
+    #print(pklname)
+    #pickle.dump(ev, open(f'JetHTTrigEff/frames/{pklname}.pkl', 'wb'))
 
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
@@ -323,10 +329,16 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
         if 'MuonEG' == dataSet:
             maxPtData = maxPtData.assign(MuonEGTriggers=trig['MuonEGTriggers'])
-        if trigger:
+        if 'A'==trigger:
             maxPtData = maxPtData.assign(L1_SingleJet180=trig['L1_SingleJet180'].to_numpy().flatten())
             maxPtData = maxPtData.assign(HLT_AK8PFJet500=trig['HLT_AK8PFJet500'].to_numpy().flatten())
 
+        if 'B' == trigger:
+            maxPtData = maxPtData.assign(L1_SingleJet180=trig['L1_SingleJet180'].to_numpy().flatten())
+            maxPtData = maxPtData.assign(HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4=trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'].to_numpy().flatten())
+
+            #trig['L1_SingleJet180'] = pd.DataFrame(events.array('L1_SingleJet180')).fillna(0)
+        #trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')).fillna(0)
 
         #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
         '''if 'MuonEG'==dataSet:
