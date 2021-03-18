@@ -106,14 +106,13 @@ class EfficiencyInfoB(object):
 
         return np.array(upperError), np.array(lowerError)
 
-    def plot(self, ylim = [-0.05, 1.05]):
+    def plot(self, ylim = [-0.05, 1.05], title='', xlabel=''):
         edge = self.getBinCenter(self.demEdge)
-
         fig, ax = plt.subplots(figsize=(10,6))
         ax.grid()
         ax.set_ylim(ylim)
-        ax.set_title(self.name)
-        ax.set_xlabel(self.var)
+        ax.set_title(f'{self.name} ({title})')
+        ax.set_xlabel(self.var + ' ' + xlabel)
         ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)
         xerr = np.ones((2, len(self.quot)))*(edge[1]-edge[0])/2

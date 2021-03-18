@@ -92,7 +92,7 @@ npvsGkeys = muonR[6][2]['H']
 
 tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets', 'ggH', 'MuonEG']
 dataSetList = ['Base', 'Parked', 'JetHT', 'MuonEG']
-triggerSetList = ['A', 'B']
+triggerSetList = ['A', 'B', 'C']
 
 def getMaxPt(physobj, col):
     colidx = physobj[col].idxmax(axis=1).to_numpy()
@@ -103,6 +103,51 @@ def getMaxPt(physobj, col):
         npArr = physobj[var].to_numpy()
         maxPtData[var] = npArr[rowidx, colidx]
     return maxPtData
+
+def getNthPt(n, physobj, sortBy, extractCol):
+    tosortby = physobj[sortBy].fillna(0).to_numpy()
+    idxsorted = np.argsort(tosortby, axis=1, kind='stable')
+    idxn = idxsorted[:,-n]
+    rowidx = range(physobj[extractCol].shape[0])
+    nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
+    return pd.Series(nthVals)
+
+def getdR(objName, events, fatJetPhysObj,):
+    eventidx = fatJetPhysObj.FatJet_pt.index
+
+    #maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1).to_numpy()
+    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0).to_numpy()
+    idxsorted = np.argsort(tosortby, axis=1, kind='stable')
+    maxptJetIdx = idxsorted[:,-1]
+    #print(fatJetPhysObj['FatJet_pt'].dropna(how='all'))
+    #print(maxptJetIdx)
+    #print(eventidx)
+    #print(maxptJetIdx)
+    padto = max(maxptJetIdx)+1
+    print(np.array(events.array('FatJet_eta').pad(padto).fillna(np.nan)))
+
+
+    fatJetEta = events.array('FatJet_eta').pad(padto).fillna(np.nan)[eventidx, maxptJetIdx]
+    fatJetPhi = events.array('FatJet_phi').pad(padto).fillna(np.nan)[eventidx, maxptJetIdx]
+
+    #print(np.array(fatJetEta))
+    #print(np.array(fatJetPhi))
+
+    objEta = events.array(f'{objName}_eta')[eventidx]#, maxptJetIdx]
+    objPhi = events.array(f'{objName}_phi')[eventidx]#, maxptJetIdx]
+    #dphi = np.arccos(np.cos(objPhi+3.1)) + np.arccos(np.cos(fatJetPhi+3.1))
+    dr = np.sqrt(np.power(fatJetEta-objEta,2)+np.power(dphi(objPhi, fatJetPhi),2))
+    return pd.DataFrame(dr)
+
+def dphi(phi1,phi2):
+    phi1[phi1 < 0] = phi1[phi1<0] + 2*np.pi
+    phi2[phi2<0] = phi2[phi2<0]
+    #tmp1 = np.minimum(np.abs(phi1-phi2),np.abs(phi1-phi2+(2*np.pi)))
+    #minimum = np.minimum(tmp1, np.abs(phi1-phi2-(2*np.pi)))
+    return np.minimum(np.abs(phi1-phi2), 2*np.pi - np.abs(phi1-phi2))
+
+def getdRCount(dr):
+    return pd.DataFrame((dr<0.8).sum(axis=1))
 
 ## I don't have the getSubjetData here becuase i imported the dataManager one because yeah
 
@@ -148,6 +193,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     other = PhysObj('other' + fileName)
     trig = PhysObj('trig' + fileName)
     electrons = PhysObj('electrons'+fileName)
+    ak4Jets = PhysObj('ak4Jets' + fileName)
 
     ## data doens't have LHE_HT
     if tag == 'data' and 'LHE_HT' in allVars:
@@ -203,6 +249,21 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     if 'B' ==trigger:
         trig['L1_SingleJet180'] = pd.DataFrame(events.array('L1_SingleJet180')).fillna(0)
         trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')).fillna(0)
+
+    # path C
+    if 'C' == trigger:
+        trig['L1_DoubleJet112er2p3_dEta_Max1p6'] = pd.DataFrame(events.array('L1_DoubleJet112er2p3_dEta_Max1p6')).fillna(0)
+        trig['L1_DoubleJet150er2p5'] = pd.DataFrame(events.array('L1_DoubleJet150er2p5')).fillna(0)
+        trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'] = pd.DataFrame(events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')).fillna(0)
+
+        ak4Jets['Jet_pt'] = pd.DataFrame(events.array('Jet_pt'))
+        ak4Jets['Jet_eta'] = pd.DataFrame(events.array('Jet_eta')).abs()
+        ak4Jets['Jet_puId'] = pd.DataFrame(events.array('Jet_puId'))
+        ak4Jets['dR'] = getdR(objName='Jet', events=events, fatJetPhysObj=jets)
+        ak4Jets['Jet_pt'] = ak4Jets['Jet_pt'][ak4Jets['dR'] < 0.8]
+        #ak4Jets['Jet_pt'] = ak4Jets['Jet_pt'][ak4Jets['Jet_pt'] > 30]
+        ak4Jets['Jet_btagDeepB'] = pd.DataFrame(events.array('Jet_btagDeepB'))
+        other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
     #-------------------------------------------------------------------------
 
     #--------------- Calculate MuonEG pass triggers --------------------------
@@ -242,7 +303,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
 
     ## make Event object
-    ev = Event(jets, muons, other, trig, electrons)
+    ev = Event(jets, muons, other, trig, electrons, ak4Jets)
 
 
     ## cutting events
@@ -258,6 +319,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     other.cut(other['PV_npvsGood'] >= 1)
 
 
+
     ## muon cuts
     if 'Parked'==dataSet:
         muons.cut((muons['Muon_softId'] > 0))
@@ -265,14 +327,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         muons.cut(muons['Muon_pt'] > 7)
         muons.cut(muons['Muon_IP'] > 2)
         muons.cut(muons['Muon_ip3d'] < 0.5)
-    if 'JetHT'==dataSet:
-        other.cut(other['HLT_trigger'] > 0)
+    # if 'JetHT'==dataSet:
+    #    other.cut(other['HLT_trigger'] > 0)
 
-    ## include or exclude triggers for trigger efficiency study for JetHT
-    '''if trigger:
-        print('in trig')
-        trig.cut(trig['L1_SingleJet180'] == True)
-        trig.cut(trig['HLT_AK8PFJet500'] == True)'''
 
     if 'MuonEG'==dataSet:
 
@@ -290,6 +347,14 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         passf = passf[passf>25]
         passf = passf.dropna(how='all')
         electrons.trimTo(passf)
+
+    if 'C' == trigger:
+        ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
+        ak4Jets.cut(ak4Jets['Jet_eta'] < 2.4)
+        ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
+        other.cut(other['JetFatJet_dRCnt'] >= 2 )
+
+
 
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
@@ -337,8 +402,35 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
             maxPtData = maxPtData.assign(L1_SingleJet180=trig['L1_SingleJet180'].to_numpy().flatten())
             maxPtData = maxPtData.assign(HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4=trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'].to_numpy().flatten())
 
-            #trig['L1_SingleJet180'] = pd.DataFrame(events.array('L1_SingleJet180')).fillna(0)
-        #trig['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')).fillna(0)
+        if 'C' == trigger:
+           # (L1_DoubleJet112er2p3_dEta_Max1p6 or L1_DoubleJet150er2p5) and HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71
+            maxPtData = maxPtData.assign(L1_DoubleJet112er2p3_dEta_Max1p6=trig['L1_DoubleJet112er2p3_dEta_Max1p6'].to_numpy().flatten())
+            maxPtData = maxPtData.assign(L1_DoubleJet150er2p5=trig['L1_DoubleJet150er2p5'].to_numpy().flatten())
+            maxPtData = maxPtData.assign(HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71=trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'].to_numpy().flatten())
+
+
+            maxPtData = maxPtData.assign(Jet_pt1=getNthPt(n=1, physobj=ak4Jets,
+                                                         sortBy='Jet_pt',
+                                                         extractCol='Jet_pt'))
+            maxPtData = maxPtData.assign(Jet_pt2=getNthPt(n=2, physobj=ak4Jets,
+                                                         sortBy='Jet_pt',
+                                                         extractCol='Jet_pt'))
+            maxPtData = maxPtData.assign(Jet_btagDeepB1=getNthPt(n=1,
+                                                                physobj=ak4Jets,
+                                                                sortBy='Jet_btagDeepB',
+                                                                extractCol='Jet_btagDeepB'))
+            maxPtData = maxPtData.assign(Jet_btagDeepB2=getNthPt(n=2,
+                                                                physobj=ak4Jets,
+                                                                sortBy='Jet_btagDeepB',
+                                                                extractCol='Jet_btagDeepB'))
+            #maxPtData = maxPtData.assign(Jet_putId1=getNthPt(n=1, physobj=ak4Jets,
+            #                                             sortBy='Jet_pt',
+            #                                             extractCol='Jet_puId'))
+            #maxPtData = maxPtData.assign(Jet_putId2=getNthPt(n=2, physobj=ak4Jets,
+            #                                             sortBy='Jet_pt',
+            #                                             extractCol='Jet_puId'))
+
+
 
         #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
         '''if 'MuonEG'==dataSet:
@@ -350,6 +442,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         if MC:
             maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
+
+        if 'C' == trigger:
+            maxPtData = maxPtData[maxPtData['Jet_pt2'].notna()]
 
         ## LHE_weights
         if 'ggH'==tag:

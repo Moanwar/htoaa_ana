@@ -13,6 +13,7 @@ import sys
 import os
 import pickle
 import numpy as np
+import math
 from htoaaRootFilesLoc import TTJetsPaths, WJetsPaths, bEnrPaths, BGenPaths, ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths
 
 
@@ -148,7 +149,7 @@ def getSubJetData(subjetnum, subjetvarname, events):
 
 ## get secondary vertex info
 ## takes the idx of the max pt fatjet and index idx. get eta and phi of the corresponding
-## fatjet and SV. Takes the original PhysObj or jet PhysObj and the opened root file
+## fatjet and SV. Takes the original PhysObj or jet PysObj and the opened root file
 def getnSVCounts(data, events):
     eventidx = data.FatJet_pt.index
     maxptjetidx = data['FatJet_pt'].idxmax(axis = 1).to_numpy() #same as colidx
@@ -159,7 +160,8 @@ def getnSVCounts(data, events):
     sveta = events.array('SV_eta')[eventidx]
     svphi = events.array('SV_phi')[eventidx]
 
-    dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(jetphi - svphi, 2))
+    dphi = np.arccos(np.cos(jetphi+3.1)) + np.arccos(np.cos(svphi+3.1))
+    dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(dphi, 2))
     dr = pd.DataFrame(dr)
     nSVcounts = (dr < 0.8).sum(axis=1)
     return nSVcounts

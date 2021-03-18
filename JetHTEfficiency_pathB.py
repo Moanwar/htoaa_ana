@@ -263,7 +263,7 @@ def makeOverlay(effInfo, labels, title, xlabel, figname, ylim=[-0.05,1.05]):
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.legend(loc='lower right')
-    plt.savefig(f'JetHTTrigEff/plots/B/{figname}')
+    plt.savefig(f'JetHTTrigEff/plots/C/{figname}.png')
     plt.show()
     plt.close()
 
