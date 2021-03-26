@@ -106,7 +106,7 @@ def getMaxPt(physobj, col):
 
 def getNthPt(n, physobj, sortBy, extractCol):
     tosortby = physobj[sortBy].fillna(0).to_numpy()
-    idxsorted = np.argsort(tosortby, axis=1, kind='stable')
+    idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
 
     idxn = idxsorted[:,-n]
 
@@ -119,20 +119,9 @@ def getdR(objName, events, fatJetPhysObj, jetPhysObj):
     eventidx = fatJetPhysObj.FatJet_pt.index
     eventidx = range(len(eventidx))
 
-    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)#.to_numpy()
-    #idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
-    #idxsorted = tosortby.rank(axis=1,method='first', ascending=False)-1
+    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
 
     maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
-
-
-    # for i in [600602]:
-    #     print('-------------------------')
-    #     print(i)
-    #     #print('pt idx: ', maxptJetIdx.loc[i])
-    #     print('fat jet: ', fatJetPhysObj['FatJet_pt'].loc[i])
-
-    #padto = max(maxptJetIdx)+1
 
     fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
     fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
@@ -143,23 +132,7 @@ def getdR(objName, events, fatJetPhysObj, jetPhysObj):
     objEta = jetPhysObj['Jet_eta']
     objPhi = jetPhysObj['Jet_phi']
 
-
     dr = np.sqrt(np.power(fatJetEta-objEta,2)+np.power(dphi(objPhi, fatJetPhi),2))
-
-    #dp = dphi(objPhi, fatJetPhi)
-
-
-    #i = 0
-    # print(eventidx)
-    # print('maxptjetidx: ', maxptJetIdx[i])
-    # print('fatjetpt: ', tosortby[i])
-    # print('fjet eta: ', pd.DataFrame(fatJetEta).iloc[i])
-    # print('fjet phi: ', pd.DataFrame(fatJetPhi).iloc[i])
-    # print('jet eta: ', pd.DataFrame(objEta).iloc[i])
-    # print('jet phi: ', pd.DataFrame(objPhi).iloc[i])
-    # #print('dphi: ', pd.DataFrame(dp).iloc[i])
-    # print('dr: ', pd.DataFrame(dr).iloc[i])
-
 
     return pd.DataFrame(dr)
 
@@ -331,15 +304,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ev = Event(jets, muons, other, trig, electrons, ak4Jets)
 
 
-    # print('---------------------------')
-    # print('before jet cuts')
-    # for key in jets.keys():
-    #     print(jets[key].loc[600602])
-
-
-
-
-
     ## cutting events
     ## jet cuts
     jets.cut(jets['FatJet_pt'] > 170)
@@ -352,19 +316,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     #jets.cut(jets['FatJet_mass'] <= 200)
     other.cut(other['PV_npvsGood'] >= 1)
 
-
     ev.sync()
-
-
-
-
-    # print('---------------------------')
-    # print('after jet cuts')
-    # for key in jets.keys():
-    #     print(jets[key].loc[600602])
-
-
-
 
     ## muon cuts
     if 'Parked'==dataSet:
@@ -395,31 +347,11 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         electrons.trimTo(passf)
 
     if 'C' == trigger:
-
-
-
         ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
-
-        #print('after pt cut: ', ak4Jets['Jet_pt'].shape)
-
         ak4Jets.cut(ak4Jets['Jet_eta'].abs() < 2.4)
-
-        #print('after eta cut: ', ak4Jets['Jet_pt'].shape)
-
         ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
 
-        #print('after puid cut: ', ak4Jets['Jet_pt'].shape )
-
         ev.sync()
-        #print('after first ak4 cuts: ', ak4Jets['Jet_pt'].shape)
-
-
-    #print('---------------------------')
-    #print('after slim jet cuts')
-    #for key in jets.keys():
-    #    print(jets[key].loc[600602])
-
-
 
         ## have to calculate dR after cutting all the things, so that I don't
         ## choose the wrong fat jet
@@ -427,22 +359,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
         ak4Jets.cut(ak4Jets['dR'] < 0.8)
 
-
-        #for key in ak4Jets.keys():
-        #    ak4Jets[key][ak4Jets.dR > 0.8] = np.nan
-
-
         #pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
         #pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
         #print('other before cut: ', other['JetFatJet_dRCnt'].shape)
-
-
-
-        other.cut(other['JetFatJet_dRCnt'] >= 2 )
-
-
-        #print('other after cut: ', other['JetFatJet_dRCnt'].shape)
-
 
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
@@ -505,20 +424,12 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                                          extractCol='Jet_pt'))
             maxPtData = maxPtData.assign(Jet_btagDeepB1=getNthPt(n=1,
                                                                 physobj=ak4Jets,
-                                                                sortBy='Jet_btagDeepB',
+                                                                sortBy='Jet_pt',
                                                                 extractCol='Jet_btagDeepB'))
             maxPtData = maxPtData.assign(Jet_btagDeepB2=getNthPt(n=2,
                                                                 physobj=ak4Jets,
-                                                                sortBy='Jet_btagDeepB',
+                                                                sortBy='Jet_pt',
                                                                 extractCol='Jet_btagDeepB'))
-            #maxPtData = maxPtData.assign(Jet_putId1=getNthPt(n=1, physobj=ak4Jets,
-            #                                             sortBy='Jet_pt',
-            #                                             extractCol='Jet_puId'))
-            #maxPtData = maxPtData.assign(Jet_putId2=getNthPt(n=2, physobj=ak4Jets,
-            #                                             sortBy='Jet_pt',
-            #                                             extractCol='Jet_puId'))
-
-
 
         #----- MuonEG only pass events w/ electron pt or muon pt > 25 -----
         '''if 'MuonEG'==dataSet:
@@ -527,9 +438,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         #------------------------------------------------------------------
         ## add index back into the df for comparison
-        # print(jets.FatJet_pt.index)
-        # print(ak4Jets.Jet_pt.index)
-        # print(other.LHE_HT.index)
 
         maxPtData['eventNum'] = jets.FatJet_pt.index
 
@@ -537,9 +445,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
             maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
 
         if 'C' == trigger:
-            #print(maxPtData.index)
             maxPtData = maxPtData[maxPtData['Jet_pt2'] > 30]
-            #print(maxPtData.index)
+
 
 
         ## LHE_weights

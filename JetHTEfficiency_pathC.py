@@ -201,29 +201,29 @@ ggH_parkingfatpt_cut = EfficiencyInfoC(ggHParkingDf_ptbtagCut, name = 'ggH (park
 ggH_parkingfatpt_cut.plot(title='trigger C')
 #---------------- ggH without muon selection or pT/IP/PU weights --------------
 #%%
-root = True
 if root==True:
     ggHBaseDf = DM.processData(DM.ggHPaths, 'ggH', 'Base', MC=True, trigger=trigger)
-    pickle.dump(ggHBaseDf, open(pickledir + 'ggHBaseDfB.pkl', 'wb'))
+    pickle.dump(ggHBaseDf, open(pickledir + 'ggHBaseDf.pkl', 'wb'))
 else:
-    ggHBaseDf = pickle.load(open(pickledir + 'ggHBaseDfB.pkl', 'rb'))
+    ggHBaseDf = pickle.load(open(pickledir + 'ggHBaseDf.pkl', 'rb'))
 
 ggHBaseDf_btagCut = btagCut(ggHBaseDf)
 ggH_base_pt = EfficiencyInfoC(demDf=ggHBaseDf_btagCut, name='GGH (base selection)',
                               **ptparams)
 ggH_base_pt.plot(title='trigger C')
 
-
 ggHBaseDf_ptCut = ptCut(ggHBaseDf)
+btags = pd.DataFrame(ggHBaseDf_ptCut.Jet_btagDeepB1, columns=['Jet_btagDeepB1'])
+btags.loc[:,'Jet_btagDeepB2'] = ggHBaseDf_ptCut.Jet_btagDeepB2
+ggHBaseDf_ptCut = ggHBaseDf_ptCut.assign(Jet_btagDeepB1=btags.max(axis=1))
+ggHBaseDf_ptCut = ggHBaseDf_ptCut.assign(Jet_btagDeepB2=btags.min(axis=1))
+
 ggH_base_btag = EfficiencyInfoC(demDf=ggHBaseDf_ptCut, name='GGH (base selection)',
                               **btagparams)
 ggH_base_btag.plot(title='trigger C')
 
 ggHBaseDf_ptbtagCut = btagCut(ggHBaseDf_ptCut)
-
-# pickle.dump(ggHBaseDf_ptbtagCut, open(pickledir+'ggHBaseDf_ptbtagCut.pkl', 'wb'))
-
-ggH_basefatpt_cut = EfficiencyInfoC(ggHBaseDf_ptbtagCut, name = 'GGH (base selection) ( pt, btag cut)',
+ggH_basefatpt_cut = EfficiencyInfoC(ggHBaseDf_ptbtagCut, name = 'GGH (base selection) (pt, btag cut)',
                                     var='FatJet_pt',nbins=27, histrange=(150,1500))#**fatjetparams)
 ggH_basefatpt_cut.plot(title='trigger C')
 #%%
