@@ -30,9 +30,6 @@ class EfficiencyInfoC(EfficiencyInfoB):
         self.plotdir = 'JetHTTrigEff/plots/C/'
 
     def getNumDf(self, df):
-        print(df.L1_DoubleJet112er2p3_dEta_Max1p6)
-        print(df.L1_DoubleJet150er2p5)
-        print(df.HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71)
         trig = np.logical_and(np.logical_or(df.L1_DoubleJet112er2p3_dEta_Max1p6,
                                             df.L1_DoubleJet150er2p5),
                               df.HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71)
@@ -51,12 +48,12 @@ def btagCut(df):
     return df[(df.Jet_btagDeepB1 > 0.4184) & (df.Jet_btagDeepB2 > 0.4184)]
 
 def ptCut(df):
-    return df[(df.Jet_pt1 > 130) & (df.Jet_pt2 > 130)]
+    return df[(df.Jet_pt1 > 140) & (df.Jet_pt2 > 140)]
 
 #--------------- parkeddata -----------------------
 
 pickledir = 'JetHTTrigEff/pickles/C/'
-root = False
+root = True
 hist_params = {'bins':50, 'range':(600)}
 append_params = {'ignore_index':True, 'sort':False}
 trigger='C'
@@ -66,7 +63,7 @@ ptparams = {'var':'Jet_pt2', 'nbins':50, 'histrange':(0,600)}
 btagparams = {'var':'Jet_btagDeepB2', 'nbins':20, 'histrange':(0,1)}
 fatjetparams = {'var':'FatJet_pt', 'nbins':50, 'histrange':(0,1000)}
 
-
+#%%
 if root:
     parkedDf = DM.processData(DM.ParkedDataPaths[0], 'data', 'Parked', MC=False, trigger=trigger)
     
@@ -88,7 +85,7 @@ parkedfatpt_cut = EfficiencyInfoC(parkedDf_ptbtagCut, name = 'Parked data ( pt, 
                                  **fatjetparams)
 parkedfatpt_cut.plot(title='trigger C')
 
-#%%
+ #%%
 
 # -------------- MuonEG --------------------
 if root:
@@ -203,7 +200,8 @@ ggH_parkingfatpt_cut = EfficiencyInfoC(ggHParkingDf_ptbtagCut, name = 'ggH (park
                                  **fatjetparams)
 ggH_parkingfatpt_cut.plot(title='trigger C')
 #---------------- ggH without muon selection or pT/IP/PU weights --------------
-
+#%%
+root = True
 if root==True:
     ggHBaseDf = DM.processData(DM.ggHPaths, 'ggH', 'Base', MC=True, trigger=trigger)
     pickle.dump(ggHBaseDf, open(pickledir + 'ggHBaseDfB.pkl', 'wb'))
@@ -215,16 +213,20 @@ ggH_base_pt = EfficiencyInfoC(demDf=ggHBaseDf_btagCut, name='GGH (base selection
                               **ptparams)
 ggH_base_pt.plot(title='trigger C')
 
+
 ggHBaseDf_ptCut = ptCut(ggHBaseDf)
 ggH_base_btag = EfficiencyInfoC(demDf=ggHBaseDf_ptCut, name='GGH (base selection)',
                               **btagparams)
 ggH_base_btag.plot(title='trigger C')
 
 ggHBaseDf_ptbtagCut = btagCut(ggHBaseDf_ptCut)
-ggH_basefatpt_cut = EfficiencyInfoC(ggHBaseDf_ptbtagCut, name = 'ggH (base selection) ( pt, btag cut)',
-                                 **fatjetparams)
-ggH_basefatpt_cut.plot(title='trigger C')
 
+# pickle.dump(ggHBaseDf_ptbtagCut, open(pickledir+'ggHBaseDf_ptbtagCut.pkl', 'wb'))
+
+ggH_basefatpt_cut = EfficiencyInfoC(ggHBaseDf_ptbtagCut, name = 'GGH (base selection) ( pt, btag cut)',
+                                    var='FatJet_pt',nbins=27, histrange=(150,1500))#**fatjetparams)
+ggH_basefatpt_cut.plot(title='trigger C')
+#%%
 #---------------------- ttbar MC with muon selection --------------------------
 
 if root==True:

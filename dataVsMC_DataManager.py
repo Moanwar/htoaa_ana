@@ -112,38 +112,61 @@ def getNthPt(n, physobj, sortBy, extractCol):
     nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
     return pd.Series(nthVals)
 
-def getdR(objName, events, fatJetPhysObj,):
+def getdR(objName, events, fatJetPhysObj, jetPhysObj):
     eventidx = fatJetPhysObj.FatJet_pt.index
+    eventidx = range(len(eventidx))
 
-    #maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1).to_numpy()
-    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0).to_numpy()
-    idxsorted = np.argsort(tosortby, axis=1, kind='stable')
-    maxptJetIdx = idxsorted[:,-1]
-    #print(fatJetPhysObj['FatJet_pt'].dropna(how='all'))
-    #print(maxptJetIdx)
-    #print(eventidx)
-    #print(maxptJetIdx)
-    padto = max(maxptJetIdx)+1
-    print(np.array(events.array('FatJet_eta').pad(padto).fillna(np.nan)))
+    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)#.to_numpy()
+    #idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
+    #idxsorted = tosortby.rank(axis=1,method='first', ascending=False)-1
+
+    maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
 
 
-    fatJetEta = events.array('FatJet_eta').pad(padto).fillna(np.nan)[eventidx, maxptJetIdx]
-    fatJetPhi = events.array('FatJet_phi').pad(padto).fillna(np.nan)[eventidx, maxptJetIdx]
+    # for i in [600602]:
+    #     print('-------------------------')
+    #     print(i)
+    #     #print('pt idx: ', maxptJetIdx.loc[i])
+    #     print('fat jet: ', fatJetPhysObj['FatJet_pt'].loc[i])
 
-    #print(np.array(fatJetEta))
-    #print(np.array(fatJetPhi))
+    #padto = max(maxptJetIdx)+1
 
-    objEta = events.array(f'{objName}_eta')[eventidx]#, maxptJetIdx]
-    objPhi = events.array(f'{objName}_phi')[eventidx]#, maxptJetIdx]
-    #dphi = np.arccos(np.cos(objPhi+3.1)) + np.arccos(np.cos(fatJetPhi+3.1))
+    fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
+    fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
+
+    fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
+    fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
+
+    objEta = jetPhysObj['Jet_eta']
+    objPhi = jetPhysObj['Jet_phi']
+
+
     dr = np.sqrt(np.power(fatJetEta-objEta,2)+np.power(dphi(objPhi, fatJetPhi),2))
+
+    #dp = dphi(objPhi, fatJetPhi)
+
+
+    #i = 0
+    # print(eventidx)
+    # print('maxptjetidx: ', maxptJetIdx[i])
+    # print('fatjetpt: ', tosortby[i])
+    # print('fjet eta: ', pd.DataFrame(fatJetEta).iloc[i])
+    # print('fjet phi: ', pd.DataFrame(fatJetPhi).iloc[i])
+    # print('jet eta: ', pd.DataFrame(objEta).iloc[i])
+    # print('jet phi: ', pd.DataFrame(objPhi).iloc[i])
+    # #print('dphi: ', pd.DataFrame(dp).iloc[i])
+    # print('dr: ', pd.DataFrame(dr).iloc[i])
+
+
     return pd.DataFrame(dr)
 
 def dphi(phi1,phi2):
+    return np.minimum(np.minimum(np.abs(phi1-phi2),np.abs(phi1-phi2+(2*np.pi))),
+                      np.abs(phi1-phi2-(2*np.pi)))
+
+def dphi2(phi1,phi2):
     phi1[phi1 < 0] = phi1[phi1<0] + 2*np.pi
-    phi2[phi2<0] = phi2[phi2<0]
-    #tmp1 = np.minimum(np.abs(phi1-phi2),np.abs(phi1-phi2+(2*np.pi)))
-    #minimum = np.minimum(tmp1, np.abs(phi1-phi2-(2*np.pi)))
+    phi2[phi2<0] = phi2[phi2<0] + 2*np.pi
     return np.minimum(np.abs(phi1-phi2), 2*np.pi - np.abs(phi1-phi2))
 
 def getdRCount(dr):
@@ -158,7 +181,7 @@ def getdRCount(dr):
 ## tag: (str) what dataset the root file is (BGen, GGH..) check list of valid tags
 ## dataset: (str) what kind of cuts you want to be making. check list of valid datasets
 ## MC: (bool) is this file MC or not
-## trigger: (bool) on for have trigger info in the resulting dataframe
+## trigger: (str) on for have trigger info in the resulting dataframe
 def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## open file, get events
     fileName, fileExtension = os.path.splitext(filePath)
@@ -202,13 +225,14 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## fill the PhysObjs with data from the root file
     ## fatjets vars
     jets['FatJet_pt'] = pd.DataFrame(events.array('FatJet_pt'))
-    jets['FatJet_eta'] = pd.DataFrame(np.abs(events.array('FatJet_eta')))
+    jets['FatJet_eta'] = pd.DataFrame(events.array('FatJet_eta'))
     jets['FatJet_mass'] = pd.DataFrame(events.array('FatJet_mass'))
     jets['FatJet_btagCSVV2'] = pd.DataFrame(events.array('FatJet_btagCSVV2'))
     jets['FatJet_btagDeepB'] = pd.DataFrame(events.array('FatJet_btagDeepB'))
     jets['FatJet_msoftdrop'] = pd.DataFrame(events.array('FatJet_msoftdrop'))
     jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
     jets['FatJet_deepTagMD_H4qvsQCD'] = pd.DataFrame(events.array('FatJet_deepTagMD_H4qvsQCD'))
+    jets['FatJet_phi'] = pd.DataFrame(events.array('FatJet_phi'))
     # jets['FatJet_n2b1'] = pd.DataFrame(events.array('FatJet_n2b1'))
     # jets['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
     # jets['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
@@ -257,13 +281,11 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'] = pd.DataFrame(events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')).fillna(0)
 
         ak4Jets['Jet_pt'] = pd.DataFrame(events.array('Jet_pt'))
-        ak4Jets['Jet_eta'] = pd.DataFrame(events.array('Jet_eta')).abs()
+        ak4Jets['Jet_eta'] = pd.DataFrame(events.array('Jet_eta'))
         ak4Jets['Jet_puId'] = pd.DataFrame(events.array('Jet_puId'))
-        ak4Jets['dR'] = getdR(objName='Jet', events=events, fatJetPhysObj=jets)
-        ak4Jets['Jet_pt'] = ak4Jets['Jet_pt'][ak4Jets['dR'] < 0.8]
-        #ak4Jets['Jet_pt'] = ak4Jets['Jet_pt'][ak4Jets['Jet_pt'] > 30]
+        ak4Jets['Jet_phi'] = pd.DataFrame(events.array('Jet_phi'))
         ak4Jets['Jet_btagDeepB'] = pd.DataFrame(events.array('Jet_btagDeepB'))
-        other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
+
     #-------------------------------------------------------------------------
 
     #--------------- Calculate MuonEG pass triggers --------------------------
@@ -286,12 +308,12 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         trig['MuonEGTriggers'] = pd.DataFrame(trig1+trig2+trig3+trig4)
 
         muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
-        muons['Muon_eta'] = pd.DataFrame(events.array('Muon_eta')).abs()
+        muons['Muon_eta'] = pd.DataFrame(events.array('Muon_eta'))
         muons['Muon_mediumPromptId'] = pd.DataFrame(events.array('Muon_mediumPromptId')).fillna(0).astype(int)
         muons['Muon_miniIsoId'] = pd.DataFrame(events.array('Muon_miniIsoId'))
 
         electrons['Electron_pt'] = pd.DataFrame(events.array('Electron_pt'))
-        electrons['Electron_eta'] = pd.DataFrame(events.array('Electron_eta')).abs()
+        electrons['Electron_eta'] = pd.DataFrame(events.array('Electron_eta'))
         electrons['Electron_mvaFall17V2Iso_WP90'] = pd.DataFrame(events.array('Electron_mvaFall17V2Iso_WP90')).fillna(0).astype(int)
 
     #-----------------------------------------------------------------------
@@ -306,10 +328,19 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ev = Event(jets, muons, other, trig, electrons, ak4Jets)
 
 
+    print('---------------------------')
+    print('before jet cuts')
+    for key in jets.keys():
+        print(jets[key].loc[600602])
+
+
+
+
+
     ## cutting events
     ## jet cuts
     jets.cut(jets['FatJet_pt'] > 170)
-    jets.cut(jets['FatJet_eta'] < 2.4)
+    jets.cut(jets['FatJet_eta'].abs() < 2.4)
     jets.cut(jets['FatJet_btagDDBvL'] > 0.8)
     jets.cut(jets['FatJet_btagDeepB'] > 0.4184)
     jets.cut(jets['FatJet_msoftdrop'] > 90)
@@ -319,11 +350,23 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     other.cut(other['PV_npvsGood'] >= 1)
 
 
+    ev.sync()
+
+
+
+
+    print('---------------------------')
+    print('after jet cuts')
+    for key in jets.keys():
+        print(jets[key].loc[600602])
+
+
+
 
     ## muon cuts
     if 'Parked'==dataSet:
         muons.cut((muons['Muon_softId'] > 0))
-        muons.cut(muons['Muon_eta'] < 2.4)
+        muons.cut(muons['Muon_eta'].abs() < 2.4)
         muons.cut(muons['Muon_pt'] > 7)
         muons.cut(muons['Muon_IP'] > 2)
         muons.cut(muons['Muon_ip3d'] < 0.5)
@@ -335,10 +378,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         trig.cut(trig['MuonEGTriggers'] == True)
         electrons.cut(electrons['Electron_pt'] > 15)
-        electrons.cut(electrons['Electron_eta'] < 2.5)
+        electrons.cut(electrons['Electron_eta'].abs() < 2.5)
         electrons.cut(electrons['Electron_mvaFall17V2Iso_WP90'] == 1)
         muons.cut(muons['Muon_pt'] > 10)
-        muons.cut(muons['Muon_eta'] < 2.4)
+        muons.cut(muons['Muon_eta'].abs() < 2.4)
         muons.cut(muons['Muon_mediumPromptId'] == 1)
         muons.cut(muons['Muon_miniIsoId'] >= 2)
 
@@ -349,19 +392,61 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         electrons.trimTo(passf)
 
     if 'C' == trigger:
+
+
+
         ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
-        ak4Jets.cut(ak4Jets['Jet_eta'] < 2.4)
+
+        print('after pt cut: ', ak4Jets['Jet_pt'].shape)
+
+        ak4Jets.cut(ak4Jets['Jet_eta'].abs() < 2.4)
+
+        print('after eta cut: ', ak4Jets['Jet_pt'].shape)
+
         ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
+
+        print('after puid cut: ', ak4Jets['Jet_pt'].shape )
+
+        ev.sync()
+        print('after first ak4 cuts: ', ak4Jets['Jet_pt'].shape)
+
+
+    print('---------------------------')
+    print('after slim jet cuts')
+    for key in jets.keys():
+        print(jets[key].loc[600602])
+
+
+
+        ## have to calculate dR after cutting all the things, so that I don't
+        ## choose the wrong fat jet
+        ak4Jets['dR'] = getdR(objName='Jet', events=events, fatJetPhysObj=jets, jetPhysObj=ak4Jets)
+        other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
+
+
+
+        for key in ak4Jets.keys():
+            ak4Jets[key][ak4Jets.dR > 0.8] = np.nan
+
+
+        pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
+        pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
+        #print('other before cut: ', other['JetFatJet_dRCnt'].shape)
+
         other.cut(other['JetFatJet_dRCnt'] >= 2 )
 
+
+        #print('other after cut: ', other['JetFatJet_dRCnt'].shape)
 
 
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
-    #pickle.dump(ev.frame, open('JetHTTrigEff/frames/frame.pkl', 'wb'))
-    #pklname = 'TTJets_MuonEG'#fileName[-21:-16]
-    #print(pklname)
-    #pickle.dump(ev, open(f'JetHTTrigEff/frames/{pklname}.pkl', 'wb'))
+
+    #print('after cuts: ',jets.FatJet_pt.shape)
+    #print('lenth after sync: ', len(other.LHE_HT))
+    #pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
+    #pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
+
 
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
@@ -370,8 +455,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         other.LHE_HT = other.LHE_HT.rename({0:'LHE_HT'}, axis='columns')
     other.PV_npvs = other.PV_npvs.rename({0:'PV_npvs'}, axis='columns')
     other.PV_npvsGood =other.PV_npvsGood.rename({0:'PV_npvsGood'}, axis='columns')
-
-    #other.Generator_weight = other.Generator_weight.rename({0:'Generator_weight'}, axis='columns')
 
     ## if nothing's left after cut, return empty dataframe
     if (jets.FatJet_pt.empty):
@@ -438,13 +521,19 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                   (maxPtData['Muon_pt'] > 25)]'''
 
         #------------------------------------------------------------------
+        ## add index back into the df for comparison
+        # print(jets.FatJet_pt.index)
+        # print(ak4Jets.Jet_pt.index)
+        # print(other.LHE_HT.index)
 
+        maxPtData['eventNum'] = jets.FatJet_pt.index
 
         if MC:
             maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
 
         if 'C' == trigger:
-            maxPtData = maxPtData[maxPtData['Jet_pt2'].notna()]
+            maxPtData = maxPtData[maxPtData['Jet_pt2'] > 30]
+
 
         ## LHE_weights
         if 'ggH'==tag:
@@ -510,14 +599,14 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
                                       (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                      (maxPtData.Muon_eta < 1.5) &
+                                      (maxPtData.Muon_eta.abs() < 1.5) &
                                       (maxPtData.PV_npvsGood == k+1),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
                         maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
                                       (maxPtData.Muon_IP < ipkeys[j +1]) &
-                                      (maxPtData.Muon_eta >= 1.5) &
+                                      (maxPtData.Muon_eta.abs() >= 1.5) &
                                       (maxPtData.PV_npvsGood == k+1),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
                         ## for places npvs good is out of range
@@ -525,14 +614,14 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
                                       (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                      (maxPtData.Muon_eta < 1.5) &
+                                      (maxPtData.Muon_eta.abs() < 1.5) &
                                       (maxPtData.PV_npvsGood > len(npvsGkeys)),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['L'][k]
                         maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                       (maxPtData.Muon_pt < ptkeys[i+1]) &
                                       (maxPtData.Muon_IP >= ipkeys[j]) &
                                       (maxPtData.Muon_IP < ipkeys[j +1]) &
-                                      (maxPtData.Muon_eta >= 1.5) &
+                                      (maxPtData.Muon_eta.abs() >= 1.5) &
                                       (maxPtData.PV_npvsGood > len(npvsGkeys)),
                                       'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
 
@@ -543,13 +632,13 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                   (maxPtData.Muon_pt < ptkeys[i+1]) &
                                   (maxPtData.Muon_IP >= ipkeys[j]) &
                                   (maxPtData.Muon_IP < ipkeys[j+1]) &
-                                  (maxPtData.Muon_eta < 1.5),
+                                  (maxPtData.Muon_eta.abs() < 1.5),
                                   'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['L']
                     maxPtData.loc[(maxPtData.Muon_pt >= ptkeys[i]) &
                                   (maxPtData.Muon_pt < ptkeys[i+1]) &
                                   (maxPtData.Muon_IP >= ipkeys[j]) &
                                   (maxPtData.Muon_IP  < ipkeys[j +1]) &
-                                  (maxPtData.Muon_eta >= 1.5),
+                                  (maxPtData.Muon_eta.abs() >= 1.5),
                                   'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
 
 
