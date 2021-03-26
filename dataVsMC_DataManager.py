@@ -107,7 +107,10 @@ def getMaxPt(physobj, col):
 def getNthPt(n, physobj, sortBy, extractCol):
     tosortby = physobj[sortBy].fillna(0).to_numpy()
     idxsorted = np.argsort(tosortby, axis=1, kind='stable')
+
     idxn = idxsorted[:,-n]
+
+
     rowidx = range(physobj[extractCol].shape[0])
     nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
     return pd.Series(nthVals)
@@ -328,10 +331,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ev = Event(jets, muons, other, trig, electrons, ak4Jets)
 
 
-    print('---------------------------')
-    print('before jet cuts')
-    for key in jets.keys():
-        print(jets[key].loc[600602])
+    # print('---------------------------')
+    # print('before jet cuts')
+    # for key in jets.keys():
+    #     print(jets[key].loc[600602])
 
 
 
@@ -355,10 +358,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
 
 
-    print('---------------------------')
-    print('after jet cuts')
-    for key in jets.keys():
-        print(jets[key].loc[600602])
+    # print('---------------------------')
+    # print('after jet cuts')
+    # for key in jets.keys():
+    #     print(jets[key].loc[600602])
 
 
 
@@ -397,24 +400,24 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
         ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
 
-        print('after pt cut: ', ak4Jets['Jet_pt'].shape)
+        #print('after pt cut: ', ak4Jets['Jet_pt'].shape)
 
         ak4Jets.cut(ak4Jets['Jet_eta'].abs() < 2.4)
 
-        print('after eta cut: ', ak4Jets['Jet_pt'].shape)
+        #print('after eta cut: ', ak4Jets['Jet_pt'].shape)
 
         ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
 
-        print('after puid cut: ', ak4Jets['Jet_pt'].shape )
+        #print('after puid cut: ', ak4Jets['Jet_pt'].shape )
 
         ev.sync()
-        print('after first ak4 cuts: ', ak4Jets['Jet_pt'].shape)
+        #print('after first ak4 cuts: ', ak4Jets['Jet_pt'].shape)
 
 
-    print('---------------------------')
-    print('after slim jet cuts')
-    for key in jets.keys():
-        print(jets[key].loc[600602])
+    #print('---------------------------')
+    #print('after slim jet cuts')
+    #for key in jets.keys():
+    #    print(jets[key].loc[600602])
 
 
 
@@ -422,16 +425,18 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         ## choose the wrong fat jet
         ak4Jets['dR'] = getdR(objName='Jet', events=events, fatJetPhysObj=jets, jetPhysObj=ak4Jets)
         other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
+        ak4Jets.cut(ak4Jets['dR'] < 0.8)
 
 
+        #for key in ak4Jets.keys():
+        #    ak4Jets[key][ak4Jets.dR > 0.8] = np.nan
 
-        for key in ak4Jets.keys():
-            ak4Jets[key][ak4Jets.dR > 0.8] = np.nan
 
-
-        pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
-        pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
+        #pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
+        #pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
         #print('other before cut: ', other['JetFatJet_dRCnt'].shape)
+
+
 
         other.cut(other['JetFatJet_dRCnt'] >= 2 )
 
@@ -444,8 +449,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     #print('after cuts: ',jets.FatJet_pt.shape)
     #print('lenth after sync: ', len(other.LHE_HT))
-    #pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
-    #pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
+    pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
+    pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
 
 
 
@@ -532,7 +537,9 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
             maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
 
         if 'C' == trigger:
+            #print(maxPtData.index)
             maxPtData = maxPtData[maxPtData['Jet_pt2'] > 30]
+            #print(maxPtData.index)
 
 
         ## LHE_weights
