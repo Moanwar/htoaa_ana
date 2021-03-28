@@ -16,33 +16,8 @@ import matplotlib.pyplot as plt
 import dataVsMC_DataManager as DM
 #from EfficiencyInfo import EfficiencyInfo
 import mplhep as hep
-#hep.set_style(hep.style.ROOT)
 plt.style.use(hep.style.ROOT)
-from EfficiencyInfoB import EfficiencyInfoB
-
-def truncateDf(df):
-    return df.loc[df.FatJet_pt > 400]
-
-class EfficiencyInfoC(EfficiencyInfoB):
-    def __init__(self, demDf, name, var, nbins, histrange):
-        #EfficiencyInfoB.__init__(demDf, name, var, nbins, histrange)
-        super().__init__(demDf, name, var, nbins, histrange)
-        self.plotdir = 'JetHTTrigEff/plots/C/'
-
-    def getNumDf(self, df):
-        trig = np.logical_and(np.logical_or(df.L1_DoubleJet112er2p3_dEta_Max1p6,
-                                            df.L1_DoubleJet150er2p5),
-                              df.HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71)
-        # trig = ((df.L1_DoubleJet112er2p3_dEta_Max1p6 |
-        #                 df.L1_DoubleJet150er2p5) &
-        #                df.HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71)
-        ret = df[trig]
-        return ret
-        #return df.loc[(df.L1_DoubleJet112er2p3_dEta_Max1p6 ==True |
-        #                df.L1_DoubleJet150er2p5==True) &
-         #              df.HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71==True]
-
-# L1_DoubleJet112er2p3_dEta_Max1p6 or L1_DoubleJet150er2p5) and HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71
+from EfficiencyInfoC import EfficiencyInfoC
 
 def btagCut(df):
     return df[(df.Jet_btagDeepB1 > 0.4184) & (df.Jet_btagDeepB2 > 0.4184)]
