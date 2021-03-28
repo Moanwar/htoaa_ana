@@ -320,7 +320,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
     ## muon cuts
     if 'Parked'==dataSet:
-        muons.cut((muons['Muon_softId'] > 0))
+        muons.cut((muons['Muon_softId'] > 0.9))
         muons.cut(muons['Muon_eta'].abs() < 2.4)
         muons.cut(muons['Muon_pt'] > 7)
         muons.cut(muons['Muon_IP'] > 2)
@@ -503,7 +503,7 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
 
 
-        if 'Parked'==dataSet and 'data'!=tag and 'ggH'!=tag: #not JetHT and tag != 'ggH' and tag!='data':
+        if 'Parked'==dataSet and 'data'!=tag: #'ggH'!=tag: #not JetHT and tag != 'ggH' and tag!='data':
             ## npvs Ratio (PU) weights
             for i in range(len(ptkeys)-1):
                 for j in range(len(ipkeys)-1):
