@@ -170,9 +170,9 @@ QCD_base_btag = EfficiencyInfoC(demDf=QCDBaseDf_ptCut, name='QCD (base selection
 QCD_base_btag.plot(title='trigger C')
 
 QCDBaseDf_ptbtagCut = bothCut(QCDBaseDf)
-QCD_parkingfatpt_cut = EfficiencyInfoC(QCDBaseDf_ptbtagCut, name = 'QCD (base selection) ( pt, btag cut)',
+QCD_basefatpt_cut = EfficiencyInfoC(QCDBaseDf_ptbtagCut, name = 'QCD (base selection) ( pt, btag cut)',
                                  **fatjetparams)
-QCD_parkingfatpt_cut.plot(title='trigger C')
+QCD_basefatpt_cut.plot(title='trigger C')
 #---------------- ggH with parking selections and weights ---------------------
 #%%
 root=False
@@ -300,7 +300,7 @@ def makeOverlay(effInfo, labels, title, xlabel, figname, ylim=[-0.05,1.05]):
                     xerr = xerr, label=labels[i], **plot_params)
     ax.set_title(title)
     ax.set_xlabel(xlabel)
-    ax.legend(loc='lower right')
+    ax.legend(loc='best')
     plt.savefig(f'JetHTTrigEff/plots/C/{figname}.png')
     plt.show()
     plt.close()
@@ -310,7 +310,7 @@ parkingQCDtitle = 'Parking + QCD (trigger C)'
 pt = 'Jet_pt'
 btag = 'Jet_btagDeepB'
 
-makeOverlay(effInfo=[parkedpt, QCD_parking, QCD_base_pt],
+makeOverlay(effInfo=[parkedfatpt_cut, QCD_parkingfatpt_cut, QCD_basefatpt_cut],#[parkedpt, QCD_parking, QCD_base_pt],
             labels= parkingQCDlabels,
             title=parkingQCDtitle,
             xlabel=pt,
@@ -340,7 +340,7 @@ makeOverlay(effInfo=[parkedbtag, ggH_parking_btag, ggH_base_btag],
 ## -------------- MuonEG + ttBar (MuonEG) + ttBar (base) -----------------
 muonegttbarlabels = ['MuonEG', 'TTBar (MuonEG selection)', 'TTBar (base selection)']
 muonegttbartitle = 'MuonEG + TTBar (trigger C)'
-makeOverlay(effInfo=[muonEGpt, TTBar_muonEG_pt, TTBar_base_pt],
+makeOverlay(effInfo=[muonEGfatpt_cut, TTBar_muonEGfatpt_cut, TTBarBasefatpt_cut],
             labels=muonegttbarlabels,
             title=muonegttbartitle,
             xlabel=pt,
@@ -355,7 +355,7 @@ makeOverlay(effInfo=[muonEGbtag, TTBar_muonEG_btag, TTBar_base_btag],
 ## ----------------- qcd + ttbar + ggh -----------------------------
 qcdttbargghlabels = ['QCD', 'TTBar', 'GGH']
 qcdttbargghtitle = 'QCD + TTBar + GGH (trigger C)'
-makeOverlay(effInfo=[QCD_base_pt, TTBar_base_pt, ggH_base_pt],
+makeOverlay(effInfo=[QCD_basefatpt_cut, TTBarBasefatpt_cut , ggH_basefatpt_cut],
             labels=qcdttbargghlabels,
             title=qcdttbargghtitle,
             xlabel=pt,

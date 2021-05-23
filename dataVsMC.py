@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from analib import PhysObj, Event
-from info import BGenFileNames, bEnrFileNames
+#from info import BGenFileNames, bEnrFileNames
 
 import dataVsMC_DataManager as DM #import processData, jetVars, muonVars, PVVars, allVars, dataPath, ggHPath, bEnrPaths, BGenPaths, TTJetsPaths,
 from dataManager import trainVars # this is so we can run our thing through the BDT XML correctly
@@ -23,7 +23,7 @@ root = False
 ## test
 
 ## function to add a BDTScore column to each of the background/signal/data DF
-loadedModel = pickle.load(open('Htoaa_BDThigh disc.pkl', 'rb'))
+loadedModel = pickle.load(open('BDTModels/Htoaa_BDThigh disc.pkl', 'rb'))
 def analyze(dataDf):
     prediction = loadedModel.predict_proba(dataDf[trainVars])
     dataDf = dataDf.assign(BDTScore=prediction[:,1])
@@ -42,10 +42,14 @@ if root:
     ggHDf = DM.processData(DM.ggHPaths, 'ggH', 'Parked', True)
 
     ############## BGen ##############
+    #%%
     BGenDf = pd.DataFrame()
     for fileName in DM.BGenPaths:
-        tmpDf = DM.processData(fileName, 'BGen', 'Parked', True)
+        tmpDf = DM.processData(fileName, 'BGen', 'Parked', True, trigger=None)
+        print(tmpDf.shape)
         BGenDf = BGenDf.append(tmpDf, ignore_index=True, sort=False)
+
+    #%%
     ###################################
 
     ############## bEnr ##############
@@ -109,10 +113,10 @@ else:
     TTJetsDf = pickle.load(open('dataVsMC/TTJetsDf.pkl', 'rb'))
     ZJetsDf = pickle.load(open('dataVsMC/ZJetsDf.pkl', 'rb'))
     WJetsDf = pickle.load(open('dataVsMC/WJetsDf.pkl', 'rb'))
-    if DM.JetHT:
-        JetHTDf = pickle.load(open('dataVsMC/JetHTDf.pkl', 'rb'))
-    else:
-        dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
+    # if DM.JetHT:
+    #     JetHTDf = pickle.load(open('dataVsMC/JetHTDf.pkl', 'rb'))
+    #v else:
+    dataDf = pickle.load(open('dataVsMC/dataDf.pkl', 'rb'))
 
 
 ggHDf = analyze(ggHDf)
@@ -121,10 +125,10 @@ bEnrDf = analyze(bEnrDf)
 TTJetsDf = analyze(TTJetsDf)
 ZJetsDf = analyze(ZJetsDf)
 WJetsDf = analyze(WJetsDf)
-if DM.JetHT:
-    JetHTDf = analyze(JetHTDf)
-else:
-    dataDf = analyze(dataDf)
+# if DM.JetHT:
+#     JetHTDf = analyze(JetHTDf)
+#else:
+dataDf = analyze(dataDf)
 
 
 
@@ -136,10 +140,10 @@ dfdict = { 'WJets': WJetsDf,
            }
 
 ## define variables to plot, which is all of them but weights and LHE_HT
-if DM.JetHT:
-    cols = list(JetHTDf.columns)
-else:
-    cols = list(dataDf.columns)
+# if DM.JetHT:
+#     cols = list(JetHTDf.columns)
+#else:
+cols = list(dataDf.columns)
 
 
 ## remove things i don't want plotted
@@ -218,16 +222,16 @@ for var in cols:
 
 
     ## plotting data
-    if DM.JetHT:
-        datavals, databins, _ = ax0.hist(JetHTDf[var].values,
-                label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
-                density=density, bins=nbins, linewidth=3, color='k',
-                range=range_local, weights=JetHTDf.final_weights)
-    else:
-        datavals, databins, _ = ax0.hist(dataDf[var].values,
-                label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
-                histtype='step', density=density, bins=nbins, linewidth=3,
-                color='k',range=range_local, weights=dataDf.final_weights)
+    # if DM.JetHT:
+    #     datavals, databins, _ = ax0.hist(JetHTDf[var].values,
+    #             label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
+    #             density=density, bins=nbins, linewidth=3, color='k',
+    #             range=range_local, weights=JetHTDf.final_weights)
+    # else:
+    datavals, databins, _ = ax0.hist(dataDf[var].values,
+            label=f'parkedData ({round(np.sum(dataDf.final_weights))})',
+            histtype='step', density=density, bins=nbins, linewidth=3,
+            color='k',range=range_local, weights=dataDf.final_weights)
 
     ax0.set_title(var )# + ' JetHT')
     ax0.legend(loc='best', frameon=True)
@@ -249,10 +253,10 @@ for var in cols:
 
 
     ## saving da plots
-    if DM.JetHT:
-        filedest = 'dataVsMCDist/JetHT/{}.png'
-    else:
-        filedest = 'dataVsMCDist/Parked/{}.png'
+    # if DM.JetHT:
+    #     filedest = 'dataVsMCDist/JetHT/{}.png'
+    # else:
+    filedest = 'dataVsMCDist/Parked/{}.png'
     plt.savefig(filedest.format(var))
     plt.show()
     plt.close()

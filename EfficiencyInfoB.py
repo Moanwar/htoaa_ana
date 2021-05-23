@@ -57,6 +57,8 @@ class EfficiencyInfoB(object):
 
 
     def getBinCenter(self, arr):
+        if np.isinf(arr[-1]):
+            arr[-1] = arr[-2] + (arr[1]-arr[0])
         arrCen = list()
         for i in range(len(arr)-1):
             arrCen.append((arr[i+1]+arr[i])/2)
@@ -110,8 +112,8 @@ class EfficiencyInfoB(object):
         edge = self.getBinCenter(self.demEdge)
         fig, ax = plt.subplots(figsize=(10,6))
         ax.grid()
-        ax.set_ylim(ylim)
-        ax.set_title(f'{self.name} ({title})')
+        #ax.set_ylim(ylim)
+        ax.set_title(f'{self.name}{title}')
         ax.set_xlabel(self.var + ' ' + xlabel)
         ax.errorbar(edge, self.quot, yerr=(self.lowErr, self.upErr),
                     linestyle='None',fmt='ok', capsize=5)

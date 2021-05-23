@@ -29,7 +29,7 @@ np.set_printoptions(suppress=True)
 
 trigTensor = pickle.load(open('TrigTensor.p','rb'))
 pathlist = ['ABC', 'AB', 'C']
-taglist = ['BGen', 'bEnr', 'Parked', 'ggH', 'JetHT', 'ZJets', 'WJets', 'TTJets']
+taglist = ['BGen', 'bEnr', 'Parked', 'ggH', 'JetHT', 'ZJets', 'WJets', 'TTJets', 'QCDInc']
 
 plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJet_btagDeepB',
             'FatJet_msoftdrop', 'FatJet_btagDDBvL', 'FatJet_deepTagMD_H4qvsQCD', 'FatJet_n2b1',
@@ -63,11 +63,11 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
                                                          physobj=ak4Jets,
                                                          sortBy='Jet_pt',
                                                          extractCol='Jet_btagDeepB'))
-
         btags = pd.DataFrame(maxPtData.Jet_btagDeepB1, columns=['Jet_btagDeepB1'])
         btags = btags.assign(Jet_btagDeepB2=maxPtData.Jet_btagDeepB2)
         maxPtData = maxPtData.assign(Jet_btagDeepB1=btags.max(axis=1))
         maxPtData = maxPtData.assign(Jet_btagDeepB2=btags.min(axis=1))
+
 
     maxPtData['final_weights'] = 1
     if 'ggH'==tag:
@@ -79,24 +79,28 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
                                       maxPtData['ggH_weights'])
     elif 'BGen'==tag:
         maxPtData['LHE_weights'] = DM.BGenDict[filepath]
-        wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
-        wgt[wgt<0.1] = 0.1
-        maxPtData['QCD_correction'] = wgt
-        Xsec_wgt = 10.78
+        # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
+        # wgt[wgt<0.1] = 0.1
+        # maxPtData['QCD_correction'] = wgt
+        # Xsec_wgt = 10.78
         maxPtData = maxPtData.assign(final_weights =
-                                     maxPtData['LHE_weights']*
-                                     maxPtData['QCD_correction']*
-                                     Xsec_wgt)
+                                     maxPtData['LHE_weights'])
+                                     #maxPtData['QCD_correction']
+                                     #*Xsec_wgt)
     elif 'bEnr' == tag:
         maxPtData['LHE_weights'] = DM.bEnrDict[filepath]
-        wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
-        wgt[wgt<0.1] = 0.1
-        maxPtData['QCD_correction'] = wgt
-        Xsec_wgt = 4.1
+        # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
+        # wgt[wgt<0.1] = 0.1
+        # maxPtData['QCD_correction'] = wgt
+        # Xsec_wgt = 4.1
         maxPtData = maxPtData.assign(final_weights=
-                                     maxPtData['LHE_weights']*
-                                     maxPtData['QCD_correction']*
-                                     Xsec_wgt)
+                                     maxPtData['LHE_weights'])
+                                     #maxPtData['QCD_correction']
+                                     #*Xsec_wgt)
+    elif 'QCDInc'==tag:
+        maxPtData['LHE_weights'] =DM.QCDIncDict[filepath]
+        maxPtData = maxPtData.assign(final_weights=
+                                     maxPtData['LHE_weights'])
     elif 'WJets'==tag:
         maxPtData['LHE_weights'] = DM.WJetsDict[filepath]
         maxPtData = maxPtData.assign(final_weights = maxPtData['LHE_weights'])
@@ -106,13 +110,16 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
     elif 'TTJets'==tag:
         maxPtData['LHE_weights'] = DM.TTJetsDict[filepath]
         maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
+        ## added this for checks
+        #wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
+        #wgt[wgt<0.1] = 0.1
+        #maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights']*wgt)
 
     if MC:
         #bins = pd.IntervalIndex.from_breaks(breaks=trigTensor['meta'][path], closed='left')
         if 'C'==path:
             bins = trigTensor['meta']['CX']
             ##!!! TODO: swap ak4 jets values here too don't forget to do that
-
             trigWgt = pd.cut(x=maxPtData.Jet_btagDeepB2, bins=bins, right=False, include_lowest=True,
                              labels=trigTensor['CX']).astype(float)
         else:
@@ -122,12 +129,25 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
         maxPtData = maxPtData.assign(trigWeight = trigWgt)
         maxPtData = maxPtData.assign(final_weights = maxPtData['final_weights']*
                                      maxPtData['trigWeight']*54.54)
-    else:
-        maxPtData['event'] = other['event']
+        ## added ask bhoff if this is for all of just qcd
+        # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
+        # wgt[wgt<0.1] = 0.1
+        # maxPtData['QCD_correction'] = wgt
+        # maxPtData = maxPtData.assign(final_weights=maxPtData['final_weights']*
+        #                              maxPtData['QCD_correction'])
 
+
+    # else:
+    #     maxPtData['event'] = other['event'].values.astype(int)
+    #     maxPtData['run'] = other['run'].values.astype(int)
+    #     maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
+
+    maxPtData['event'] = other['event'].values.astype(int)
+    maxPtData['run'] = other['run'].values.astype(int)
+    maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
     maxPtData['FatJet_eta'] = maxPtData['FatJet_eta'].abs()
-    maxPtData['EventNum'] = jets.FatJet_pt.index
+    #maxPtData['EventNum'] = jets.FatJet_pt.index
     return maxPtData
 
 
@@ -201,6 +221,20 @@ def process(filepath, MC, tag):
 
     ev = Event(jets, other, trig)
 
+    ## select base on genparticles 
+    gen = PhysObj('gen')
+    gen['pdgId'] = pd.DataFrame(events.array('GenPart_pdgId'))
+    gen['gen_pt'] = pd.DataFrame(events.array('GenPart_pt'))
+    gen.cut((gen.pdgId==5)&(gen.gen_pt>15))
+    if ('BGen'==tag) or ('bEnr'==tag):
+        ev.register(gen)
+        ev.sync()
+        ev.objs.pop('gen')
+    elif 'QCDInc'==tag:
+        gen.cut((gen.pdgId==5)&(gen.gen_pt>15))
+        jets.FatJet_pt.drop(gen.pdgId.index, inplace=True)
+        ev.sync()
+
     jets.cut(jets['FatJet_pt'] >= 250) #250)
     jets.cut(jets['FatJet_eta'].abs() < 2.4)
     jets.cut(jets['FatJet_btagDDBvL'] > 0.8)
@@ -211,12 +245,11 @@ def process(filepath, MC, tag):
     other.cut(other['PV_npvsGood'] >= 1)
 
 
-    ## cut all but the fattest jet
-    jets.cut(jets.FatJet_pt.rank(method='max', axis=1, ascending=False)==1)
-
     # ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
     # ak4Jets.cut(ak4Jets['Jet_eta'].abs() < 2.4)
     # ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
+
+    ev.sync()
 
     ## golden json cuts
     if False == MC:
@@ -242,9 +275,6 @@ def process(filepath, MC, tag):
 
 
     ev.sync()
-
-
-    print(jets.FatJet_pt.loc[115])
 
     # make C events
     Cjets = jets.deepcopy()
@@ -298,38 +328,20 @@ def process(filepath, MC, tag):
 
 
     ## perform C cuts
+    ## cut all but the fattest jet
+
+    Cjets.cut(Cjets.FatJet_pt.rank(method='max', axis=1, ascending=False)==1)
     Cjets.cut(Cjets['FatJet_pt'] < 400)
-
-
-    print(Cjets.FatJet_pt.loc[115])
-
     Cak4Jets.cut(Cak4Jets['Jet_btagDeepB'] > 0.4184)
-
-
-    print(Cak4Jets.Jet_pt.loc[115])
-
-
     Cak4Jets.cut(Cak4Jets['Jet_pt'] > 140)
-
-    print(Cak4Jets.Jet_pt.loc[115])
-
     Cak4Jets.cut(Cak4Jets['Jet_eta'].abs() < 2.4)
-
-
-    print(Cak4Jets.Jet_pt.loc[115])
-
     Cak4Jets.cut(Cak4Jets['Jet_puId'] >= 1)
-
-
-    print(Cak4Jets.Jet_pt.loc[115])
-
     Cjets.FatJet_pt.drop(ABCjets.FatJet_pt.index, inplace=True, errors='ignore')
     Cjets.FatJet_pt.drop(ABjets.FatJet_pt.index, inplace=True, errors='ignore')
 
-    print(Cak4Jets.Jet_pt.loc[115])
-
 
     Cev.sync()
+
     Cak4Jets['dR'] = DM.getdR(objName='Jet', events=events, fatJetPhysObj=Cjets, jetPhysObj=Cak4Jets)
     Cother['JetFatJet_dRCnt'] = pd.DataFrame((Cak4Jets.dR<0.8).sum(axis=1))
     Cak4Jets.cut(Cak4Jets['dR'] < 0.8)
@@ -337,16 +349,24 @@ def process(filepath, MC, tag):
     Ctrig.cut(Ctrig['trigC']==True)
     Cev.sync()
 
-    print(Cak4Jets.Jet_pt.loc[115])
-
-
     CXdf = pd.DataFrame(Cother['run'])
     CXdf = CXdf.rename({0:'run'})
     CXdf = CXdf.assign(luminosityBlock = Cother['luminosityBlock'])
     CXdf = CXdf.assign(event = Cother['event'])
 
-    pickle.dump(CXdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/CXevents.pkl','wb'))
+    ABCdf = pd.DataFrame(ABCother['run'])
+    #ABCdf = ABCdf.rename({0:'run'})
+    ABCdf = ABCdf.assign(luminosityBlock = ABCother['luminosityBlock'])
+    ABCdf = ABCdf.assign(event = ABCother['event'])
 
+    ABdf = pd.DataFrame(ABother['run'])
+    #ABdf = ABdf.rename({0:'run'})
+    ABdf = ABdf.assign(luminosityBlock = ABother['luminosityBlock'])
+    ABdf = ABdf.assign(event = ABother['event'])
+
+    pickle.dump(CXdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/CXevents.pkl','wb'))
+    pickle.dump(ABCdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/ABCevents.pkl','wb'))
+    pickle.dump(ABdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/ABevents.pkl','wb'))
 
     ABCDf = getMaxPtDf(filepath=filepath, ev=ABCev, MC=MC, path='ABC', tag=tag, events=events)
     ABDf = getMaxPtDf(filepath=filepath, ev=ABev, MC=MC, path='AB', tag=tag, events=events)
@@ -425,7 +445,7 @@ nbins = {'FatJet_pt': 110,
 
 pickledir = 'JetHTTrigEff/dataVsMC/pickles'
 append_params = {'ignore_index':True, 'sort':False}
-root=True
+root=False
 #%%
 if root:
     ggH = process(filepath=DM.ggHPaths, MC=True, tag='ggH')
@@ -436,10 +456,6 @@ if root:
     BGen = {'ABC': pd.DataFrame(), 'AB': pd.DataFrame(), 'C': pd.DataFrame()}
     for fileName in DM.BGenPaths:
         tmp = process(filepath=fileName, MC=True, tag='BGen')
-        # for key in tmp:
-        #     print(key)
-        #     if not tmp[key].empty:
-        #         print(tmp[key].shape, int(tmp[key].final_weights.sum()))
         BGen['ABC'] = BGen['ABC'].append(tmp['ABC'], **append_params)
         BGen['AB'] = BGen['AB'].append(tmp['AB'], **append_params)
         BGen['C'] = BGen['C'].append(tmp['C'], **append_params)
@@ -450,10 +466,6 @@ if root:
     bEnr = {'ABC': pd.DataFrame(), 'AB': pd.DataFrame(), 'C': pd.DataFrame()}
     for fileName in DM.bEnrPaths:
         tmp=process(filepath=fileName, MC=True, tag='bEnr')
-        for key in tmp:
-            print(key)
-            if not tmp[key].empty:
-                print(tmp[key].shape, int(tmp[key].final_weights.sum()))
         bEnr['ABC'] = bEnr['ABC'].append(tmp['ABC'], **append_params)
         bEnr['AB'] = bEnr['AB'].append(tmp['AB'], **append_params)
         bEnr['C'] = bEnr['C'].append(tmp['C'], **append_params)
@@ -480,15 +492,27 @@ if root:
     for key in ZJets:
         ZJets[key] = analyze(ZJets[key])
     pickle.dump(ZJets, open(f'{pickledir}/ZJets.pkl','wb'))
-
+#%%
     TTJets = process(filepath=DM.TTJetsPaths[0], MC=True, tag='TTJets')
     for key in TTJets:
         TTJets[key] = analyze(TTJets[key])
     pickle.dump(TTJets, open(f'{pickledir}/TTJets.pkl','wb'))
 
 #%%
+    QCDInc = {'ABC': pd.DataFrame(), 'AB': pd.DataFrame(), 'C': pd.DataFrame()}
+    for fileName in DM.QCDIncPaths:
+        tmp = process(filepath=fileName, MC=True, tag='QCDInc')
+        QCDInc['ABC'] = QCDInc['ABC'].append(tmp['ABC'], **append_params)
+        QCDInc['AB'] = QCDInc['AB'].append(tmp['AB'], **append_params)
+        QCDInc['C'] = QCDInc['C'].append(tmp['C'], **append_params)
+    for key in QCDInc:
+        QCDInc[key] = analyze(QCDInc[key])
+    pickle.dump(QCDInc, open(f'{pickledir}/QCDInc.pkl','wb'))
+
+#%%
+    jdir = '/Users/si_sutantawibul1/Projects/htoaa/data/JetHT/2018_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root'
     JetHT = {'ABC': pd.DataFrame(), 'AB': pd.DataFrame(), 'C': pd.DataFrame()}
-    for fileName in [DM.JetHTPaths[2]]:#DM.JetHTPaths:
+    for fileName in [jdir]:#DM.JetHTPaths:
         tmp=process(filepath=fileName, MC=False, tag='JetHT')
         JetHT['ABC'] = JetHT['ABC'].append(tmp['ABC'], **append_params)
         JetHT['AB'] = JetHT['AB'].append(tmp['AB'], **append_params)
@@ -505,13 +529,14 @@ else:
     ZJets = pickle.load(open(f'{pickledir}/ZJets.pkl','rb'))
     TTJets = pickle.load(open(f'{pickledir}/TTJets.pkl','rb'))
     JetHT = pickle.load(open(f'{pickledir}/JetHT.pkl','rb'))
-
+    QCDInc = pickle.load(open(f'{pickledir}/QCDInc.pkl','rb'))
 
 bgs = {'WJets': WJets,
        'ZJets': ZJets,
        'TTJets': TTJets,
        'bEnr': bEnr,
-       'BGen': BGen
+       'BGen': BGen,
+       'QCDInc' :QCDInc
        }
 
 wgt = pd.DataFrame()
@@ -529,7 +554,7 @@ for path in pathlist:
         else:
             range_local = ranges[var]
 
-        fig, (ax0, ax1) = plt.subplots(nrows=2, gridspec_kw={'height_ratios': [3, 1]},
+        fig, (ax0, ax1) = plt.subplots(figsize=(15,9),nrows=2, gridspec_kw={'height_ratios': [3, 1]},
                                        sharex=True)
         ax0.set_ylabel('events')
         ax1.set_ylabel('ratio')
@@ -574,7 +599,7 @@ for path in pathlist:
         hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbin, 'stacked':True}
 
         ## making color palette for the QCD stakcs
-        pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759']
+        pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759', '#ba6861']
 
 
         ## plotting background MC
@@ -609,8 +634,9 @@ for path in pathlist:
         if 'BDTScore'==var:
             datavals, databins, _ = ax0.hist(JetHTDf[var].values,
                                          label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
-                                         density=density, bins=nbin, linewidth=3, color='k',
+                                         density=density, bins=8, linewidth=3, color='k',
                                          range=(0,0.8), weights=JetHTDf.final_weights)
+            datavals = np.append(datavals, [0,0])
         elif 'LHE_HT' == var:
             continue
         else:
@@ -632,11 +658,9 @@ for path in pathlist:
 
 
         ax0.set_title(f'{var} {path}' )# + ' JetHT')
-        ax0.legend(loc='best', frameon=True,bbox_to_anchor=(1, 0.5))
+        ax0.legend(loc='best')#, frameon=True,bbox_to_anchor=(1, 0.5))
         ax0.grid()
 
         plt.savefig(f'JetHTTrigEff/dataVsMC/plots/{var}_{path}'  , bbox_inches = "tight")
         plt.show()
         plt.close
-    print(np.sum(toplotweights))
-    wgt[path] = np.sum(toplotweights)

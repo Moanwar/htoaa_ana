@@ -15,7 +15,7 @@ import pickle
 import numpy as np
 from dataManager import getSubJetData, getnSVCounts
 from htoaaRootFilesLoc import TTJetsPaths, WJetsPaths, bEnrPaths, BGenPaths
-from htoaaRootFilesLoc import ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths, MuonEGPaths
+from htoaaRootFilesLoc import ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths, MuonEGPaths, QCDIncPaths
 #import htoaaRootFilesLoc
 
 #JetHT = False
@@ -23,15 +23,36 @@ from htoaaRootFilesLoc import ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths,
 #exec(open("./htoaaRootFilesLoc.py").read())
 
 
-BGenWeight = [1, 0.259, 0.0515, 0.01666, 0.00905, 0.003594, 0.001401]
-bEnrWeight =[ 1.0, 0.33, 0.034, 0.034, 0.024, 0.0024, 0.00044]
+BGenWeight = [111800000. / 18740178,
+              28070000. / 17127050,
+              3082000. / 8292039,
+              724200. / 5844648,
+              138200. / 1953159,
+              13610. /  511470,
+              2909. /  287303]
+bEnrWeight =[80430000. / 19407546,
+             16620000. / 12042685,
+             1487000. / 10381843,
+             296000. / 2031431,
+             46610. /  474198,
+             3720. /  411724,
+             646.2 / 401397]
+QCDIncWeight = [1547000000. / 54289442,
+                322600000. / 54661579,
+                29980000. / 55152960,
+                6334000. / 48158738,
+                1088000. / 15466225,
+                99110. / 10955087,
+                20230. /  5475677
+                ]
 ZJetsWeight = [ 145400. / 16704355, 34000. / 14642701, 18670. / 10561192]
 WJetsWeight = [315600. / 10071273, 68570./ 15298056, 34900. / 14627242]
-TJetsWeight = [831760.0 / 10244307]
+TJetsWeight = [0.08119]#[831760.0 / 10244307]
 ParkedDataWeight = [7.1055]
 
 BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
+QCDIncDict = dict(zip(QCDIncPaths,QCDIncWeight))
 ZJetsDict = dict(zip(ZJetsPaths, ZJetsWeight))
 WJetsDict = dict(zip(WJetsPaths, WJetsWeight))
 TTJetsDict = dict(zip(TTJetsPaths, TJetsWeight))
@@ -92,7 +113,7 @@ npvsGkeys = muonR[6][2]['H']
 
 tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets', 'ggH', 'MuonEG']
 dataSetList = ['Base', 'Parked', 'JetHT', 'MuonEG']
-triggerSetList = ['A', 'B', 'C']
+triggerSetList = ['A', 'B', 'C', None]
 
 def getMaxPt(physobj, col):
     colidx = physobj[col].idxmax(axis=1).to_numpy()
@@ -110,7 +131,6 @@ def getNthPt(n, physobj, sortBy, extractCol):
 
     idxn = idxsorted[:,-n]
 
-
     rowidx = range(physobj[extractCol].shape[0])
     nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
     return pd.Series(nthVals)
@@ -118,23 +138,23 @@ def getNthPt(n, physobj, sortBy, extractCol):
 def getdR(objName, events, fatJetPhysObj, jetPhysObj):
     eventidx = fatJetPhysObj.FatJet_pt.index
     eventidx = range(len(eventidx))
-
     tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
-
     maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
+
+    idx = maxptJetIdx.index
 
     fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
     fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
-
     fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
     fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
-
     objEta = jetPhysObj['Jet_eta']
     objPhi = jetPhysObj['Jet_phi']
 
     dr = np.sqrt(np.power(fatJetEta-objEta,2)+np.power(dphi(objPhi, fatJetPhi),2))
-
     return pd.DataFrame(dr)
+
+
+
 
 def dphi(phi1,phi2):
     return np.minimum(np.minimum(np.abs(phi1-phi2),np.abs(phi1-phi2+(2*np.pi))),
@@ -158,7 +178,7 @@ def getdRCount(dr):
 ## dataset: (str) what kind of cuts you want to be making. check list of valid datasets
 ## MC: (bool) is this file MC or not
 ## trigger: (str) on for have trigger info in the resulting dataframe
-def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
+def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
     ## open file, get events
     fileName, fileExtension = os.path.splitext(filePath)
 
@@ -209,10 +229,10 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
     jets['FatJet_deepTagMD_H4qvsQCD'] = pd.DataFrame(events.array('FatJet_deepTagMD_H4qvsQCD'))
     jets['FatJet_phi'] = pd.DataFrame(events.array('FatJet_phi'))
-    # jets['FatJet_n2b1'] = pd.DataFrame(events.array('FatJet_n2b1'))
-    # jets['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
-    # jets['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
-    # jets['SubJet_tau1(1)'] = getSubJetData(1, 'SubJet_tau1', events)
+    jets['FatJet_n2b1'] = pd.DataFrame(events.array('FatJet_n2b1'))
+    jets['SubJet_mass(1)'] = getSubJetData(1,'SubJet_mass', events)
+    jets['SubJet_mass(2)'] = getSubJetData(2, 'SubJet_mass', events)
+    jets['SubJet_tau1(1)'] = getSubJetData(1, 'SubJet_tau1', events)
     # jets['FatJet_n3b1'] = pd.DataFrame(events.array('FatJet_n3b1'))
     # jets['FatJet_tau2'] = pd.DataFrame(events.array('FatJet_tau2'))
     # jets['SubJet_n2b1(1)'] = getSubJetData(1, 'SubJet_n2b1', events)
@@ -221,14 +241,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     # jets['SubJet_btagDeepB(2)'] = getSubJetData(2, 'SubJet_btagDeepB', events)
     # jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
-    ## JetHT triggers
-    ## add them all up, so passing at least one is just see if event has trig > 0
-    '''if JetHT:
-        trig1 = events.array('HLT_AK8PFJet500')
-        trig2 = events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4')
-        trig3 = events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
-        trig4 = events.array('HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5')
-        other['HLT_trigger'] = pd.DataFrame(trig1+trig2+trig3+trig4)'''
 
     ## muons
     if 'Parked'==dataSet:
@@ -330,7 +342,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
 
 
     if 'MuonEG'==dataSet:
-
         trig.cut(trig['MuonEGTriggers'] == True)
         electrons.cut(electrons['Electron_pt'] > 15)
         electrons.cut(electrons['Electron_eta'].abs() < 2.5)
@@ -366,12 +377,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
 
-    #print('after cuts: ',jets.FatJet_pt.shape)
-    #print('lenth after sync: ', len(other.LHE_HT))
     pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
     pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
-
-
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
     ## passed into getMaxPt
@@ -414,7 +421,6 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
             maxPtData = maxPtData.assign(L1_DoubleJet112er2p3_dEta_Max1p6=trig['L1_DoubleJet112er2p3_dEta_Max1p6'].to_numpy().flatten())
             maxPtData = maxPtData.assign(L1_DoubleJet150er2p5=trig['L1_DoubleJet150er2p5'].to_numpy().flatten())
             maxPtData = maxPtData.assign(HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71=trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'].to_numpy().flatten())
-
 
             maxPtData = maxPtData.assign(Jet_pt1=getNthPt(n=1, physobj=ak4Jets,
                                                          sortBy='Jet_pt',
@@ -460,31 +466,29 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
                                            maxPtData['ggH_weights'])
 
         elif 'BGen'==tag:
-            maxPtData['LHE_weights'] = BGenDict[filePath]
+            Xsec_wgt = 21.56
+            maxPtData['LHE_weights'] = BGenDict[filePath]*Xsec_wgt
 
             wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
             wgt[wgt<0.1] = 0.1
             maxPtData['QCD_correction'] = wgt
-            Xsec_wgt = 21.56
+
 
             maxPtData = maxPtData.assign(final_weights =
                                          maxPtData['LHE_weights']*
-                                         maxPtData['QCD_correction']*
-                                         Xsec_wgt)
-
+                                         maxPtData['QCD_correction'])
 
         elif 'bEnr'==tag:
-            maxPtData['LHE_weights'] = bEnrDict[filePath]
+            Xsec_wgt = 8.2
+            maxPtData['LHE_weights'] = bEnrDict[filePath]*Xsec_wgt
 
             wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
             wgt[wgt<0.1] = 0.1
             maxPtData['QCD_correction'] = wgt
-            Xsec_wgt = 8.2
 
             maxPtData = maxPtData.assign(final_weights=
                                          maxPtData['LHE_weights']*
-                                         maxPtData['QCD_correction']*
-                                         Xsec_wgt)
+                                         maxPtData['QCD_correction'])
 
 
         elif 'WJets'==tag:
@@ -572,8 +576,8 @@ def processData (filePath, tag, dataSet, MC, trigger): #JetHT=False):
         if tag == 'data':
             maxPtData['final_weights'] = ParkedDataDict[filePath]
 
-    maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
 
+    maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
     maxPtData = maxPtData.dropna(how='all')
     #maxPtData = maxPtData.fillna(0)
 
