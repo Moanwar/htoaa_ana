@@ -7,7 +7,7 @@ Created on Tue Apr 13 15:42:04 2021
 """
 
 import pickle
-from EffInfoABC import EfficiencyInfoABC,EfficiencyInfoAB,EfficiencyInfoC
+#from EffInfoABC import EfficiencyInfoABC,EfficiencyInfoAB,EfficiencyInfoC
 from ScaleFactor import ScaleFactor
 import uproot
 import pandas as pd
@@ -171,6 +171,7 @@ def process(filepath, MC, tag):
     other = PhysObj('other')
     ak4Jets = PhysObj('ak4Jets')
     trig = PhysObj('trig')
+    muon = PhysObj('muons')
 
     f = uproot.open(fileName + '.root')
     events = f.get('Events')
@@ -203,6 +204,8 @@ def process(filepath, MC, tag):
     other['event'] = pd.DataFrame(events.array('event').astype(int))
     other['luminosityBlock'] = pd.DataFrame(events.array('luminosityBlock').astype(int))
 
+    
+
     ## triggers
     trigABC1 = events.array('L1_SingleJet180') & (events.array('HLT_AK8PFJet500') |
                                                events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'))
@@ -220,20 +223,34 @@ def process(filepath, MC, tag):
 
 
     ev = Event(jets, other, trig)
+    
+    
+    
+    
+    ii =104512
+     
+    for obj in ev.objs:
+        for key in ev.objs[obj]:
+            print(key)
+            print(ev.objs[obj][key].loc[ii])
+            print('--------------------------')
+    
+    
 
     ## select base on genparticles 
-    gen = PhysObj('gen')
-    gen['pdgId'] = pd.DataFrame(events.array('GenPart_pdgId'))
-    gen['gen_pt'] = pd.DataFrame(events.array('GenPart_pt'))
-    gen.cut((gen.pdgId==5)&(gen.gen_pt>15))
-    if ('BGen'==tag) or ('bEnr'==tag):
-        ev.register(gen)
-        ev.sync()
-        ev.objs.pop('gen')
-    elif 'QCDInc'==tag:
+    if MC:
+        gen = PhysObj('gen')
+        gen['pdgId'] = pd.DataFrame(events.array('GenPart_pdgId'))
+        gen['gen_pt'] = pd.DataFrame(events.array('GenPart_pt'))
         gen.cut((gen.pdgId==5)&(gen.gen_pt>15))
-        jets.FatJet_pt.drop(gen.pdgId.index, inplace=True)
-        ev.sync()
+        if ('BGen'==tag) or ('bEnr'==tag):
+            ev.register(gen)
+            ev.sync()
+            ev.objs.pop('gen')
+        elif 'QCDInc'==tag:
+            gen.cut((gen.pdgId==5)&(gen.gen_pt>15))
+            jets.FatJet_pt.drop(gen.pdgId.index, inplace=True)
+            ev.sync()
 
     jets.cut(jets['FatJet_pt'] >= 250) #250)
     jets.cut(jets['FatJet_eta'].abs() < 2.4)
@@ -242,6 +259,7 @@ def process(filepath, MC, tag):
     jets.cut(jets['FatJet_msoftdrop'] > 90)
     jets.cut(jets['FatJet_msoftdrop'] < 200)
     jets.cut(jets['FatJet_mass'] > 90)
+    jets.cut(jets['FatJet_mass'] < 200)
     other.cut(other['PV_npvsGood'] >= 1)
 
 
@@ -320,12 +338,10 @@ def process(filepath, MC, tag):
     ABtrig.cut(ABtrig['trigAB']==True)
     ABev.sync()
 
-
     ##since AB events that passes ABC trigger can survive, do ABCtrigger after
     ## event removal from AB
     ABCtrig.cut(ABCtrig['trigABC']==True)
     ABCev.sync()
-
 
     ## perform C cuts
     ## cut all but the fattest jet
@@ -339,7 +355,6 @@ def process(filepath, MC, tag):
     Cjets.FatJet_pt.drop(ABCjets.FatJet_pt.index, inplace=True, errors='ignore')
     Cjets.FatJet_pt.drop(ABjets.FatJet_pt.index, inplace=True, errors='ignore')
 
-
     Cev.sync()
 
     Cak4Jets['dR'] = DM.getdR(objName='Jet', events=events, fatJetPhysObj=Cjets, jetPhysObj=Cak4Jets)
@@ -350,12 +365,12 @@ def process(filepath, MC, tag):
     Cev.sync()
 
     CXdf = pd.DataFrame(Cother['run'])
-    CXdf = CXdf.rename({0:'run'})
+    # CXdf = CXdf.rename({0:'run'})
     CXdf = CXdf.assign(luminosityBlock = Cother['luminosityBlock'])
     CXdf = CXdf.assign(event = Cother['event'])
 
     ABCdf = pd.DataFrame(ABCother['run'])
-    #ABCdf = ABCdf.rename({0:'run'})
+    # ABCdf = ABCdf.rename({0:'run'})
     ABCdf = ABCdf.assign(luminosityBlock = ABCother['luminosityBlock'])
     ABCdf = ABCdf.assign(event = ABCother['event'])
 
@@ -364,9 +379,9 @@ def process(filepath, MC, tag):
     ABdf = ABdf.assign(luminosityBlock = ABother['luminosityBlock'])
     ABdf = ABdf.assign(event = ABother['event'])
 
-    pickle.dump(CXdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/CXevents.pkl','wb'))
-    pickle.dump(ABCdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/ABCevents.pkl','wb'))
-    pickle.dump(ABdf, open('/Users/si_sutantawibul1/Projects/htoaa/JetHTTrigEff/frames/ABevents.pkl','wb'))
+    pickle.dump(CXdf, open('JetHTTrigEff/frames/CXevents.pkl','wb'))
+    pickle.dump(ABCdf, open('JetHTTrigEff/frames/ABCevents.pkl','wb'))
+    pickle.dump(ABdf, open('JetHTTrigEff/frames/ABevents.pkl','wb'))
 
     ABCDf = getMaxPtDf(filepath=filepath, ev=ABCev, MC=MC, path='ABC', tag=tag, events=events)
     ABDf = getMaxPtDf(filepath=filepath, ev=ABev, MC=MC, path='AB', tag=tag, events=events)
@@ -399,7 +414,7 @@ def analyze(dataDf):
 #def makefinaldf(ev, MC, tag, path):
 
 
-ranges = {'FatJet_pt': (250,800),
+ranges = {'FatJet_pt': (250,850),
           'FatJet_eta': (0,3),
           'FatJet_phi': (-3.2, 3.2),
           'FatJet_mass': (85, 205),
@@ -417,35 +432,33 @@ ranges = {'FatJet_pt': (250,800),
           'SubJet_tau1(1)': (0,.5),
           'FatJet_nSV': (-1,11),
           'BDTScore': (0,1),
-          'FatJet_n2b1': (0,1)
           }
 
-nbins = {'FatJet_pt': 110,
-          'FatJet_eta': 15,
-          'FatJet_phi': 32,
-          'FatJet_mass': 32,
-          'FatJet_btagCSVV2': 22,
-          'FatJet_btagDeepB': 14,
-          'FatJet_msoftdrop': 32,
-          'FatJet_btagDDBvL': 26,
-          'FatJet_deepTagMD_H4qvsQCD': 20,
-          'PV_npvs': 40,
-          'PV_npvsGood': 40,
-          'LHE_HT': 500,
-          'FatJet_n2b1': 10,
-          'SubJet_mass(1)': 105,
-          'SubJet_mass(2)': 105,
-          'SubJet_tau1(1)': 10,
-          'FatJet_nSV': 12,
-          'BDTScore': 10,
-          'FatJet_n2b1': 10
+nbins = {'FatJet_pt': 30,
+         'FatJet_eta': 15,
+         'FatJet_phi': 32,
+         'FatJet_mass': 32,
+         'FatJet_btagCSVV2': 22,
+         'FatJet_btagDeepB': 14,
+         'FatJet_msoftdrop': 32,
+         'FatJet_btagDDBvL': 26,
+         'FatJet_deepTagMD_H4qvsQCD': 20,
+         'PV_npvs': 40,
+         'PV_npvsGood': 40,
+         'LHE_HT': 500,
+         'FatJet_n2b1': 20,
+         'SubJet_mass(1)': 22,
+         'SubJet_mass(2)': 22,
+         'SubJet_tau1(1)': 20,
+         'FatJet_nSV': 12,
+         'BDTScore': 10,
           }
 
 
 
 pickledir = 'JetHTTrigEff/dataVsMC/pickles'
 append_params = {'ignore_index':True, 'sort':False}
-root=False
+root=True
 #%%
 if root:
     ggH = process(filepath=DM.ggHPaths, MC=True, tag='ggH')
@@ -510,9 +523,9 @@ if root:
     pickle.dump(QCDInc, open(f'{pickledir}/QCDInc.pkl','wb'))
 
 #%%
-    jdir = '/Users/si_sutantawibul1/Projects/htoaa/data/JetHT/2018_JetHT_Skim_nFat1_doubB_0p8_deepB_Med_massH_90_200_msoft_90_200_pT_240.root'
+    
     JetHT = {'ABC': pd.DataFrame(), 'AB': pd.DataFrame(), 'C': pd.DataFrame()}
-    for fileName in [jdir]:#DM.JetHTPaths:
+    for fileName in DM.JetHTPaths:
         tmp=process(filepath=fileName, MC=False, tag='JetHT')
         JetHT['ABC'] = JetHT['ABC'].append(tmp['ABC'], **append_params)
         JetHT['AB'] = JetHT['AB'].append(tmp['AB'], **append_params)
@@ -533,26 +546,17 @@ else:
 
 bgs = {'WJets': WJets,
        'ZJets': ZJets,
+       'QCDInc' :QCDInc,
        'TTJets': TTJets,
-       'bEnr': bEnr,
        'BGen': BGen,
-       'QCDInc' :QCDInc
+       'bEnr': bEnr,
        }
 
 wgt = pd.DataFrame()
 for path in pathlist:
     for var in plotVars:
-        #nbins=10
         nbin = nbins[var]
-        if 'pt' in var:
-            if 'C' == path:
-                range_local = (250, 400)
-                nbin = 30
-            else:
-                range_local = (400, 800)
-                nbin = 80
-        else:
-            range_local = ranges[var]
+        range_local = ranges[var]
 
         fig, (ax0, ax1) = plt.subplots(figsize=(15,9),nrows=2, gridspec_kw={'height_ratios': [3, 1]},
                                        sharex=True)
@@ -567,30 +571,11 @@ for path in pathlist:
         toplotlabel = list()
         for key, bgdict in bgs.items():
             bg = bgdict[path]
-            # xmintmp, xmaxtmp = np.percentile(bg[var], [0,99.8])
-            # xmin.append(xmintmp)
-            # xmax.append(xmaxtmp)
-
             toplot = pd.concat([toplot, bg[var]], ignore_index=False, axis=1)
             toplotweights = pd.concat([toplotweights, bg['final_weights']], ignore_index=False,
                       axis=1)
             toplotweights = toplotweights.rename({'final_weights': key})
             toplotlabel.append(f'{key} ({round(np.sum(bg.final_weights))})')
-
-
-
-        # if 'BDTScore'==var:
-        #     range_local = (0,1)
-        #     bins = np.linspace(0,1, num=nbin)
-        #     xlabels = bins[1:].astype(str)
-        # else:
-        #     range_local=(min(xmin), max(xmax))
-        #     bins = np.linspace(min(xmin),max(xmax), num=nbin)
-
-
-        # print(f'{path}/{var}/({range_local[0]:.2f}, {range_local[1]:.2f})')
-
-
 
         if 'BDTScore' != var:
             bins = np.linspace(range_local[0], range_local[1], num=nbin)
@@ -599,8 +584,7 @@ for path in pathlist:
         hist_params = {'density': density, 'histtype': 'bar', 'range' : range_local, 'bins':nbin, 'stacked':True}
 
         ## making color palette for the QCD stakcs
-        pal = ['#603514', '#b940f2','#ec6f38', '#6acaf8', '#82f759', '#ba6861']
-
+        pal = ['#603514', '#b940f2','#ba6861', '#ec6f38', '#6acaf8', '#82f759', ]
 
         ## plotting background MC
         if 'BDTScore'==var:
@@ -617,43 +601,55 @@ for path in pathlist:
         ## plotting signal MC
         ## scaling GGH area to equal bg area
         ggHDf = ggH[path]
-        gghweights = ggHDf['final_weights']*np.nansum(toplotweights)/np.sum(ggHDf.final_weights)
-        ggHDf['final_weights'] = gghweights
+        scale = np.nansum(toplotweights)/np.sum(ggHDf.final_weights)
+        gghweights = ggHDf['final_weights']*scale
+        #ggHDf['final_weights'] = gghweights
 
         if 'BDTScore'==var:
-            ax0.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
+            ax0.hist(ggHDf[var].values, label=f'GGH ({round(np.sum(ggHDf.final_weights))}x{round(scale)})', histtype='step',
                 density=density, bins=nbin, linewidth=3, color='r',
-                range=range_local, weights=ggHDf['final_weights'])
+                range=range_local, weights=gghweights)
         else:
-            ax0.hist(np.clip(ggHDf[var].values, bins[0], bins[-1]), label=f'GGH ({round(np.sum(ggHDf.final_weights))})', histtype='step',
+            ax0.hist(np.clip(ggHDf[var].values, bins[0], bins[-1]), label=f'GGH ({round(np.sum(ggHDf.final_weights))}x{round(scale)})', histtype='step',
                      density=density, bins=nbin, linewidth=3, color='r',
-                     range=range_local, weights=ggHDf['final_weights'])
+                     range=range_local, weights=gghweights)
 
         # plotting JetHT
         JetHTDf = JetHT[path]
+        x = getBinCenter(bgbins)
         if 'BDTScore'==var:
-            datavals, databins, _ = ax0.hist(JetHTDf[var].values,
-                                         label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
-                                         density=density, bins=8, linewidth=3, color='k',
-                                         range=(0,0.8), weights=JetHTDf.final_weights)
+            # datavals, databins, _ = ax0.hist(JetHTDf[var].values,
+            #                              label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
+            #                              density=density, bins=8, linewidth=3, color='k',
+            #                              range=(0,0.8), weights=JetHTDf.final_weights)
+            datavals, databins = np.histogram(JetHTDf[var].values, 
+                                              density=density, bins=8, range=(0,0.8),
+                                              weights=JetHTDf.final_weights.values)
             datavals = np.append(datavals, [0,0])
         elif 'LHE_HT' == var:
             continue
         else:
-            datavals, databins, _ = ax0.hist(np.clip(JetHTDf[var].values, bins[0], bins[-1]),
-                                         label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
-                                         density=density, bins=nbin, linewidth=3, color='k',
-                                         range=range_local, weights=JetHTDf.final_weights)
+            # datavals, databins, _ = ax0.hist(np.clip(JetHTDf[var].values, bins[0], bins[-1]),
+            #                              label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})', histtype='step',
+            #                              density=density, bins=nbin, linewidth=3, color='k',
+            #                              range=range_local, weights=JetHTDf.final_weights)
+            datavals, databins = np.histogram(np.clip(JetHTDf[var].values, bins[0], bins[-1]), 
+                                              density=density, bins=nbin, range=range_local,
+                                              weights=JetHTDf.final_weights.values)
+        xerr = (x[1]-x[0])/2
+        yerr = 1/np.sqrt(datavals)
+        ax0.errorbar(x, datavals, xerr=xerr, yerr=yerr, fmt='ko')
 
         ## plotting ratio
         totalbgvals = bgvals[-1]
         y = np.divide((datavals-totalbgvals), totalbgvals, out = np.zeros_like(totalbgvals),
                       where=(totalbgvals>0))
-        x = getBinCenter(bgbins)
+        #x = getBinCenter(bgbins)
         ax1.grid()
         ymax = 0.5
         ax1.set_ylim(bottom=-ymax, top=ymax)
-        ax1.scatter(x,y, color='k')
+        #ax1.scatter(x,y, color='k')
+        ax1.errorbar(x,y, xerr=xerr, yerr=yerr, fmt='ko')
         #ax1.set_xticklabels(xlabels)
 
 
