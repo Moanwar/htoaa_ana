@@ -23,6 +23,10 @@ import copy as cp
 import dataVsMC_DataManager as DM
 import matplotlib.pyplot as plt
 import json
+from uproot_methods import TLorentzVectorArray as TLVA
+import mplhep as hep
+
+plt.style.use(hep.style.ROOT)
 
 np.seterr(divide='ignore', invalid='ignore')
 np.set_printoptions(suppress=True)
@@ -34,12 +38,13 @@ taglist = ['BGen', 'bEnr', 'Parked', 'ggH', 'JetHT', 'ZJets', 'WJets', 'TTJets',
 plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJet_btagDeepB',
             'FatJet_msoftdrop', 'FatJet_btagDDBvL', 'FatJet_deepTagMD_H4qvsQCD', 'FatJet_n2b1',
             'SubJet_mass(1)','SubJet_mass(2)','SubJet_tau1(1)','FatJet_nSV', 'PV_npvs', 'PV_npvsGood',
-            'BDTScore', 'LHE_HT', 'FatJet_nSV']
+            'BDTScore', 'FatJet_nSV']
 
 
 def getMaxPtDf(filepath, ev, MC, path, tag, events):
     jets = ev.objs['jets']
     other = ev.objs['other']
+    muons = ev.objs['muons']
     if jets.FatJet_pt.empty:
         return pd.DataFrame()
     maxPtData = DM.getMaxPt(jets, 'FatJet_pt')
@@ -67,7 +72,6 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
         btags = btags.assign(Jet_btagDeepB2=maxPtData.Jet_btagDeepB2)
         maxPtData = maxPtData.assign(Jet_btagDeepB1=btags.max(axis=1))
         maxPtData = maxPtData.assign(Jet_btagDeepB2=btags.min(axis=1))
-
 
     maxPtData['final_weights'] = 1
     if 'ggH'==tag:
@@ -171,7 +175,7 @@ def process(filepath, MC, tag):
     other = PhysObj('other')
     ak4Jets = PhysObj('ak4Jets')
     trig = PhysObj('trig')
-    muon = PhysObj('muons')
+    muons = PhysObj('muons')
 
     f = uproot.open(fileName + '.root')
     events = f.get('Events')
@@ -204,7 +208,14 @@ def process(filepath, MC, tag):
     other['event'] = pd.DataFrame(events.array('event').astype(int))
     other['luminosityBlock'] = pd.DataFrame(events.array('luminosityBlock').astype(int))
 
-    
+    muons['Muon_softId'] = pd.DataFrame(events.array('Muon_softId'))
+    muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
+    muons['Muon_eta'] = pd.DataFrame(events.array('Muon_eta'))
+    muons['Muon_ip3d'] = pd.DataFrame(events.array('Muon_ip3d'))
+    muons['Muon_charge'] = pd.DataFrame(events.array('Muon_charge'))
+    muons['Muon_phi'] = pd.DataFrame(events.array('Muon_phi'))
+    muons['Muon_mass'] = pd.DataFrame(events.array('Muon_mass'))
+    #muon[''] = pd.DataFrame(events.array(''))
 
     ## triggers
     trigABC1 = events.array('L1_SingleJet180') & (events.array('HLT_AK8PFJet500') |
@@ -212,30 +223,14 @@ def process(filepath, MC, tag):
     trigABC2 = (events.array('L1_DoubleJet112er2p3_dEta_Max1p6') |
              events.array('L1_DoubleJet150er2p5')) & events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
     trig['trigABC'] = pd.DataFrame((trigABC1 | trigABC2).astype(bool))
-
     trigAB = events.array('L1_SingleJet180') & (events.array('HLT_AK8PFJet500') |
                                                 events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'))
     trig['trigAB'] = pd.DataFrame(trigAB.astype(bool))
-
     trigC = (events.array('L1_DoubleJet112er2p3_dEta_Max1p6') |
              events.array('L1_DoubleJet150er2p5')) & events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
     trig['trigC'] = pd.DataFrame(trigC.astype(bool))
 
-
-    ev = Event(jets, other, trig)
-    
-    
-    
-    
-    ii =104512
-     
-    for obj in ev.objs:
-        for key in ev.objs[obj]:
-            print(key)
-            print(ev.objs[obj][key].loc[ii])
-            print('--------------------------')
-    
-    
+    ev = Event(jets, other, trig, muons)
 
     ## select base on genparticles 
     if MC:
@@ -262,18 +257,38 @@ def process(filepath, MC, tag):
     jets.cut(jets['FatJet_mass'] < 200)
     other.cut(other['PV_npvsGood'] >= 1)
 
-
-    # ak4Jets.cut(ak4Jets['Jet_pt']  > 30)
-    # ak4Jets.cut(ak4Jets['Jet_eta'].abs() < 2.4)
-    # ak4Jets.cut(ak4Jets['Jet_puId'] >= 1)
-
+    muons.cut(muons['Muon_softId']==1)
+    muons.cut(muons['Muon_pt']>5)
+    muons.cut(muons['Muon_eta'].abs()<2.4)
+    muons.cut(muons['Muon_ip3d']<0.5)
+    ev.sync()
+    muons['dR'] = DM.getdR(objName='Muon', events=ev, fatJetPhysObj=jets, jetPhysObj=muons)
+    muons.cut(muons['dR'] < 0.8)
+    ev.sync()
+    pmuons, mmuons = muons.deepcopy(), muons.deepcopy()
+    pmuons.cut(pmuons.Muon_charge == 1)
+    mmuons.cut(mmuons.Muon_charge == -1)
+    pmuons.cut(pmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
+    mmuons.cut(mmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
+    pmuons.trimto(mmuons.Muon_charge)
+    mmuons.trimto(pmuons.Muon_charge)
+    pTL = TLVA.from_ptetaphim(pmuons.Muon_pt.sum(axis=1),
+            pmuons.Muon_eta.sum(axis=1),
+            pmuons.Muon_phi.sum(axis=1),
+            pmuons.Muon_mass.sum(axis=1))
+    mTL = TLVA.from_ptetaphim(mmuons.Muon_pt.sum(axis=1),
+            mmuons.Muon_eta.sum(axis=1),
+            mmuons.Muon_phi.sum(axis=1),
+            mmuons.Muon_mass.sum(axis=1))
+    msum = pd.Series((pTL + mTL).mass)
+    msum.index = mmuons.Muon_pt.index
+    msum = msum[msum > 12].dropna()
+    muons.trimto(msum)
+    del msum, pmuons, mmuons, pTL, mTL
     ev.sync()
 
     ## golden json cuts
     if False == MC:
-
-        print('we in the GJSON selection')
-
         jdata = json.load(open('C2018.json'))
         dtev = PhysObj('event')
         dtev.run = pd.DataFrame(events.array('run'))
@@ -291,7 +306,6 @@ def process(filepath, MC, tag):
         dtev.cut(truthframe == True)
         ev.sync()
 
-
     ev.sync()
 
     # make C events
@@ -299,24 +313,27 @@ def process(filepath, MC, tag):
     Cak4Jets = ak4Jets.deepcopy()
     Cother = other.deepcopy()
     Ctrig = trig.deepcopy()
+    Cmuons = muons.deepcopy()
 
-    Cev = Event(Cjets, Cother, Cak4Jets, Ctrig)
+    Cev = Event(Cjets, Cother, Cak4Jets, Ctrig, Cmuons)
 
     #process further for ABC/AB
     jets.cut(jets['FatJet_pt'] >= 400)
 
     #make ABC/AB events
     ABjets = jets.deepcopy()
-    ABak4Jets = ak4Jets.deepcopy()
+    #ABak4Jets = ak4Jets.deepcopy()
     ABother = other.deepcopy()
     ABtrig = trig.deepcopy()
-    ABev = Event(ABjets, ABother, ABtrig)
+    ABmuons = muons.deepcopy()
+    ABev = Event(ABjets, ABother, ABtrig, ABmuons)
 
     ABCjets = jets
     ABCak4Jets = ak4Jets
     ABCother = other
     ABCtrig = trig
-    ABCev = Event(ABCjets, ABCak4Jets, ABCother, ABCtrig)
+    ABCmuons = muons
+    ABCev = Event(ABCjets, ABCak4Jets, ABCother, ABCtrig, ABCmuons)
 
     del jets, ak4Jets, other, trig
 
@@ -624,7 +641,8 @@ for path in pathlist:
             #                              range=(0,0.8), weights=JetHTDf.final_weights)
             datavals, databins = np.histogram(JetHTDf[var].values, 
                                               density=density, bins=8, range=(0,0.8),
-                                              weights=JetHTDf.final_weights.values)
+                                              weights=JetHTDf.final_weights.values,
+                                              )
             datavals = np.append(datavals, [0,0])
         elif 'LHE_HT' == var:
             continue
@@ -635,10 +653,12 @@ for path in pathlist:
             #                              range=range_local, weights=JetHTDf.final_weights)
             datavals, databins = np.histogram(np.clip(JetHTDf[var].values, bins[0], bins[-1]), 
                                               density=density, bins=nbin, range=range_local,
-                                              weights=JetHTDf.final_weights.values)
+                                              weights=JetHTDf.final_weights.values,
+                                              )
         xerr = (x[1]-x[0])/2
         yerr = 1/np.sqrt(datavals)
-        ax0.errorbar(x, datavals, xerr=xerr, yerr=yerr, fmt='ko')
+        ax0.errorbar(x, datavals, xerr=xerr, yerr=yerr, fmt='ko',
+                     label=f'JetHT ({round(np.sum(JetHTDf.final_weights))})')
 
         ## plotting ratio
         totalbgvals = bgvals[-1]

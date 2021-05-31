@@ -126,35 +126,33 @@ def getMaxPt(physobj, col):
     return maxPtData
 
 def getNthPt(n, physobj, sortBy, extractCol):
-    tosortby = physobj[sortBy].fillna(0).to_numpy()
-    idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
+    # tosortby = physobj[sortBy].fillna(0).to_numpy()
+    # idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
+    # idxn = idxsorted[:,-n]
+    # rowidx = range(physobj[extractCol].shape[0])
+    # nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
 
-    idxn = idxsorted[:,-n]
+    nthVals=physobj[extractCol][physobj[sortBy].rank(axis=1,method='first',ascending=False)==n].to_numpy().flatten()
+    nthVals=nthVals[~np.isnan(nthVals)]
+    return nthVals
 
-    rowidx = range(physobj[extractCol].shape[0])
-    nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
-    return pd.Series(nthVals)
-
+## gets the dR between the highest pt fatjet and whatever physics obj you put in as 
+## 'jetPhysObj'. I just didn't want to change the name
 def getdR(objName, events, fatJetPhysObj, jetPhysObj):
     eventidx = fatJetPhysObj.FatJet_pt.index
     eventidx = range(len(eventidx))
     tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
     maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
-
     idx = maxptJetIdx.index
-
     fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
     fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
     fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
     fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
-    objEta = jetPhysObj['Jet_eta']
-    objPhi = jetPhysObj['Jet_phi']
+    objEta = jetPhysObj[f'{objName}_eta']
+    objPhi = jetPhysObj[f'{objName}_phi']
 
     dr = np.sqrt(np.power(fatJetEta-objEta,2)+np.power(dphi(objPhi, fatJetPhi),2))
     return pd.DataFrame(dr)
-
-
-
 
 def dphi(phi1,phi2):
     return np.minimum(np.minimum(np.abs(phi1-phi2),np.abs(phi1-phi2+(2*np.pi))),
@@ -168,6 +166,13 @@ def dphi2(phi1,phi2):
 def getdRCount(dr):
     return pd.DataFrame((dr<0.8).sum(axis=1))
 
+## returns the invariant mass between 2 objs. can be any thing as long as 1 and 2
+## are broadcastable to each other
+def getInvMass(pt1, pt2, eta1, eta2, phi1, phi2):
+    t1 = 2*pt1*pt2
+    t2 = np.cosh(eta1-eta2)
+    t3 = np.cos(phi1-phi2)
+    return np.sqrt(t1*(t2-t3))
 ## I don't have the getSubjetData here becuase i imported the dataManager one because yeah
 
 
@@ -399,7 +404,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
             maxPtMuons = getMaxPt(muons, 'Muon_pt')#.reindex(muons.Muon_pt.index)
             maxPtData = pd.concat([maxPtJets, maxPtMuons], axis=1)
         if 'MuonEG'==dataSet:
-            maxPtMuons = getMaxPt(muons, 'Muon_pt')
+            maxPtMuons =  (muons, 'Muon_pt')
             maxPtElectrons = getMaxPt(electrons, 'Electron_pt')
             maxPtData = pd.concat([maxPtJets, maxPtMuons, maxPtElectrons],
                                   axis=1)
