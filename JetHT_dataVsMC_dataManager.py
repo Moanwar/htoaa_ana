@@ -38,13 +38,18 @@ taglist = ['BGen', 'bEnr', 'Parked', 'ggH', 'JetHT', 'ZJets', 'WJets', 'TTJets',
 plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJet_btagDeepB',
             'FatJet_msoftdrop', 'FatJet_btagDDBvL', 'FatJet_deepTagMD_H4qvsQCD', 'FatJet_n2b1',
             'SubJet_mass(1)','SubJet_mass(2)','SubJet_tau1(1)','FatJet_nSV', 'PV_npvs', 'PV_npvsGood',
-            'BDTScore', 'FatJet_nSV']
+            'BDTScore', 'FatJet_nSV', 
+            'pMuon_eta', 'mMuon_eta', 'pMuon_pt', 'mMuon_pt', 'pMuon_ip3d',
+            'mMuon_ip3d', 'pMuon_sip3d', 'mMuon_sip3d', 'MuonPair_mass', 
+            'MuonPair_eta', 'MuonPair_pt', 'MuonPair_pt|FatJet_pt',
+            'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
+            ]
 
 
 def getMaxPtDf(filepath, ev, MC, path, tag, events):
     jets = ev.objs['jets']
     other = ev.objs['other']
-    muons = ev.objs['muons']
+    #muons = ev.objs['muons']
     if jets.FatJet_pt.empty:
         return pd.DataFrame()
     maxPtData = DM.getMaxPt(jets, 'FatJet_pt')
@@ -215,7 +220,7 @@ def process(filepath, MC, tag):
     muons['Muon_charge'] = pd.DataFrame(events.array('Muon_charge'))
     muons['Muon_phi'] = pd.DataFrame(events.array('Muon_phi'))
     muons['Muon_mass'] = pd.DataFrame(events.array('Muon_mass'))
-    #muon[''] = pd.DataFrame(events.array(''))
+    muons['Muon_sip3d'] = pd.DataFrame(events.array('Muon_sip3d'))
 
     ## triggers
     trigABC1 = events.array('L1_SingleJet180') & (events.array('HLT_AK8PFJet500') |
@@ -256,7 +261,6 @@ def process(filepath, MC, tag):
     jets.cut(jets['FatJet_mass'] > 90)
     jets.cut(jets['FatJet_mass'] < 200)
     other.cut(other['PV_npvsGood'] >= 1)
-
     muons.cut(muons['Muon_softId']==1)
     muons.cut(muons['Muon_pt']>5)
     muons.cut(muons['Muon_eta'].abs()<2.4)
@@ -284,7 +288,8 @@ def process(filepath, MC, tag):
     msum.index = mmuons.Muon_pt.index
     msum = msum[msum > 12].dropna()
     muons.trimto(msum)
-    del msum, pmuons, mmuons, pTL, mTL
+    #del msum, pmuons, mmuons, pTL, mTL
+    del msum
     ev.sync()
 
     ## golden json cuts
@@ -314,7 +319,6 @@ def process(filepath, MC, tag):
     Cother = other.deepcopy()
     Ctrig = trig.deepcopy()
     Cmuons = muons.deepcopy()
-
     Cev = Event(Cjets, Cother, Cak4Jets, Ctrig, Cmuons)
 
     #process further for ABC/AB
@@ -382,17 +386,14 @@ def process(filepath, MC, tag):
     Cev.sync()
 
     CXdf = pd.DataFrame(Cother['run'])
-    # CXdf = CXdf.rename({0:'run'})
     CXdf = CXdf.assign(luminosityBlock = Cother['luminosityBlock'])
     CXdf = CXdf.assign(event = Cother['event'])
 
     ABCdf = pd.DataFrame(ABCother['run'])
-    # ABCdf = ABCdf.rename({0:'run'})
     ABCdf = ABCdf.assign(luminosityBlock = ABCother['luminosityBlock'])
     ABCdf = ABCdf.assign(event = ABCother['event'])
 
     ABdf = pd.DataFrame(ABother['run'])
-    #ABdf = ABdf.rename({0:'run'})
     ABdf = ABdf.assign(luminosityBlock = ABother['luminosityBlock'])
     ABdf = ABdf.assign(event = ABother['event'])
 
@@ -404,8 +405,40 @@ def process(filepath, MC, tag):
     ABDf = getMaxPtDf(filepath=filepath, ev=ABev, MC=MC, path='AB', tag=tag, events=events)
     CDf = getMaxPtDf(filepath=filepath, ev=Cev, MC=MC, path='C', tag=tag, events=events)
 
-
-
+    ## adding muon info
+    def muoncol(muondf, var, jets, pm):
+        return muondf[f'Muon_{var}'].sum(axis=1).loc[jets.FatJet_pt.index].values    
+    def addmuons(df, jets):
+        df = df.assign(pMuon_eta = muoncol(pmuons, 'eta', jets, 'p'))
+        df = df.assign(mMuon_eta = muoncol(mmuons, 'eta', jets, 'm'))
+        df = df.assign(pMuon_pt = muoncol(pmuons, 'pt', jets, 'p'))
+        df = df.assign(mMuon_pt = muoncol(mmuons, 'pt', jets, 'm'))
+        df = df.assign(pMuon_ip3d = muoncol(pmuons, 'ip3d', jets, 'p'))
+        df = df.assign(mMuon_ip3d = muoncol(mmuons, 'ip3d', jets, 'm'))
+        df = df.assign(pMuon_sip3d = muoncol(pmuons, 'sip3d', jets, 'p'))
+        df = df.assign(mMuon_sip3d = muoncol(mmuons, 'sip3d', jets, 'm'))
+        
+        msum = pTL + mTL
+        mPair = pd.concat([pd.Series(msum.mass, index=pmuons.Muon_pt.index), 
+                           pd.Series(msum.eta, index=pmuons.Muon_pt.index), 
+                           pd.Series(msum.pt, index=pmuons.Muon_pt.index)], 
+                          axis=1)
+        mPair = mPair.rename(columns={0:'MuonPair_mass', 1:'MuonPair_eta', 2:'MuonPair_pt'})
+        
+        toconcat = mPair.loc[jets.FatJet_pt.index]
+        toconcat.reset_index(drop=True, inplace=True)
+        df = pd.concat([df, toconcat], axis=1)
+        print(df)
+        df = df.assign(one=df.MuonPair_pt/df.FatJet_pt)
+        df = df.assign(two=df.pMuon_pt/df.FatJet_pt)
+        df = df.assign(three=df.mMuon_pt/df.FatJet_pt)
+        df = df.rename(columns={'one':'MuonPair_pt|FatJet_pt', 'two':'pMuon_pt|FatJet_pt', 'three': 'mMuon_pt|FatJet_pt'})
+        
+        return df
+    
+    if not ABCDf.empty: ABCDf = addmuons(ABCDf, ABCjets)
+    if not ABDf.empty: ABDf = addmuons(ABDf, ABjets)
+    if not CDf.empty: CDf = addmuons(CDf, Cjets)
 
     return {'ABC': ABCDf, 'AB': ABDf, 'C': CDf}
 
@@ -430,7 +463,6 @@ def analyze(dataDf):
 #======================== main ==============================
 #def makefinaldf(ev, MC, tag, path):
 
-
 ranges = {'FatJet_pt': (250,850),
           'FatJet_eta': (0,3),
           'FatJet_phi': (-3.2, 3.2),
@@ -449,6 +481,21 @@ ranges = {'FatJet_pt': (250,850),
           'SubJet_tau1(1)': (0,.5),
           'FatJet_nSV': (-1,11),
           'BDTScore': (0,1),
+          
+          'pMuon_eta': (0,3), 
+          'mMuon_eta': (0,3), 
+          'pMuon_pt': (0, 600), 
+          'mMuon_pt': (0,600), 
+          'pMuon_ip3d': (0,10),
+          'mMuon_ip3d': (0,10), 
+          'pMuon_sip3d': (0,1), 
+          'mMuon_sip3d': (0,1), 
+          'MuonPair_mass': (0, 100), 
+          'MuonPair_eta': (0,3), 
+          'MuonPair_pt': (0,600), 
+          'MuonPair_pt|FatJet_pt': (0, 1),
+          'pMuon_pt|FatJet_pt': (0, 1), 
+          'mMuon_pt|FatJet_pt': (0, 1)
           }
 
 nbins = {'FatJet_pt': 30,
@@ -469,13 +516,28 @@ nbins = {'FatJet_pt': 30,
          'SubJet_tau1(1)': 20,
          'FatJet_nSV': 12,
          'BDTScore': 10,
+         
+         'pMuon_eta': 15, 
+         'mMuon_eta': 15, 
+         'pMuon_pt': 30, 
+         'mMuon_pt': 30, 
+         'pMuon_ip3d': 10,
+         'mMuon_ip3d': 10, 
+         'pMuon_sip3d': 10, 
+         'mMuon_sip3d': 10, 
+         'MuonPair_mass': 20, 
+         'MuonPair_eta': 15, 
+         'MuonPair_pt': 30, 
+         'MuonPair_pt|FatJet_pt': 10,
+         'pMuon_pt|FatJet_pt': 10, 
+         'mMuon_pt|FatJet_pt': 10
           }
 
 
 
 pickledir = 'JetHTTrigEff/dataVsMC/pickles'
 append_params = {'ignore_index':True, 'sort':False}
-root=True
+root=False
 #%%
 if root:
     ggH = process(filepath=DM.ggHPaths, MC=True, tag='ggH')
@@ -570,10 +632,10 @@ bgs = {'WJets': WJets,
        }
 
 wgt = pd.DataFrame()
-for path in pathlist:
+for path in ['AB']:#pathlist:
     for var in plotVars:
-        nbin = nbins[var]
-        range_local = ranges[var]
+        nbin = nbins[var] if var in nbins else 10
+        range_local = ranges[var] if var in ranges else None
 
         fig, (ax0, ax1) = plt.subplots(figsize=(15,9),nrows=2, gridspec_kw={'height_ratios': [3, 1]},
                                        sharex=True)
