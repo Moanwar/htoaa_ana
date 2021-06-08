@@ -139,15 +139,24 @@ def getNthPt(n, physobj, sortBy, extractCol):
 ## gets the dR between the highest pt fatjet and whatever physics obj you put in as 
 ## 'jetPhysObj'. I just didn't want to change the name
 def getdR(objName, events, fatJetPhysObj, jetPhysObj):
-    eventidx = fatJetPhysObj.FatJet_pt.index
-    eventidx = range(len(eventidx))
-    tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
-    maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
-    idx = maxptJetIdx.index
-    fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
-    fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
-    fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
-    fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
+    # eventidx = fatJetPhysObj.FatJet_pt.index
+    # eventidx = range(len(eventidx))
+    # tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
+    # maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
+    # idx = maxptJetIdx.index
+    # fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
+    # fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
+    # fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
+    # fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
+    
+    fatJetEta = fatJetPhysObj['FatJet_eta'][fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1].sum(axis=1).to_numpy().reshape(len(fatJetPhysObj['FatJet_pt']),1)
+    fatJetPhi = fatJetPhysObj['FatJet_phi'][fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1].sum(axis=1).to_numpy().reshape(len(fatJetPhysObj['FatJet_pt']),1)
+
+    # print('---------------', objName)
+    # print((fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1).loc[15015])
+    # print(jetPhysObj[f'{objName}_eta'].loc[15015])
+    # print(jetPhysObj[f'{objName}_phi'].loc[15015])
+
     objEta = jetPhysObj[f'{objName}_eta']
     objPhi = jetPhysObj[f'{objName}_phi']
 
