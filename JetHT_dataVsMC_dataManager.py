@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 13 15:42:04 2021
-
-@author: si_sutantawibul1
-"""
 
 import pickle
 #from EffInfoABC import EfficiencyInfoABC,EfficiencyInfoAB,EfficiencyInfoC
