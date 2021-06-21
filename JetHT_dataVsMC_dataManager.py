@@ -39,6 +39,8 @@ plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJe
             ]
 
 
+
+
 def getMaxPtDf(filepath, ev, MC, path, tag, events):
     jets = ev.objs['jets']
     other = ev.objs['other']
