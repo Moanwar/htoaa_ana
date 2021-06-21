@@ -32,13 +32,11 @@ plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJe
             'FatJet_msoftdrop', 'FatJet_btagDDBvL', 'FatJet_deepTagMD_H4qvsQCD', 'FatJet_n2b1',
             'SubJet_mass(1)','SubJet_mass(2)','SubJet_tau1(1)','FatJet_nSV', 'PV_npvs', 'PV_npvsGood',
             'BDTScore', 'FatJet_nSV', 
-            'pMuon_eta', 'mMuon_eta', 'pMuon_pt', 'mMuon_pt', 'pMuon_ip3d',
-            'mMuon_ip3d', 'pMuon_sip3d', 'mMuon_sip3d', 'MuonPair_mass', 
-            'MuonPair_eta', 'MuonPair_pt', 'MuonPair_pt|FatJet_pt',
-            'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
+            # 'pMuon_eta', 'mMuon_eta', 'pMuon_pt', 'mMuon_pt', 'pMuon_ip3d',
+            # 'mMuon_ip3d', 'pMuon_sip3d', 'mMuon_sip3d', 'MuonPair_mass', 
+            # 'MuonPair_eta', 'MuonPair_pt', 'MuonPair_pt|FatJet_pt',
+            # 'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
             ]
-
-
 
 
 def getMaxPtDf(filepath, ev, MC, path, tag, events):
@@ -208,14 +206,14 @@ def process(filepath, MC, tag):
     other['event'] = pd.DataFrame(events.array('event').astype(int))
     other['luminosityBlock'] = pd.DataFrame(events.array('luminosityBlock').astype(int))
 
-    muons['Muon_softId'] = pd.DataFrame(events.array('Muon_softId'))
-    muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
-    muons['Muon_eta'] = pd.DataFrame(events.array('Muon_eta'))
-    muons['Muon_ip3d'] = pd.DataFrame(events.array('Muon_ip3d'))
-    muons['Muon_charge'] = pd.DataFrame(events.array('Muon_charge'))
-    muons['Muon_phi'] = pd.DataFrame(events.array('Muon_phi'))
-    muons['Muon_mass'] = pd.DataFrame(events.array('Muon_mass'))
-    muons['Muon_sip3d'] = pd.DataFrame(events.array('Muon_sip3d'))
+    # muons['Muon_softId'] = pd.DataFrame(events.array('Muon_softId'))
+    # muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
+    # muons['Muon_eta'] = pd.DataFrame(events.array('Muon_eta'))
+    # muons['Muon_ip3d'] = pd.DataFrame(events.array('Muon_ip3d'))
+    # muons['Muon_charge'] = pd.DataFrame(events.array('Muon_charge'))
+    # muons['Muon_phi'] = pd.DataFrame(events.array('Muon_phi'))
+    # muons['Muon_mass'] = pd.DataFrame(events.array('Muon_mass'))
+    # muons['Muon_sip3d'] = pd.DataFrame(events.array('Muon_sip3d'))
 
     ## triggers
     trigABC1 = events.array('L1_SingleJet180') & (events.array('HLT_AK8PFJet500') |
@@ -256,36 +254,36 @@ def process(filepath, MC, tag):
     jets.cut(jets['FatJet_mass'] > 90)
     jets.cut(jets['FatJet_mass'] < 200)
     other.cut(other['PV_npvsGood'] >= 1)
-    muons.cut(muons['Muon_softId']==1)
-    muons.cut(muons['Muon_pt']>5)
-    muons.cut(muons['Muon_eta'].abs()<2.4)
-    muons.cut(muons['Muon_ip3d']<0.5)
-    ev.sync()
-    muons['dR'] = DM.getdR(objName='Muon', events=ev, fatJetPhysObj=jets, jetPhysObj=muons)
-    muons.cut(muons['dR'] < 0.8)
-    ev.sync()
-    pmuons, mmuons = muons.deepcopy(), muons.deepcopy()
-    pmuons.cut(pmuons.Muon_charge == 1)
-    mmuons.cut(mmuons.Muon_charge == -1)
-    pmuons.cut(pmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
-    mmuons.cut(mmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
-    pmuons.trimto(mmuons.Muon_charge)
-    mmuons.trimto(pmuons.Muon_charge)
-    pTL = TLVA.from_ptetaphim(pmuons.Muon_pt.sum(axis=1),
-            pmuons.Muon_eta.sum(axis=1),
-            pmuons.Muon_phi.sum(axis=1),
-            pmuons.Muon_mass.sum(axis=1))
-    mTL = TLVA.from_ptetaphim(mmuons.Muon_pt.sum(axis=1),
-            mmuons.Muon_eta.sum(axis=1),
-            mmuons.Muon_phi.sum(axis=1),
-            mmuons.Muon_mass.sum(axis=1))
-    msum = pd.Series((pTL + mTL).mass)
-    msum.index = mmuons.Muon_pt.index
-    msum = msum[msum > 12].dropna()
-    muons.trimto(msum)
-    #del msum, pmuons, mmuons, pTL, mTL
-    del msum
-    ev.sync()
+    # muons.cut(muons['Muon_softId']==1)
+    # muons.cut(muons['Muon_pt']>5)
+    # muons.cut(muons['Muon_eta'].abs()<2.4)
+    # muons.cut(muons['Muon_ip3d']<0.5)
+    # ev.sync()
+    # muons['dR'] = DM.getdR(objName='Muon', events=ev, fatJetPhysObj=jets, jetPhysObj=muons)
+    # muons.cut(muons['dR'] < 0.8)
+    # ev.sync()
+    # pmuons, mmuons = muons.deepcopy(), muons.deepcopy()
+    # pmuons.cut(pmuons.Muon_charge == 1)
+    # mmuons.cut(mmuons.Muon_charge == -1)
+    # pmuons.cut(pmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
+    # mmuons.cut(mmuons.Muon_mass.rank(axis=1,method='first',ascending=False) == 1)
+    # pmuons.trimto(mmuons.Muon_charge)
+    # mmuons.trimto(pmuons.Muon_charge)
+    # pTL = TLVA.from_ptetaphim(pmuons.Muon_pt.sum(axis=1),
+    #         pmuons.Muon_eta.sum(axis=1),
+    #         pmuons.Muon_phi.sum(axis=1),
+    #         pmuons.Muon_mass.sum(axis=1))
+    # mTL = TLVA.from_ptetaphim(mmuons.Muon_pt.sum(axis=1),
+    #         mmuons.Muon_eta.sum(axis=1),
+    #         mmuons.Muon_phi.sum(axis=1),
+    #         mmuons.Muon_mass.sum(axis=1))
+    # msum = pd.Series((pTL + mTL).mass)
+    # msum.index = mmuons.Muon_pt.index
+    # msum = msum[msum > 12].dropna()
+    # muons.trimto(msum)
+    # #del msum, pmuons, mmuons, pTL, mTL
+    # del msum
+    # ev.sync()
 
     ## golden json cuts
     if False == MC:
@@ -313,8 +311,8 @@ def process(filepath, MC, tag):
     Cak4Jets = ak4Jets.deepcopy()
     Cother = other.deepcopy()
     Ctrig = trig.deepcopy()
-    Cmuons = muons.deepcopy()
-    Cev = Event(Cjets, Cother, Cak4Jets, Ctrig, Cmuons)
+    # Cmuons = muons.deepcopy()
+    Cev = Event(Cjets, Cother, Cak4Jets, Ctrig)#, Cmuons)
 
     #process further for ABC/AB
     jets.cut(jets['FatJet_pt'] >= 400)
@@ -324,15 +322,15 @@ def process(filepath, MC, tag):
     #ABak4Jets = ak4Jets.deepcopy()
     ABother = other.deepcopy()
     ABtrig = trig.deepcopy()
-    ABmuons = muons.deepcopy()
-    ABev = Event(ABjets, ABother, ABtrig, ABmuons)
+    #ABmuons = muons.deepcopy()
+    ABev = Event(ABjets, ABother, ABtrig)#, ABmuons)
 
     ABCjets = jets
     ABCak4Jets = ak4Jets
     ABCother = other
     ABCtrig = trig
-    ABCmuons = muons
-    ABCev = Event(ABCjets, ABCak4Jets, ABCother, ABCtrig, ABCmuons)
+    ##ABCmuons = muons
+    ABCev = Event(ABCjets, ABCak4Jets, ABCother, ABCtrig)#, ABCmuons)
 
     del jets, ak4Jets, other, trig
 
@@ -400,40 +398,40 @@ def process(filepath, MC, tag):
     ABDf = getMaxPtDf(filepath=filepath, ev=ABev, MC=MC, path='AB', tag=tag, events=events)
     CDf = getMaxPtDf(filepath=filepath, ev=Cev, MC=MC, path='C', tag=tag, events=events)
 
-    ## adding muon info
-    def muoncol(muondf, var, jets, pm):
-        return muondf[f'Muon_{var}'].sum(axis=1).loc[jets.FatJet_pt.index].values    
-    def addmuons(df, jets):
-        df = df.assign(pMuon_eta = muoncol(pmuons, 'eta', jets, 'p'))
-        df = df.assign(mMuon_eta = muoncol(mmuons, 'eta', jets, 'm'))
-        df = df.assign(pMuon_pt = muoncol(pmuons, 'pt', jets, 'p'))
-        df = df.assign(mMuon_pt = muoncol(mmuons, 'pt', jets, 'm'))
-        df = df.assign(pMuon_ip3d = muoncol(pmuons, 'ip3d', jets, 'p'))
-        df = df.assign(mMuon_ip3d = muoncol(mmuons, 'ip3d', jets, 'm'))
-        df = df.assign(pMuon_sip3d = muoncol(pmuons, 'sip3d', jets, 'p'))
-        df = df.assign(mMuon_sip3d = muoncol(mmuons, 'sip3d', jets, 'm'))
+    # ## adding muon info
+    # def muoncol(muondf, var, jets, pm):
+    #     return muondf[f'Muon_{var}'].sum(axis=1).loc[jets.FatJet_pt.index].values    
+    # def addmuons(df, jets):
+    #     df = df.assign(pMuon_eta = muoncol(pmuons, 'eta', jets, 'p'))
+    #     df = df.assign(mMuon_eta = muoncol(mmuons, 'eta', jets, 'm'))
+    #     df = df.assign(pMuon_pt = muoncol(pmuons, 'pt', jets, 'p'))
+    #     df = df.assign(mMuon_pt = muoncol(mmuons, 'pt', jets, 'm'))
+    #     df = df.assign(pMuon_ip3d = muoncol(pmuons, 'ip3d', jets, 'p'))
+    #     df = df.assign(mMuon_ip3d = muoncol(mmuons, 'ip3d', jets, 'm'))
+    #     df = df.assign(pMuon_sip3d = muoncol(pmuons, 'sip3d', jets, 'p'))
+    #     df = df.assign(mMuon_sip3d = muoncol(mmuons, 'sip3d', jets, 'm'))
         
-        msum = pTL + mTL
-        mPair = pd.concat([pd.Series(msum.mass, index=pmuons.Muon_pt.index), 
-                           pd.Series(msum.eta, index=pmuons.Muon_pt.index), 
-                           pd.Series(msum.pt, index=pmuons.Muon_pt.index)], 
-                          axis=1)
-        mPair = mPair.rename(columns={0:'MuonPair_mass', 1:'MuonPair_eta', 2:'MuonPair_pt'})
+    #     msum = pTL + mTL
+    #     mPair = pd.concat([pd.Series(msum.mass, index=pmuons.Muon_pt.index), 
+    #                        pd.Series(msum.eta, index=pmuons.Muon_pt.index), 
+    #                        pd.Series(msum.pt, index=pmuons.Muon_pt.index)], 
+    #                       axis=1)
+    #     mPair = mPair.rename(columns={0:'MuonPair_mass', 1:'MuonPair_eta', 2:'MuonPair_pt'})
         
-        toconcat = mPair.loc[jets.FatJet_pt.index]
-        toconcat.reset_index(drop=True, inplace=True)
-        df = pd.concat([df, toconcat], axis=1)
-        print(df)
-        df = df.assign(one=df.MuonPair_pt/df.FatJet_pt)
-        df = df.assign(two=df.pMuon_pt/df.FatJet_pt)
-        df = df.assign(three=df.mMuon_pt/df.FatJet_pt)
-        df = df.rename(columns={'one':'MuonPair_pt|FatJet_pt', 'two':'pMuon_pt|FatJet_pt', 'three': 'mMuon_pt|FatJet_pt'})
+    #     toconcat = mPair.loc[jets.FatJet_pt.index]
+    #     toconcat.reset_index(drop=True, inplace=True)
+    #     df = pd.concat([df, toconcat], axis=1)
+    #     print(df)
+    #     df = df.assign(one=df.MuonPair_pt/df.FatJet_pt)
+    #     df = df.assign(two=df.pMuon_pt/df.FatJet_pt)
+    #     df = df.assign(three=df.mMuon_pt/df.FatJet_pt)
+    #     df = df.rename(columns={'one':'MuonPair_pt|FatJet_pt', 'two':'pMuon_pt|FatJet_pt', 'three': 'mMuon_pt|FatJet_pt'})
         
-        return df
+        # return df
     
-    if not ABCDf.empty: ABCDf = addmuons(ABCDf, ABCjets)
-    if not ABDf.empty: ABDf = addmuons(ABDf, ABjets)
-    if not CDf.empty: CDf = addmuons(CDf, Cjets)
+    # if not ABCDf.empty: ABCDf = addmuons(ABCDf, ABCjets)
+    # if not ABDf.empty: ABDf = addmuons(ABDf, ABjets)
+    # if not CDf.empty: CDf = addmuons(CDf, Cjets)
 
     return {'ABC': ABCDf, 'AB': ABDf, 'C': CDf}
 
