@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import json
 from uproot_methods import TLorentzVectorArray as TLVA
 import mplhep as hep
+from copy import deepcopy
 
 plt.style.use(hep.style.ROOT)
 
@@ -71,6 +72,14 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
         maxPtData = maxPtData.assign(Jet_btagDeepB1=btags.max(axis=1))
         maxPtData = maxPtData.assign(Jet_btagDeepB2=btags.min(axis=1))
 
+
+    maxPtData['event'] = other['event'].values.astype(int)
+    maxPtData['run'] = other['run'].values.astype(int)
+    maxPtData['Pileup_nTrueInt'] = other['Pileup_nTrueInt']
+    maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
+    maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+    maxPtData['HLT_AK8PFJet500'] = ev.objs['trig'].HLT_AK8PFJet500
+    
     maxPtData['final_weights'] = 1
     if 'ggH'==tag:
         maxPtData['LHE_weights'] = 0.0046788#1
@@ -130,7 +139,7 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
                              labels=trigTensor[path]).astype(float)
         maxPtData = maxPtData.assign(trigWeight = trigWgt)
         maxPtData = maxPtData.assign(final_weights = maxPtData['final_weights']*
-                                     maxPtData['trigWeight']*54.54)
+                                     maxPtData['trigWeight'])
         ## added ask bhoff if this is for all of just qcd
         # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
         # wgt[wgt<0.1] = 0.1
@@ -144,10 +153,29 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
     #     maxPtData['run'] = other['run'].values.astype(int)
     #     maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
 
-    maxPtData['event'] = other['event'].values.astype(int)
-    maxPtData['run'] = other['run'].values.astype(int)
-    maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
-    maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+    
+    ## HEmiss
+    region = ((maxPtData.FatJet_eta < -1.17) & (maxPtData.FatJet_phi > -1.97)
+              & (maxPtData.FatJet_phi < -0.47))
+    if not MC:
+        ## HEM veto for data
+        idx = maxPtData[region & (maxPtData.run > 319077)].dropna().index 
+        maxPtData.drop(idx, inplace=True)
+        
+    else: 
+        if 'C' == path: 
+            maxPtData = maxPtData.assign(final_weights=maxPtData.final_weights*15.8)
+        else:
+            region1 = region & (maxPtData.HLT_AK8PFJet500==True)
+            region2 = region & (maxPtData.HLT_AK8PFJet500==False)
+            maxPtData.final_weights[region1] *= 21.09
+            maxPtData.final_weights[region2] *= 15.8
+            
+    ## lumi 
+    
+        
+    print('path :' , path)
+    print('weight :', maxPtData.final_weights.sum())
     maxPtData['FatJet_eta'] = maxPtData['FatJet_eta'].abs()
     #maxPtData['EventNum'] = jets.FatJet_pt.index
     return maxPtData
@@ -205,6 +233,7 @@ def process(filepath, MC, tag):
     other['run'] = pd.DataFrame(events.array('run').astype(int))
     other['event'] = pd.DataFrame(events.array('event').astype(int))
     other['luminosityBlock'] = pd.DataFrame(events.array('luminosityBlock').astype(int))
+    other['Pileup_nTrueInt'] = pd.DataFrame(events.array('Pileup_nTrueInt'))
 
     # muons['Muon_softId'] = pd.DataFrame(events.array('Muon_softId'))
     # muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
@@ -227,6 +256,9 @@ def process(filepath, MC, tag):
     trigC = (events.array('L1_DoubleJet112er2p3_dEta_Max1p6') |
              events.array('L1_DoubleJet150er2p5')) & events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
     trig['trigC'] = pd.DataFrame(trigC.astype(bool))
+    trig['HLT_AK8PFJet500'] = pd.DataFrame(events.array('HLT_AK8PFJet500'))
+    trig['HLT_AK8PFJet330_TrimMass30'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30'))
+    trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'] = pd.DataFrame(events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'))
 
     ev = Event(jets, other, trig, muons)
 
@@ -437,7 +469,7 @@ def process(filepath, MC, tag):
 
 
 
-#%%
+
 ## function to get center of ins given binedges as np array
 def getBinCenter(arr):
     arrCen = list()
@@ -530,7 +562,7 @@ nbins = {'FatJet_pt': 30,
 
 pickledir = 'JetHTTrigEff/dataVsMC/pickles'
 append_params = {'ignore_index':True, 'sort':False}
-root=False
+root=True
 #%%
 if root:
     ggH = process(filepath=DM.ggHPaths, MC=True, tag='ggH')
@@ -602,6 +634,7 @@ if root:
         JetHT['ABC'] = JetHT['ABC'].append(tmp['ABC'], **append_params)
         JetHT['AB'] = JetHT['AB'].append(tmp['AB'], **append_params)
         JetHT['C'] = JetHT['C'].append(tmp['C'], **append_params)
+#%%
     for key in JetHT:
         JetHT[key] = analyze(JetHT[key])
     pickle.dump(JetHT, open(f'{pickledir}/JetHT.pkl','wb'))
