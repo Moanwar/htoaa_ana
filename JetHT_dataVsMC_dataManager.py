@@ -38,6 +38,24 @@ plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJe
             # 'MuonPair_eta', 'MuonPair_pt', 'MuonPair_pt|FatJet_pt',
             # 'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
             ]
+pudir = '/home/chosila/Projects/htoaa/PUweights/PU_ratio_2021_05_26.root'
+puf = uproot.open(pudir)
+
+def calcPU(maxPtData):
+
+    pvals = puf.get('PU_ratio').values
+    fvals = puf.get('PU_ratio_HLT_AK8PFJet330').values
+    
+    for i in range(99):
+        maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & maxPtData.HLT_AK8PFJet500] *= pvals[i]
+        maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
+                                                                                      maxPtData.HLT_DoublePFJets)] *= fvals[i]
+    maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & maxPtData.HLT_AK8PFJet500] *= pvals[99]
+    maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
+                                                                                  maxPtData.HLT_DoublePFJets)] *= fvals[99]
+    return maxPtData
+
+
 
 
 def getMaxPtDf(filepath, ev, MC, path, tag, events):
@@ -75,10 +93,13 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
 
     maxPtData['event'] = other['event'].values.astype(int)
     maxPtData['run'] = other['run'].values.astype(int)
-    maxPtData['Pileup_nTrueInt'] = other['Pileup_nTrueInt']
     maxPtData['luminosityBlock'] = other['luminosityBlock'].values.astype(int)
     maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
-    maxPtData['HLT_AK8PFJet500'] = ev.objs['trig'].HLT_AK8PFJet500
+    maxPtData['HLT_AK8PFJet500'] = ev.objs['trig'].HLT_AK8PFJet500.values.astype(bool)
+    maxPtData['HLT_AK8PFJet330'] = ev.objs['trig'].HLT_AK8PFJet330.values.astype(bool)
+    maxPtData['HLT_DoublePFJets'] = ev.objs['trig'].HLT_DoublePFJets.values.astype(bool)
+    if MC:
+            maxPtData['Pileup_nTrueInt'] = other['Pileup_nTrueInt']
     
     maxPtData['final_weights'] = 1
     if 'ggH'==tag:
@@ -90,24 +111,14 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
                                       maxPtData['ggH_weights'])
     elif 'BGen'==tag:
         maxPtData['LHE_weights'] = DM.BGenDict[filepath]
-        # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
-        # wgt[wgt<0.1] = 0.1
-        # maxPtData['QCD_correction'] = wgt
-        # Xsec_wgt = 10.78
         maxPtData = maxPtData.assign(final_weights =
                                      maxPtData['LHE_weights'])
-                                     #maxPtData['QCD_correction']
-                                     #*Xsec_wgt)
+                                     
     elif 'bEnr' == tag:
         maxPtData['LHE_weights'] = DM.bEnrDict[filepath]
-        # wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
-        # wgt[wgt<0.1] = 0.1
-        # maxPtData['QCD_correction'] = wgt
-        # Xsec_wgt = 4.1
         maxPtData = maxPtData.assign(final_weights=
                                      maxPtData['LHE_weights'])
-                                     #maxPtData['QCD_correction']
-                                     #*Xsec_wgt)
+                                     
     elif 'QCDInc'==tag:
         maxPtData['LHE_weights'] =DM.QCDIncDict[filepath]
         maxPtData = maxPtData.assign(final_weights=
@@ -121,10 +132,7 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
     elif 'TTJets'==tag:
         maxPtData['LHE_weights'] = DM.TTJetsDict[filepath]
         maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
-        ## added this for checks
-        #wgt = 4.346 - 0.356*np.log2(maxPtData.LHE_HT)
-        #wgt[wgt<0.1] = 0.1
-        #maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights']*wgt)
+
 
     if MC:
         #bins = pd.IntervalIndex.from_breaks(breaks=trigTensor['meta'][path], closed='left')
@@ -164,14 +172,18 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
         
     else: 
         if 'C' == path: 
-            maxPtData = maxPtData.assign(final_weights=maxPtData.final_weights*15.8)
+            maxPtData = maxPtData.assign(final_weights=maxPtData.final_weights*15.8*54.54)
         else:
             region1 = region & (maxPtData.HLT_AK8PFJet500==True)
             region2 = region & (maxPtData.HLT_AK8PFJet500==False)
+            ## HE MISS
             maxPtData.final_weights[region1] *= 21.09
             maxPtData.final_weights[region2] *= 15.8
-            
-    ## lumi 
+            ## PILE UP 
+            maxPtData.final_weights[maxPtData.HLT_AK8PFJet500==True] *= 59.83
+            maxPtData.final_weights[maxPtData.HLT_AK8PFJet500==False] *= 54.54
+        
+        maxPtData = calcPU(maxPtData)
     
         
     print('path :' , path)
@@ -228,12 +240,13 @@ def process(filepath, MC, tag):
 
     if MC:
         other['LHE_HT'] = pd.DataFrame(events.array('LHE_HT')).astype(np.float64)
+        other['Pileup_nTrueInt'] = pd.DataFrame(events.array('Pileup_nTrueInt'))
     other['PV_npvs'] = pd.DataFrame(events.array('PV_npvs'))
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
     other['run'] = pd.DataFrame(events.array('run').astype(int))
     other['event'] = pd.DataFrame(events.array('event').astype(int))
     other['luminosityBlock'] = pd.DataFrame(events.array('luminosityBlock').astype(int))
-    other['Pileup_nTrueInt'] = pd.DataFrame(events.array('Pileup_nTrueInt'))
+    
 
     # muons['Muon_softId'] = pd.DataFrame(events.array('Muon_softId'))
     # muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
@@ -257,8 +270,9 @@ def process(filepath, MC, tag):
              events.array('L1_DoubleJet150er2p5')) & events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71')
     trig['trigC'] = pd.DataFrame(trigC.astype(bool))
     trig['HLT_AK8PFJet500'] = pd.DataFrame(events.array('HLT_AK8PFJet500'))
-    trig['HLT_AK8PFJet330_TrimMass30'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30'))
-    trig['HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'] = pd.DataFrame(events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'))
+    trig['HLT_AK8PFJet330'] = pd.DataFrame(events.array('HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'))
+    trig['HLT_DoublePFJets'] = pd.DataFrame(events.array('HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71'))
+
 
     ev = Event(jets, other, trig, muons)
 
@@ -562,7 +576,7 @@ nbins = {'FatJet_pt': 30,
 
 pickledir = 'JetHTTrigEff/dataVsMC/pickles'
 append_params = {'ignore_index':True, 'sort':False}
-root=True
+root=False
 #%%
 if root:
     ggH = process(filepath=DM.ggHPaths, MC=True, tag='ggH')
@@ -658,7 +672,7 @@ bgs = {'WJets': WJets,
        }
 
 wgt = pd.DataFrame()
-for path in ['AB']:#pathlist:
+for path in pathlist:
     for var in plotVars:
         nbin = nbins[var] if var in nbins else 10
         range_local = ranges[var] if var in ranges else None
