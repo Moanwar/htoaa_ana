@@ -38,6 +38,7 @@ plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJe
             # 'MuonPair_eta', 'MuonPair_pt', 'MuonPair_pt|FatJet_pt',
             # 'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
             ]
+
 pudir = '/home/chosila/Projects/htoaa/PUweights/PU_ratio_2021_05_26.root'
 puf = uproot.open(pudir)
 
@@ -48,11 +49,18 @@ def calcPU(maxPtData):
     
     for i in range(99):
         maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & maxPtData.HLT_AK8PFJet500] *= pvals[i]
-        maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
-                                                                                      maxPtData.HLT_DoublePFJets)] *= fvals[i]
+        maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & ~maxPtData.HLT_AK8PFJet500] *= fvals[i]
     maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & maxPtData.HLT_AK8PFJet500] *= pvals[99]
-    maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
-                                                                                  maxPtData.HLT_DoublePFJets)] *= fvals[99]
+    maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & ~maxPtData.HLT_AK8PFJet500] *= fvals[99]
+    
+    
+    # for i in range(99):
+    #     maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & maxPtData.HLT_AK8PFJet500] *= pvals[i]
+    #     maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==i) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
+    #                                                                                   maxPtData.HLT_DoublePFJets)] *= fvals[i]
+    # maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & maxPtData.HLT_AK8PFJet500] *= pvals[99]
+    # maxPtData.final_weights[(maxPtData.Pileup_nTrueInt==99) & ~maxPtData.HLT_AK8PFJet500 & (maxPtData.HLT_AK8PFJet330 | 
+    #                                                                               maxPtData.HLT_DoublePFJets)] *= fvals[99]
     return maxPtData
 
 
@@ -98,8 +106,10 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
     maxPtData['HLT_AK8PFJet500'] = ev.objs['trig'].HLT_AK8PFJet500.values.astype(bool)
     maxPtData['HLT_AK8PFJet330'] = ev.objs['trig'].HLT_AK8PFJet330.values.astype(bool)
     maxPtData['HLT_DoublePFJets'] = ev.objs['trig'].HLT_DoublePFJets.values.astype(bool)
+    
     if MC:
-            maxPtData['Pileup_nTrueInt'] = other['Pileup_nTrueInt']
+        maxPtData['Pileup_nTrueInt'] = other['Pileup_nTrueInt'].values
+
     
     maxPtData['final_weights'] = 1
     if 'ggH'==tag:
@@ -172,18 +182,30 @@ def getMaxPtDf(filepath, ev, MC, path, tag, events):
         
     else: 
         if 'C' == path: 
-            maxPtData = maxPtData.assign(final_weights=maxPtData.final_weights*15.8*54.54)
+            ## the 15.8 needs to be in the correct region 
+            wgt = pd.Series(np.ones_like(maxPtData.FatJet_pt))*54.5365
+            wgt[region] = 15.8
+            maxPtData = maxPtData.assign(final_weights=maxPtData.final_weights*wgt)
         else:
             region1 = region & (maxPtData.HLT_AK8PFJet500==True)
             region2 = region & (maxPtData.HLT_AK8PFJet500==False)
-            ## HE MISS
-            maxPtData.final_weights[region1] *= 21.09
-            maxPtData.final_weights[region2] *= 15.8
-            ## PILE UP 
-            maxPtData.final_weights[maxPtData.HLT_AK8PFJet500==True] *= 59.83
-            maxPtData.final_weights[maxPtData.HLT_AK8PFJet500==False] *= 54.54
+            wgt = cp.deepcopy(maxPtData.HLT_AK8PFJet500)
+            ## pile up 
+            wgt[wgt==False] = 54.5365
+            wgt[wgt==True] = 59.8279
+            ## HE miss 
+            wgt[region1] = 21.09 
+            wgt[region2] = 15.8 
+            
+            # ## HE MISS
+            # maxPtData.final_weights[region1] *= 21.09
+            # maxPtData.final_weights[region2] *= 15.8
+            
+            maxPtData = maxPtData.assign(final_weights = maxPtData.final_weights*wgt)
         
-        maxPtData = calcPU(maxPtData)
+            print(maxPtData.final_weights.sum())
+            maxPtData = calcPU(maxPtData)
+            print(maxPtData.final_weights.sum())
     
         
     print('path :' , path)
