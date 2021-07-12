@@ -5,82 +5,106 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, auc, accuracy_score
 import random
+import pickle
+
 
 CSVpathBg = 'CSV/TTBarMuEleFat_Bkg.csv'
 CSVpathSig = 'CSV/TTBarMuEleFat_Sig.csv'
  
 test_size = 0.2
-ntrees = 400
-treeDepth = 3
-mcw = 3
-lr = 0.01
-# trainVars = [    
-#     'FatJet_pt',
-#     'FatJet_eta',
-#     'FatJet_mass',
-#     'FatJet_btagCSVV2',
-#     'FatJet_btagDeepB',
-#     'FatJet_msoftdrop',
-#     'FatJet_btagDDBvL',
-#     'FatJet_deepTagMD_H4qvsQCD',
-#     'FatJet_n2b1',
-#     'SubJet_mass(1)',
-#     'SubJet_mass(2)',
-#     'SubJet_tau1(1)',
-#     'FatJet_nSV'
-#     ]
-trainVars=['msoft_fat', 'mass_fat', 'deepB_max_jet',
-       'flavB_max_jet', 'pt_llJ', 'pt_llvJ', 'MT_llvJ', 'mass_llJ',
-       'mass_llvJ', 'mass_max_lep_fat', 'mass_min_lep_fat', 'dR_max_lep_fat',
-       'dR_min_lep_fat', 'dEta_max_lep_fat', 'dEta_min_lep_fat', 'dR_ll_fat',
-       'dEta_ll_fat']
+
+n_estimators = [400, 800, 1200, 1600]
+max_depth = [2, 4, 6, 8]
+min_child_weight = [2,4, 6,8, 10]
+learning_rate = [0.0001, 0.001, 0.01]
 
 
-# data = pd.read_csv(CSVpathbg, header=0)
-# dataSig = data.loc[data.isSignal == 1]
-# dataBg = data.loc[data.isSignal == 0]
-colunstripped = [' isSignal', ' msoft_fat', ' mass_fat', ' deepB_max_jet', ' flavB_max_jet', 
-        ' pt_llJ',' pt_llvJ', ' MT_llvJ', ' mass_llJ', ' mass_llvJ', ' mass_max_lep_fat', 
-        ' mass_min_lep_fat', ' dR_max_lep_fat', ' dR_min_lep_fat',  ' dEta_max_lep_fat',
-        ' dEta_min_lep_fat', ' dR_ll_fat', ' dEta_ll_fat']
-colstripped = [x.strip() for x in colunstripped]
-cols = dict(zip(colunstripped, colstripped))
+
+params =  { 
+    'n_estimators' : 400,
+    'max_depth' : 2,
+    'min_child_weight' : 2,
+    'learning_rate' : 0.02,
+    'objective' : 'binary:logistic', 
+    'eval_metric' : 'auc',
+    'reg_alpha' : 1,
+    }
+num_boost_round = 999
+trainVars=['msoft_fat', 
+           'mass_fat', 
+           'deepB_max_jet',
+           'flavB_max_jet', 
+           'pt_llJ', 
+           'pt_llvJ', 
+           'MT_llvJ', 
+           'mass_llJ',
+           'mass_llvJ', 
+           'mass_max_lep_fat', 
+           'mass_min_lep_fat', 
+           'dR_max_lep_fat',
+           'dR_min_lep_fat', 
+           'dEta_max_lep_fat', 
+           'dEta_min_lep_fat', 
+           'dR_ll_fat',
+           'dEta_ll_fat']
+
 dataBg = pd.read_csv(CSVpathBg, header=0)
-dataBg.rename(columns=cols, inplace=True)
+dataBg.columns = dataBg.columns.str.replace(' ', '')
 dataBg = dataBg.sample(frac=0.6)
 
 
 dataSig = pd.read_csv(CSVpathSig, header=0)
-dataSig.rename(columns=cols, inplace=True)
+dataSig.columns = dataSig.columns.str.replace(' ', '')
 data = dataSig.append(dataBg, ignore_index=True)
-#%%
+
 print('Signal event count: ' + str(len(dataSig.index)))
 print('Background event count: ' + str(len(dataBg.index)))
 
 
 ## split data into training and testing
-# randInt = random.randint(0,100)
-randInt = random.randint(0,1000)
+randInt = 576#random.randint(0,1000) #576
 print("random int: " + str(randInt))
 trainData, testData = train_test_split(data, random_state=randInt, test_size=test_size)
 
+
+diff = []
+testauc = []
+paramslist = []
+
+# n_estimators = [400, 800, 1200, 1600]
+# max_depth = [2, 4, 6, 8]
+# min_child_weight = [2,4, 6,8, 10]
+# learning_rate = [0.0001, 0.001, 0.01]
+
+
+
+# for i in n_estimators:
+#     for j in max_depth:
+#         for k in min_child_weight:
+#             for l in learning_rate:
 cls = xgb.XGBClassifier(
-    n_estimators = ntrees,
-    max_depth = treeDepth,
-    min_child_weight = mcw,
-    learning_rate = lr,
     random_state=randInt,
-    n_jobs=1
+    **params,
     )
 eval_set = [(testData[trainVars], testData['isSignal'])]
 
 cls.fit(trainData[trainVars], trainData['isSignal'],
-           #sample_weight=(trainData['final_weights']),
-           #early_stopping_rounds=100, 
+           early_stopping_rounds=100, 
            eval_metric="auc",
            eval_set = eval_set,
-           #sample_weight_eval_set=[testData['final_weights']],
-           verbose=0)
+           verbose=1)
+
+'''dtrain = xgb.DMatrix(trainData[trainVars], label=trainData['isSignal'])
+cv_results = xgb.cv(
+    params,
+    dtrain=dtrain,
+    num_boost_round=num_boost_round,
+    seed=42,
+    nfold=5,
+    metrics={'auc'},
+    early_stopping_rounds=100,
+)
+print(cv_results)'''
 
 print ("XGBoost trained")
 
@@ -99,13 +123,14 @@ fig, ax = plt.subplots()
 
 print(f"diff - {test_auc-train_auc}")
 
-
 prediction = cls.predict(testData[trainVars])
 accuracy = accuracy_score(testData['isSignal'], prediction)
 print("XGBoost test accuracy - {}".format(accuracy))
 
 
 
+plotdir = 'csvpickles/plots'
+paramcap = f'ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}_Int{randInt}'
 ## draw them rocs
 fig, ax = plt.subplots(figsize=(8,8))
 train_auc = auc(fpr, tpr)
@@ -117,8 +142,10 @@ ax.set_xlabel('False Positive Rate')
 ax.set_ylabel('True Positive Rate')
 ax.legend(loc="lower right")
 ax.grid()
-ax.set_title('ROC')
+ax.set_title(f'ROC {paramcap}')
+#%%
 #fig.savefig("{}/roc_{} {}.png".format(dest, hyppar, condition))
+plt.savefig(f'{plotdir}/roc_{paramcap}.png')
 plt.show()
 plt.clf()
 
@@ -129,13 +156,38 @@ testData = testData.assign(BDTScore = test_proba[:,1])
 ## making bdt score figs babey
 density = True
 fig, ax = plt.subplots(figsize=(8,8))
-ax.hist(trainData.BDTScore.loc[trainData.isSignal == 1],  bins=20, ls = '--', histtype='step',stacked=True, label='train signal', density=density)
-ax.hist(trainData.BDTScore.loc[trainData.isSignal == 0], bins=20, ls = '--', histtype='step',stacked=True, label='train background', density=density)
-ax.hist(testData.BDTScore.loc[testData.isSignal == 1], bins=20, histtype='step', stacked=True, label='test signal', fill=False, density=density)
-ax.hist(testData.BDTScore.loc[testData.isSignal == 0],  bins=20, histtype='step', stacked=True, label='test background', fill=False, density=density)
+bins = np.linspace(0,1,21)
+ax.hist(trainData.BDTScore.loc[trainData.isSignal == 1],  bins=bins, ls = '--', histtype='step',stacked=True, label='train signal', density=density)
+ax.hist(trainData.BDTScore.loc[trainData.isSignal == 0], bins=bins, ls = '--', histtype='step',stacked=True, label='train background', density=density)
+ax.hist(testData.BDTScore.loc[testData.isSignal == 1], bins=bins, histtype='step', stacked=True, label='test signal', fill=False, density=density)
+ax.hist(testData.BDTScore.loc[testData.isSignal == 0],  bins=bins, histtype='step', stacked=True, label='test background', fill=False, density=density)
 ax.legend(loc='best')
 ax.set_title('BDT score')
 ax.set_xlabel('BDT Score')
+plt.savefig(f'{plotdir}/bdtscore_{paramcap}.png')
 #fig.savefig("{}/BDTScore_{} {}.png".format(dest, hyppar, condition))
 plt.show()
 plt.clf()
+
+## feature importance 
+xgb.plot_importance(cls)
+plt.savefig(f'{plotdir}/featureImportance_{paramcap}.png')
+plt.show()
+       
+## save model
+pickle.dump(cls, open(f'csvpickles/model_ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}','wb'))         
+                
+#                 testauc.append(test_auc)
+#                 diff.append(np.abs(train_auc-test_auc))
+#                 paramslist.append((i,j,k,l))
+                
+
+# results = pd.DataFrame(testauc, columns = ['testauc'])
+# results = results.assign(diff=diff)
+# results = results.assign(params=paramslist)
+
+# #%%
+# #results = pickle.load(open('csvpickls/results.pkl','rb'))
+# plt.scatter(results['diff'], results['testauc'])
+# plt.xlabel('|testauc - train auc|')
+# plt.ylabel('test auc')
