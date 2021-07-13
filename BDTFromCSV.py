@@ -8,8 +8,16 @@ import random
 import pickle
 
 
-CSVpathBg = 'CSV/TTBarMuEleFat_Bkg.csv'
-CSVpathSig = 'CSV/TTBarMuEleFat_Sig.csv'
+
+mu_ele = True
+
+if mu_ele:
+    CSVpathBg = 'CSV/DoubleLep_Bkg.csv'
+    CSVpathSig = 'CSV/DoubleLep_Sig.csv'
+else:
+    CSVpathBg = 'CSV/MuonEG_Bkg.csv'
+    CSVpathSig = 'CSV/MuonEG_Sig.csv'
+
  
 test_size = 0.2
 
@@ -21,7 +29,7 @@ learning_rate = [0.0001, 0.001, 0.01]
 
 
 params =  { 
-    'n_estimators' : 400,
+    'n_estimators' : 600,
     'max_depth' : 2,
     'min_child_weight' : 2,
     'learning_rate' : 0.02,
@@ -30,23 +38,23 @@ params =  {
     'reg_alpha' : 1,
     }
 num_boost_round = 999
-trainVars=['msoft_fat', 
-           'mass_fat', 
-           'deepB_max_jet',
-           'flavB_max_jet', 
-           'pt_llJ', 
-           'pt_llvJ', 
-           'MT_llvJ', 
-           'mass_llJ',
-           'mass_llvJ', 
-           'mass_max_lep_fat', 
-           'mass_min_lep_fat', 
-           'dR_max_lep_fat',
-           'dR_min_lep_fat', 
-           'dEta_max_lep_fat', 
-           'dEta_min_lep_fat', 
-           'dR_ll_fat',
-           'dEta_ll_fat']
+# trainVars=['msoft_fat', 
+#            'mass_fat', 
+#            'deepB_max_jet',
+#            'flavB_max_jet', 
+#            'pt_llJ', 
+#            'pt_llvJ', 
+#            'MT_llvJ', 
+#            'mass_llJ',
+#            'mass_llvJ', 
+#            'mass_max_lep_fat', 
+#            'mass_min_lep_fat', 
+#            'dR_max_lep_fat',
+#            #'dR_min_lep_fat', 
+#            'dEta_max_lep_fat', 
+#            'dEta_min_lep_fat', 
+#            'dR_ll_fat',
+#            'dEta_ll_fat']
 
 dataBg = pd.read_csv(CSVpathBg, header=0)
 dataBg.columns = dataBg.columns.str.replace(' ', '')
@@ -59,6 +67,14 @@ data = dataSig.append(dataBg, ignore_index=True)
 
 print('Signal event count: ' + str(len(dataSig.index)))
 print('Background event count: ' + str(len(dataBg.index)))
+
+toRemove = ['Event', 'isSignal', 'mass_fat', 'msoft_fat']
+if not mu_ele: 
+    toRemove.append('mu_ele')
+trainVars = [x for x in data.columns if x not in toRemove]
+
+#trainVars = ['mu_ele', 'mass_llvJ']
+
 
 
 ## split data into training and testing
@@ -119,7 +135,6 @@ test_proba = cls.predict_proba(testData[trainVars])
 fprt, tprt, thresholds = roc_curve(testData['isSignal'], test_proba[:,1])
 test_auc = auc(fprt, tprt)
 print("XGBoost test set auc - {}".format(test_auc))
-fig, ax = plt.subplots()
 
 print(f"diff - {test_auc-train_auc}")
 
@@ -130,7 +145,10 @@ print("XGBoost test accuracy - {}".format(accuracy))
 
 
 plotdir = 'csvpickles/plots'
-paramcap = f'ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}_Int{randInt}'
+if mu_ele:
+    paramcap = f'ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}_meT'
+else:
+    paramcap = f'ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}_meF'
 ## draw them rocs
 fig, ax = plt.subplots(figsize=(8,8))
 train_auc = auc(fpr, tpr)
@@ -143,6 +161,8 @@ ax.set_ylabel('True Positive Rate')
 ax.legend(loc="lower right")
 ax.grid()
 ax.set_title(f'ROC {paramcap}')
+
+
 #%%
 #fig.savefig("{}/roc_{} {}.png".format(dest, hyppar, condition))
 plt.savefig(f'{plotdir}/roc_{paramcap}.png')
@@ -175,7 +195,7 @@ plt.savefig(f'{plotdir}/featureImportance_{paramcap}.png')
 plt.show()
        
 ## save model
-pickle.dump(cls, open(f'csvpickles/model_ntrees{params["n_estimators"]}_depth{params["max_depth"]}_mcw{params["min_child_weight"]}_lr{params["learning_rate"]}','wb'))         
+pickle.dump(cls, open(f'csvpickles/model_{paracap}','wb'))         
                 
 #                 testauc.append(test_auc)
 #                 diff.append(np.abs(train_auc-test_auc))

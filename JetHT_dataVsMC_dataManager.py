@@ -39,10 +39,12 @@ plotVars = ['FatJet_pt', 'FatJet_eta', 'FatJet_mass', 'FatJet_btagCSVV2', 'FatJe
             # 'pMuon_pt|FatJet_pt', 'mMuon_pt|FatJet_pt'
             ]
 
-pudir = '/home/chosila/Projects/htoaa/PUweights/PU_ratio_2021_05_26.root'
-puf = uproot.open(pudir)
+
 
 def calcPU(maxPtData):
+    
+    pudir = '/home/chosila/Projects/htoaa/PUweights/PU_ratio_2021_05_26.root'
+    puf = uproot.open(pudir)
 
     pvals = puf.get('PU_ratio').values
     fvals = puf.get('PU_ratio_HLT_AK8PFJet330').values
