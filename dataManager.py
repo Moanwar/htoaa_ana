@@ -115,8 +115,8 @@ elif disc == 'm':
     trainVars = standardVars + highDiscVars + mediumDiscVars
 
 ## lumi and npvs ratio tensors
-muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
-muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
+muonR = pickle.load(open('weights/MuonRtensor.p', 'rb'))
+muonL = pickle.load(open('weights/MuonLtensor.p', 'rb'))
 
 ptkeys = list(muonL.keys()) + [999999]
 ptkeys.remove('meta')

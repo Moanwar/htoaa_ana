@@ -14,6 +14,7 @@ import pickle
 import random
 import os
 from sklearn.model_selection import GridSearchCV
+from pathlib import Path
 
 #from dataManager import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
 from dataManager import processData, ggHPaths, BGenPaths, bEnrPaths, allVars, trainVars, disc, TTJetsPaths, WJetsPaths, ZJetsPaths
@@ -27,12 +28,14 @@ parser.add_option("--ntrees", type="int", dest="ntrees", help="hyp", default = 4
 parser.add_option("--treeDeph", type="int", dest="treeDeph", help="hyp", default = 3)
 parser.add_option("--lr", type="float", dest="lr", help="hyp", default = 0.01)
 parser.add_option("--mcw", type="float", dest="mcw", help="hyp", default = 3)
-parser.add_option("--doXML", action="store_true", dest="doXML", help="Do save not write the xml file", default=True)
-parser.add_option("--HypOpt", action="store_true", dest="HypOpt", help="If you call this will not do plots with repport", default=False)
-parser.add_option("--dist", action='store_true', dest='dist', default=False)
+parser.add_option("--doXML", dest="doXML", help="Do save not write the xml file", default=True)
+parser.add_option("--HypOpt", dest="HypOpt", help="If you call this will not do plots with repport", default=False)
+parser.add_option("--dist", dest='dist', default=False)
 parser.add_option("--randInt", type='int', dest='randInt', default=1)
-parser.add_option('--train', dest='train', default=True)
+parser.add_option('--train' ,dest='train', default=True)
+parser.add_option('--root' , dest='root', default=True)
 (options, args) = parser.parse_args()
+
 
 hyppar= "ntrees_"+str(options.ntrees)+"_deph_"+str(options.treeDeph)+"_mcw_"+str(options.mcw)+"_lr_"+str(options.lr)
 #hyppar = 'ggH_unweighted ' + ' randInt '+str(options.randInt)
@@ -54,8 +57,9 @@ else:
 ## reload the data from ROOT, can just open pickle
 ## read determines if you want to load data from a root or pikl
 
-root = True
-if root:
+root = options.root
+
+if root==True:
     data = pd.DataFrame()
     data = data.append(processData(ggHPaths, 'ggH', True), ignore_index=True, sort=False)
     #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
@@ -88,12 +92,13 @@ if root:
     data = data.append(TTJetsData, ignore_index=True, sort=False)
     data = data.append(WJetsData, ignore_index=True, sort=False)
     data = data.append(ZJetsData, ignore_index=True, sort=False)
-    pickle.dump(data, open('data.pkl', 'wb'))
+    Path('pickles').mkdir(parents=True, exist_ok=True)
+    pickle.dump(data, open('pickles/data.pkl', 'wb'))
 
 ##############
 
-if not root:
-    data = pickle.load(open('data.pkl', 'rb'))
+else:
+    data = pickle.load(open('pickles/data.pkl', 'rb'))
 
 
 ## this is when you want to be training a new BDT
@@ -171,6 +176,7 @@ if options.train:
     #############################
 
     ## training
+    print("Training XGBoost")
 
     cls = xgb.XGBClassifier(
         n_estimators = options.ntrees,
@@ -210,7 +216,7 @@ if options.train:
 
 
     ## save model to pickle
-    pklpath="Htoaa_BDT" + condition
+    pklpath="pickles/Htoaa_BDT_" + condition
     if options.doXML:
         pickle.dump(cls, open(pklpath+".pkl", 'wb'))
         file = open(pklpath+"pkl.log","w")
@@ -228,6 +234,8 @@ if options.train:
 
 
     ## draw them rocs
+    print('Drawing ROCs')
+    Path(dest).mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(8,8))
     train_auc = auc(fpr, tpr)
     ax.plot(fpr, tpr, lw=1, color='g',label='XGB train (area = %0.5f)'%(train_auc))
@@ -346,6 +354,7 @@ if options.train:
             plt.legend(loc='best')
 
             plt.xlabel(colName)
+            Path('distributions').mkdir(parents=True, exist_ok=True)
             plt.savefig("distributions/dist_{}.png".format(colName))
             plt.clf()
 
@@ -364,7 +373,7 @@ if options.train:
         plt.clf()
 
 else:
-    print('we fc')
+    pass
     ## this is if you want to use existing BDT to test
     ## or should i be doing that in datavs mc. no i should do it here too
 

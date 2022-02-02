@@ -22,7 +22,7 @@ from htoaaRootFilesLoc import ZJetsPaths, ParkedDataPaths, JetHTPaths, ggHPaths,
 
 #exec(open("./htoaaRootFilesLoc.py").read())
 
-
+## MC weights for each pt range
 BGenWeight = [111800000. / 18740178,
               28070000. / 17127050,
               3082000. / 8292039,
@@ -50,6 +50,7 @@ WJetsWeight = [315600. / 10071273, 68570./ 15298056, 34900. / 14627242]
 TJetsWeight = [0.08119]#[831760.0 / 10244307]
 ParkedDataWeight = [7.1055]
 
+## dict of file and weights 
 BGenDict = dict(zip(BGenPaths, BGenWeight))
 bEnrDict = dict(zip(bEnrPaths, bEnrWeight))
 QCDIncDict = dict(zip(QCDIncPaths,QCDIncWeight))
@@ -58,8 +59,7 @@ WJetsDict = dict(zip(WJetsPaths, WJetsWeight))
 TTJetsDict = dict(zip(TTJetsPaths, TJetsWeight))
 ParkedDataDict = dict(zip(ParkedDataPaths, ParkedDataWeight))
 
-
-
+## variables to compare MC and data
 jetVars = ['FatJet_pt',
            'FatJet_eta',
            'FatJet_mass',
@@ -82,7 +82,6 @@ jetVars = ['FatJet_pt',
            'SubJet_btagDeepB(2)',
            'SubJet_tau1(2)',
            'FatJet_nSV']
-
 muonVars = ['Muon_pt',
             'Muon_eta',
             'Muon_ip3d',
@@ -93,28 +92,25 @@ PVVars = ['PV_npvs', 'PV_npvsGood']
 allVars = list(jetVars + muonVars + PVVars + ['LHE_HT'])
 allVars.sort()
 
+## weights based on muons lumi, ratio
+muonR = pickle.load(open('weights/MuonRtensor.p', 'rb'))
+muonL = pickle.load(open('weights/MuonLtensor.p', 'rb'))
 
-muonR = pickle.load(open('muontensor/MuonRtensor.p', 'rb'))
-muonL = pickle.load(open('muontensor/MuonLtensor.p', 'rb'))
-
-
-
-
-#ptkeys = list(muonL.keys()) + [999999]
 ptkeys = list(muonL.keys())
 ptkeys.append(999999)
 ptkeys.remove('meta')
 
-#ipkeys = list(muonL[ptkeys[0]].keys()) + [999999]
 ipkeys = list(muonL[ptkeys[0]].keys())
 ipkeys.append(999999)
 
 npvsGkeys = muonR[6][2]['H']
 
+## for checking that input into processData have the valid cases setup
 tagslist = ['bEnr', 'BGen', 'data', 'JetHT', 'WJets', 'TTJets', 'ZJets', 'ggH', 'MuonEG']
 dataSetList = ['Base', 'Parked', 'JetHT', 'MuonEG']
 triggerSetList = ['A', 'B', 'C', None]
 
+## function to get the maxpt of physics obj (muon, electron, jet) and all its relavent info
 def getMaxPt(physobj, col):
     colidx = physobj[col].idxmax(axis=1).to_numpy()
     rowidx = list(range(len(colidx)))
@@ -125,37 +121,17 @@ def getMaxPt(physobj, col):
         maxPtData[var] = npArr[rowidx, colidx]
     return maxPtData
 
+## like maxpt but nth pt 
 def getNthPt(n, physobj, sortBy, extractCol):
-    # tosortby = physobj[sortBy].fillna(0).to_numpy()
-    # idxsorted = np.argsort(tosortby, axis=1, kind='quicksort')
-    # idxn = idxsorted[:,-n]
-    # rowidx = range(physobj[extractCol].shape[0])
-    # nthVals = physobj[extractCol].to_numpy()[rowidx, idxn]
-
     nthVals=physobj[extractCol][physobj[sortBy].rank(axis=1,method='first',ascending=False)==n].to_numpy().flatten()
     nthVals=nthVals[~np.isnan(nthVals)]
     return nthVals
 
 ## gets the dR between the highest pt fatjet and whatever physics obj you put in as 
 ## 'jetPhysObj'. I just didn't want to change the name
-def getdR(objName, events, fatJetPhysObj, jetPhysObj):
-    # eventidx = fatJetPhysObj.FatJet_pt.index
-    # eventidx = range(len(eventidx))
-    # tosortby = fatJetPhysObj['FatJet_pt'].fillna(0)
-    # maxptJetIdx = fatJetPhysObj['FatJet_pt'].idxmax(axis=1)#idxsorted.loc[:,0].astype(int)
-    # idx = maxptJetIdx.index
-    # fatJetEta = fatJetPhysObj['FatJet_eta'].to_numpy()[eventidx, maxptJetIdx]
-    # fatJetPhi = fatJetPhysObj['FatJet_phi'].to_numpy()[eventidx, maxptJetIdx]
-    # fatJetEta = fatJetEta.reshape(len(fatJetEta),1)
-    # fatJetPhi = fatJetPhi.reshape(len(fatJetPhi),1)
-    
+def getdR(objName, events, fatJetPhysObj, jetPhysObj):    
     fatJetEta = fatJetPhysObj['FatJet_eta'][fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1].sum(axis=1).to_numpy().reshape(len(fatJetPhysObj['FatJet_pt']),1)
     fatJetPhi = fatJetPhysObj['FatJet_phi'][fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1].sum(axis=1).to_numpy().reshape(len(fatJetPhysObj['FatJet_pt']),1)
-
-    # print('---------------', objName)
-    # print((fatJetPhysObj['FatJet_pt'].rank(method='max', axis=1, ascending=False)==1).loc[15015])
-    # print(jetPhysObj[f'{objName}_eta'].loc[15015])
-    # print(jetPhysObj[f'{objName}_phi'].loc[15015])
 
     objEta = jetPhysObj[f'{objName}_eta']
     objPhi = jetPhysObj[f'{objName}_phi']
@@ -221,6 +197,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
     f = uproot.open(fileName + '.root')
     events = f.get('Events')
 
+    ## create physics objects 
     jets = PhysObj('jets' + fileName)
     muons = PhysObj('muons' + fileName)
     other = PhysObj('other' + fileName)
@@ -256,7 +233,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
     # jets['SubJet_tau1(2)'] = getSubJetData(2, 'SubJet_tau1', events)
 
 
-    ## muons
+    ## fill muon physics objects (only for parked dataset) 
     if 'Parked'==dataSet:
         muons['Muon_pt'] = pd.DataFrame(events.array('Muon_pt'))
         muons['Muon_eta'] = pd.DataFrame(np.abs(events.array('Muon_eta')))
@@ -265,6 +242,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
         muons['Muon_IP'] = pd.DataFrame(events.array('Muon_dxy')/events.array('Muon_dxyErr')).abs()
 
     #-------------- Jet HT Trigger efficiency vals ---------------------------
+    ## only for calculating jetHt trigger efficiency
 
     #L1_SingleJet180 and HLT_AK8PFJet500
     if 'A'==trigger:
@@ -329,7 +307,6 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
     ## make Event object
     ev = Event(jets, muons, other, trig, electrons, ak4Jets)
 
-
     ## cutting events
     ## jet cuts
     jets.cut(jets['FatJet_pt'] > 170)
@@ -384,15 +361,8 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
         other['JetFatJet_dRCnt'] = getdRCount(ak4Jets['dR'])
         ak4Jets.cut(ak4Jets['dR'] < 0.8)
 
-        #pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
-        #pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
-        #print('other before cut: ', other['JetFatJet_dRCnt'].shape)
-
     ## sync so all events cut to same events after apply individual cuts
     ev.sync()
-
-    pickle.dump(jets, open('JetHTTrigEff/frames/fatjets.pkl','wb'))
-    pickle.dump(ak4Jets , open('JetHTTrigEff/frames/ak4jets.pkl','wb'))
 
     ## rename the columns of LHE_HT, PV_npvs, PV_npvsGood to match the ones that get
     ## passed into getMaxPt
@@ -406,6 +376,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
        return pd.DataFrame()
 
     else:
+        ## Return only the highest pt physics objects and their related variables
         maxPtJets = getMaxPt(jets, 'FatJet_pt')#.reindex(jets.FatJet_pt.index)
         if ('JetHT'==dataSet) or ('Base'==dataSet):
             maxPtData = maxPtJets
@@ -420,6 +391,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
 
         maxPtData = maxPtData.assign(PV_npvs=other.PV_npvs.to_numpy())
         maxPtData = maxPtData.assign(PV_npvsGood=other.PV_npvsGood.to_numpy())
+        ## apply trigger info for each each case
         if 'MuonEG' == dataSet:
             maxPtData = maxPtData.assign(MuonEGTriggers=trig['MuonEGTriggers'])
         if 'A'==trigger:
@@ -458,7 +430,6 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
 
         #------------------------------------------------------------------
         ## add index back into the df for comparison
-
         maxPtData['eventNum'] = jets.FatJet_pt.index
 
         if MC:
@@ -469,6 +440,7 @@ def processData (filePath, tag, dataSet, MC, trigger=None): #JetHT=False):
 
 
 
+        ## applying weighing factors for MC to match data
         ## LHE_weights
         if 'ggH'==tag:
              maxPtData['LHE_weights'] = 0.0046788#1
