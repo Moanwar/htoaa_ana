@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3
+
+###!/usr/bin/env python
+###!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Fri Nov  6 16:00:41 2020
@@ -7,6 +10,7 @@ Created on Fri Nov  6 16:00:41 2020
 """
 
 import numpy as np
+#%matplotlib inline
 import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb
@@ -39,7 +43,9 @@ parser.add_option('--root' , dest='root', default=True)
 
 hyppar= "ntrees_"+str(options.ntrees)+"_deph_"+str(options.treeDeph)+"_mcw_"+str(options.mcw)+"_lr_"+str(options.lr)
 #hyppar = 'ggH_unweighted ' + ' randInt '+str(options.randInt)
-print(hyppar)
+print("Start htoaa_BDT3.py::")
+print(hyppar, flush=True)
+#print(hyppar)
 
 if disc == None:
     condition = ''
@@ -60,6 +66,8 @@ else:
 root = options.root
 
 if root==True:
+    #print("Read data from root files", flush=True)
+    print("Read data from root files")
     data = pd.DataFrame()
     data = data.append(processData(ggHPaths, 'ggH', True), ignore_index=True, sort=False)
     #data = data.append(processData(BGenPath, 'BGen'), ignore_index=True, sort = False)
@@ -98,6 +106,8 @@ if root==True:
 ##############
 
 else:
+    #print("Read data from pkl", flush=True)
+    print("Read data from pkl")
     data = pickle.load(open('pickles/data.pkl', 'rb'))
 
 
@@ -176,6 +186,7 @@ if options.train:
     #############################
 
     ## training
+    #print("Training XGBoost", flush=True)
     print("Training XGBoost")
 
     cls = xgb.XGBClassifier(
@@ -248,14 +259,16 @@ if options.train:
     ax.grid()
     ax.set_title(hyppar + ' ' + condition)
     fig.savefig("{}/roc_{} {}.png".format(dest, hyppar, condition))
-    plt.show()
+    #plt.show()
     plt.clf()
 
 
+    print("Add BDT scopres to dataframe")
     ## add the BDT scores to the df so manip is easier. hopefully
     trainData = trainData.assign(BDTScore = train_proba[:,1])
     testData = testData.assign(BDTScore = test_proba[:,1])
 
+    print("Make BDT score figures")
     ## making bdt score figs babey
     density = True
     fig, ax = plt.subplots(figsize=(8,8))
@@ -267,9 +280,10 @@ if options.train:
     ax.set_title('BDT score {} {}'.format(hyppar, condition))
     ax.set_xlabel('BDT Score')
     fig.savefig("{}/BDTScore_{} {}.png".format(dest, hyppar, condition))
-    plt.show()
+    #plt.show()
     plt.clf()
 
+    print("Made BDT score figures")
 
     ################### sensitivity plots ####################
     '''sortedData = testData.loc[testData.target==1].sort_values(by='BDTScore', axis=0, kind='mergesort')
@@ -320,7 +334,7 @@ if options.train:
     #plt.show()
     #fig.savefig("plots/%s_XGB_importance.png" % hyppar)
 
-
+    '''
     ## distributions of things yeah
     if options.dist:
         for colName in dataSig.columns:
@@ -371,7 +385,9 @@ if options.train:
         plt.xlabel('LHE_HT')
         #plt.show()
         plt.clf()
+    '''
 
+    print("BDT training done")
 else:
     pass
     ## this is if you want to use existing BDT to test
