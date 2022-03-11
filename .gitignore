@@ -3,7 +3,7 @@ __pycache__/
 *.log
 *.out
 *.error
-*.txt
+cout*.txt
 plots/
 dataVsMCDist_tmp/
 scripts/
