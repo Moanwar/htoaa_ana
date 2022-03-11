@@ -1,5 +1,6 @@
-#!/afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3
+#!/usr/bin/env python3
 
+###!/afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3
 ###!/usr/bin/env python
 ###!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -10,7 +11,8 @@ Created on Fri Nov  6 16:00:41 2020
 """
 
 import numpy as np
-#%matplotlib inline
+import matplotlib
+matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb

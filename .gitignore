@@ -4,3 +4,7 @@ __pycache__/
 *.out
 *.error
 *.txt
+plots/
+dataVsMCDist_tmp/
+scripts/
+pickles/

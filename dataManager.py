@@ -32,7 +32,7 @@ disc = 'h'
 
 ## if you are doing dataVSMC using JetHT, set true
 ## maybe in the future, can read this from the where you read file names
-JetHT = False
+JetHT = False 
 
 ## vars to grab maxPt from jet physobj
 jetVars = ['FatJet_pt',
@@ -88,6 +88,7 @@ standardVars = [
     'FatJet_btagDeepB',
     'FatJet_msoftdrop',
     'FatJet_btagDDBvL',
+    #'FatJet_btagDDBvL2',
     'FatJet_deepTagMD_H4qvsQCD'
     ]
 highDiscVars = [
@@ -167,12 +168,15 @@ def getnSVCounts(data, events):
     sveta = events.array('SV_eta')[eventidx]
     svphi = events.array('SV_phi')[eventidx]
 
+    #print("dataManager::getnSVCounts():: eventidx {}, maxptjetidx {}".format(eventidx, maxptjetidx))
     dr = np.sqrt(np.power(jeteta - sveta, 2) + np.power(dphi(jetphi, svphi), 2))
     dr = pd.DataFrame(dr)
     nSVcounts = (dr < 0.8).sum(axis=1)
     return nSVcounts
 
 def dphi(jetphi, svphi):
+    #print("dataManager::dPhi() jetphi: {}".format(jetphi))
+    #print("dataManager::dPhi() svphi: {}".format(svphi))
     jetphi[jetphi < 0 ] = jetphi[jetphi<0] + 2*np.pi
     svphi[svphi < 0] = svphi[svphi<0] + 2*np.pi
     return jetphi - svphi
@@ -185,10 +189,12 @@ def processData (filePath, tag, BDT):
     if BDT: # this is to cover my ass
         JethT = False
 
+    print("tag: ",tag, ",  BDT: ",BDT, ", JetHT: ",JetHT, ", filePath: ",filePath)
+    
     ## open file, get events
     fileName, fileExtension = os.path.splitext(filePath)
 
-    print(filePath)
+    #print("filePath: ",filePath)
 
     if fileExtension != '.root':
         print('this program only supports .root  files')
@@ -199,7 +205,18 @@ def processData (filePath, tag, BDT):
         sys.exit()
 
     f = uproot.open(fileName + '.root')
+    #print("f.keys(): {}".format(f.keys()))
+    #print("f[Events]: {}".format(f["Events"]))
+    #events = f["Events"] # f.get('Events')
     events = f.get('Events')
+    #print("events.keys(): {}".format(events.keys()))
+    #print("events: {}".format(events))
+
+    variable1='Electron_pt'
+    if variable1 in events:
+        print("%s key exists"%variable1)
+    #print("events[{}]: {}".format(variable1, events[variable1]))
+    #print("events[{}].array(): {}".format(variable1, events[variable1].array()[:10]))
 
     jets = PhysObj('jets' + fileName)
     muons = PhysObj('muons' + fileName)
@@ -208,14 +225,22 @@ def processData (filePath, tag, BDT):
     ## fille the physObjs
     ## still break into disc and train or dataVSMC
 
+    #print("events.array('FatJet_pt'): {}".format(events.array('FatJet_pt')))
     ## baseline
     jets['FatJet_pt'] = pd.DataFrame(events.array('FatJet_pt'))
+
+    #print("\n\n\nevents.array('FatJet_pt'): {}",events.array('FatJet_pt'))
+    #print("\n\n\njets: {}",jets)
+    print("jets.FatJet_pt.empty - level-0: {}".format(jets.FatJet_pt.empty))
+    #exit(0)
+    
     jets['FatJet_eta'] = pd.DataFrame(np.abs(events.array('FatJet_eta')))
     jets['FatJet_mass'] = pd.DataFrame(events.array('FatJet_mass'))
     jets['FatJet_btagCSVV2'] = pd.DataFrame(events.array('FatJet_btagCSVV2'))
     jets['FatJet_btagDeepB'] = pd.DataFrame(events.array('FatJet_btagDeepB'))
     jets['FatJet_msoftdrop'] = pd.DataFrame(events.array('FatJet_msoftdrop'))
-    jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
+    #jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvL'))
+    jets['FatJet_btagDDBvL'] = pd.DataFrame(events.array('FatJet_btagDDBvLV2'))
     jets['FatJet_deepTagMD_H4qvsQCD'] = pd.DataFrame(events.array('FatJet_deepTagMD_H4qvsQCD'))
 
     if 'h' == disc or 'm' == disc:
@@ -257,12 +282,19 @@ def processData (filePath, tag, BDT):
     other['PV_npvsGood'] = pd.DataFrame(events.array('PV_npvsGood'))
 
 
+    #print("jets: {}".format(jets))
+    #print("muons: {}".format(muons))
+    #print("other: {}".format(other))
+    
     ## make Event object
     ev = Event(jets, muons, other)
 
+    #print("jets.FatJet_pt.empty - before cuts: {}".format(jets.FatJet_pt.empty))
+    
     ## cuts
     ## jet cuts
     jets.cut(jets['FatJet_pt'] > 170)
+    '''
     jets.cut(jets['FatJet_eta'] < 2.4)
     jets.cut(jets['FatJet_btagDDBvL'] > 0.8)
     jets.cut(jets['FatJet_btagDeepB'] > 0.4184)
@@ -271,26 +303,34 @@ def processData (filePath, tag, BDT):
     jets.cut(jets['FatJet_mass'] > 90)
     jets.cut(jets['FatJet_mass'] <= 200)
     other.cut(other['PV_npvsGood'] >= 1)
-
+    '''
+    #print("Siddh here 5")
     if not BDT:
         if JetHT:
             other.cut(other['HLT_trigger'] > 0)
         else:
+            #print("muons['Muon_softId']: ",muons['Muon_softId'])
+            #print("\n\n")
             muons.cut((muons['Muon_softId'] > 0))
             muons.cut(muons['Muon_eta'] < 2.4)
             muons.cut(muons['Muon_pt'] > 7)
             muons.cut(muons['Muon_IP'] > 2)
             muons.cut(muons['Muon_ip3d'] < 0.5)
 
-
+    #print("jets.FatJet_pt.empty - after cuts_0: {}".format(jets.FatJet_pt.empty))
+    
+    #print("Siddh here 6")
     ## sync so all events to propagate the cuts
     ev.sync()
+
+    #print("jets.FatJet_pt.empty - after cuts: {}".format(jets.FatJet_pt.empty))
 
     ## if nothing's left after cut, return empty dataframe
     if (jets.FatJet_pt.empty):
         return pd.DataFrame()
 
-
+    #print("Siddh here 7")
+    
     ## rename the columns of otherVars PhysObj so they can be passed to
     ## maxptData later
     if MC:
@@ -310,10 +350,13 @@ def processData (filePath, tag, BDT):
     if MC:
         maxPtData = maxPtData.assign(LHE_HT=other.LHE_HT.to_numpy())
 
+    #print("Siddh here 8")    
     ## secondary vertex
     if disc!='b':
-        maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+        #maxPtData['FatJet_nSV'] = getnSVCounts(jets, events)
+        maxPtData['FatJet_nSV'] = -1 # temparary <<<<<<<<<<<<<<<<
 
+    #print("Siddh here 9")    
     ## define target to distinguish between signal and background
     ## during training
     if BDT:
@@ -322,9 +365,10 @@ def processData (filePath, tag, BDT):
         else:
             maxPtData['target'] = 0
 
+    #print("Siddh here 10")    
     if tag == 'data':
         maxPtData['final_weights'] = 7.1055
-
+    #print("Siddh here 11")    
 
     if tag == 'ggH':
          maxPtData['LHE_weights'] = 1
@@ -334,7 +378,8 @@ def processData (filePath, tag, BDT):
          maxPtData['final_weights'] = (maxPtData['LHE_weights'] *
                                        maxPtData['ggH_weights'])
     elif tag == 'BGen':
-        maxPtData['LHE_weights'] = BGenDict[filePath]
+        #maxPtData['LHE_weights'] = BGenDict[filePath]
+        maxPtData['LHE_weights'] = 1 ## temparary <<<<<<<<<<<<<<<<<<
         wgt = 4.346 - 0.356*np.log(maxPtData.LHE_HT)/np.log(2)
         wgt[wgt<0.1] = 0.1
         maxPtData['QCD_correction'] = wgt
@@ -369,6 +414,7 @@ def processData (filePath, tag, BDT):
         maxPtData['LHE_weights'] = TTJetsDict[filePath]
         maxPtData = maxPtData.assign(final_weights=maxPtData['LHE_weights'])
 
+    #print("Siddh here 12") 
     if (not BDT) and (not JetHT) and (tag!='ggH') and (tag!='data'):
         ## npvs Ratio weights
         for i in range(len(ptkeys)-1):
@@ -389,6 +435,7 @@ def processData (filePath, tag, BDT):
                                   (maxPtData.PV_npvsGood == k+1),
                                   'PU_weights'] = muonR[ptkeys[i]][ipkeys[j]]['H'][k]
 
+        #print("Siddh here 13")                
         ## lumi weights
         for i in range(len(ptkeys)-1):
             for j in range(len(ipkeys)-1):
@@ -405,14 +452,19 @@ def processData (filePath, tag, BDT):
                               (maxPtData.Muon_eta >= 1.5),
                               'lumi_weights'] = muonL[ptkeys[i]][ipkeys[j]]['H']
 
+        #print("Siddh here 14")       
+
         maxPtData = maxPtData.assign(final_weights =
                                      maxPtData['lumi_weights']*
                                      maxPtData['PU_weights']*
                                      maxPtData['final_weights'])
 
+    #print("Siddh here 15")       
     maxPtData = maxPtData.dropna(how='all')
+    #print("Siddh here 16")       
     maxPtData = maxPtData.fillna(0)
-
+    #print("Siddh here 17")
+    
     return maxPtData
 
 

@@ -19,9 +19,25 @@ import glob
 
 
 #command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && time conda env list && python --version && python -V && scl enable rh-python36 bash && python -V && time conda list && time python htoaa_BDT3.py "
-command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && time python3 htoaa_BDT3.py "
+#command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && time python3 htoaa_BDT3.py "
 #command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && time conda env list && python --version && python3 -V && time conda list && time python htoaa_BDT3.py "
 #command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && source activate /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && echo $PATH && time python3 htoaa_BDT3.py "
+#command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time source /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/bin/activate mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && which conda && time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3 htoaa_BDT3.py "
+#command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time source /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/bin/activate mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && which conda && time python3 htoaa_BDT3.py " # didn't work
+#command0 = "source /afs/cern.ch/user/s/ssawant/.bashrc && time conda env list && time conda activate mlemv_fromSi && time conda env list && python --version && python3 -V && which python && which python3 && time conda list && which conda && time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3 htoaa_BDT3.py "
+commands = [
+    "source /afs/cern.ch/user/s/ssawant/.bashrc",
+    "time conda env list",
+    "time conda activate mlemv_fromSi",
+    "time conda env list",
+    "python --version",
+    "python3 -V",
+    "which python",
+    "which python3",
+    "time conda list",
+    "which conda",
+    "time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/mlemv_fromSi/bin/python3 htoaa_BDT3.py"
+]
 scriptName0 = "htoaa_BDT3"
 
 
@@ -67,7 +83,9 @@ with open(condor_exec_file, 'w') as f:
     #f.write("cd /afs/cern.ch/work/s/ssawant/private/L1T_ServiceTasks/hcalPUsub_v4_20210510/myStudies/run_1/mimicMLJetRec/Run3_MC/tmp/  \n")
     #f.write("eval \n")
     f.write("cd %s \n" % (pwd))
-    f.write("%s \n" % (command0))
+    #f.write("%s \n" % (command0))
+    for command_0 in commands:
+        f.write("%s \n" % (command_0))
 
 
 condor_submit_file = 'condor_submit_%s.sh' % (scriptName0)
@@ -81,8 +99,8 @@ with open(condor_submit_file, 'w') as f:
     f.write("notification = never \n")
     f.write("should_transfer_files = YES \n")
     f.write("when_to_transfer_output = ON_EXIT \n")
-    #f.write("+JobFlavour = \"longlunch\" \n")
-    f.write("+JobFlavour = \"espresso\" \n")
+    f.write("+JobFlavour = \"longlunch\" \n")
+    #f.write("+JobFlavour = \"espresso\" \n")
     f.write("queue \n")
 
 '''

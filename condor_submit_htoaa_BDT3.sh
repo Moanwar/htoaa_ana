@@ -7,5 +7,5 @@ error = htoaa_BDT3.error
 notification = never 
 should_transfer_files = YES 
 when_to_transfer_output = ON_EXIT 
-+JobFlavour = "espresso" 
++JobFlavour = "longlunch" 
 queue 
