@@ -1,0 +1,4 @@
+,nanoAOD,cross_section,nEvents,sumEvents
+QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8,['/eos/cms/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/*/*.root'],23590000,-1,-1
+QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8,['/eos/cms/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/*/*.root'],324500,-1,-1
+QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8,['/eos/cms/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/*/*.root'],1127,-1,-1
