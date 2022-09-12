@@ -2,6 +2,13 @@ import json
 
 
 
+
+def calculate_lumiScale(luminosity, crossSection, sumEvents):
+    lumiScale = 1
+    if sumEvents != 0: lumiScale = luminosity * crossSection / sumEvents
+    return lumiScale
+
+
 def GetDictFromJsonFile(filePath):
     # Lines starting with '#' are not read out, and also content between '/* .... */' are not read.
     # Content between " '''   ....  ''' " are not read
@@ -28,8 +35,11 @@ def GetDictFromJsonFile(filePath):
     return dictionary
 
 
-
-def calculate_lumiScale(luminosity, crossSection, sumEvents):
-    lumiScale = 1
-    if sumEvents != 0: lumiScale = luminosity * crossSection / sumEvents
-    return lumiScale
+def DfColLabel_convert_bytes_to_string(df):
+    cols_rename = {}
+    for col in df.columns:
+        if isinstance(col, (bytes, bytearray)):
+            cols_rename[col] = col.decode()
+    print("DfColLabel_convert_bytes_to_string:: cols_rename: {}".format(cols_rename))
+    df.rename(columns=cols_rename, inplace=True)
+    return df
