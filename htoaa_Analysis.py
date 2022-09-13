@@ -11,132 +11,60 @@ import numpy as np
 import math
 
 from htoaa_Settings import *
-from htoaa_CommonTools import GetDictFromJsonFile, DfColLabel_convert_bytes_to_string, calculate_lumiScale
 from htoaa_NanoAODBranches import htoaa_nanoAODBranchesToRead
+from htoaa_CommonTools import GetDictFromJsonFile, DfColLabel_convert_bytes_to_string, calculate_lumiScale
+from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEta
+
 
 printLevel = 10
+nEventToReadInBatch = 2500000
 pd.set_option('display.max_columns', None)
 
-def read_data(sInputFiles, branchesToRead):
-    data_all = pd.DataFrame()
-    for sInputFile in sInputFiles:
-        if printLevel >= 10: print("sInputFile: {}".format(sInputFile))
-        with uproot.open(sInputFile) as fInputFile:
-            #tree = fInputFile['Events']
-            tree = fInputFile.get('Events')
-
-            print("nEvents: {}".format(uproot.numentries(sInputFile, 'Events')))
-            
-            if printLevel >= 10:
-                '''
-                print("fInputFile.keys(): {}, \nfInputFile.classnames(): {}".format(fInputFile.keys(), fInputFile.classnames()))
-                print("type(fInputFile['Events']: {}".format(type(fInputFile['Events'])))
-                print("type(fInputFile['Events']: {}".format(type(fInputFile[b'Events;1'])))
-                print("type(fInputFile.get('Events'): {}".format(type(fInputFile.get('Events'))))
-                print("type(tree): {}".format(type(tree)))
-
-                print("tree.keys(): {}".format(tree.keys()))
-                '''
-                #data_i = tree.arrays(branchesToRead, library="pd")
-                #data_i = tree.arrays(branchesToRead)
-                #print("type(data_i): {}".format(type(data_i)))
-                #data_i = pd.DataFrame( tree.arrays(branchesToRead, entry_stop=1000) )                
-                data_i = pd.DataFrame( tree.arrays(branchesToRead) )
-                #data_i.set_index([b'run', b'luminosityBlock', b'event'])
-                #data_i = pd.DataFrame( tree.arrays(branchesToRead), columns=branchesToRead )
-
-                
-                '''
-                for br_name in branchesToRead:
-                    print("br_name: {}".format(br_name))
-                    #data_i[br_name] = pd.DataFrame( tree.arrays( br_name ) )
-                    data_i[br_name] = pd.Series( tree.arrays( br_name ) )
-                '''
-                print("type(data_i): {}".format(type(data_i)))
-                print("data_i.columns: {}".format(data_i.columns))
-                print("data_i.shape: {}".format(data_i.shape))
-                #print("data_i.describe: {}".format(data_i.describe()))
-                print("data_i: {}".format(data_i))
-
-                data_i = DfColLabel_convert_bytes_to_string(data_i)
-
-                print("data_i.columns: {}".format(data_i.columns))
-                for col in data_i.columns:
-                    print("col {}, type(col) {}".format(col, type(col)))
-
-                '''
-                rename_cols = { bytes(br_name, 'utf-8') : br_name for br_name in branchesToRead }
-                print("rename_cols: {}".format(rename_cols))
-                data_i.rename(columns=rename_cols, inplace=True)
-                '''
-                '''
-                for br_name in branchesToRead:
-                    #data_i.rename(columns={b'%s' % (br_name): '%s' % (br_name)}, inplace=True)
-                    data_i.rename(columns={bytes(br_name, 'utf-8'): '%s' % (br_name)}, inplace=True)
-                '''
-                #print("data_i after renaming columns: {}".format(data_i))
-
-                '''
-                #print("mask: {}".format(data_i.nMuon > 0))
-                mask = data_i['nMuon'] > 0
-                print("mask{} : {}".format(type(mask), mask))
-                print("mask.sum(): {}".format(mask.sum()))
-                print("mask.sum(): {}".format((data_i['nMuon'] > 0).sum()))
-                
-                #data_i.drop(data_i[b'nMuon'] <= 1, inplace=True)
-                print("data_i.loc[mask]): {}".format(data_i.loc[mask]))
-                print("data_i.loc[data_i[b'nMuon'] > 0]): {}".format(data_i.loc[data_i['nMuon'] > 0]))
-                print("data_i[mask]: {}".format(data_i[mask]))
-                print("data_i[mask].index: {}".format(data_i[mask].index))
-                #data_i.drop(index=data_i[~mask].index, inplace=True)
-                #data_i.drop(index=data_i[data_i[b'nMuon'] == 0].index, inplace=True)
-                '''
-                data_i.drop(index=data_i.loc[data_i['nMuon'] <= 1].index, inplace=True)
-                #print("data_i: {}".format(data_i))
-
-                data_all = data_all.append( data_i )
-                #print("data_all: {}".format(data_all))
-
-                #print("\n\n\ndata_i.index ({}): {}".format(len(data_i), data_i.index.to_list()))
-                #print("\n\ndata_all.index ({}): {}\n\n".format(len(data_all), data_all.index.to_list()))
 
 
-    '''
-    print("data_all['Muon_pt'][:]: {}".format(data_all['Muon_pt'][:]))
-    print("\ndata_all['Muon_pt'][:][0]: {}".format(data_all['Muon_pt'][data_all.index][0]))
-    print("\ndata_all['Muon_pt'][:][1]: {}".format(data_all['Muon_pt'][:][1]))
-    '''
-
-    print("data_all.head(): {}".format(data_all.head()))
-
-    data_all['mll'] = np.vectorize(calc_mll)(data_all.Muon_pt, data_all.Muon_eta, data_all.Muon_phi)
-
-    print("data_all.head(): {}".format(data_all.head()))
-    
-    #for i in range(2):
-    #    print("data_all['Muon_pt'][{}]: {}".format(i, data_all[:, 'Muon_pt'][i]))
-    
-            
-    return;
-
-
-def read_data1(sInputFiles, branchesToRead):
+def data_read_and_select(sInputFiles, branchesToRead):
     data_all = pd.DataFrame()
     for sInputFile in sInputFiles:
         if printLevel >= 10: print("sInputFile: {}".format(sInputFile))
         with uproot.open(sInputFile) as fInputFile:            
-            #tree = fInputFile['Events']
-            tree = fInputFile.get('Events')
+            tree = fInputFile['Events']
+            #tree = fInputFile.get('Events')
+            if printLevel >= 1: print("file: {}, nEvents: {}".format(sInputFile, uproot.numentries(sInputFile, 'Events')))
 
-            print("nEvents: {}".format(uproot.numentries(sInputFile, 'Events')))
-
-            iteration = 0
             for data_i in tree.iterate(branchesToRead,
                                        flatten=False, outputtype=pd.DataFrame,
-                                       entrysteps=2500000):
-                print("data_i {} ({}): {}".format(iteration, type(data_i), data_i))
-                iteration += 1
+                                       entrysteps=nEventToReadInBatch):
 
+                ## select data... Put data selection cuts here --------------------------------------------------
+
+                #fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon, nObjects_min=2, nObjects_max=99) ].index
+                fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon, nObjects_min=3) ].index
+                #fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon,  nObjects_max=1) ].index
+                #data_i.drop(index=fail, inplace=True)
+                data_i.drop(fail, inplace=True)
+                print("\n\ndata_i selected 0: {}".format(data_i))
+
+                #PtThrshs=[[25, 15, 10]]
+                #print("PtThrshs_0 ({}): {}".format(type(PtThrshs), PtThrshs))
+                #fail = data_i[ ~ np.vectorize(cut_ObjectPt)(data_i.Muon_pt, PtThrshs=PtThrshs)].index
+                fail = data_i[ ~ np.vectorize(cut_ObjectPt)(data_i.Muon_pt, PtThrsh_Lead=25, PtThrsh_Sublead=15, PtThrsh_Third=10)].index
+                data_i.drop(fail, inplace=True)
+                print("\n\ndata_i selected 1: {}".format(data_i))
+
+                fail = data_i[ ~ np.vectorize(cut_ObjectEta)(data_i.Muon_eta, EtaThrsh=2.3, nObjects=3) ].index
+                data_i.drop(index=fail, inplace=True)
+                
+ 
+                data_i['mll_tmp'] = np.vectorize(calc_mll)(data_i.Muon_pt, data_i.Muon_eta, data_i.Muon_phi)
+                print("\n\ndata_i selected 2: {}".format(data_i))
+                
+                if data_i.empty: continue
+                data_all = data_all.append( data_i )
+
+
+    return data_all;
+
+                
 
     
 
@@ -170,6 +98,10 @@ def calc_mll(lep_pts,lep_etas,lep_phis):
     return math.sqrt(mllll)# /1000 #/1000 to go from MeV to GeV
 
 
+def plot_data(data):
+    
+    
+
 
 if __name__ == '__main__':
     print("htoaa_Analysis:: main: {}".format(sys.argv))
@@ -198,4 +130,5 @@ if __name__ == '__main__':
     lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
 
     # read_data(sInputFiles=sInputFiles, branchesToRead=htoaa_nanoAODBranchesToRead)
-    read_data1(sInputFiles=sInputFiles, branchesToRead=htoaa_nanoAODBranchesToRead)
+    data_selected = data_read_and_select(sInputFiles=sInputFiles, branchesToRead=htoaa_nanoAODBranchesToRead)
+    plot_data( data_selected )

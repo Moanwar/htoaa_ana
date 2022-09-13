@@ -25,8 +25,8 @@ anaVersion    = args.version
 
 pwd = os.getcwd()
 DestinationDir = "./%s" % (anaVersion)
-if "/home/siddhesh/" in pwd: DestinationDir = "/home/siddhesh/Work/CMS/htoaa/analysis/%s" % (anaVersion)
-elif "/afs/cern.ch/" in pwd: DestinationDir = "/afs/cern.ch/work/s/ssawant/private/htoaa/analysis/%s" % (anaVersion)
+if   "/home/siddhesh/" in pwd: DestinationDir = "/home/siddhesh/Work/CMS/htoaa/analysis/%s" % (anaVersion)
+elif "/afs/cern.ch/"   in pwd: DestinationDir = "/afs/cern.ch/work/s/ssawant/private/htoaa/analysis/%s" % (anaVersion)
 if not os.path.exists(DestinationDir): os.mkdir( DestinationDir )
 
 
