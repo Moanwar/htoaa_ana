@@ -38,8 +38,14 @@ htoaa_nanoAODBranchesToRead =[
     'Muon_pt',
     'Muon_eta',
     'Muon_phi',
-    'Muon_ip3d',
-    'Muon_softId',
-    'Muon_dxy',
-    'Muon_dxyErr'
+#    'Muon_ip3d',
+#    'Muon_softId',
+#    'Muon_dxy',
+#    'Muon_dxyErr',
+
+    ## Electron
+    'nElectron',
+    'Electron_pt',
+    'Electron_eta',
+    'Electron_phi'
 ]

@@ -83,22 +83,78 @@ for sample_category, samples in samplesList.items():
         for iJob in range(len(files_splitted)):
             config["era"] = era
             config["inputFiles"] = list( files_splitted[iJob] )
-            config["outputFile"] = '%s/analyze_htoaa_%s_0_%d' % (DestinationDir, sample, iJob)
+            config["outputFile"] = '%s/analyze_htoaa_%s_0_%d.root' % (DestinationDir, sample, iJob)
             config["sampleCategory"] = sample_category
             #config["Luminosity"] = Luminosity
             config["crossSection"] = sample_cossSection
             config["nEvents"] = sample_nEvents
             config["sumEvents"] = sample_sumEvents
 
-            print("config: {}".format(config))
-
-            sConfig_to_use = "%s/%s" % (DestinationDir, sConfig.replace(".json", "_0_%d.json" % (iJob)))
+            configName = "%s" % sConfig.replace(".json", "_%s_0_%d.json" % (sample, iJob))
+            sConfig_to_use = "%s/%s" % (DestinationDir, configName)
+            print("config {}: {}".format(sConfig_to_use, config))
             with open(sConfig_to_use, "w") as fConfig:
                 json.dump( config,  fConfig, indent=4)
             
             
-
-        
+            ## condor job scripts ----------------------------------------------------------------------------
+            condorJobName = "%s_%s" % (sAnalysis.replace(".py", ""), configName.replace(".json", ""))
+            condor_exec_file = '%s/condor_%s_exec.sh' % (DestinationDir, condorJobName) 
+            if not os.path.isfile(condor_exec_file):
+                with open(condor_exec_file, 'w') as f:
+                    f.write("#!/bin/bash  \n\n")
+                    f.write("cd %s \n" % pwd)
+                    f.write("export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch \n")
+                    f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
+                    f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
+                    #f.write("cd ")
+                    f.write("export X509_USER_PROXY=/home/ssawant/x509up_u56558 \n")
+                    f.write("eval \n")
+                    f.write("cd %s \n" % (pwd))
+                    f.write("source /afs/cern.ch/user/s/ssawant/.bashrc \n")
+                    f.write("which conda \n")
+                    f.write("time conda env list \n")
+                    f.write("conda activate ana_htoaa \n")
+                    f.write("time conda env list \n")
+                    
+                    f.write("time conda list \n")
+                    f.write("which python3 \n")
+                    f.write("python3 -V \n")
+                    #f.write(" \n")
+                    f.write("conda activate ana_htoaa \n")
+                    #f.write("time python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+                    f.write("time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/bin/python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+            
+            condor_submit_file = '%s/condor_%s_submit.sh' % (DestinationDir, condorJobName)
+            if not os.path.isfile(condor_submit_file):
+                with open(condor_submit_file, 'w') as f:
+                    f.write("universe = vanilla \n")
+                    f.write("executable = %s \n" % condor_exec_file)
+                    f.write("getenv = TRUE \n")
+                    f.write("log = %s/condor_%s.log \n" % (DestinationDir, condorJobName))
+                    f.write("output = %s/condor_%s.out \n" % (DestinationDir, condorJobName))
+                    f.write("error = %s/condor_%s.error \n" % (DestinationDir, condorJobName))
+                    f.write("notification = never \n")
+                    f.write("should_transfer_files = YES \n")
+                    f.write("when_to_transfer_output = ON_EXIT \n")
+                    f.write("+JobFlavour = \"longlunch\" \n")
+                    f.write("queue \n")
+            '''
+            Job Flavours::
+            espresso     = 20 minutes
+            microcentury = 1 hour
+            longlunch    = 2 hours
+            workday      = 8 hours
+            tomorrow     = 1 day
+            testmatch    = 3 days
+            nextweek     = 1 week
+            '''
+            
+            os.system("chmod a+x %s" % condor_exec_file)
+            os.system("chmod a+x %s" % condor_submit_file)
+            cmd1 = "condor_submit %s" % condor_submit_file
+            print("Now:  %s " % cmd1)            
+            os.system(cmd1)
 
         
 

@@ -78,6 +78,7 @@ def cut_ObjectPt(objects_Pt, PtThrsh_Lead=None, PtThrsh_Sublead=None, PtThrsh_Th
         True: All objects' Pt is about respective threshold
         False: Else false
     '''
+    print("objects_Pt ({}) : {}".format(type(objects_Pt),  objects_Pt))
     condition = True
     if                                    objects_Pt[0] < PtThrsh_Lead:     condition = False    
     if (PtThrsh_Sublead is not None) and (objects_Pt[1] < PtThrsh_Sublead): condition = False
@@ -87,7 +88,10 @@ def cut_ObjectPt(objects_Pt, PtThrsh_Lead=None, PtThrsh_Sublead=None, PtThrsh_Th
 
     return condition
     
+def cut_ObjectPt_1(objects_Pt, PtThrshs):
+    print("objects_Pt ({}) : {}, \t\t PtThrshs ({}) : {}".format(type(objects_Pt),  objects_Pt, type(PtThrshs), PtThrshs))
 
+    return True
 
 def cut_ObjectEta(objects_Eta, EtaThrsh, nObjects):
     '''
