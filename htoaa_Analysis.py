@@ -4,6 +4,8 @@ import os
 import sys
 import json
 from collections import OrderedDict as OD
+import time
+
 import pandas as pd
 import uproot
 #import uproot3 as uproot
@@ -13,6 +15,7 @@ import awkward as ak
 import matplotlib.pyplot as plt
 #import mplhep as hep # for histograms like CMS template
 import hist # for histogram
+import vector
 
 from collections import Counter
 import linecache
@@ -25,9 +28,9 @@ from htoaa_CommonTools import GetDictFromJsonFile, DfColLabel_convert_bytes_to_s
 from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEta, cut_ObjectPt_1
 
 
-printLevel = 10
-nEventToReadInBatch = 1000 # 2500000
-nEventsToAnalyze = 5000
+printLevel = 0
+nEventToReadInBatch = 2500000 # 10000 # 2500000
+nEventsToAnalyze = -1 # 100000
 pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -390,6 +393,9 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
 
                 
     if sOutFile is not None  and len(data_all) > 0:
+        if not sOutFile.endswith('.root'): sOutFile += '.root'
+        sOutFile = sOutFile.replace('.root', '_wAwkwardArray.root')
+        
         with uproot.recreate(sOutFile) as fOut:
             #fOut['evt/hnMuon'] = np.histogram(ak.to_numpy(data_all[:]['nMuon']), bins=20, range=(-0.5, 19.5))
 
@@ -663,18 +669,24 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
                 'Muon_pt',
                 'Muon_eta',
                 'Muon_phi',
+                'Muon_mass',
+                'Muon_charge',
             ]
 
             htoaa_nanoAODBranchesToRead_electron = [
                 'nElectron',
                 'Electron_pt',
                 'Electron_eta',
-                'Electron_phi'
+                'Electron_phi',
+                'Electron_eCorr',
+                'Electron_mass',
+                'Electron_charge',
             ]
             
             #tracemalloc.start()
             #counts = Counter()
-            for iEvtStart in range(0, nEventsToAnalyze, nEventToReadInBatch):
+            nEventsToAnalyze_1 = tree.num_entries if nEventsToAnalyze == -1 else nEventsToAnalyze
+            for iEvtStart in range(0, nEventsToAnalyze_1, nEventToReadInBatch):
                 if printLevel >= 1: print("\n\nRead entries from {} to {}".format(iEvtStart, (iEvtStart+nEventToReadInBatch-1)))
                 data_subset = None
 
@@ -724,10 +736,10 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
                     print("mask_pass_all_cut  ({}): {}".format(len(mask_pass_all_cut.index), mask_pass_all_cut))
 
                     
-                events.dropEventsFailingMask(mask_pass_cut = mask_pass_all_cut)
+                #events.dropEventsFailingMask(mask_pass_cut = mask_pass_all_cut)
+                #print("\n Dayaset selected after nMuon, nElectron cut: :: Events: \n"); events.print()
 
-
-                if printLevel >= 10:
+                if printLevel >= 12:
                     #print("\n data_subset_mu _2 ({}): \n{}".format(len(data_subset_mu.loc[pd.IndexSlice[:, 0], :].index), data_subset_mu.to_string()))
                     print("\n data_subset_mu  _2 ({}): \n{}".format(getDataframeNEvents(data_subset_mu), data_subset_mu.to_string()))
                     print("\n data_subset_ele _2 ({}): \n{}".format(getDataframeNEvents(data_subset_ele), data_subset_ele.to_string()))
@@ -748,37 +760,185 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
                 '''
 
 
-                #mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=[20.0, 3.5])
-                #mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=[20.0])
-                mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=[5.0, 3.0])
+                mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=[4.0, 3.0])
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuPt_cut)
                  
                 if printLevel >= 10:
                     print("mask_pass_MuPt_cut  ({}): {}".format(len(mask_pass_MuPt_cut.index), mask_pass_MuPt_cut))
                     
+                mask_pass_ElePt_cut = cutDf_ObjectPt(df=collection_ele.df, objectName='Electron_pt', PtThrshs=[4.0, 3.0])
+                mask_pass_all_cut = (mask_pass_all_cut & mask_pass_ElePt_cut)
 
-
+                
+                mask_pass_MuEta_cut = cutDf_ObjectEta(df=collection_mu.df, objectName='Muon_eta', EtaThrsh=2.4, nObjects=2)
+                mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuEta_cut)               
+                
+                mask_pass_EleEta_cut = cutDf_ObjectEta(df=collection_ele.df, objectName='Electron_eta', EtaThrsh=2.5, nObjects=2)
+                mask_pass_all_cut = (mask_pass_all_cut & mask_pass_EleEta_cut)                
                     
-                    
+                mask_pass_MuChargeSum_cut = cutDf_chargeSum(df=collection_mu.df, objectName='Muon_charge', nObjects=2, chargeSumCondition=0)
+                mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuChargeSum_cut)
+                
+                mask_pass_EleChargeSum_cut = cutDf_chargeSum(df=collection_ele.df, objectName='Electron_charge', nObjects=2, chargeSumCondition=0)
+                mask_pass_all_cut = (mask_pass_all_cut & mask_pass_EleChargeSum_cut)
+                   
                 if printLevel >= 10:
                     print("mask_pass_all_cut ({}): {}".format(len(mask_pass_all_cut.index), mask_pass_all_cut.to_string()))
 
                     
                 if getDataframeNEvents(mask_pass_all_cut) == 0: continue
-                
+
+
+
 
                 events.dropEventsFailingMask(mask_pass_cut = mask_pass_all_cut)
 
                 
-                
-                print("\n Dayaset selected untilnow: :: Events: \n")
-                events.print()
+                if printLevel >= 6:
+                    print("\n Dayaset selected untilnow: :: Events: \n")
+                    events.print()
 
                 
 
+                                
 
-    print("\n\n\n Final dataset:: Events: \n")
-    events.print()
+                
+
+    if printLevel >= 5:
+        print("\n\n\n Final dataset:: Events: \n")
+        events.print()
+
+
+
+    nMuons = 2
+    nElectrons = 2
+    vMuons = []
+    for iParticle in range(nMuons):
+        vMu = getLorentzVectorFromDf(df=collection_mu.df, indexLevel1=iParticle,
+                                     ptObjectName='Muon_pt', etaObjectName='Muon_eta', phiObjectName='Muon_phi', massObjectName='Muon_mass')
+        vMuons.append( vMu )
+
+
+    vElectrons = []
+    for iParticle in range(nElectrons):
+        vEle = getLorentzVectorFromDf(df=collection_ele.df, indexLevel1=iParticle,
+                                     ptObjectName='Electron_pt', etaObjectName='Electron_eta', phiObjectName='Electron_phi', massObjectName='Electron_mass')
+        vElectrons.append( vEle )
+
+
+
+        
+    if printLevel >= 5:
+        print("nEvents after selection: {}".format(events.nEvents()))
+
+
+    if sOutFile is not None  and events.nEvents() > 0:
+        if not sOutFile.endswith('.root'): sOutFile += '.root'
+        sOutFile = sOutFile.replace('.root', '_wPandas.root')
+        
+        with uproot.recreate(sOutFile) as fOut:
+            #fOut['evt/hnMuon'] = np.histogram(ak.to_numpy(data_all[:]['nMuon']), bins=20, range=(-0.5, 19.5))
+
+            hnMuon = hist.Hist.new.Reg(20, -0.5, 19.5, name="No. of muons").Weight()
+            hnMuon.fill( collection_mu.df['nMuon'].to_numpy() )
+            fOut['evt/hnMuon'] = hnMuon
+
+
+            hMuonPt = hist.Hist.new.Reg(100, 0, 100, name="Muon pT").Weight()
+            hMuonPt.fill( collection_mu.df['Muon_pt'].to_numpy() )
+            fOut['evt/hMuonPt'] = hMuonPt
+
+            hMuonPt_lead = hist.Hist.new.Reg(100, 0, 100, name="Leading muon pT").Weight()
+            hMuonPt_lead.fill( collection_mu.df.loc[pd.IndexSlice[:, 0], 'Muon_pt'].to_numpy() ) 
+            fOut['evt/hLeadingMuonPt'] = hMuonPt_lead
+
+            hMuonPt_sublead = hist.Hist.new.Reg(100, 0, 100, name="Sub-leading muon pT").Weight()
+            hMuonPt_sublead.fill( collection_mu.df.loc[pd.IndexSlice[:, 1], 'Muon_pt'].to_numpy() )
+            fOut['evt/hSubleadingMuonPt'] = hMuonPt_sublead
+
+            '''
+            hMuonPt_thridlead = hist.Hist.new.Reg(100, 0, 100, name="Third-leading muon pT").Weight()
+            hMuonPt_thridlead.fill(ak.to_numpy( data_all[:, 'Muon_pt', 2] ))
+            fOut['evt/hThirdleadingMuonPt'] = hMuonPt_thridlead
+            '''
+
+            ## Eta --
+            hMuonEta = hist.Hist.new.Reg(40, -3, 3, name="Muon eta").Weight()
+            hMuonEta.fill( collection_mu.df['Muon_eta'].to_numpy() )
+            fOut['evt/hMuonEta'] = hMuonEta
+
+            
+            ## Phi --
+            hMuonPhi = hist.Hist.new.Reg(40, -3.14, 3.14, name="Muon phi").Weight()
+            hMuonPhi.fill( collection_mu.df['Muon_phi'].to_numpy() )
+            fOut['evt/hMuonPhi'] = hMuonPhi
+
+
+            ### Electron
+
+            hElectronPt = hist.Hist.new.Reg(100, 0, 100, name="Electron pT").Weight()
+            hElectronPt.fill( collection_ele.df['Electron_pt'].to_numpy() )
+            fOut['evt/hElectronPt'] = hElectronPt
+
+            hElectronPt_lead = hist.Hist.new.Reg(100, 0, 100, name="Leading Electron pT").Weight()
+            hElectronPt_lead.fill( collection_ele.df.loc[pd.IndexSlice[:, 0], 'Electron_pt'].to_numpy() ) 
+            fOut['evt/hLeadingElectronPt'] = hElectronPt_lead
+
+            hElectronPt_sublead = hist.Hist.new.Reg(100, 0, 100, name="Sub-leading Electron pT").Weight()
+            hElectronPt_sublead.fill( collection_ele.df.loc[pd.IndexSlice[:, 1], 'Electron_pt'].to_numpy() )
+            fOut['evt/hSubleadingElectronPt'] = hElectronPt_sublead
+
+            '''
+            hElectronPt_thridlead = hist.Hist.new.Reg(100, 0, 100, name="Third-leading Electron pT").Weight()
+            hElectronPt_thridlead.fill(ak.to_numpy( data_all[:, 'Electron_pt', 2] ))
+            fOut['evt/hThirdleadingElectronPt'] = hElectronPt_thridlead
+            '''
+
+            ## Eta --
+            hElectronEta = hist.Hist.new.Reg(40, -3, 3, name="Electron eta").Weight()
+            hElectronEta.fill( collection_ele.df['Electron_eta'].to_numpy() )
+            fOut['evt/hElectronEta'] = hElectronEta
+
+            
+            ## Phi --
+            hElectronPhi = hist.Hist.new.Reg(40, -3.14, 3.14, name="Electron phi").Weight()
+            hElectronPhi.fill( collection_ele.df['Electron_phi'].to_numpy() )
+            fOut['evt/hElectronPhi'] = hElectronPhi
+
+
+
+            hmass_2Mu = hist.Hist.new.Reg(100, 0, 200, name="mass(2 mu) [GeV]").Weight()
+            hmass_2Mu.fill( (vMuons[0] + vMuons[1]).mass )
+            fOut['evt/hmass_2Mu'] = hmass_2Mu
+
+            hmass_2Ele = hist.Hist.new.Reg(100, 0, 200,  name="mass(2 ele) [GeV]").Weight()
+            hmass_2Ele.fill( (vElectrons[0] + vElectrons[1]).mass )
+            fOut['evt/hmass_2Ele'] = hmass_2Ele
+
+            hdR_2Mu = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu)").Weight()
+            hdR_2Mu.fill( vMuons[0].deltaR(vMuons[1]) )
+            fOut['evt/hdR_2Mu'] = hdR_2Mu
+
+            hdR_2Ele = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 ele)").Weight()
+            hdR_2Ele.fill( vElectrons[0].deltaR(vElectrons[1]) )
+            fOut['evt/hdR_2Ele'] = hdR_2Ele            
+
+            hdR_2Mu_2Ele = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu, 2 ele)").Weight()
+            hdR_2Mu_2Ele.fill( (vMuons[0] + vMuons[1]).deltaR(vElectrons[0] + vElectrons[1]) )
+            fOut['evt/hdR_2Mu_2Ele'] = hdR_2Mu_2Ele
+
+
+            h2ddR_2Mu_vs_dR_2Ele = (
+                hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu)")
+                .Reg(100, 0, 3.14, name="deltaR(2 ele)")
+                .Weight() )
+            h2ddR_2Mu_vs_dR_2Ele.fill( vMuons[0].deltaR(vMuons[1]), vElectrons[0].deltaR(vElectrons[1]) )
+            fOut['evt/h2ddR_2Mu_vs_dR_2Ele'] = h2ddR_2Mu_vs_dR_2Ele
+            
+
+            print("Wrote to sOutFile {}".format(sOutFile))
+
+    
 
 
 class Collection:
@@ -824,7 +984,7 @@ class Events:
             
     def dropEventsFailingMask(self, mask_pass_cut):
         
-        if printLevel >= 10:
+        if printLevel >= 14:
             print("Events::dropEventsFailingMask():: mask_pass_cut ({}): {}".format(getDataframeNEvents(mask_pass_cut), mask_pass_cut.to_string()))
             print("Events::dropEventsFailingMask():: mask_pass_cut[mask_pass_cut] ({}): {}".format(getDataframeNEvents(mask_pass_cut[mask_pass_cut]), mask_pass_cut[mask_pass_cut].to_string()))
             #print("Events::dropEventsFailingMask():: ".format())
@@ -844,14 +1004,12 @@ class Events:
             #indexLevel0_allCollections += set( getDataframeIndexLevel0(collection.df) )
             indexLevel0_collectionwise[name] = set( getDataframeIndexLevel0(collection.df) )
             indexLevel0_allCollections.update( indexLevel0_collectionwise[name] )
-        #indexLevel0_allCollections = list(set(indexLevel0_allCollections)) # remove duplicate
 
-        #indexLevel0_eventsPassingCut = set( getDataframeIndexLevel0(mask_pass_cut[mask_pass_cut]) )
         indexLevel0_eventsPassingCut = mask_pass_cut.groupby(axis=0, level=0).all() # Boolean pd.Series with 'index=index level0 of mask_pass_cut' seting True when all subentries in mask_pass_cut are true
         indexLevel0_eventsPassingCut = set( indexLevel0_eventsPassingCut[indexLevel0_eventsPassingCut].index ) # get entry when all subentries in 'mask_pass_cut' are true
         indexLevel0_eventsToDrop =  indexLevel0_allCollections - indexLevel0_eventsPassingCut 
         
-        if printLevel >= 10:
+        if printLevel >= 11:
             print("Events::dropEventsFailingMask():: indexLevel0_allCollections ({}): {}".format(len(indexLevel0_allCollections), indexLevel0_allCollections))
             print("Events::dropEventsFailingMask():: indexLevel0_eventsPassingCut ({}): {}".format(len(indexLevel0_eventsPassingCut), indexLevel0_eventsPassingCut))
             print("Events::dropEventsFailingMask():: indexLevel0_eventsToDrop ({}): {}".format(len(indexLevel0_eventsToDrop), indexLevel0_eventsToDrop))
@@ -880,6 +1038,11 @@ class Events:
         
 
         return
+
+    
+    def nEvents(self):
+        #return getDataframeNEvents( self.collections.items()[0][1].df )
+        return getDataframeNEvents( next(iter(self.collections.items()))[1].df ) # next(iter(self.collections.items()))[1] : get first collection
 
 
 
@@ -993,32 +1156,23 @@ def cutDf_ObjectPt(df, objectName, PtThrshs=[]):
     '''
     if len(PtThrshs) == 0:
         raise Exception("cutDf_ObjectPt():: PtThrshs not provided \t\t **** ERROR ****")
-
-    mask = None
-    #mask_tmp = df['nMuon'] != df['nMuon']
-    mask_tmp = df[objectName] == df[objectName]
-    #mask_tmp = df[objectName].astype(int) != df[objectName].astype(int)
-    if printLevel >= 10:
-        print("cutDf_ObjectPt():: mask_tmp   ({}): {} \n{}\n\n".format(type(mask_tmp), getDataframeNEvents(mask_tmp),   mask_tmp.tolist(), mask_tmp.to_string()))
-        print("cutDf_ObjectPt():: mask_tmp.index: {}\n".format(mask_tmp.index))
-
-    mask = mask_tmp
+    
+    mask_failingCut = df[objectName] != df[objectName] # set mask for all entry-subentry rows to False
+    #print("cutDf_ObjectPt():: mask before  ({}): {} \n{}".format(getDataframeNEvents(mask),   mask.tolist(), mask.to_string()))
     for iParticle, PtTrsh in enumerate(PtThrshs):
-        mask_i = df.loc[pd.IndexSlice[:, iParticle], objectName] > PtTrsh
-        #if mask is None: mask = mask_i
-        #else:            mask = (mask & mask_i)
-        #else:            mask = mask.join(mask_i, how='outer')
-
-        #mask = ~ (mask &  mask_i)
-        mask = (mask &  mask_i)
+        mask_failingCut_i = df.loc[pd.IndexSlice[:, iParticle], objectName] < PtTrsh # set mask to True for failing particles
+        # mask = (mask & mask_i)        
+        mask_failingCut = (mask_failingCut |
+                (df.loc[pd.IndexSlice[:, iParticle], objectName] < PtTrsh) ) # set entry-subentry combination True for failing particles **** IMPORTANT ****
         
         
         if printLevel >= 10:
             print("cutDf_ObjectPt():: iParticle {}, PtTrsh {}".format(iParticle, PtTrsh))
-            print("cutDf_ObjectPt():: mask   ({}): {} \n{}".format(getDataframeNEvents(mask),   mask.tolist(), mask.to_string()))
-            print("cutDf_ObjectPt():: mask_i ({}): {} \n{}".format(len(mask_i.tolist()), mask_i.tolist(), mask_i.to_string()))
+            print("cutDf_ObjectPt():: mask   ({}): {} \n{}".format(getDataframeNEvents((~mask_failingCut)),   (~mask_failingCut).tolist(), (~mask_failingCut).to_string()))
+            print("cutDf_ObjectPt():: mask_i ({}): {} \n{}".format(len((~mask_failingCut_i).index), (~mask_failingCut_i).tolist(), (~mask_failingCut_i).to_string()))
 
-    return mask;
+    
+    return ( ~ mask_failingCut);
 
 
 
@@ -1029,14 +1183,34 @@ def cutDf_ObjectEta(df, objectName, EtaThrsh, nObjects):
     Return:
         True: All objects' Eta is about respective threshold
         False: Else false
-    '''    
-    condition = True
+    '''   
+    
+    mask_failingCut = df[objectName] != df[objectName] # set mask for all entry-subentry rows to False 
     for iObject in range(nObjects):
-        if abs(objects_Eta[iObject]) > EtaThrsh:
-            condition = False
-            break
-    return condition
+        mask_failingCut = (mask_failingCut  |
+                (abs(df.loc[pd.IndexSlice[:, iObject], objectName]) > EtaThrsh) ) # set entry-subentry combination True for failing particles **** IMPORTANT ****
+        if printLevel >= 10:
+            print("iObject, mask ({}): {}".format(iObject, getDataframeNEvents((~mask_failingCut)), (~mask_failingCut).to_string()))
+            
+    return ( ~ mask_failingCut);
 
+
+
+def cutDf_chargeSum(df, objectName, nObjects, chargeSumCondition):
+    if printLevel >= 12:
+        df_tmp = df.groupby(axis=0, level=0)
+        print("cutDf_chargeSum(): df.group(axis=0, level=0) ({}): \n{}".format(type(df_tmp), df_tmp))
+        print("cutDf_chargeSum(): df.group(axis=0, level=0) _1 ({}): \n{}".format(type(df.groupby(axis=0, level=0)), df.groupby(axis=0, level=0)[objectName].sum()))
+        
+    return (df.groupby(axis=0, level=0)[objectName].sum() == chargeSumCondition)
+                       
+    
+
+def getLorentzVectorFromDf(df, indexLevel1, ptObjectName, etaObjectName, phiObjectName, massObjectName):
+    return vector.array({'pt':  df.loc[pd.IndexSlice[:, indexLevel1], ptObjectName],
+                         'eta': df.loc[pd.IndexSlice[:, indexLevel1], etaObjectName],
+                         'phi': df.loc[pd.IndexSlice[:, indexLevel1], phiObjectName],
+                         'mass':df.loc[pd.IndexSlice[:, indexLevel1], massObjectName]})
 
 
 def calc_mll(lep_pts,lep_etas,lep_phis):
@@ -1104,7 +1278,9 @@ if __name__ == '__main__':
     print("branchesToRead: {}".format(branchesToRead))
 
 
-    #tracemalloc.start()
+    startTime = time.time()
+    
+    tracemalloc.start()
     #counts = Counter()
 
     #data_read_and_select_wNumpy(sInputFiles, branchesToRead)
@@ -1115,100 +1291,14 @@ if __name__ == '__main__':
     #snapshot = tracemalloc.take_snapshot()
     #display_top(snapshot, key_type='lineno', limit=10)
 
-    print("Done")
-    exit(0)
-
     
-    ### Event loop starts here --------------------------------------------------------------------------------------------------
-    data_all = pd.DataFrame()
-    for sInputFile in sInputFiles:
-        if printLevel >= 10: print("sInputFile: {}".format(sInputFile))
-        with uproot.open(sInputFile) as fInputFile:            
-            tree = fInputFile['Events']
-            #tree = fInputFile.get('Events')
-            #if printLevel >= 1: print("file: {}, nEvents: {}".format(sInputFile, uproot.numentries(sInputFile, 'Events')))
-            if printLevel >= 1: print("file: {}, nEvents: {}".format(sInputFile, uproot.num_entries('%s:Events' % sInputFile)))
-            print("tree.num_entries(): {}".format(tree.num_entries))
+    current_memory, peak_memory = tracemalloc.get_traced_memory() # https://medium.com/survata-engineering-blog/monitoring-memory-usage-of-a-running-python-program-49f027e3d1ba
+    print(f"\n\nMemory usage:: current {current_memory / 10**6}MB;  peak {peak_memory / 10**6}MB")
 
-            #for data_i in tree.iterate(branchesToRead,
-            #                           flatten=False, outputtype=pd.DataFrame,
-            #                           entrysteps=nEventToReadInBatch):
-            for data_i in tree.iterate(branchesToRead,
-                                       library="pd", how=dict,
-                                       #library="np",
-                                       #library="ak",
-                                       #max_num_elements=4000, 
-                                       step_size=1000):
-
-                
-                print("\ndata_i 0 ({}): {}".format(type(data_i), data_i)); sys.stdout.flush();
-                #print("\ndata_i 0 ({}): {}".format(type(data_i), data_i.to_list())); sys.stdout.flush();
-                #print("\n\ndata_i 0 {},  \n{}".format(data_i.shape, data_i.columns)); sys.stdout.flush();
-                #print("\n\ndta_i.index ({}): {}".format(type(data_i.index), data_i.index))
-
-
-                data_i = data_i.loc[data_i.nMuon >= 3]
-                print("\n\ndata_i selected 0: {}".format(data_i)); sys.stdout.flush();
-
-                data_i = data_i[data_i.nElectron >= 2]
-                print("\n\ndata_i selected 1: {}".format(data_i)); sys.stdout.flush();
-
-                continue
-            
-                
-                #fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon, nObjects_min=2, nObjects_max=99) ].index
-                fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon, nObjects_min=3) ].index
-                #fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nMuon,  nObjects_max=1) ].index
-                #data_i.drop(index=fail, inplace=True)
-                data_i.drop(fail, inplace=True)
-                print("\n\ndata_i selected 0 {},  \n{}".format(data_i.shape, data_i.columns)); sys.stdout.flush();
-                print("\n\ndata_i selected 0: {}".format(data_i))
-
-
-                fail = data_i[ ~ np.vectorize(cut_ObjectMultiplicity)(data_i.nElectron, nObjects_min=2) ].index
-                data_i.drop(fail, inplace=True)
-                print("\n\ndata_i selected 0p1 {},  \n{}".format(data_i.shape, data_i.columns)); sys.stdout.flush();
-                print("\n\ndata_i selected 0p1: {}".format(data_i))
-                
-                
-
-                print("data_i.Muon_pt: {}".format(data_i.Muon_pt))
-                #print("".format())
-
-                continue
-                
-                #PtThrshs=[[25, 15, 10]]
-                #print("PtThrshs_0 ({}): {}".format(type(PtThrshs), PtThrshs))
-                #fail = data_i[ ~ np.vectorize(cut_ObjectPt)(data_i.Muon_pt, PtThrshs=PtThrshs)].index
-                fail = data_i[ ~ np.vectorize(cut_ObjectPt)(data_i.Muon_pt, PtThrsh_Lead=25, PtThrsh_Sublead=15, PtThrsh_Third=10)].index
-                data_i.drop(fail, inplace=True)
-                print("\n\ndata_i selected 1 {},  \n{}".format(data_i.shape, data_i.columns)); sys.stdout.flush();
-                print("\n\ndata_i selected 1: {}".format(data_i))
-
-                fail = data_i[ ~ np.vectorize(cut_ObjectEta)(data_i.Muon_eta, EtaThrsh=2.3, nObjects=3) ].index
-                data_i.drop(index=fail, inplace=True)
-                
- 
-                data_i['mll_tmp'] = np.vectorize(calc_mll)(data_i.Muon_pt, data_i.Muon_eta, data_i.Muon_phi)
-                print("\n\ndata_i selected 2 {},  \n{}".format(data_i.shape, data_i.columns)); sys.stdout.flush();
-                print("\n\ndata_i selected 2: {}".format(data_i))
-                
-                if data_i.empty: continue
-                data_all = data_all.append( data_i )
-
-
-    exit(0)
-    fIn = uproot.open(sInputFiles[0])
-    tree = fInputFile['Events']
-    
-    print("data_all.Muon_pt: {}".format(data_all.Muon_pt))
-    print("ak.flatten(tree['Muon_pt']]: {}".format(ak.flatten(tree['Muon_pt'])))
-    #print("ak.flatten(data_all.Muon_pt): {}".format(ak.flatten(data_all.Muon_pt)))
-    #h_Muon_pt = np.histogram(ak.flatten(data_all.Muon_pt), bins=40, range=(0, 100))
-    h_Muon_pt = np.histogram(ak.flatten(tree["Muon_pt"]), bins=40, range=(0, 100))
-    #h_Muon_pt = np.histogram(data_all.nMuon, bins=20, range=(0, 20))
-
-
-    with uproot.recreate(sOutputFile) as fOutputFile:
-        fOutputFile["muon_pt"] = h_Muon_pt
-    
+    endTime = time.time()
+    totalTime = endTime - startTime
+    totalTime_hr  = int(totalTime/60/60)
+    totalTime_min = totalTime - float(totalTime_hr * 60)
+    totalTime_min = int(totalTime_min/60)
+    totalTime_sec = totalTime - float(totalTime_hr * 60*60) - float(totalTime_min * 60)
+    print(f"Total run time: {totalTime_hr}h {totalTime_min}m {totalTime_sec}s = {totalTime}sec ")
