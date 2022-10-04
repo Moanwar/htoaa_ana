@@ -29,7 +29,7 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
 printLevel = 0
-nEventToReadInBatch = 2500000 # 10000 # 2500000
+nEventToReadInBatch =  2500000 # 10000 # 2500000
 nEventsToAnalyze = -1 # 100000
 pd.set_option('display.max_columns', None)
 
@@ -217,12 +217,19 @@ def append_to_dictOfNpArrays(data_sum, data_i):
     #print("data_sum: {}".format(data_sum))
     return data_sum
     
-
+### -------------------------------------------------------------------------------------------------------------------------------------------
 
 
                 
 def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
-    data_all = None
+    nMuonsToSelect           = 2
+    nElectronsToSelect       = 2
+    muonPtThrshsToSelect     = [4.0, 3.0]
+    electronPtThrshsToSelect = [4.0, 3.0]
+                    
+    vector.register_awkward()
+    
+    data_all = None    
     for sInputFile in sInputFiles:
         if printLevel >= 10: print("sInputFile: {}".format(sInputFile))
         with uproot.open(sInputFile) as fInputFile:            
@@ -235,13 +242,46 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
                 print("tree.keys(): {}, tree.typenames(): {}".format(tree.keys(), tree.typenames()))
 
 
+            htoaa_nanoAODBranchesToRead_info = [
+                'run',
+                'luminosityBlock',
+                'event',
+                #'nMuon',
+                #'nElectron',
+            ]
 
+            htoaa_nanoAODBranchesToRead_muon = [
+                'nMuon',
+                'Muon_pt',
+                'Muon_eta',
+                'Muon_phi',
+                'Muon_mass',
+                'Muon_charge',
+            ]
+
+            htoaa_nanoAODBranchesToRead_electron = [
+                'nElectron',
+                'Electron_pt',
+                'Electron_eta',
+                'Electron_phi',
+                'Electron_eCorr',
+                'Electron_mass',
+                'Electron_charge',
+            ]
+            
+
+
+            branchesToRead_1 = htoaa_nanoAODBranchesToRead_info + htoaa_nanoAODBranchesToRead_muon + htoaa_nanoAODBranchesToRead_electron
+            nEventsToAnalyze_1 = tree.num_entries if nEventsToAnalyze == -1 else nEventsToAnalyze
+            
             #tracemalloc.start()
             #counts = Counter()
             iIteration = 0
-            for data_i in tree.iterate(branchesToRead,
+            for data_i in tree.iterate(branchesToRead_1,
                                        library="ak",
-                                       step_size=nEventToReadInBatch):
+                                       entry_start=0, entry_stop=nEventsToAnalyze_1,
+                                       step_size=nEventToReadInBatch,
+                                       ):
                 '''
                 uproot tree --> akward array:  list of event-level dict
                 For e.g.
@@ -256,105 +296,74 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
                 iIteration += 1
                 
                 # num_events_data_i = len(data_i)
-                if printLevel >= 12: 
-                    #print("\ndata_i 0 ({}): \nkeys: {}".format(type(data_i), data_i.keys())); sys.stdout.flush();
-                    print("\ndata_i 0 ({}):  {}".format(type(data_i), data_i)); sys.stdout.flush();
-                    print("data_i[0]: {}".format(data_i[0]))
 
-                    print("ak.count(data_i): {}".format(ak.count(data_i)))
-                    print("ak.num(data_i, axis=0): {}".format(ak.num(data_i, axis=0)))
-                    print("len(data_i): {}".format(len(data_i)))
-                    print("\ndata_i[:]: {}".format(data_i[:]))
-                    print("\ndata_i[:]['nMuon'] ({}): {}".format(type(data_i[:]['nMuon']), data_i[:]['nMuon']))
-                    print("\ndata_i[:]['Muon_pt'] ({}): {}".format(type(data_i[:]['Muon_pt']), data_i[:]['Muon_pt']))
-                    #print("data_i['nMuon'] ({})  ({}): {}".format(type(data_i['nMuon']), len(data_i['nMuon']), data_i['nMuon']))
+
+                if printLevel >= 12:
+                    #print(f"iIteration {iIteration}: data_i ({ak.count(data_i)}): {data_i.to_list()}")
+                    print(f"iIteration {iIteration}: data_i ({len(data_i)}): {data_i[:]['Muon_pt'].to_list()}")
+
 
                     
-                mask_nMu_1 = data_i[:]['nMuon'] >= 3
-                mask_nMu = np.vectorize(cut_ObjectMultiplicity)(data_i[:]['nMuon'], nObjects_min=3)
-                if printLevel >= 12:
-                    print("mask_nMu ({}): {}".format(len(mask_nMu), list(mask_nMu)))
-                    print("np.sum(mask_nMu): {}".format(np.sum(mask_nMu)))
-                    print("mask_nMu_1 ({}): {}".format(len(mask_nMu_1), list(mask_nMu_1)))
-                    print("np.sum(mask_nMu_1): {}".format(np.sum(mask_nMu_1)))
-                    print("\n\nmask: {}, \n\ndata_i['nMuon'][mask]: {}".format(mask_nMu, data_i[mask_nMu]['nMuon'] ))
-                    print("\n\ndata_i[mask]['Muon_pt']: {}".format(data_i[mask_nMu]['Muon_pt']))
-
-
+                #mask_nMu_1 = data_i[:]['nMuon'] >= 3
+                mask_nMu = np.vectorize(cut_ObjectMultiplicity)(data_i[:]['nMuon'], nObjects_min=nMuonsToSelect) 
                 if ak.sum(mask_nMu) == 0: continue 
                 data_i = data_i[mask_nMu]
 
                 
-                mask_nEle = np.vectorize(cut_ObjectMultiplicity)(data_i[:]['nElectron'], nObjects_min=2)
+                mask_nEle = np.vectorize(cut_ObjectMultiplicity)(data_i[:]['nElectron'], nObjects_min=nElectronsToSelect)
+                if ak.sum(mask_nEle) == 0: continue 
+                data_i = data_i[mask_nEle]
 
                 if printLevel >= 12: 
                     print("\ndata_i selected 1 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
                     
                 
-                    
-                    
-                #mask_nEle = data_i[:]['nElectron'] >= 2
-                if printLevel >= 12:
-                    print("mask_nEle: {}".format(list(mask_nEle)))
-                    print("np.sum(mask_nEle): {}".format(np.sum(mask_nEle)))
-                    print("\n\nmask: {}, \n\ndata_i['nElectron'][mask]: {}".format(mask_nEle, data_i[mask_nEle]['nElectron'] ))
-                    print("\n\ndata_i[mask]['Electron_pt']: {}".format(data_i[mask_nEle]['Electron_pt']))
-
-                if ak.sum(mask_nEle) == 0: continue   
-                data_i = data_i[mask_nEle]
-                
-                if printLevel >= 12: 
-                    #print("\ndata_i selected 2 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
-                    print("\ndata_i selected 2 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
-                    #print("len(data_i): {}, len(data_all): {}".format(len(data_i), len(data_all)))
-
-                if printLevel >= 15:
-                    print("ak.to_list(data_i[:]['Muon_pt']): {}".format(ak.to_list(data_i[:]['Muon_pt'])))
-                    print("data_i[:]['Muon_pt'][1]): {}".format(data_i[:]['Muon_pt'][1]))
-                    print("data_i[:]['Muon_pt'][1]): {}".format((data_i[:]['Muon_pt'])[:][1]))
-                    print("data_i[0]['Muon_pt']: {}, \t  data_i[0]['Muon_pt'][1]): {}".format(data_i[0]['Muon_pt'], data_i[0]['Muon_pt'][1]))
-                    print("data_i[1]['Muon_pt']: {}, \t  data_i[1]['Muon_pt'][1]): {}".format(data_i[1]['Muon_pt'], data_i[1]['Muon_pt'][1]))
-
-                    print("data_i[:, 'Muon_pt']: {}".format(data_i[:, 'Muon_pt']))
-                    print("data_i[:, 'Muon_pt', 1]: {}".format(data_i[:, 'Muon_pt', 1]))
-
-                
-                    
-                #mask_MuPt = np.vectorize(cut_ObjectPt)(data_i[:, 'Muon_pt'], PtThrsh_Lead=25, PtThrsh_Sublead=20, PtThrsh_Third=15, PtThrsh_Fourth=10)
-                #mask_MuPt = np.vectorize(cut_ObjectPt_1)(data_i[:, 'Muon_pt'], [25, 20, 15, 10])
-                mask_MuPt = ((data_i[:, 'Muon_pt', 0] > 25) & 
-                             (data_i[:, 'Muon_pt', 1] > 15) & 
-                             (data_i[:, 'Muon_pt', 2] > 10) )
-                #print("mask_MuPt ({}) ({}): {}  \t\t sum: {}".format(type(mask_MuPt), len(mask_MuPt), ak.to_list(mask_MuPt), ak.sum(mask_MuPt)))
+                #mask_MuPt = ((data_i[:, 'Muon_pt', 0] > 5) ) # & 
+                #             (data_i[:, 'Muon_pt', 1] > 3) )
+                mask_MuPt = cutAwkArray_ObjectPt(awkArray=data_i, objectName='Muon_pt', PtThrshs=muonPtThrshsToSelect)
                 if ak.sum(mask_MuPt) == 0: continue   
                 data_i = data_i[mask_MuPt]
-                if printLevel >= 12:
-                    print("\ndata_i selected 3 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
-                    print("data_i[:, 'Muon_eta', :) ({}): {}".format(type(data_i[:, 'Muon_eta', :]), data_i[:, 'Muon_eta', :]))
-                    print("abs(data_i[:, 'Muon_eta', :) ): {}".format(abs(data_i[:, 'Muon_eta', :])))
-
-                    
-                #mask_MuEta = abs(data_i[:, 'Muon_eta', :]) < 2.5
-                mask_MuEta = ((abs(data_i[:, 'Muon_eta', 0]) < 2.5) & 
-                              (abs(data_i[:, 'Muon_eta', 1]) < 2.5) & 
-                              (abs(data_i[:, 'Muon_eta', 2]) < 2.5) )
-                if ak.sum(mask_MuEta) == 0: continue   
-                data_i = data_i[mask_MuEta]
-                if printLevel >= 12:
-                    print("\ndata_i selected 4 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
 
 
-                mask_ElePt = ((data_i[:, 'Electron_pt', 0] > 20) & 
-                              (data_i[:, 'Electron_pt', 1] > 15)  )
+                #mask_ElePt = ((data_i[:, 'Electron_pt', 0] > 20) & 
+                #              (data_i[:, 'Electron_pt', 1] > 15)  )
+                mask_ElePt = cutAwkArray_ObjectPt(awkArray=data_i, objectName='Electron_pt', PtThrshs=electronPtThrshsToSelect)
                 if ak.sum(mask_ElePt) == 0: continue   
                 data_i = data_i[mask_ElePt]
 
                 
-                mask_EleEta = ((abs(data_i[:, 'Electron_eta', 0]) < 2.4) & 
-                               (abs(data_i[:, 'Electron_eta', 1]) < 2.4) )
+                if printLevel >= 12:
+                    #print("\ndata_i selected 3 ({}) ({}):  {}".format(type(data_i), len(data_i), ak.to_list(data_i))); sys.stdout.flush();
+                    print("data_i[:, 'Muon_eta', :) ({}): {}".format(type(data_i[:, 'Muon_eta', :]), data_i[:, 'Muon_eta', :]))
+                    #print("abs(data_i[:, 'Muon_eta', :) ): {}".format(abs(data_i[:, 'Muon_eta', :])))
+
+                    
+                #mask_MuEta = abs(data_i[:, 'Muon_eta', :]) < 2.5
+                #mask_MuEta = ((abs(data_i[:, 'Muon_eta', 0]) < 2.4) & 
+                #              (abs(data_i[:, 'Muon_eta', 1]) < 2.4) )
+                mask_MuEta = cutAwkArray_ObjectEta(awkArray=data_i, objectName='Muon_eta', EtaThrsh=2.4, nObjects=nMuonsToSelect)
+                if ak.sum(mask_MuEta) == 0: continue   
+                data_i = data_i[mask_MuEta]
+                
+                
+                #mask_EleEta = ((abs(data_i[:, 'Electron_eta', 0]) < 2.4) & 
+                #               (abs(data_i[:, 'Electron_eta', 1]) < 2.4) )
+                mask_EleEta = cutAwkArray_ObjectEta(awkArray=data_i, objectName='Electron_eta', EtaThrsh=2.5, nObjects=nElectronsToSelect)
                 if ak.sum(mask_EleEta) == 0: continue   
                 data_i = data_i[mask_EleEta]
 
+
+                mask_MuChargeSum = cutAwkArray_chargeSum(awkArray=data_i, objectName='Muon_charge', nObjects=nMuonsToSelect, chargeSumCondition=0)
+                if ak.sum(mask_MuChargeSum) == 0: continue
+                data_i = data_i[mask_MuChargeSum]
+
+                mask_EleChargeSum = cutAwkArray_chargeSum(awkArray=data_i, objectName='Electron_charge', nObjects=nElectronsToSelect, chargeSumCondition=0)
+                if ak.sum(mask_EleChargeSum) == 0: continue
+                data_i = data_i[mask_EleChargeSum]
+
+
+
+                
                 
                 if len(data_i) > 0:
                     if data_all is None:
@@ -388,13 +397,60 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
     #hnMuon, _ = np.histogram(aNMuon1, bins=50, range=(0, 100))
 
     
-    if printLevel >= 0  and len(data_all) > 0:                
+    if printLevel >= 1  and len(data_all) > 0:                
         print("\ndata_all final  ({}) ({}):  {}".format(type(data_all), len(data_all), ak.to_list(data_all))); sys.stdout.flush();
 
+        print(f"\n\nSelected events ({len(data_all)}): {list(zip(data_all['run'], data_all['luminosityBlock'],data_all['event'] ))}")
+
+
+
+
+
+    
+
+
+
+        
                 
     if sOutFile is not None  and len(data_all) > 0:
         if not sOutFile.endswith('.root'): sOutFile += '.root'
         sOutFile = sOutFile.replace('.root', '_wAwkwardArray.root')
+
+
+
+        if printLevel >=12:
+            data_tmp1 = data_all[:, ['Muon_pt', 'Muon_eta', 'Muon_phi', 'Muon_mass'], :]
+            print(f"\n\ndata_tmp1 ({len(data_tmp1)}): {data_tmp1.to_list()}")
+            print(f"data_all['Muon_pt']: {data_all['Muon_pt']}")
+            print(f"aw.Array(data_all, with_name='Momentum4D'): {ak.Array(data_all, with_name='Momentum4D')}")
+
+            #vMu = ak.Array(data_all, with_name='Momentum4D')
+            vMu = getLorentzVectorFromAwkArray(data_tmp1, ptObjectName='Muon_pt', etaObjectName='Muon_eta', phiObjectName='Muon_phi', massObjectName='Muon_mass')
+            print(f"vMu ({type(vMu)}) :{vMu}  list: {vMu.to_list()}")
+
+            vMuCombinations = ak.combinations(vMu, 2, axis=1)
+            print(f"ak.combinations(vMu, 2, axis=1) ({type(vMuCombinations)}): {vMuCombinations.to_list()}")
+
+            vMus = ak.unzip(vMuCombinations)
+            print(f"ak.unzip(vMuCombinations) {type(vMus)}: {vMus}")
+
+            print(f"vMus[0]: {type(vMus[0])} {vMus[0].to_list()}")
+            print(f"vMus[1]: {type(vMus[1])} {vMus[1].to_list()}")
+
+            print(f"(vMus[0] + vMus[1]).mass: {(vMus[0] + vMus[1]).mass.to_list()}")
+            print(f"(vMus[0] + vMus[1]).mass _1: {(vMus[0] + vMus[1]).mass[:, 0].to_list()}")
+
+            print(f"(vMu[:, 0] + vMu[:, 1])  : {(vMu[:, 0] + vMu[:, 1]).to_list()}")
+            print(f"(vMu[:, 0] + vMu[:, 1]).mass  : {(vMu[:, 0] + vMu[:, 1]).mass.to_list()}")
+
+            print(f"vMu[:, 0].deltaR(vMu[:, 1].to_list(): {vMu[:, 0].deltaR(vMu[:, 1]).to_list()}")
+
+
+
+        vMuons     = getLorentzVectorFromAwkArray(data_all, ptObjectName='Muon_pt',     etaObjectName='Muon_eta',     phiObjectName='Muon_phi',     massObjectName='Muon_mass')
+        vElectrons = getLorentzVectorFromAwkArray(data_all, ptObjectName='Electron_pt', etaObjectName='Electron_eta', phiObjectName='Electron_phi', massObjectName='Electron_mass')
+
+
         
         with uproot.recreate(sOutFile) as fOut:
             #fOut['evt/hnMuon'] = np.histogram(ak.to_numpy(data_all[:]['nMuon']), bins=20, range=(-0.5, 19.5))
@@ -415,11 +471,12 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
             hMuonPt_sublead = hist.Hist.new.Reg(100, 0, 100, name="Sub-leading muon pT").Weight()
             hMuonPt_sublead.fill(ak.to_numpy( data_all[:, 'Muon_pt', 1] ))
             fOut['evt/hSubleadingMuonPt'] = hMuonPt_sublead
-            
+
+            '''
             hMuonPt_thridlead = hist.Hist.new.Reg(100, 0, 100, name="Third-leading muon pT").Weight()
             hMuonPt_thridlead.fill(ak.to_numpy( data_all[:, 'Muon_pt', 2] ))
             fOut['evt/hThirdleadingMuonPt'] = hMuonPt_thridlead
-
+            '''
 
             ## Eta --
             hMuonEta = hist.Hist.new.Reg(40, -3, 3, name="Muon eta").Weight()
@@ -462,183 +519,139 @@ def data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutFile=None):
             fOut['evt/hElectronPhi'] = hElectronPhi
 
 
+
+
+            hmass_2Mu = hist.Hist.new.Reg(100, 0, 200, name="mass(2 mu) [GeV]").Weight()
+            hmass_2Mu.fill( (vMuons[:, 0] + vMuons[:, 1]).mass )
+            fOut['evt/hmass_2Mu'] = hmass_2Mu
+
+            hmass_2Ele = hist.Hist.new.Reg(100, 0, 200,  name="mass(2 ele) [GeV]").Weight()
+            hmass_2Ele.fill( (vElectrons[:, 0] + vElectrons[:, 1]).mass )
+            fOut['evt/hmass_2Ele'] = hmass_2Ele
+
+            hdR_2Mu = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu)").Weight()
+            hdR_2Mu.fill( vMuons[:, 0].deltaR(vMuons[:, 1]) )
+            fOut['evt/hdR_2Mu'] = hdR_2Mu
+
+            hdR_2Ele = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 ele)").Weight()
+            hdR_2Ele.fill( vElectrons[:, 0].deltaR(vElectrons[:, 1]) )
+            fOut['evt/hdR_2Ele'] = hdR_2Ele            
+
+            hdR_2Mu_2Ele = hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu, 2 ele)").Weight()
+            hdR_2Mu_2Ele.fill( (vMuons[:, 0] + vMuons[:, 1]).deltaR(vElectrons[:, 0] + vElectrons[:, 1]) )
+            fOut['evt/hdR_2Mu_2Ele'] = hdR_2Mu_2Ele
+
+
+            h2ddR_2Mu_vs_dR_2Ele = (
+                hist.Hist.new.Reg(100, 0, 3.14, name="deltaR(2 mu)")
+                .Reg(100, 0, 3.14, name="deltaR(2 ele)")
+                .Weight() )
+            h2ddR_2Mu_vs_dR_2Ele.fill( vMuons[:, 0].deltaR(vMuons[:, 1]), vElectrons[:, 0].deltaR(vElectrons[:, 1]) )
+            fOut['evt/h2ddR_2Mu_vs_dR_2Ele'] = h2ddR_2Mu_vs_dR_2Ele
+            
+
             print("Wrote to sOutFile {}".format(sOutFile))
+
+    
 
     return
 
 
-                
-def data_read_and_select_wPandas_v0(sInputFiles, branchesToRead, sOutFile=None):
-    data_all = None
-    data_all_info = None
-    for sInputFile in sInputFiles:
-        if printLevel >= 10: print("sInputFile: {}".format(sInputFile))
-        with uproot.open(sInputFile) as fInputFile:            
-            tree = fInputFile['Events']
-            #tree = fInputFile.get('Events')
-            #if printLevel >= 1: print("file: {}, nEvents: {}".format(sInputFile, uproot.numentries(sInputFile, 'Events')))
-            if printLevel >= 0: print("file: {}, nEvents: {}".format(sInputFile, tree.num_entries)); sys.stdout.flush();
-            if printLevel >= 100:
-                print("tree.show(): {}".format(tree.show()))
-                print("tree.keys(): {}, tree.typenames(): {}".format(tree.keys(), tree.typenames()))
+def cutAwkArray_ObjectPt(awkArray, objectName, PtThrshs=[]):
+    mask = None
+    for iParticle, PtThrsh in enumerate(PtThrshs):
+        mask_i = awkArray[:, objectName, iParticle] > PtThrsh
+        if mask is None:
+            mask = mask_i
+        else:
+            mask = (mask & mask_i)
+
+        if printLevel >= 12:
+            print(f"mask_i: {mask_i}")
+            print(f"mask: {mask}")
+
+    return mask;
+    
+
+def cutAwkArray_ObjectEta(awkArray, objectName, EtaThrsh, nObjects):
+    '''
+    Check Objects abs(Eta) is greater than thresholds set in EtaThrshs list.
+
+    Return:
+        True: All objects' Eta is about respective threshold
+        False: Else false
+    '''   
+
+    mask = None
+    for iParticle in range(nObjects):
+        mask_i = abs(awkArray[:, objectName, iParticle]) < EtaThrsh
+        if mask is None:
+            mask = mask_i
+        else:
+            mask = (mask & mask_i)
+
+        if printLevel >= 12:
+            print(f"mask_i: {mask_i}")
+            print(f"mask: {mask}")
+
+    return mask;
 
 
-            htoaa_nanoAODBranchesToRead_info = [
-                'run',
-                'luminosityBlock',
-                'event',
-                #'nMuon',
-                #'nElectron',
-            ]
-
-            htoaa_nanoAODBranchesToRead_muon = [
-                'nMuon',
-                'Muon_pt',
-                'Muon_eta',
-                'Muon_phi',
-            ]
-
-            htoaa_nanoAODBranchesToRead_electron = [
-                'nElectron',
-                'Electron_pt',
-                'Electron_eta',
-                'Electron_phi'
-            ]
-            
-            #tracemalloc.start()
-            #counts = Counter()
-            for iEvtStart in range(0, 500, nEventToReadInBatch):
-                data_subset = None
-
-                data_subset_info = tree.arrays(
-                    htoaa_nanoAODBranchesToRead_info,
-                    entry_start=iEvtStart, entry_stop=(iEvtStart+nEventToReadInBatch),
-                    library='pd'
-                )
-                if (data_subset_info is not None) and (len(data_subset_info.index) > 0):
-                    if data_all_info is None:
-                        data_all_info = data_subset_info
-                    else:
-                        data_all_info = pd.concat([data_all_info, data_subset_info])
-                        
-
-                for iTreeBranchSet, treeBranches_list in enumerate([
-                        htoaa_nanoAODBranchesToRead_info + htoaa_nanoAODBranchesToRead_muon,
-                        htoaa_nanoAODBranchesToRead_info + htoaa_nanoAODBranchesToRead_electron
-                        #htoaa_nanoAODBranchesToRead_info + htoaa_nanoAODBranchesToRead_muon + htoaa_nanoAODBranchesToRead_electron
-                        #htoaa_nanoAODBranchesToRead_info
-                        #htoaa_nanoAODBranchesToRead_info, htoaa_nanoAODBranchesToRead_muon, htoaa_nanoAODBranchesToRead_electron                        
-                ]):
-                    #treeBranches_list = set(treeBranches_list)
-                    if printLevel >= 10:
-                        print("\n\ntreeBranches_list: {}".format(treeBranches_list))
-                        
-                    data_subset_byTrBrch = tree.arrays(
-                        treeBranches_list,
-                        entry_start=iEvtStart, entry_stop=(iEvtStart+nEventToReadInBatch),
-                        library='pd'
-                    )
-                    '''
-                    print("data_subset_byTrBrch 0 {}: \n{}".format(type(data_subset_byTrBrch), data_subset_byTrBrch)); sys.stdout.flush();
-                    print("data_subset_byTrBrch.index ({}): {}".format(type(data_subset_byTrBrch.index), data_subset_byTrBrch.index)); sys.stdout.flush();
-                    index_tmp = list(data_subset_byTrBrch.index)
-                    print("index_tmp ({}): {}".format(type(index_tmp), index_tmp))
-                    index_multi = pd.MultiIndex.from_product([list(data_subset_byTrBrch.index), [0]], names=["entry", "subentry"])
-                    print("index_multi ({}): {}".format(type(index_multi), index_multi))
-                    #data_subset_byTrBrch = pd.DataFrame( data_subset_byTrBrch, index=pd.MultiIndex(levels=[list(data_subset_byTrBrch.index), []], names=['entry', 'subentry']) )
-                    #data_subset_byTrBrch = pd.DataFrame( data_subset_byTrBrch, index=[() for   ], names=['entry', 'subentry']) )
-                    data_subset_byTrBrch = pd.DataFrame( data_subset_byTrBrch[treeBranches_list], index=index_multi )
-                    print("data_subset_byTrBrch 1 {}: \n{}".format(type(data_subset_byTrBrch), data_subset_byTrBrch)); sys.stdout.flush();
-                    '''
-                    if printLevel >= 10:
-                        #print("\ndata_subset_byTrBrch.index ({}): {}".format(type(data_subset_byTrBrch.index), data_subset_byTrBrch.index))
-                        #print("data_subset_byTrBrch.columns ({}): {}".format(type(data_subset_byTrBrch.columns), data_subset_byTrBrch.columns))
-                        print("data_subset_byTrBrch ({}): \n{}".format(type(data_subset_byTrBrch), data_subset_byTrBrch))
-
-                    if len(data_subset_byTrBrch.index) > 0:
-                        if data_subset is None:
-                            data_subset = data_subset_byTrBrch 
-                        else:
-                            #data = data.join(data_part)
-                            #data_subset = data_subset.join(data_subset_byTrBrch, how='outer')
-                            data_subset = data_subset.join(data_subset_byTrBrch, how='outer', rsuffix='_%d' % (iTreeBranchSet))                            
-                        if printLevel >= 10:
-                            print("\n\ndata_subset_i: \n{}".format(data_subset))
-
-                if printLevel >= 10:
-                    print("\n\ndata_subset: \n{}".format(data_subset))
-
-                            
-                if (data_subset is not None) and (len(data_subset.index) > 0):
-                    if data_all is None:
-                        data_all = data_subset
-                    else:
-                        data_all = pd.concat([data_all, data_subset])
-                        
-                if printLevel >= 10:
-                    print("\n\ndata_all_i: \n{}".format(data_all))
-
-                        
-                        
-            if printLevel >= 9:
-                print("\n\ndata_all: \n{}".format(data_all))
-
-            mask_nMu = data_all.nMuon >= 2
-            data_all = data_all.loc[ mask_nMu ]
-            if printLevel >= 9:
-                print("mask_nMu: {}".format(mask_nMu))
-                print("\n\n data_all.loc[ data_all.nMuon > 2 ]**: \n{}".format(data_all))
-                print("data_all[(:, 0)].index: {}.  len(data_all[(:, 0)].index): {} ".format(data_all.loc[(slice(None), 0), :].index, len(data_all.loc[(slice(None), 0), :].index)))
-
-            #mask_MuPt = data_all.loc[(slice(None), 0), 'Muon_pt'] > 20
-            mask_MuPt = data_all.loc[ pd.IndexSlice[:, 0], 'Muon_pt'] > 20
-            mask_MuPt_1 = mask_MuPt[mask_MuPt].index
-            mask_MuPt_2 = mask_MuPt_1.get_level_values(0) # mask_MuPt_1.droplevel(level=1)
-            if printLevel >= 9:
-                print("\nmask_MuPt ({}): {}".format(type(mask_MuPt), mask_MuPt))
-                print("\n mask_MuPt.index: {}".format(mask_MuPt.index))
-                print("\n mask_MuPt.index_1: {}".format(mask_MuPt[mask_MuPt].index))
-                
-                print("mask_MuPt_1 ({}): {}".format(type(mask_MuPt_1), mask_MuPt_1))
-                
-                print("mask_MuPt_2 ({}): {}".format(type(mask_MuPt_2), mask_MuPt_2))
-                #mask_MuPt_3 = list(mask_MuPt_2)
-                #print("mask_MuPt_3 ({}): {}".format(type(mask_MuPt_3), mask_MuPt_3))
-            #data_all = data_all.loc[(slice(mask_MuPt_3), slice(None)), :]
-            #data_all = data_all.loc[ pd.IndexSlice[mask_MuPt, :], pd.IndexSlice[:] ]
-            #data_all = data_all.loc[ pd.IndexSlice[mask_MuPt_1, :], pd.IndexSlice[:] ]
-            #data_all = data_all.loc[ pd.IndexSlice[mask_MuPt_1, :], : ]
-            data_all = data_all.loc[ pd.IndexSlice[mask_MuPt_2, :], : ]
-            if printLevel >= 9:
-                print("data_all ({}): \n{}".format(len(data_all.loc[pd.IndexSlice[:, 0], :].index), data_all))
-                #print("\n\n data_allmask_MuPt.loc[ data_all.nMuon > 2 ]**: \n{}".format(data_all))
 
 
-            mask_1 = data_all.loc[pd.IndexSlice[:, 0], :].index
-            mask_2 = data_all.loc[pd.IndexSlice[:, 0], :].index.get_level_values(level=0)
-            if printLevel >= 9:
-                print("mask_1 ({}): {}".format(type(mask_1), mask_1))
-                print("mask_2 ({}): {}".format(type(mask_2), mask_2))
+def cutAwkArray_chargeSum(awkArray, objectName, nObjects, chargeSumCondition):
+    if printLevel >= 12:
+        print(f"awkArray[:, {objectName}, :{nObjects}]:  {awkArray[:, objectName, :nObjects] } ")
+        print(f"awk.sum(awkArray[:, {objectName}, :{nObjects}], axis=-1):  {ak.sum(awkArray[:, objectName, :nObjects], axis=-1)} ")
+        print(f"awk.sum(awkArray[:, {objectName}, :{nObjects}], axis=-1) == chargeSumCondition:  {(ak.sum(awkArray[:, objectName, :nObjects], axis=-1) == chargeSumCondition)} ")
 
 
-            mask_info_1 = data_all_info.index
-            if printLevel >= 9:
-                print("mask_info_1 ({}): {}".format(type(mask_info_1), mask_info_1))
-                print("data_all_info ({}): {}".format(len(data_all_info.index), data_all_info))
+    return (ak.sum(awkArray[:, objectName, :nObjects], axis=-1) == chargeSumCondition)
 
-            data_all_info = data_all_info.loc[pd.IndexSlice[mask_2], :]
-            mask_info_1 = data_all_info.index
-            if printLevel >= 9:
-                print("mask_info_1 after selection ({}): {}".format(type(mask_info_1), mask_info_1))
-                print("data_all_info after selection ({}): {}".format(len(data_all_info.index), data_all_info))
-           
-            
-            #data_all.loc[]
+
+def getLorentzVectorFromAwkArray(awkArray, ptObjectName, etaObjectName, phiObjectName, massObjectName):
+    '''
+    return ak.Array(
+        awkArray,
+        with_name='Momentum4D'
+    )
+    '''
+    v1 = ak.zip( {
+        'pt':   awkArray[ptObjectName],
+        'eta':  awkArray[etaObjectName],
+        'phi':  awkArray[phiObjectName],
+        'mass': awkArray[massObjectName],
+    })
+    if printLevel >= 12:
+        print(f"getLorentzVectorFromAwkArray(): v1 ({type(v1)}): {v1.to_list()}")
+
+    return ak.Array(v1, with_name='Momentum4D')
+                       
+### -------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
+    nMuonsToSelect           = 2
+    nElectronsToSelect       = 2
+    muonPtThrshsToSelect     = [4.0, 3.0]
+    electronPtThrshsToSelect = [4.0, 3.0]
+    
     data_all = None
 
     collection_info  = Collection('info')
@@ -723,12 +736,12 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
                 mask_pass_all_cut = None
 
                 #mask_pass_nMu_cut = collection_mu.df['nMuon'] >= 2
-                mask_pass_nMu_cut = cutDf_ObjectMultiplicity(df=collection_mu.df, objectName='nMuon', nObjects_min=2)
+                mask_pass_nMu_cut = cutDf_ObjectMultiplicity(df=collection_mu.df, objectName='nMuon', nObjects_min=nMuonsToSelect)
                 mask_pass_all_cut = mask_pass_nMu_cut
 
 
                 #mask_pass_nEle_cut = collection_ele.df['nElectron'] >= 2
-                mask_pass_nEle_cut = cutDf_ObjectMultiplicity(df=collection_ele.df, objectName='nElectron', nObjects_min=2)
+                mask_pass_nEle_cut = cutDf_ObjectMultiplicity(df=collection_ele.df, objectName='nElectron', nObjects_min=nElectronsToSelect)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_nEle_cut)                
                 if printLevel >= 12:
                     print("mask_pass_nMu_cut  ({}): {}".format(len(mask_pass_nMu_cut.index), mask_pass_nMu_cut))
@@ -760,29 +773,35 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
                 '''
 
 
-                mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=[4.0, 3.0])
+                mask_pass_MuPt_cut = cutDf_ObjectPt(df=collection_mu.df, objectName='Muon_pt', PtThrshs=muonPtThrshsToSelect)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuPt_cut)
                  
-                if printLevel >= 10:
+                if printLevel >= 12:
                     print("mask_pass_MuPt_cut  ({}): {}".format(len(mask_pass_MuPt_cut.index), mask_pass_MuPt_cut))
                     
-                mask_pass_ElePt_cut = cutDf_ObjectPt(df=collection_ele.df, objectName='Electron_pt', PtThrshs=[4.0, 3.0])
+                mask_pass_ElePt_cut = cutDf_ObjectPt(df=collection_ele.df, objectName='Electron_pt', PtThrshs=electronPtThrshsToSelect)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_ElePt_cut)
 
                 
-                mask_pass_MuEta_cut = cutDf_ObjectEta(df=collection_mu.df, objectName='Muon_eta', EtaThrsh=2.4, nObjects=2)
+                mask_pass_MuEta_cut = cutDf_ObjectEta(df=collection_mu.df, objectName='Muon_eta', EtaThrsh=2.4, nObjects=nMuonsToSelect)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuEta_cut)               
                 
-                mask_pass_EleEta_cut = cutDf_ObjectEta(df=collection_ele.df, objectName='Electron_eta', EtaThrsh=2.5, nObjects=2)
+                mask_pass_EleEta_cut = cutDf_ObjectEta(df=collection_ele.df, objectName='Electron_eta', EtaThrsh=2.5, nObjects=nElectronsToSelect)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_EleEta_cut)                
-                    
-                mask_pass_MuChargeSum_cut = cutDf_chargeSum(df=collection_mu.df, objectName='Muon_charge', nObjects=2, chargeSumCondition=0)
+
+
+                
+                #events.dropEventsFailingMask(mask_pass_cut = mask_pass_all_cut); events.print()
+
+                
+                
+                mask_pass_MuChargeSum_cut = cutDf_chargeSum(df=collection_mu.df, objectName='Muon_charge', nObjects=nMuonsToSelect, chargeSumCondition=0)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_MuChargeSum_cut)
                 
-                mask_pass_EleChargeSum_cut = cutDf_chargeSum(df=collection_ele.df, objectName='Electron_charge', nObjects=2, chargeSumCondition=0)
+                mask_pass_EleChargeSum_cut = cutDf_chargeSum(df=collection_ele.df, objectName='Electron_charge', nObjects=nElectronsToSelect, chargeSumCondition=0)
                 mask_pass_all_cut = (mask_pass_all_cut & mask_pass_EleChargeSum_cut)
                    
-                if printLevel >= 10:
+                if printLevel >= 12:
                     print("mask_pass_all_cut ({}): {}".format(len(mask_pass_all_cut.index), mask_pass_all_cut.to_string()))
 
                     
@@ -810,8 +829,8 @@ def data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutFile=None):
 
 
 
-    nMuons = 2
-    nElectrons = 2
+    nMuons = nMuonsToSelect
+    nElectrons = nElectronsToSelect
     vMuons = []
     for iParticle in range(nMuons):
         vMu = getLorentzVectorFromDf(df=collection_mu.df, indexLevel1=iParticle,
@@ -1104,44 +1123,6 @@ def cutDf_ObjectMultiplicity(df, objectName, nObjects_min=None, nObjects_max=Non
 
 
 
-def cutDf_ObjectPt_1(df, objectName, PtThrshs=[]): 
-    '''
-    Check Objects Pt is above their resepctive thresholds.
-    If PtThrsh_<rank> is not set, then their Pt condition is not checked.
-
-    Return:
-      pd.Series of boolean, with 
-        True: All objects' Pt is about respective threshold
-        False: Else false
-    '''
-    if len(PtThrshs) == 0:
-        raise Exception("cutDf_ObjectPt():: PtThrshs not provided \t\t **** ERROR ****")
-
-    mask = None
-    #mask_tmp = df['nMuon'] != df['nMuon']
-    mask_tmp = df[objectName] != df[objectName]
-    #mask_tmp = df[objectName].astype(int) != df[objectName].astype(int)
-    if printLevel >= 10:
-        print("cutDf_ObjectPt():: mask_tmp   ({}): {} \n{}\n\n".format(type(mask_tmp), getDataframeNEvents(mask_tmp),   mask_tmp.tolist(), mask_tmp.to_string()))
-        print("cutDf_ObjectPt():: mask_tmp.index: {}\n".format(mask_tmp.index))
-
-    mask = mask_tmp
-    for iParticle, PtTrsh in enumerate(PtThrshs):
-        mask_i = df.loc[pd.IndexSlice[:, iParticle], objectName] > PtTrsh
-        #if mask is None: mask = mask_i
-        #else:            mask = (mask & mask_i)
-        #else:            mask = mask.join(mask_i, how='outer')
-
-        mask = (mask | mask_i)
-        
-        
-        if printLevel >= 10:
-            print("cutDf_ObjectPt():: iParticle {}, PtTrsh {}".format(iParticle, PtTrsh))
-            print("cutDf_ObjectPt():: mask   ({}): {} \n{}".format(getDataframeNEvents(mask),   mask.tolist(), mask.to_string()))
-            print("cutDf_ObjectPt():: mask_i ({}): {} \n{}".format(len(mask_i.tolist()), mask_i.tolist(), mask_i.to_string()))
-
-    return mask;
-
 
 
 def cutDf_ObjectPt(df, objectName, PtThrshs=[]): 
@@ -1166,7 +1147,7 @@ def cutDf_ObjectPt(df, objectName, PtThrshs=[]):
                 (df.loc[pd.IndexSlice[:, iParticle], objectName] < PtTrsh) ) # set entry-subentry combination True for failing particles **** IMPORTANT ****
         
         
-        if printLevel >= 10:
+        if printLevel >= 12:
             print("cutDf_ObjectPt():: iParticle {}, PtTrsh {}".format(iParticle, PtTrsh))
             print("cutDf_ObjectPt():: mask   ({}): {} \n{}".format(getDataframeNEvents((~mask_failingCut)),   (~mask_failingCut).tolist(), (~mask_failingCut).to_string()))
             print("cutDf_ObjectPt():: mask_i ({}): {} \n{}".format(len((~mask_failingCut_i).index), (~mask_failingCut_i).tolist(), (~mask_failingCut_i).to_string()))
@@ -1189,7 +1170,7 @@ def cutDf_ObjectEta(df, objectName, EtaThrsh, nObjects):
     for iObject in range(nObjects):
         mask_failingCut = (mask_failingCut  |
                 (abs(df.loc[pd.IndexSlice[:, iObject], objectName]) > EtaThrsh) ) # set entry-subentry combination True for failing particles **** IMPORTANT ****
-        if printLevel >= 10:
+        if printLevel >= 12:
             print("iObject, mask ({}): {}".format(iObject, getDataframeNEvents((~mask_failingCut)), (~mask_failingCut).to_string()))
             
     return ( ~ mask_failingCut);
@@ -1201,8 +1182,18 @@ def cutDf_chargeSum(df, objectName, nObjects, chargeSumCondition):
         df_tmp = df.groupby(axis=0, level=0)
         print("cutDf_chargeSum(): df.group(axis=0, level=0) ({}): \n{}".format(type(df_tmp), df_tmp))
         print("cutDf_chargeSum(): df.group(axis=0, level=0) _1 ({}): \n{}".format(type(df.groupby(axis=0, level=0)), df.groupby(axis=0, level=0)[objectName].sum()))
+
+        print(f"df.loc[pd.IndexSlice[:, range(nObjects)], objectName]: {df.loc[pd.IndexSlice[:, range(nObjects)], objectName]}")
+        #print(f"df.loc[pd.IndexSlice[:, range(nObjects)], objectName].sum(axis=0, level=0): {df.loc[pd.IndexSlice[:, range(nObjects)], objectName].sum(axis=0, level=0)}")
+        #print(f"df.loc[pd.IndexSlice[:, range(1)], objectName]: {df.loc[pd.IndexSlice[:, range(1)], objectName].sum(axis=0, level=0)}")
+
+        #print(f"(df.loc[pd.IndexSlice[:, range(nObjects)], objectName].sum(axis=0, level=0)== chargeSumCondition): {(df.loc[pd.IndexSlice[:, range(nObjects)], objectName].sum(axis=0, level=0) == chargeSumCondition)}")
+
+        print(f"(df.loc[pd.IndexSlice[:, range(nObjects)], objectName]).groupby(axis=0, level=0).sum():  { (df.loc[pd.IndexSlice[:, range(nObjects)], objectName]).groupby(axis=0, level=0).sum()}")
+        print(f"( (df.loc[pd.IndexSlice[:, range(nObjects)], objectName]).groupby(axis=0, level=0).sum() == chargeSumCondition):  {( (df.loc[pd.IndexSlice[:, range(nObjects)], objectName]).groupby(axis=0, level=0).sum() == chargeSumCondition)}")
         
-    return (df.groupby(axis=0, level=0)[objectName].sum() == chargeSumCondition)
+    #return (df.groupby(axis=0, level=0)[objectName].sum() == chargeSumCondition)
+    return ( (df.loc[pd.IndexSlice[:, range(nObjects)], objectName]).groupby(axis=0, level=0).sum() == chargeSumCondition) 
                        
     
 
@@ -1211,6 +1202,8 @@ def getLorentzVectorFromDf(df, indexLevel1, ptObjectName, etaObjectName, phiObje
                          'eta': df.loc[pd.IndexSlice[:, indexLevel1], etaObjectName],
                          'phi': df.loc[pd.IndexSlice[:, indexLevel1], phiObjectName],
                          'mass':df.loc[pd.IndexSlice[:, indexLevel1], massObjectName]})
+### -------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 def calc_mll(lep_pts,lep_etas,lep_phis):
@@ -1285,8 +1278,8 @@ if __name__ == '__main__':
 
     #data_read_and_select_wNumpy(sInputFiles, branchesToRead)
 
-    #data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutputFile)
-    data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutputFile)
+    data_read_and_select_wAkward(sInputFiles, branchesToRead, sOutputFile)
+    #data_read_and_select_wPandas(sInputFiles, branchesToRead, sOutputFile)
 
     #snapshot = tracemalloc.take_snapshot()
     #display_top(snapshot, key_type='lineno', limit=10)
