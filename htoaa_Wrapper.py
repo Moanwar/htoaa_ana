@@ -7,21 +7,28 @@ from collections import OrderedDict as OD
 import numpy as np
 
 from htoaa_Settings import *
-from htoaa_Samples import Samples2018
+from htoaa_Samples import (
+    Samples2018,
+    kData
+)
 
 
 parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
 parser.add_argument('-era', dest='era', type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
-parser.add_argument('-run_mode', type=str, default='local', choices=['local', 'condor'])
-parser.add_argument('-v', '--version', type=str, default=None, required=True)
-parser.add_argument('-nFilesPerJob', type=int, default=1)
+parser.add_argument('-run_mode',        type=str, default='local', choices=['local', 'condor'])
+parser.add_argument('-v', '--version',  type=str, default=None, required=True)
+parser.add_argument('-samples',         type=str, default=None, help='samples to run seperated by comma')
+parser.add_argument('-nFilesPerJob',    type=int, default=10)
+parser.add_argument('-forcefully',      action='store_true', default=False)
 args=parser.parse_args()
 print("args: {}".format(args))
 
-era           = args.era
-run_mode      = args.run_mode
-nFilesPerJob  = args.nFilesPerJob
-anaVersion    = args.version 
+era              = args.era
+run_mode         = args.run_mode
+nFilesPerJob     = args.nFilesPerJob
+selSamplesToRun  = args.samples
+anaVersion       = args.version
+submitForcefully = args.forcefully
 
 pwd = os.getcwd()
 DestinationDir = "./%s" % (anaVersion)
@@ -31,7 +38,7 @@ if not os.path.exists(DestinationDir): os.mkdir( DestinationDir )
 
 
 
-sAnalysis = "htoaa_Analysis.py"
+sAnalysis = "htoaa_Analysis_wCoffea.py"  # "htoaa_Analysis.py"
 sConfig   = "config_htoaa.json"
 
 samplesList = None
@@ -43,9 +50,13 @@ if era == Era_2018:
         samplesInfo = json.load(fSamplesInfo)
     Luminosity = Luminosities[era][0]
 
+selSamplesToRun_list = []
+if selSamplesToRun:
+    selSamplesToRun_list = selSamplesToRun.split(',')
 
 print("samplesList: {}".format(samplesList))
 print("\n\nsamplesInfo: {}".format(samplesInfo))
+print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
 
 
 config = config_Template
@@ -53,6 +64,15 @@ config = config_Template
 for sample_category, samples in samplesList.items():
     #print("sample_category {}, samples {}".format(sample_category, samples))
     for sample in samples:
+        if len(selSamplesToRun_list) > 0:
+            skipThisSample = True
+            for selSample in selSamplesToRun_list:
+                if sample.startswith(selSample): skipThisSample = False
+            if skipThisSample:
+                continue
+
+        print(f"sample_category: {sample_category}, sample: {sample}")
+            
         sampleInfo = samplesInfo[sample]
         fileList = sampleInfo[sampleFormat]
         files = []
@@ -67,8 +87,10 @@ for sample_category, samples in samplesList.items():
         print("\nsample: {}".format(sample))
         print("samplesInfo[sample]: {}".format(samplesInfo[sample]))
         print("files ({}): {}".format(len(files), files))
+
         
-        nSplits = int(len(files) / nFilesPerJob) + 1
+        nSplits = int(len(files) / nFilesPerJob) + 1 if nFilesPerJob > 0 else 1
+        
         
         files_splitted = np.array_split(files, nSplits)
         print("files_splitted: {}".format(files_splitted))
@@ -85,10 +107,16 @@ for sample_category, samples in samplesList.items():
             config["inputFiles"] = list( files_splitted[iJob] )
             config["outputFile"] = '%s/analyze_htoaa_%s_0_%d.root' % (DestinationDir, sample, iJob)
             config["sampleCategory"] = sample_category
+            config["isMC"] = (sample_category != kData)
             #config["Luminosity"] = Luminosity
             config["crossSection"] = sample_cossSection
             config["nEvents"] = sample_nEvents
             config["sumEvents"] = sample_sumEvents
+
+            outputFile_tmp = config["outputFile"].replace('.root', '_wCoffea.root')            
+            if (not submitForcefully) and (os.path.exists(outputFile_tmp)):
+                print(f"Skipping submission for {outputFile_tmp}")
+                continue # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
             configName = "%s" % sConfig.replace(".json", "_%s_0_%d.json" % (sample, iJob))
             sConfig_to_use = "%s/%s" % (DestinationDir, configName)
@@ -108,7 +136,7 @@ for sample_category, samples in samplesList.items():
                     f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
                     f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
                     #f.write("cd ")
-                    f.write("export X509_USER_PROXY=/home/ssawant/x509up_u56558 \n")
+                    f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
                     f.write("eval \n")
                     f.write("cd %s \n" % (pwd))
                     f.write("source /afs/cern.ch/user/s/ssawant/.bashrc \n")
@@ -152,9 +180,13 @@ for sample_category, samples in samplesList.items():
             
             os.system("chmod a+x %s" % condor_exec_file)
             os.system("chmod a+x %s" % condor_submit_file)
-            cmd1 = "condor_submit %s" % condor_submit_file
-            print("Now:  %s " % cmd1)            
-            os.system(cmd1)
+            if run_mode == 'condor':
+                cmd1 = "condor_submit %s" % condor_submit_file
+                print("Now:  %s " % cmd1)                
+                os.system(cmd1)
+            else:
+                pass
+                
 
         
 

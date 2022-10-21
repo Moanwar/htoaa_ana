@@ -1,6 +1,7 @@
 
 from collections import OrderedDict as OD
 
+xrootd_redirectorName = "root://xrootd-cms.infn.it//"
 sampleFormat = "nanoAOD"
 
 Era_2016 = '2016'
@@ -19,6 +20,21 @@ Luminosities = { # [<lumi>, <uncertainty in percent> ]
     Era_2018: [59.83, 2.5],
 }
 
+bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
+    Era_2018: {
+        'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
+            'L': 0.1208,
+            'M': 0.4506,
+        },
+        'DDBvL': { # not provided for UL samples
+            'M': 0.8, # taken from Si's code
+        },
+        'DDBvLV2': { # not provided for UL samples
+            'M': 0.8, # taken from Si's code
+        },
+    },
+}
+
 
 
 config_Template = OD([
@@ -27,8 +43,9 @@ config_Template = OD([
     ("inputFiles", ''),
     ("outputFile", ''),
     ("sampleCategory", ''),
+    ("isMC", False),
     #("Luminosity", 0),
     ("crossSection", 0),
     ("nEvents", -1),
-    ("sumEvents", -1),
+    ("sumEvents", -1),    
 ])
