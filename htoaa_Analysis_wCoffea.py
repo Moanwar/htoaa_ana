@@ -895,7 +895,7 @@ if __name__ == '__main__':
     
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
-        sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         sDir1 = 'evt/%s' % (sample_category)
 
         

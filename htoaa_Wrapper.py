@@ -113,7 +113,7 @@ for sample_category, samples in samplesList.items():
             config["nEvents"] = sample_nEvents
             config["sumEvents"] = sample_sumEvents
 
-            outputFile_tmp = config["outputFile"].replace('.root', '_wCoffea.root')            
+            #outputFile_tmp = config["outputFile"].replace('.root', '_wCoffea.root')            
             if (not submitForcefully) and (os.path.exists(outputFile_tmp)):
                 print(f"Skipping submission for {outputFile_tmp}")
                 continue # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
