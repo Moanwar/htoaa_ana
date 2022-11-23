@@ -24,4 +24,5 @@ print("Convert: %s --> %s" % (sInFile, sOutFile))
 data = pd.read_json(sInFile, orient='index')
 data.to_csv(sOutFile)
 
-#print("data: {}".format(data))
+print("data: {}".format(data))
+

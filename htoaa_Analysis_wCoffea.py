@@ -42,9 +42,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
 
-printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+printLevel = 6
+nEventToReadInBatch =  1 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  10 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -53,6 +53,21 @@ nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 class ObjectSelection:
     def __init__(self, era):
         self.era = era
+        
+        self.tagger_btagDeepB = 'DeepCSV'
+        self.wp_btagDeepB = 'M'
+
+        self.FatJetPtThsh  = 170
+        self.FatJetEtaThsh = 2.4
+
+        self.JetPtThshForHT = 30.0
+        self.JetEtaThshForHT = 2.4
+
+
+
+        self.nFatJetMin = 1
+        self.GenHTThsh  = 100.0
+        self.LHEHTThsh  = 100.0
         
 
     def selectFatJets(self, events):
@@ -70,21 +85,49 @@ class ObjectSelection:
         #jets.cut(jets['FatJet_mass'] <= 200)
         other.cut(other['PV_npvsGood'] >= 1)
         '''
-        tagger_btagDeepB = 'DeepCSV'
-        wp_btagDeepB = 'M'
-
-        FatJetPtThsh  = 170
-        FatJetEtaThsh = 2.4
 
         maskSelFatJets = (
-            (events.FatJet.pt > FatJetPtThsh) &
-            (abs(events.FatJet.eta) < FatJetEtaThsh) &
-            (events.FatJet.btagDeepB > bTagWPs[self.era][tagger_btagDeepB][wp_btagDeepB])
+            (events.FatJet.pt > self.FatJetPtThsh) &
+            (abs(events.FatJet.eta) < self.FatJetEtaThsh) &
+            (events.FatJet.btagDeepB > bTagWPs[self.era][self.tagger_btagDeepB][self.wp_btagDeepB])
         )
         if printLevel >= 15:
             #print(f"era: {self.era}, bTagWPs[self.era]: {bTagWPs[self.era]}")
             print(f"selectFatJets()::maskSelFatJets {len(maskSelFatJets)}: {maskSelFatJets.to_list()}")
         return events.FatJet[maskSelFatJets]
+
+
+    def selectGenHiggs(self, events):
+        maskGenHiggs = (
+            (events.GenPart.pdgId  == 25) & # pdgId:: 25: H0
+            (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+        )
+        if printLevel >= 15:
+            print(f"\n maskGenHiggs:  {maskGenHiggs.to_list()} ")
+            print(f"\n events.GenPart[maskGenHiggs]:  {events.GenPart[maskGenHiggs].to_list()} ")
+            print(f"\n events.GenPart[maskGenHiggs].mass:  {events.GenPart[maskGenHiggs].mass.to_list()} ")
+        return events.GenPart[maskGenHiggs]
+
+
+    def GenHT(self, events):
+        maskForGenHT = (
+            (events.GenJet.pt > self.JetPtThshForHT) &
+            (abs(events.GenJet.eta) < self.JetEtaThshForHT)
+        )
+        selGenJetPt = events.GenJet[maskForGenHT].pt
+        GenHT = ak.sum(selGenJetPt, axis=-1)
+        
+        if printLevel >= 5:
+            print(f"\nevents.GenJet.fields: {events.GenJet.fields}")
+            print(f"\nevents.GenJet: {events.GenJet.to_list()}")
+            print(f"\nevents.GenJet.pt ({len(events.GenJet.pt)}): {events.GenJet.pt.to_list()} ")
+            print(f"\nmaskForGenHT: {maskForGenHT.to_list()} ")
+            print(f"\nselGenJetPt: {selGenJetPt.to_list()} ")
+            print(f"\nGenHT ({len(GenHT)}): {GenHT.to_list()} ")
+            
+        return GenHT
+
+
 
 
     
@@ -105,7 +148,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
-        eta_axis      = hist.Bin("Eta",       r"$\eta$",          100, -5, 5)
+        eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
@@ -163,7 +206,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hLeadingFatJetParticleNet_HccvsQCD',        {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNet_HccvsQCD"}),
             ('hLeadingFatJetParticleNet_QCD',             {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNet_QCD"}),
             
-            ('hLeadingFatJetParticleNet_mass',            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_mass"}),            
+            ('hLeadingFatJetParticleNet_mass',            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_mass"}),
+
+            ('hGenHiggsPt_all',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
+            ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
+            ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
         ])
 
         
@@ -205,60 +252,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 pt_axis,
                 systematic_axis,
             ),
-            'hLeadingFatJetEta': hist.Hist(
-                "Counts",
-                dataset_axis,
-                eta_axis,
-                systematic_axis,
-            ),
-            'hLeadingFatJetPhi': hist.Hist(
-                "Counts",
-                dataset_axis,
-                phi_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetMass': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mass_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetMSoftDrop': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mass_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetBtagDeepB': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mlScore_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetBtagDDBvLV2': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mlScore_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetBtagDDCvBV2': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mlScore_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetBtagHbb': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mlScore_axis,
-                systematic_axis,
-            ),
-             'hLeadingFatJetDeepTagMD_H4qvsQCD': hist.Hist(
-                "Counts",
-                dataset_axis,
-                mlScore_axis,
-                systematic_axis,
-            ),
             
         })
 
@@ -298,13 +291,40 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
     
     def process_shift(self, events, shift_syst=None):
-        nFatJetMin = 1
-
+        
         output = self.accumulator.identity()
         dataset = events.metadata["dataset"] # dataset label
         #print(f"dataset: {dataset}")
 
+        
+        if printLevel >= 6:
+            print(f"events.GenPart: {events.GenPart.fields}") # ['eta', 'mass', 'phi', 'pt', 'genPartIdxMother', 'pdgId', 'status', 'statusFlags', 'genPartIdxMotherG', 'distinctParentIdxG', 'childrenIdxG', 'distinctChildrenIdxG']
+            print(f"events.GenPart.nGenPart: {ak.count(events.GenPart.pdgId, axis=1).to_list()}")
+            '''
+            print(f"\nevents.GenPart.pdgId: {events.GenPart.pdgId.to_list()}")
+            print(f"\nevents.GenPart.pt: {events.GenPart.pt.to_list()}")
+            print(f"\nevents.GenPart.eta: {events.GenPart.eta.to_list()}")
+            print(f"\nevents.GenPart.phi: {events.GenPart.phi.to_list()}")
+            print(f"\nevents.GenPart.mass: {events.GenPart.mass.to_list()}")
+            print(f"\nevents.GenPart.genPartIdxMother: {events.GenPart.genPartIdxMother.to_list()}")
+            print(f"\nevents.GenPart.status: {events.GenPart.status.to_list()}")
+            print(f"\nevents.GenPart.statusFlags: {events.GenPart.statusFlags.to_list()}")
+            print(f"\nevents.GenPart.genPartIdxMotherG: {events.GenPart.genPartIdxMotherG.to_list()}")
+            print(f"\nevents.GenPart.distinctParentIdxG: {events.GenPart.distinctParentIdxG.to_list()}")
+            print(f"\nevents.GenPart.childrenIdxG: {events.GenPart.childrenIdxG.to_list()}")
+            print(f"\nevents.GenPart.distinctChildrenIdxG: {events.GenPart.distinctChildrenIdxG.to_list()}"); sys.stdout.flush()
+            #print(f"events.GenPart.: {events.GenPart.}")
+            '''
+            print(f"\nevents.GenPart: {events.GenPart.to_list()} ")
 
+        if printLevel >= 15:
+            mask_GenHiggs = (
+                (events.GenPart.pdgId  == 25) & # pdgId:: 25: H0
+                (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+            )
+            print(f"\n mask_GenHiggs:  {mask_GenHiggs.to_list()} ")
+            print(f"\n events.GenPart[mask_GenHiggs]:  {events.GenPart[mask_GenHiggs].to_list()} ")
+            print(f"\n events.GenPart[mask_GenHiggs].mass:  {events.GenPart[mask_GenHiggs].mass.to_list()} "); sys.stdout.flush()
         
         ##################
         # OBJECT SELECTION
@@ -312,8 +332,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         # FatJet selection
         selFatJet = self.objectSelector.selectFatJets(events)
-        
 
+        genHiggs = None
+        genHT    = None
+        if self.datasetInfo[dataset]['isMC']:
+            genHiggs  = self.objectSelector.selectGenHiggs(events)        
+            genHT     = self.objectSelector.GenHT(events)
+        
+ 
+        
         #####################
         # EVENT SELECTION
         #####################
@@ -322,15 +349,29 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # this will help us later in composing the boolean selections easily
         selection = PackedSelection()
 
-        if printLevel >= 5:
+        if printLevel >= 12:
             print(f"events.PV.npvsGood.to_list(): {events.PV.npvsGood.to_list()}")
         # nPVGood >= 1
         selection.add("nPV", events.PV.npvsGood >= 1)
         
         # >=1 FatJet
-        selection.add("FatJetGe1", ak.num(selFatJet) >= nFatJetMin)
+        selection.add("FatJetGet", ak.num(selFatJet) >= self.objectSelector.nFatJetMin)
 
-        sel_SR = selection.all("nPV", "FatJetGe1")
+        if self.datasetInfo[dataset]['isMC']:
+            #selection.add("GenHT", genHT >= self.objectSelector.GenHTThsh)
+            selection.add("LHEHT", events.LHE.HT  >= self.objectSelector.LHEHTThsh)
+
+            if printLevel >= 15:
+                print(f"\nevents.LHE.fields: {events.LHE.fields}")
+                print(f"\nevents.LHE.HT: {events.LHE.HT.to_list()}")
+                print(f"\ngenHT: {genHT.to_list()} ")
+            
+        sel_SR          = selection.all("nPV", "FatJetGet")
+        sel_SR_wGenCuts = selection.all("LHEHT")
+
+        #print(f"\nsel_SR ({len(sel_SR)}): {sel_SR}   nEventsPass: {ak.sum(sel_SR, axis=0)}")
+        #print(f"\nsel_SR_wGenCuts ({len(sel_SR_wGenCuts)}): {sel_SR_wGenCuts}   nEventsPass: {ak.sum(sel_SR_wGenCuts, axis=0)}")
+        
 
         # useful debugger for selection efficiency
         if shift_syst is None and printLevel >= 5:
@@ -349,6 +390,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"sel_SR ({len(sel_SR)}): {sel_SR}")
             print(f"selFatJet.pt[sel_SR].to_list(): {selFatJet.pt[sel_SR].to_list()} ")
 
+
+
+        #if printLevel >= 5:
+        #    print(f" {events.}")
+            
+            
         ##################
         # EVENT VARIABLES
         ##################
@@ -362,7 +409,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ################
 
         # create a processor Weights object, with the same length as the number of events in the chunk
-        weights = Weights(len(events))
+        weights     = Weights(len(events))
+        weights_gen = Weights(len(events))
 
 
         if self.datasetInfo[dataset]["isMC"]:
@@ -370,6 +418,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "lumiWeight",
                 weight=np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
             )
+            weights.add(
+                "genWeight",
+                weight=np.copysign(np.ones(len(events)), events.genWeight)
+            )
+            weights.add(
+                "btagWeight",
+                weight=(events.btagWeight.DeepCSVB)
+            )
+            
+ 
+            weights_gen.add(
+                "lumiWeight",
+                weight=np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
+            )
+            weights_gen.add(
+                "genWeight",
+                weight=np.copysign(np.ones(len(events)), events.genWeight)
+            )
+            
+            
             if printLevel >= 5:
                 print(f"\nevents.genWeight ({events.genWeight.fields}) ({len(events.genWeight)}): {events.genWeight.to_list()}")
                 genWgt1 = np.copysign(np.ones(len(events)), events.genWeight)
@@ -384,16 +452,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 
 
-            weights.add(
-                "genWeight",
-                weight=np.copysign(np.ones(len(events)), events.genWeight)
-            )
-
-            weights.add(
-                "btagWeight",
-                weight=(events.btagWeight.DeepCSVB)
-            )
-                
+               
         
         ###################
         # FILL HISTOGRAMS
@@ -422,10 +481,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if syst == "noweight":
                 evtWeight = np.ones(len(events))
             else:
-                evtWeight = weights.weight(weightSyst)
+                evtWeight     = weights.weight(weightSyst)
+                evtWeight_gen = weights_gen.weight(weightSyst)
 
 
-            if printLevel >= 5:
+            if printLevel >= 15:
                 print(f"ak.num(selFatJet[sel_SR]) ({len(ak.num(selFatJet[sel_SR]))}): {ak.num(selFatJet[sel_SR])}")
                 print(f"ak.to_numpy(ak.num(selFatJet[sel_SR])) ({len(ak.to_numpy(ak.num(selFatJet[sel_SR])))}): {ak.to_numpy(ak.num(selFatJet[sel_SR]))}")
                 print(f"selFatJet.pt[sel_SR] ({len(selFatJet.pt[sel_SR])}): {selFatJet.pt[sel_SR]}")
@@ -685,6 +745,31 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight=evtWeight[sel_SR]
             )
 
+
+            if self.datasetInfo[dataset]["isMC"]:
+                output['hGenHiggsPt_all'].fill(
+                    dataset=dataset,
+                    Pt=(ak.flatten(genHiggs.pt)),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenHiggsPt_sel'].fill(
+                    dataset=dataset,
+                    Pt=(ak.flatten(genHiggs.pt[sel_SR])),
+                    systematic=syst,
+                    weight=evtWeight_gen[sel_SR]
+                )
+                output['hGenHiggsPt_sel_wGenCuts'].fill(
+                    dataset=dataset,
+                    Pt=(ak.flatten(genHiggs.pt[sel_SR_wGenCuts])),
+                    systematic=syst,
+                    weight=evtWeight_gen[sel_SR_wGenCuts]
+                )
+
+
+                
+                
+
             '''
             output[''].fill(
                 dataset=dataset,
@@ -717,71 +802,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             '''
 
-
-            
-            
-        '''
-       
-        nFatJet = 1
-        FatJetPtThsh = 220
-        FatJetEtaThsh = 2.4
-        
-        dataset = events.metadata["dataset"]
-        print(f"dataset: {dataset}")
-    
-        # Keep track of muons and electrons by tagging them 0/1.
-        #electrons = ak.with_field(events.Electron, 11, 'flavor')
-        #muons     = ak.with_field(events.Muon, 13, 'flavor')
-        
-        if printLevel >= 5:
-            print(f"events.fields: {events.fields}")
-            print(f"events.FatJet.fields: {events.FatJet.fields}")
-            print(f"events.FatJet.pt: {events.FatJet.pt}")
-
-
-        self.output['cutflow']['All events'] += len(events)
-
-
-        self.output['hnFatJet_level0'].fill( ak.to_numpy(ak.num(events.FatJet)) )
-        
-        #events = events[(
-        #    (ak.num(events.FatJet) >= 1) )]
-        #self.output['cutflow']['nFatJet >= 1'] += len(events)
-
-        if printLevel >= 5:
-            print(f"events.FatJet.pt _0 ({len(events)}): {events.FatJet.pt.to_list()}")
-
-        #events = events[(
-        #    (events.FatJet.pt[:, 0] > FatJetPtThsh) )]
-        #self.output['cutflow']['LeadingFatJetPt > %s' % (FatJetPtThsh)] += len(events)
-
-        if printLevel >= 5:
-            print(f"\n\nevents.FatJet.pt _1 ({len(events)}): {events.FatJet.pt.to_list()}")
-            cut1  = (events.FatJet.pt > FatJetPtThsh)
-            print(f"\n\ncut1 ({len(cut1)}): {cut1.to_list()}")
-            #events1 = events.FatJet[cut1]
-            events1 = events[ak.any(cut1, axis=1)]
-            print(f"\n\nevents1 ({len(events1)}): {events1.to_list()}")
-            print(f"\n\nevents1.FatJet.pt _1 ({len(events1)}): {events1.FatJet.pt.to_list()}")
-
-        events = events[(
-            (events.FatJet.pt > FatJetPtThsh) )]
-        self.output['cutflow']['LeadingFatJetPt _1 > %s' % (FatJetPtThsh)] += len(events)
-        
-        if printLevel >= 5:
-            print(f"events.FatJet.pt _2 ({len(events)}): {events.FatJet.pt.to_list()}")
-
-        
-        events = events[(
-            (abs(events.FatJet.eta) < 2.4) )]
-        self.output['cutflow']['FatJetAbsEta < 2.4'] += len(events)
-
-        if printLevel >= 5:
-            print(f"nEvents FatJetEta cut ({len(events)}) ")
-            print(f"events: {events.to_list()}")
-            
-        self.output['hnFatJet_level1'].fill( ak.to_numpy(ak.num(events.FatJet)) )
-        '''
         
         return output
 
@@ -830,15 +850,15 @@ if __name__ == '__main__':
     config = GetDictFromJsonFile(sConfig)
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
     
-    sInputFiles  = config["inputFiles"]
-    sOutputFile  = config["outputFile"]
-    sample_category = config['sampleCategory']
-    isMC = config["isMC"]
-    era = config['era']
-    luminosity = Luminosities[era][0]
+    sInputFiles         = config["inputFiles"]
+    sOutputFile         = config["outputFile"]
+    sample_category     = config['sampleCategory']
+    isMC                = config["isMC"]
+    era                 = config['era']
+    luminosity          = Luminosities[era][0]
     sample_crossSection = config["crossSection"]
-    sample_nEvents = config["nEvents"]
-    sample_sumEvents = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
+    sample_nEvents      = config["nEvents"]
+    sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
     if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
     lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
     #branchesToRead = htoaa_nanoAODBranchesToRead
@@ -901,7 +921,7 @@ if __name__ == '__main__':
         
         with uproot.recreate(sOutputFile) as fOut:
             for key, value in output.items():
-                print(f"key: {key},  value ({type(value)}): {value}")
+                #print(f"key: {key},  value ({type(value)}): {value}")
                 #if not (key.startswith('h') or key != 'cutflow'): continue
                 if not isinstance(value, hist.Hist): continue
                 #print(f"1: key {key}, value ({type(value)})     Hist: {type(hist.Hist)},    isinstance(value, hist.Hist): {isinstance(value, hist.Hist)}") # value: {value}")

@@ -167,6 +167,7 @@ for sample_category, samples in samplesList.items():
                     f.write("when_to_transfer_output = ON_EXIT \n")
                     f.write("+JobFlavour = \"longlunch\" \n")
                     f.write("queue \n")
+                    
             '''
             Job Flavours::
             espresso     = 20 minutes
