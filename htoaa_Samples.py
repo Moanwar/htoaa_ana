@@ -5,7 +5,7 @@ kData = "Data" # dict key for Datasets
 
 Samples2018 = OD([
 
-#    ("data", [
+#    (kData, [
 #        "/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD",
 #        "/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD",
 #        "/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD",

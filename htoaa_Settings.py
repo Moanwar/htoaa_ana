@@ -1,7 +1,10 @@
 
 from collections import OrderedDict as OD
 
-xrootd_redirectorName = "root://xrootd-cms.infn.it//"
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookXrootdService
+# cms-xrd-global.cern.ch "global redirector"
+# xrootd-cms.infn.it for Europe and Asia
+xrootd_redirectorName = "root://xrootd-cms.infn.it//" 
 sampleFormat = "nanoAOD"
 
 Era_2016 = '2016'
