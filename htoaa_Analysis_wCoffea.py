@@ -41,15 +41,25 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
 
-
+ 
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
 
 
+
+# -----------------------------------------------------------------------------------
+def get_GenPartDaughters(awkArray, index_GenPart):
+    if printLevel >= 9:
+        print(f"\n get_GenPartDaughters:: awkArray: {awkArray},   index_GenPart: {index_GenPart}"); sys.stdout.flush()
+    
+    return False
+
+
+# -----------------------------------------------------------------------------------
 class ObjectSelection:
     def __init__(self, era):
         self.era = era
@@ -117,7 +127,7 @@ class ObjectSelection:
         selGenJetPt = events.GenJet[maskForGenHT].pt
         GenHT = ak.sum(selGenJetPt, axis=-1)
         
-        if printLevel >= 5:
+        if printLevel >= 15:
             print(f"\nevents.GenJet.fields: {events.GenJet.fields}")
             print(f"\nevents.GenJet: {events.GenJet.to_list()}")
             print(f"\nevents.GenJet.pt ({len(events.GenJet.pt)}): {events.GenJet.pt.to_list()} ")
@@ -150,7 +160,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
         eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
-        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
+        #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
+        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
@@ -211,6 +222,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenHiggsPt_all',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
+
+            ('hGenHiggsMass_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
+            ('hMass_GenA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
+            ('hMass_GenAApair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HToAA) [GeV]"}),
+            ('hMass_GenAToBBbarpair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
+            ('hMass_Gen4BFromHToAA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
         ])
 
         
@@ -316,8 +333,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"events.GenPart.: {events.GenPart.}")
             '''
             print(f"\nevents.GenPart: {events.GenPart.to_list()} ")
+            print(f"\nevents.GenPart.eta: {events.GenPart.eta.to_list()} ")
 
-        if printLevel >= 15:
+        if printLevel >= 9:
+            mask_GenHiggs_1 = (
+                (events.GenPart.pdgId  == 25) #& # pdgId:: 25: H0
+                #(events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+            )
+            #print(f"\n mask_GenHiggs_1:  {mask_GenHiggs.to_list()} ")
+            print(f"\n events.GenPart[mask_GenHiggs_1]:  {events.GenPart[mask_GenHiggs_1].to_list()} ")
+            print(f"\n events.GenPart[mask_GenHiggs_1].mass:  {events.GenPart[mask_GenHiggs_1].mass.to_list()} "); sys.stdout.flush()
+            print(f"\n events.GenPart[mask_GenHiggs_1].status:  {events.GenPart[mask_GenHiggs_1].status.to_list()} "); sys.stdout.flush()
+
             mask_GenHiggs = (
                 (events.GenPart.pdgId  == 25) & # pdgId:: 25: H0
                 (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
@@ -325,7 +352,187 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"\n mask_GenHiggs:  {mask_GenHiggs.to_list()} ")
             print(f"\n events.GenPart[mask_GenHiggs]:  {events.GenPart[mask_GenHiggs].to_list()} ")
             print(f"\n events.GenPart[mask_GenHiggs].mass:  {events.GenPart[mask_GenHiggs].mass.to_list()} "); sys.stdout.flush()
-        
+
+            GenHiggsCollection = events.GenPart[mask_GenHiggs]
+            print(f"GenHiggsCollection: {GenHiggsCollection.to_list()}")
+
+        if printLevel >= 9:
+            mask_GenA = (
+                (events.GenPart.pdgId == 36)
+            )
+
+            print(f"\n mask_GenA: {mask_GenA.to_list()}")
+            print(f"\n events.GenPart[mask_GenA]: {events.GenPart[mask_GenA].to_list()}")
+            print(f"\n events.GenPart[mask_GenA].mass: {events.GenPart[mask_GenA].mass.to_list()}")
+
+            print(f"\n events.GenPart[0]: {events.GenPart[0]} ")
+            print(f"events.GenPart[:, 0]: {events.GenPart[:, 0]} ")
+            print(f"events.GenPart[:, 0].eta: {events.GenPart[:, 0].eta} ")
+
+
+            #  events.GenPart[mask_GenHiggs]:  [[{'eta': 1.03515625, 'mass': 125.0, 'phi': -1.37890625, 'pt': 181.5, 'genPartIdxMother': 10, 'pdgId': 25, 'status': 62, 'statusFlags': 10497, 'genPartIdxMotherG': 10, 'distinctParentIdxG': 0, 'childrenIdxG': [12, 13], 'distinctChildrenIdxG': [12, 13]}]]
+            #  events.GenPart[mask_GenA]: [[{'eta': 1.0625, 'mass': 20.0, 'phi': -1.49609375, 'pt': 175.5, 'genPartIdxMother': 11, 'pdgId': 36, 'status': 22, 'statusFlags': 14721, 'genPartIdxMotherG': 11, 'distinctParentIdxG': 11, 'childrenIdxG': [14, 15], 'distinctChildrenIdxG': [14, 15, 20, 21]}, {'eta': 0.023193359375, 'mass': 20.0, 'phi': -0.1494140625, 'pt': 21.625, 'genPartIdxMother': 11, 'pdgId': 36, 'status': 22, 'statusFlags': 14721, 'genPartIdxMotherG': 11, 'distinctParentIdxG': 11, 'childrenIdxG': [16, 17], 'distinctChildrenIdxG': [16, 17]}]]
+
+
+            print(f"\n mask_GenHiggs: {mask_GenHiggs.to_list()} ")
+            print(f"\n ak.local_index(mask_GenHiggs, axis=-1): {ak.local_index(mask_GenHiggs, axis=-1).to_list()} ")
+            print(f"ak.argmax(mask_GenHiggs, axis=-1): {ak.argmax(mask_GenHiggs, axis=-1).to_list()} ")
+
+            index_GenHiggs = ak.argmax(mask_GenHiggs, axis=-1) # ak.argmax(mask_GenHiggs, axis=-1): [11, 10]
+            #index_GenHiggs = ak.argmax(mask_GenHiggs, axis=-1, keepdims=True) # ak.argmax(mask_GenHiggs, axis=-1): [11, 10]
+            
+            print(f"index_GenHiggs: {index_GenHiggs.to_list()}")
+            print(f"\n events.GenPart.genPartIdxMotherG: {events.GenPart.genPartIdxMotherG.to_list()}")
+            
+            '''
+            # did not work
+            mask_GenA_1 = (
+                (events.GenPart.genPartIdxMotherG == index_GenHiggs)
+            )
+            print(f"mask_GenA_1: {mask_GenA_1.to_list()}")
+            print(f"events.GenPart[mask_GenA_1]: {events.GenPart[mask_GenA_1].to_list()}")
+
+            mask_GenA_2 = np.vectorize(get_GenPartDaughters)(events.GenPart.genPartIdxMotherG, index_GenHiggs)
+            '''
+
+
+            selGenA = events.GenPart[mask_GenA]
+            selGenA_first  = selGenA[:, 0]
+            selGenA_second = selGenA[:, 1]
+
+            '''
+            mask_GenB = (
+                abs(events.GenPart.pdgId) == 5                
+            )
+
+            '''
+
+
+            selGenB    = events.GenPart[( (events.GenPart.pdgId ==  5) & (events.GenPart.status == 23) )] # status = 23: outgoing particles of the hardest subprocess
+            selGenBbar = events.GenPart[( (events.GenPart.pdgId == -5) & (events.GenPart.status == 23) )] # status = 71: partons in preparation of hadronization process, 71 : copied partons to collect into contiguous colour singlet
+            selGenBBbar_pairs = ak.cartesian((selGenB, selGenBbar) )
+
+            selGenBBbar_pair_B, selGenBBbar_pair_Bbar = ak.unzip(selGenBBbar_pairs)
+
+            selGenBBbar_LV = selGenBBbar_pair_B + selGenBBbar_pair_Bbar
+
+            dr_GenAFirst_GenBBbar  = selGenA_first.delta_r(selGenBBbar_LV)
+            dr_GenASecond_GenBBbar = selGenA_second.delta_r(selGenBBbar_LV)
+
+            
+            
+            print(f"\n selGenA: {selGenA.to_list()}")
+            print(f"selGenA_first: {selGenA_first.to_list()}")
+            print(f"selGenA_second: {selGenA_second.to_list()}")
+
+            print(f"\n events.GenPart[(abs(events.GenPart.pdgId) ==  5)]: {events.GenPart[(abs(events.GenPart.pdgId) ==  5)].to_list()} ")
+            print(f"\n events.GenPart[(abs(events.GenPart.pdgId) ==  5)].status: {events.GenPart[(abs(events.GenPart.pdgId) ==  5)].status.to_list()} ")
+            print(f"\n selGenB: {selGenB.to_list()} ")
+            print(f"\n selGenBbar: {selGenBbar.to_list()} ")
+            print(f"\n selGenBBbar_pairs: {selGenBBbar_pairs.to_list()} ")
+
+            print(f"\n selGenBBbar_pair_B: {selGenBBbar_pair_B.to_list()} ")
+            print(f"\n selGenBBbar_pair_Bbar: {selGenBBbar_pair_Bbar.to_list()} ")
+
+            print(f"\n selGenBBbar_LV: {selGenBBbar_LV.to_list()} ")
+            print(f"\n selGenBBbar_LV.mass: {selGenBBbar_LV.mass.to_list()} ")
+
+            print(f"\n dr_GenAFirst_GenBBbar: {dr_GenAFirst_GenBBbar.to_list()} ")
+            print(f"\n dr_GenASecond_GenBBbar: {dr_GenASecond_GenBBbar.to_list()} ")
+
+            
+            selGenBQuarks = events.GenPart[( (abs(events.GenPart.pdgId) ==  5) & (events.GenPart.status == 23) )] # status = 23: outgoing particles of the hardest subprocess.  status = 71: partons in preparation of hadronization process, 71 : copied partons to collect into contiguous colour singlet
+            genBBar_pairs_all = ak.argcombinations(selGenBQuarks, 2, fields=['b', 'bbar'])
+            genBBar_pairs = genBBar_pairs_all[(
+                ((selGenBQuarks[genBBar_pairs_all['b']].pdgId) == (-1*selGenBQuarks[genBBar_pairs_all['bbar']].pdgId)  ) &
+                (selGenBQuarks[genBBar_pairs_all['b']].genPartIdxMother == selGenBQuarks[genBBar_pairs_all['bbar']].genPartIdxMother)
+            )]
+            #selGenBBbar_pairs_1 = selGenBQuarks[genBBar_pairs['b']]
+
+            print(f"\n\n\n MethodII]: \n selGenBQuarks: {selGenBQuarks.to_list()}")
+            print(f"\n genBBar_pairs_all: {genBBar_pairs_all.to_list()} ")
+            print(f"\n genBBar_pairs: {genBBar_pairs.to_list()} ")
+            print(f"\n selGenBQuarks[genBBar_pairs['b']: {selGenBQuarks[genBBar_pairs['b']].to_list()} ")
+            print(f"\n selGenBQuarks[genBBar_pairs['bbar']: {selGenBQuarks[genBBar_pairs['bbar']].to_list()} ")
+            print(f"\n (selGenBQuarks[genBBar_pairs['b']] + selGenBQuarks[genBBar_pairs['bbar']]): { (selGenBQuarks[genBBar_pairs['b']] + selGenBQuarks[genBBar_pairs['bbar']]).to_list() } ")
+            print(f"\n (selGenBQuarks[genBBar_pairs['b']] + selGenBQuarks[genBBar_pairs['bbar']]).mass: { (selGenBQuarks[genBBar_pairs['b']] + selGenBQuarks[genBBar_pairs['bbar']]).mass.to_list() } ")
+            print(f"\n (selGenBQuarks[:, 0] + selGenBQuarks[:, 1] + selGenBQuarks[:, 2] + selGenBQuarks[:, 3]).mass: {(selGenBQuarks[:, 0] + selGenBQuarks[:, 1] + selGenBQuarks[:, 2] + selGenBQuarks[:, 3]).mass.to_list()} ")
+
+
+            genBBar_pairs_all_1 = ak.argcombinations(events.GenPart, 2, fields=['b', 'bbar'])
+            genBBar_pairs_1 = genBBar_pairs_all_1[(
+                (abs(events.GenPart[genBBar_pairs_all_1['b']].pdgId) == 5) &
+                (abs(events.GenPart[genBBar_pairs_all_1['bbar']].pdgId) == 5) &
+                ((events.GenPart[genBBar_pairs_all_1['b']].pdgId) == (-1*events.GenPart[genBBar_pairs_all_1['bbar']].pdgId)  ) &
+                (events.GenPart[genBBar_pairs_all_1['b']].genPartIdxMother == events.GenPart[genBBar_pairs_all_1['bbar']].genPartIdxMother) &
+                (events.GenPart[ events.GenPart[genBBar_pairs_all_1['b']].genPartIdxMother ].pdgId == 36) &
+                (events.GenPart[ events.GenPart[genBBar_pairs_all_1['bbar']].genPartIdxMother ].pdgId == 36) 
+            )]
+
+           
+            print(f"\n\n Check here:: genBBar_pairs_all_1: {genBBar_pairs_all_1.to_list()} ")
+            print(f"\n genBBar_pairs_1: {genBBar_pairs_1.to_list()} ")
+            
+            #print(f": {} ")
+            
+            
+
+            
+
+
+
+            '''
+# find distance between leading jet and all electrons in each event
+dr = events.Jet[:, 0].delta_r(events.Electron)
+dr
+ <Array [[], [3.13], [3.45, ... 0.0858], [], []] type='40 * var * float32'>
+￼
+[8]:
+# find minimum distance
+ak.min(dr, axis=1)
+￼
+[8]:
+<Array [None, 3.13, 2.18, ... None, None] type='40 * ?float32'>
+￼
+[9]:
+# a convenience method for this operation on all jets is available
+events.Jet.nearest(events.Electron)           
+<ElectronArray [[None, None, None, ... [None, None]] type='40 * var * ?electron'>
+            
+
+
+For generated particles, the parent index is similarly mapped:
+
+[14]:
+events.GenPart.parent.pdgId
+￼
+[14]:
+<Array [[None, None, 1, 1, ... 111, 111, 111]] type='40 * var * ?int32[parameter...'>
+￼
+In addition, using the parent index, a helper method computes the inverse mapping, namely, children. As such, one can find particle siblings with:
+
+[15]:
+events.GenPart.parent.children.pdgId
+# notice this is a doubly-jagged array
+￼
+[15]:
+<Array [[None, None, [23, 21, ... [22, 22]]] type='40 * var * option[var * ?int3...'>
+￼
+Since often one wants to shortcut repeated particles in a decay sequence, a helper method distinctParent is also available. Here we use it to find the parent particle ID for all prompt electrons:
+
+[16]:
+events.GenPart[
+    (abs(events.GenPart.pdgId) == 11)
+    & events.GenPart.hasFlags(['isPrompt', 'isLastCopy'])
+].distinctParent.pdgId
+￼
+[16]:
+<Array [[], [23, 23], [23, ... [23, 23], []] type='40 * var * ?int32[parameters=...'>
+￼
+
+            
+            '''
+            
         ##################
         # OBJECT SELECTION
         ##################
@@ -338,8 +545,50 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo[dataset]['isMC']:
             genHiggs  = self.objectSelector.selectGenHiggs(events)        
             genHT     = self.objectSelector.GenHT(events)
-        
- 
+
+            # m(bbar from A) and m(4b from HToAA) ----------
+            genHiggsCollection = events.GenPart[(
+                (events.GenPart.pdgId  == 25) & # pdgId:: 25: H0
+                (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+            )]
+
+            genACollection = events.GenPart[(
+                (events.GenPart.pdgId == 36)
+            )]
+            genA_First  = genACollection[:, 0]
+            genA_Second = genACollection[:, 1]
+
+            '''
+            genBQuarkCollection = events.GenPart[(
+                (abs(events.GenPart.pdgId) ==  5) &
+                (events.GenPart.status == 23)
+            )] # status = 23: outgoing particles of the hardest subprocess.  status = 71: partons in preparation of hadronization process, 71 : copied partons to collect into contiguous colour singlet
+            genBBar_pairs_all = ak.argcombinations(genBQuarkCollection, 2, fields=['b', 'bbar'])
+            genBBar_pairs = genBBar_pairs_all[(
+                ((genBQuarkCollection[genBBar_pairs_all['b']].pdgId) == (-1*genBQuarkCollection[genBBar_pairs_all['bbar']].pdgId)  ) &
+                (genBQuarkCollection[genBBar_pairs_all['b']].genPartIdxMother == genBQuarkCollection[genBBar_pairs_all['bbar']].genPartIdxMother)
+            )]
+            '''
+
+            
+            genBBar_pairs_all = ak.argcombinations(events.GenPart, 2, fields=['b', 'bbar'])
+            genBBar_pairs = genBBar_pairs_all[(
+                (abs(events.GenPart[genBBar_pairs_all['b'   ]].pdgId) == 5) &
+                (abs(events.GenPart[genBBar_pairs_all['bbar']].pdgId) == 5) &
+                ((events.GenPart[genBBar_pairs_all['b']].pdgId) == (-1*events.GenPart[genBBar_pairs_all['bbar']].pdgId)  ) &
+                (events.GenPart[genBBar_pairs_all['b']].genPartIdxMother == events.GenPart[genBBar_pairs_all['bbar']].genPartIdxMother) &
+                (events.GenPart[ events.GenPart[genBBar_pairs_all['b'   ]].genPartIdxMother ].pdgId == 36) &
+                (events.GenPart[ events.GenPart[genBBar_pairs_all['bbar']].genPartIdxMother ].pdgId == 36) 
+            )]
+           
+
+            if printLevel >= 9:
+                print(f" \n ak.num(genHiggs): {ak.num(genHiggs).to_list()} ")
+                print(f" \n ak.num(genHiggs) == 1: {(ak.num(genHiggs) == 1).to_list()} ")
+                print(f"\n ak.num(genBBar_pairs['b']: {ak.num(genBBar_pairs['b']).to_list()} ")
+                print(f"\n ak.num(genBBar_pairs: {ak.num(genBBar_pairs).to_list()} ")
+                print(f"\n genBBar_pairs: {genBBar_pairs.to_list()}")
+            
         
         #####################
         # EVENT SELECTION
@@ -365,9 +614,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 print(f"\nevents.LHE.fields: {events.LHE.fields}")
                 print(f"\nevents.LHE.HT: {events.LHE.HT.to_list()}")
                 print(f"\ngenHT: {genHT.to_list()} ")
+
+
+            selection.add("1GenHiggs", ak.num(genHiggs) == 1)
+            selection.add("2GenA", ak.num(genACollection) == 2)
+            selection.add("2GenAToBBbarPairs", ak.num(genBBar_pairs) == 2)
+
+            
             
         sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR_wGenCuts = selection.all("LHEHT")
+        sel_GenHToAATo4B = selection.all("1GenHiggs", "2GenA", "2GenAToBBbarPairs")
 
         #print(f"\nsel_SR ({len(sel_SR)}): {sel_SR}   nEventsPass: {ak.sum(sel_SR, axis=0)}")
         #print(f"\nsel_SR_wGenCuts ({len(sel_SR_wGenCuts)}): {sel_SR_wGenCuts}   nEventsPass: {ak.sum(sel_SR_wGenCuts, axis=0)}")
@@ -411,6 +668,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # create a processor Weights object, with the same length as the number of events in the chunk
         weights     = Weights(len(events))
         weights_gen = Weights(len(events))
+        weights_GenHToAATo4B = Weights(len(events))
 
 
         if self.datasetInfo[dataset]["isMC"]:
@@ -765,6 +1023,86 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_SR_wGenCuts]
                 )
+
+                
+                # m(2b from ATo2B) and m(4b from HToAATo4b) --------------
+                if printLevel >= 9:
+                    print(f"\n Fill histograms: \ngenHiggs.mass: {genHiggs.mass.to_list()} ")
+                    print(f"\n ak.flatten(genHiggs.mass): {ak.flatten(genHiggs.mass.to_list())} ")
+                    print(f"\n output['hGenHiggsMass_all']: {output['hGenHiggsMass_all']} ")
+                    
+                output['hGenHiggsMass_all'].fill(
+                    dataset=dataset,
+                    Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                if printLevel >= 9:
+                    print(f"\n genACollection.mass ({len(genACollection.mass)}): {genACollection.mass}")
+                    print(f"\n ak.flatten(genACollection.mass) ({len(ak.flatten(genACollection.mass))}): {ak.flatten(genACollection.mass)}")
+                    print(f"\n evtWeight_gen ({len(evtWeight_gen)}): {evtWeight_gen} ")
+                    print(f"\n genACollection[:, 0].mass ({len(genACollection[:, 0].mass)}): {genACollection[:, 0].mass}")
+                    #print(f"\n ak.flatten(genACollection[:, 0].mass) ({len(ak.flatten(genACollection[:, 0].mass))}): {ak.flatten(genACollection[:, 0].mass)}")
+                    '''
+                    print(f"\n (genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass ({len((genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass)}): {(genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass.to_list()} ")
+                    print(f"\n (genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass[:, 0] ({len((genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass[:, 0])}): {(genBQuarkCollection[genBBar_pairs['b']] + genBQuarkCollection[genBBar_pairs['bbar']]).mass[:, 0].to_list()} ")
+                    print(f"\n genBQuarkCollection[genBBar_pairs['b']]: {genBQuarkCollection[genBBar_pairs['b']]}")
+                    print(f"\n genBQuarkCollection[genBBar_pairs['b']][:, 0]: {genBQuarkCollection[genBBar_pairs['b']][:, 0]}")
+                    print(f"\n (genBQuarkCollection[genBBar_pairs['b']][:, 0] + genBQuarkCollection[genBBar_pairs['bbar']][:, 0]).mass ({len((genBQuarkCollection[genBBar_pairs['b']][:, 0] + genBQuarkCollection[genBBar_pairs['bbar']][:, 0]).mass)}): {(genBQuarkCollection[genBBar_pairs['b']][:, 0] + genBQuarkCollection[genBBar_pairs['bbar']][:, 0]).mass.to_list()} ")
+                    '''
+                    print(f"\n\n CheckAgain:: \n genBBar_pairs: {genBBar_pairs}")
+                    print(f"\n events.GenPart[genBBar_pairs['b']].pdgId: {events.GenPart[genBBar_pairs['b']].pdgId}")
+                    print(f"\n events.GenPart[genBBar_pairs['bbar']].pdgId: {events.GenPart[genBBar_pairs['bbar']].pdgId}")
+                    print(f"\n ((events.GenPart[genBBar_pairs['b']][:, 0] + events.GenPart[genBBar_pairs['bbar']][:, 0] + events.GenPart[genBBar_pairs['b']][:, 1] + events.GenPart[genBBar_pairs['bbar']][:, 1]).mass): {((events.GenPart[genBBar_pairs['b']][:, 0] + events.GenPart[genBBar_pairs['bbar']][:, 0] + events.GenPart[genBBar_pairs['b']][:, 1] + events.GenPart[genBBar_pairs['bbar']][:, 1]).mass)}")
+                    print(f"\n Fill histogram ends....\n\n")
+                    
+                output['hMass_GenA_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[:, 0].mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_GenA_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[:, 1].mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                '''
+                output['hMass_GenA_all'].fill(
+                    dataset=dataset,
+                    Pt=(ak.flatten(genA_Second.mass)),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                '''
+                output['hMass_GenAApair_all'].fill(
+                    dataset=dataset,
+                    Mass=((genA_First + genA_Second).mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_GenAToBBbarpair_all'].fill(
+                    dataset=dataset,
+                    Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_GenAToBBbarpair_all'].fill(
+                    dataset=dataset,
+                    Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 1][sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_Gen4BFromHToAA_all'].fill(
+                    dataset=dataset,
+                    Mass=((events.GenPart[genBBar_pairs['b']][:, 0] + events.GenPart[genBBar_pairs['bbar']][:, 0] + events.GenPart[genBBar_pairs['b']][:, 1] + events.GenPart[genBBar_pairs['bbar']][:, 1]).mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                if printLevel >= 9:
+                    print(f"\n\n (events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0]: {(events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0].to_list()}")
+                    print(f"\n\n (events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B]: {(events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B].to_list()}")
 
 
                 
