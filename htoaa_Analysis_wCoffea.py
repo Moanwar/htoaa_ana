@@ -21,7 +21,7 @@ References:
 #import coffea.processor as processor
 from coffea import processor, util
 from coffea.nanoevents import schemas
-from coffea.nanoevents.methods import nanoaod
+from coffea.nanoevents.methods import nanoaod, vector
 from coffea.analysis_tools import PackedSelection, Weights
 #import hist
 from coffea import hist
@@ -228,6 +228,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hMass_GenAApair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HToAA) [GeV]"}),
             ('hMass_GenAToBBbarpair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
             ('hMass_Gen4BFromHToAA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
+            ('hMass_GenAToBBbarpair_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
+            ('hMass_Gen4BFromHToAA_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
         ])
 
         
@@ -580,7 +582,62 @@ events.GenPart[
                 (events.GenPart[ events.GenPart[genBBar_pairs_all['b'   ]].genPartIdxMother ].pdgId == 36) &
                 (events.GenPart[ events.GenPart[genBBar_pairs_all['bbar']].genPartIdxMother ].pdgId == 36) 
             )]
-           
+
+            # LorentVector of GenB quarks from HToAATo4b
+            nEvents_11 = ak.num(events.GenPart[genBBar_pairs['b']][:, 0].pt, axis=0)
+            mass_bQuark = 4.18
+            #print(f"\n np.full(nEvents_11, mass_bQuark): {np.full(nEvents_11, mass_bQuark)}")
+
+            # https://coffeateam.github.io/coffea/modules/coffea.nanoevents.methods.vector.html
+            # bQuark from 1st A
+            LVGenB_0 = ak.zip(
+                {
+                    "pt"  : events.GenPart[genBBar_pairs['b']][:, 0].pt,
+                    "eta" : events.GenPart[genBBar_pairs['b']][:, 0].eta,
+                    "phi" : events.GenPart[genBBar_pairs['b']][:, 0].phi,
+                    "mass": np.full(nEvents_11, mass_bQuark),
+                },
+                with_name="PtEtaPhiMLorentzVector",
+                behavior=vector.behavior,
+            )
+
+            # bbarQuark from 1st A
+            LVGenBbar_0 = ak.zip(
+                {
+                    "pt"  : events.GenPart[genBBar_pairs['bbar']][:, 0].pt,
+                    "eta" : events.GenPart[genBBar_pairs['bbar']][:, 0].eta,
+                    "phi" : events.GenPart[genBBar_pairs['bbar']][:, 0].phi,
+                    "mass": np.full(nEvents_11, mass_bQuark),
+                },
+                with_name="PtEtaPhiMLorentzVector",
+                behavior=vector.behavior,
+            )
+
+            # bQuark from 2nd A
+            LVGenB_1 = ak.zip(
+                {
+                    "pt"  : events.GenPart[genBBar_pairs['b']][:, 1].pt,
+                    "eta" : events.GenPart[genBBar_pairs['b']][:, 1].eta,
+                    "phi" : events.GenPart[genBBar_pairs['b']][:, 1].phi,
+                    "mass": np.full(nEvents_11, mass_bQuark),
+                },
+                with_name="PtEtaPhiMLorentzVector",
+                behavior=vector.behavior,
+            )
+
+            # bbarQuark from 2nd A
+            LVGenBbar_1 = ak.zip(
+                {
+                    "pt"  : events.GenPart[genBBar_pairs['bbar']][:, 1].pt,
+                    "eta" : events.GenPart[genBBar_pairs['bbar']][:, 1].eta,
+                    "phi" : events.GenPart[genBBar_pairs['bbar']][:, 1].phi,
+                    "mass": np.full(nEvents_11, mass_bQuark),
+                },
+                with_name="PtEtaPhiMLorentzVector",
+                behavior=vector.behavior,
+            )
+
+            
 
             if printLevel >= 9:
                 print(f" \n ak.num(genHiggs): {ak.num(genHiggs).to_list()} ")
@@ -589,7 +646,26 @@ events.GenPart[
                 print(f"\n ak.num(genBBar_pairs: {ak.num(genBBar_pairs).to_list()} ")
                 print(f"\n genBBar_pairs: {genBBar_pairs.to_list()}")
             
-        
+
+            if printLevel >= 9:
+                print(f"\n events.GenPart[genBBar_pairs['b']]: {events.GenPart[genBBar_pairs['b']].to_list()} ")
+                print(f"\n events.GenPart[genBBar_pairs['b']][:, 0].pt: {events.GenPart[genBBar_pairs['b']][:, 0].pt.to_list()} ")
+                print(f"\n ak.num(events.GenPart[genBBar_pairs['b']][:, 0].pt, axis=0): {ak.num(events.GenPart[genBBar_pairs['b']][:, 0].pt, axis=0)} ")
+
+                print(f"\n LVGenB_0: {LVGenB_0.to_list()} ")
+                print(f"\n LVGenBbar_0: {LVGenBbar_0.to_list()} ")
+                add1 = LVGenB_0.add(LVGenBbar_0)
+                print(f"\n after addition \n LVGenB_0: {LVGenB_0.to_list()} ")
+                print(f"\n LVGenBbar_0: {LVGenBbar_0.to_list()} ")
+                print(f"\n add1: {add1.to_list()} ")
+                print(f"\n add1.mass: {add1.mass.to_list()} ")
+                print(f"\n (LVGenB_0 + LVGenBbar_0).mass: {(LVGenB_0 + LVGenBbar_0).mass.to_list()} ")
+                
+                
+                
+
+
+            
         #####################
         # EVENT SELECTION
         #####################
@@ -1087,7 +1163,7 @@ events.GenPart[
                     Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B]),
                     systematic=syst,
                     weight=evtWeight_gen
-                )
+                )                
                 output['hMass_GenAToBBbarpair_all'].fill(
                     dataset=dataset,
                     Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 1][sel_GenHToAATo4B]),
@@ -1105,7 +1181,26 @@ events.GenPart[
                     print(f"\n\n (events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B]: {(events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B].to_list()}")
 
 
-                
+
+                output['hMass_GenAToBBbarpair_all_1'].fill(
+                    dataset=dataset,
+                    Mass=((LVGenB_0 + LVGenBbar_0).mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )                
+                output['hMass_GenAToBBbarpair_all_1'].fill(
+                    dataset=dataset,
+                    Mass=((LVGenB_1 + LVGenBbar_1).mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_Gen4BFromHToAA_all_1'].fill(
+                    dataset=dataset,
+                    Mass=((LVGenB_0 + LVGenBbar_0 + LVGenB_1 + LVGenBbar_1).mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
                 
 
             '''
