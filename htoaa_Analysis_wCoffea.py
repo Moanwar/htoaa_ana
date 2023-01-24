@@ -43,8 +43,8 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
  
 printLevel = 0
-nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+nEventToReadInBatch =   100 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  100 # -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -161,7 +161,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
-        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
+        #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
+        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       2000, 0, 200)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
