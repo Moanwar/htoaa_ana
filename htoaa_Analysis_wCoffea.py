@@ -43,8 +43,8 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
  
 printLevel = 0
-nEventToReadInBatch =   100 # 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  100 # -1 # 1000 # 100000 # -1
+nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =   -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -163,6 +163,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
         mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       2000, 0, 200)
+        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       2000, 0, 200)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
@@ -170,6 +171,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
+        sYaxis      = 'yAxis'
+        sYaxisLabel = 'yAxisLabel'
         histos = OD([
             # ('histogram_name',  {sXaxis: hist.Bin() axis,  sXaxisLabel: "histogram axis label"})
             ('nSelFatJet',                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
@@ -231,6 +234,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hMass_Gen4BFromHToAA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
             ('hMass_GenAToBBbarpair_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
             ('hMass_Gen4BFromHToAA_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
+
+            # 2-D distribution
+            ('hMass_GenA1_vs_GenA2_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1) [GeV]",
+                                                           sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2) [GeV]"}),
+            ('hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all',    {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1ToBBbar) [GeV]",
+                                                           sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2ToBBbar) [GeV]"}),
         ])
 
         
@@ -244,16 +253,35 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #hXaxis = histAttributes[sXaxis].copy()
             hXaxis = deepcopy(histAttributes[sXaxis])
             hXaxis.label = histAttributes[sXaxisLabel]
-            
-            self._accumulator.add({
-                histName: hist.Hist(
-                    "Counts",
-                    dataset_axis,
-                    hXaxis, #nObject_axis,
-                    systematic_axis,
-                )
-            })
 
+            if sYaxis not in histAttributes.keys():
+                # TH1
+                self._accumulator.add({
+                    histName: hist.Hist(
+                        "Counts",
+                        dataset_axis,
+                        hXaxis, #nObject_axis,
+                        systematic_axis,
+                    )
+                })
+            else:
+                # TH2
+                hYaxis = deepcopy(histAttributes[sYaxis])
+                hYaxis.label = histAttributes[sYaxisLabel]
+                
+                self._accumulator.add({
+                    histName: hist.Hist(
+                        "Counts",
+                        dataset_axis,
+                        hXaxis, #nObject_axis,
+                        hYaxis,
+                        systematic_axis,
+                    )
+                })
+                
+
+
+                
 
         '''
         self._accumulator = processor.dict_accumulator({
@@ -1198,6 +1226,23 @@ events.GenPart[
                 output['hMass_Gen4BFromHToAA_all_1'].fill(
                     dataset=dataset,
                     Mass=((LVGenB_0 + LVGenBbar_0 + LVGenB_1 + LVGenBbar_1).mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+
+                output['hMass_GenA1_vs_GenA2_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[:, 0].mass[sel_GenHToAATo4B]),
+                    Mass1=(genACollection[:, 1].mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                
+                output['hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all'].fill(
+                    dataset=dataset,
+                    Mass=((LVGenB_0 + LVGenBbar_0).mass),
+                    Mass1=((LVGenB_1 + LVGenBbar_1).mass),
                     systematic=syst,
                     weight=evtWeight_gen
                 )
