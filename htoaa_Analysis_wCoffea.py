@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import glob
 from collections import OrderedDict as OD
 import time
 import tracemalloc
@@ -42,9 +43,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 0
-nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =   -1 # 1000 # 100000 # -1
+printLevel = 10
+nEventToReadInBatch =  2 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  2 # -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -162,8 +163,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       2000, 0, 200)
-        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       2000, 0, 200)
+        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       3000, 0, 300)
+        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       3000, 0, 300)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
@@ -664,8 +665,7 @@ events.GenPart[
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
-            )
-
+            )            
             
 
             if printLevel >= 9:
@@ -690,6 +690,20 @@ events.GenPart[
                 print(f"\n add1.mass: {add1.mass.to_list()} ")
                 print(f"\n (LVGenB_0 + LVGenBbar_0).mass: {(LVGenB_0 + LVGenBbar_0).mass.to_list()} ")
                 
+                
+
+            if printLevel >= 9:
+                
+                genBQuarks_sel1 = ak.concatenate([LVGenB_0, LVGenBbar_0, LVGenB_1, LVGenBbar_1], axis=1)
+                print(f"\n LVGenB_0: {LVGenB_0.to_list()} ")
+                print(f"\n LVGenBbar_0: {LVGenBbar_0.to_list()} ")
+                print(f"\n LVGenB_1: {LVGenB_1.to_list()} ")
+                print(f"\n LVGenBbar_1: {LVGenBbar_1.to_list()} ")
+                print(f"\n genBQuarks_sel1: {genBQuarks_sel1.to_list()} ")
+                
+                #gen_Bquarks
+                print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(LVGenB_0).to_list()}")
+                #print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(events.GenPart[]).to_list()}")
                 
                 
 
@@ -1344,10 +1358,16 @@ if __name__ == '__main__':
     #print("branchesToRead: {}".format(branchesToRead))
 
     print(f"isMC: {isMC}, lumiScale: {lumiScale}")
+    sInputFiles_toUse = []
+    for sInputFile in sInputFiles:
+        if "*" in sInputFile:  sInputFiles_toUse.extend( glob.glob( sInputFile ) )
+        else:                  sInputFiles_toUse.append( sInputFile )
+    sInputFiles = sInputFiles_toUse
     for iFile in range(len(sInputFiles)):
         if sInputFiles[iFile].startswith("/store/"): # LFN: Logical File Name
             sInputFiles[iFile] = xrootd_redirectorName + sInputFiles[iFile]
-    print(f"sInputFiles ({len(sInputFiles)}): {sInputFiles}"); sys.stdout.flush()
+    print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}): {sInputFiles}"); sys.stdout.flush()
+
 
     startTime = time.time()
     
