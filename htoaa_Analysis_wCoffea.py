@@ -43,9 +43,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 10
-nEventToReadInBatch =  2 # 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  2 # -1 # 1000 # 100000 # -1
+printLevel = 0
+nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =   -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
