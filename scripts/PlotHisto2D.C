@@ -28,20 +28,36 @@ void PlotHisto2D() {
   int rebinX, rebinY;
 
   
-  sipFile = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-125_mA-50_wH-55_wA-40_TuneCP5_13TeV_madgraph_pythia8_1_0.root";
+  sipFile = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"; 
   /*
   sHistoName = "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenA1_vs_GenA2_all_central";
-  sLegend = "_mH-125_mA-50_wH-40_wA-30";
+  sLegend = "mH-125_mA-50_wH-40_wA-30";
   sXaxis = "m(Gen A1) [GeV]";
   sYaxis = "m(Gen A2) [GeV]";
-  sSaveAs = "m_GenA1_vs_GenA2_0.png";
+  sSaveAs = "m_GenA1_vs_GenA2_mH-70_mA-15_wH-70_wA-50_1.png";
   */
+  /*
   sHistoName = "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all_central";
   sLegend = "_mH-125_mA-50_wH-55_wA-40";
   sXaxis = "m(Gen A1ToBBbar) [GeV]";
   sYaxis = "m(Gen A2ToBBbar) [GeV]";
-  sSaveAs = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/m_GenA1_vs_GenA2_1_0.png"; 
-
+  sSaveAs = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/m_GenA1_vs_GenA2_mH-70_mA-15_wH-70_wA-50_1.png"; 
+  */
+  /*
+  sHistoName = "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenAHeavy_vs_GenALight_all_central";
+  sLegend = "mH-125_mA-50_wH-40_wA-30";
+  sSaveAs = "m_GenAHeavy_vs_GenALight_mH-70_mA-15_wH-70_wA-50_1.png";
+  */
+  /*
+  sHistoName = "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenH_vs_GenAHeavy_all_central";
+  sLegend = "mH-125_mA-50_wH-40_wA-30";
+  sSaveAs = "m_GenH_vs_GenAHeavy_mH-70_mA-15_wH-70_wA-50_1.png";
+  */
+  sHistoName = "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenH_vs_GenALight_all_central";
+  sLegend = "mH-125_mA-50_wH-40_wA-30";
+  sSaveAs = "m_GenH_vs_GenALight_mH-70_mA-15_wH-70_wA-50_1.png";
+  
+  
   rebinX = rebinY = 50;
   
 
@@ -92,8 +108,8 @@ void PlotHisto2D() {
 
   gPad->SetLogz(setLogZ);
 
-  h->GetXaxis()->SetTitle(sXaxis.data());
-  h->GetYaxis()->SetTitle(sYaxis.data());
+  //h->GetXaxis()->SetTitle(sXaxis.data());
+  //h->GetYaxis()->SetTitle(sYaxis.data());
 
   h->Draw("colz");
   

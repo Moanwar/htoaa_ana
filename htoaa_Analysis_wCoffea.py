@@ -44,8 +44,8 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
  
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =   -1 # 1000 # 100000 # -1
+nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -241,6 +241,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                                            sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2) [GeV]"}),
             ('hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all',    {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1ToBBbar) [GeV]",
                                                            sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2ToBBbar) [GeV]"}),
+            ('hMass_GenAHeavy_vs_GenALight_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A heavy) [GeV]",
+                                                                   sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
+            ('hMass_GenH_vs_GenAHeavy_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
+                                                              sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A heavy) [GeV]"}),
+            ('hMass_GenH_vs_GenALight_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
+                                                              sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
+
+            
         ])
 
         
@@ -504,6 +512,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
            
             print(f"\n\n Check here:: genBBar_pairs_all_1: {genBBar_pairs_all_1.to_list()} ")
             print(f"\n genBBar_pairs_1: {genBBar_pairs_1.to_list()} ")
+
+
+
+            idxGenA_sortByMass = ak.argsort(selGenA.mass, axis=-1, ascending=False) 
+            print(f"\n\n\n selGenA: {selGenA.to_list()}")
+            print(f"\n selGenA.mass: {selGenA.mass.to_list()}")
+            print(f"\n idxGenA_sortByMass: {idxGenA_sortByMass.to_list()}")
+            print(f"\n selGenA[idxGenA_sortByMass]. {selGenA[idxGenA_sortByMass].to_list()}")
+            print(f"\n selGenA[idxGenA_sortByMass].mass: {selGenA[idxGenA_sortByMass].mass.to_list()}")
+            print(f"\n idxGenA_sortByMass[:, 0]: {idxGenA_sortByMass[:, 0].to_list()}")
+            print(f"\n selGenA[idxGenA_sortByMass[:, 0]].mass: {selGenA[idxGenA_sortByMass[:, 0]].mass.to_list()}") # wrong
+            print(f"\n selGenA[idxGenA_sortByMass][:, 0].mass: {selGenA[idxGenA_sortByMass][:, 0].mass.to_list()}") # correct
+            
+            
             
             #print(f": {} ")
             
@@ -589,7 +611,11 @@ events.GenPart[
             )]
             genA_First  = genACollection[:, 0]
             genA_Second = genACollection[:, 1]
-
+            
+            idxGenA_sortByMass = ak.argsort(genACollection.mass, axis=-1, ascending=False)
+            # genACollection[idxGenA_sortByMass[0]] : Leading mass GenA
+            # genACollection[idxGenA_sortByMass[1]] : Subleading mass GenA
+            
             '''
             genBQuarkCollection = events.GenPart[(
                 (abs(events.GenPart.pdgId) ==  5) &
@@ -692,7 +718,7 @@ events.GenPart[
                 
                 
 
-            if printLevel >= 9:
+            if printLevel >= 19:
                 
                 genBQuarks_sel1 = ak.concatenate([LVGenB_0, LVGenBbar_0, LVGenB_1, LVGenBbar_1], axis=1)
                 print(f"\n LVGenB_0: {LVGenB_0.to_list()} ")
@@ -1257,6 +1283,35 @@ events.GenPart[
                     dataset=dataset,
                     Mass=((LVGenB_0 + LVGenBbar_0).mass),
                     Mass1=((LVGenB_1 + LVGenBbar_1).mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+                if printLevel >= 9:
+                    print(f"\n\n genHiggs.mass[sel_GenHToAATo4B]: {genHiggs.mass[sel_GenHToAATo4B].to_list()}")
+                    print(f"\n ak.flatten(genHiggs.mass[sel_GenHToAATo4B]) ({len(ak.flatten(genHiggs.mass[sel_GenHToAATo4B]))}): {ak.flatten(genHiggs.mass[sel_GenHToAATo4B]).to_list()}")
+                    print(f"\n genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B] ({len(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B])}): {genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B].to_list()}")
+
+                output['hMass_GenH_vs_GenAHeavy_all'].fill(
+                    dataset=dataset,
+                    Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
+                    Mass1=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                
+                output['hMass_GenH_vs_GenALight_all'].fill(
+                    dataset=dataset,
+                    Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
+                    Mass1=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+                output['hMass_GenAHeavy_vs_GenALight_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
+                    Mass1=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
                     systematic=syst,
                     weight=evtWeight_gen
                 )
