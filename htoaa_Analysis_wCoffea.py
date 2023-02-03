@@ -43,9 +43,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 0
-nEventToReadInBatch =   0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+printLevel = 9
+nEventToReadInBatch = 5 #  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  5 #-1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -490,7 +490,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #selGenBBbar_pairs_1 = selGenBQuarks[genBBar_pairs['b']]
 
             print(f"\n\n\n MethodII]: \n selGenBQuarks: {selGenBQuarks.to_list()}")
-            print(f"\n genBBar_pairs_all: {genBBar_pairs_all.to_list()} ")
+            #print(f"\n genBBar_pairs_all: {genBBar_pairs_all.to_list()} ")
             print(f"\n genBBar_pairs: {genBBar_pairs.to_list()} ")
             print(f"\n selGenBQuarks[genBBar_pairs['b']: {selGenBQuarks[genBBar_pairs['b']].to_list()} ")
             print(f"\n selGenBQuarks[genBBar_pairs['bbar']: {selGenBQuarks[genBBar_pairs['bbar']].to_list()} ")
@@ -510,7 +510,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )]
 
            
-            print(f"\n\n Check here:: genBBar_pairs_all_1: {genBBar_pairs_all_1.to_list()} ")
+            #print(f"\n\n Check here:: genBBar_pairs_all_1: {genBBar_pairs_all_1.to_list()} ")
             print(f"\n genBBar_pairs_1: {genBBar_pairs_1.to_list()} ")
 
 
@@ -718,19 +718,24 @@ events.GenPart[
                 
                 
 
-            if printLevel >= 19:
-                
-                genBQuarks_sel1 = ak.concatenate([LVGenB_0, LVGenBbar_0, LVGenB_1, LVGenBbar_1], axis=1)
+            if printLevel >= 9:
                 print(f"\n LVGenB_0: {LVGenB_0.to_list()} ")
                 print(f"\n LVGenBbar_0: {LVGenBbar_0.to_list()} ")
                 print(f"\n LVGenB_1: {LVGenB_1.to_list()} ")
                 print(f"\n LVGenBbar_1: {LVGenBbar_1.to_list()} ")
+                
+                # genBQuarks_sel1 = ak.concatenate([LVGenB_0, LVGenBbar_0, LVGenB_1, LVGenBbar_1], axis=1) # not working
+                genBQuarks_sel1 = ak.zip([LVGenB_0, LVGenBbar_0, LVGenB_1, LVGenBbar_1])
                 print(f"\n genBQuarks_sel1: {genBQuarks_sel1.to_list()} ")
                 
                 #gen_Bquarks
                 print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(LVGenB_0).to_list()}")
+                print(f"\n genHiggs.delta_r(LVGenBbar_0): {genHiggs.delta_r(LVGenBbar_0).to_list()}")
+                print(f"\n genHiggs.delta_r(LVGenB_1): {genHiggs.delta_r(LVGenB_1).to_list()}")
+                print(f"\n genHiggs.delta_r(LVGenBbar_1): {genHiggs.delta_r(LVGenBbar_1).to_list()}")
+                #print(f"\n genHiggs.delta_r(genBQuarks_sel1): {genHiggs.delta_r(genBQuarks_sel1).to_list()}")
                 #print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(events.GenPart[]).to_list()}")
-                
+                print(f"\n ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0)], axis=-1): {ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1).to_list()}")
                 
 
 
