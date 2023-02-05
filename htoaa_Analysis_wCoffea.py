@@ -736,6 +736,11 @@ events.GenPart[
                 #print(f"\n genHiggs.delta_r(genBQuarks_sel1): {genHiggs.delta_r(genBQuarks_sel1).to_list()}")
                 #print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(events.GenPart[]).to_list()}")
                 print(f"\n ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0)], axis=-1): {ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1).to_list()}")
+                dr_GenH_GenB = ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1)
+                print(f"\n dr_GenH_GenB: {dr_GenH_GenB.to_list()}")
+
+                max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)
+                print(f"\n max_dr_GenH_GenB: {max_dr_GenH_GenB.to_list()} ")
                 
 
 
