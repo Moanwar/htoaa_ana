@@ -43,9 +43,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 9
-nEventToReadInBatch = 5 #  0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  5 #-1 # 1000 # 100000 # -1
+printLevel = 0
+nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -163,12 +163,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       3000, 0, 300)
-        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       3000, 0, 300)
+        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       300, 0, 300)
+        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       300, 0, 300)
         mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
         jetTau_axis   = hist.Bin("TauN",      r"TauN",            100, 0, 1)
+        deltaR_axis   = hist.Bin("deltaR",     r"$delta$ r ",     500, 0, 5)
 
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
@@ -235,18 +236,25 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hMass_Gen4BFromHToAA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
             ('hMass_GenAToBBbarpair_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
             ('hMass_Gen4BFromHToAA_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
+            ('hDeltaR_GenH_GenB_max',                        {sXaxis: deltaR_axis,       sXaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
 
             # 2-D distribution
-            ('hMass_GenA1_vs_GenA2_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1) [GeV]",
-                                                           sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2) [GeV]"}),
-            ('hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all',    {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1ToBBbar) [GeV]",
-                                                           sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2ToBBbar) [GeV]"}),
-            ('hMass_GenAHeavy_vs_GenALight_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A heavy) [GeV]",
-                                                                   sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
-            ('hMass_GenH_vs_GenAHeavy_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
-                                                              sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A heavy) [GeV]"}),
-            ('hMass_GenH_vs_GenALight_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
-                                                              sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
+            ('hMass_GenA1_vs_GenA2_all',                       {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1) [GeV]",
+                                                                sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2) [GeV]"}),
+            ('hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all',         {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1ToBBbar) [GeV]",
+                                                                sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A2ToBBbar) [GeV]"}),
+            ('hMass_GenAHeavy_vs_GenALight_all',               {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A heavy) [GeV]",
+                                                                sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
+            ('hMass_GenH_vs_GenAHeavy_all',                    {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
+                                                                sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A heavy) [GeV]"}),
+            ('hMass_GenH_vs_GenALight_all',                    {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
+                                                                sYaxis: mass_axis1,      sYaxisLabel: r"m (GEN A light) [GeV]"}),
+            ('hMassGenH_vs_maxDRGenHGenB_all',                 {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]",
+                                                                sYaxis: deltaR_axis,      sYaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
+            ('hMassGenAHeavy_vs_maxDRGenHGenB_all',            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A heavy) [GeV]",
+                                                                sYaxis: deltaR_axis,      sYaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
+            ('hMassGenALight_vs_maxDRGenHGenB_all',            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A light) [GeV]",
+                                                                sYaxis: deltaR_axis,      sYaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
 
             
         ])
@@ -692,7 +700,9 @@ events.GenPart[
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
             )            
-            
+
+            dr_GenH_GenB = ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1)
+            max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)            
 
             if printLevel >= 9:
                 print(f" \n ak.num(genHiggs): {ak.num(genHiggs).to_list()} ")
@@ -736,10 +746,8 @@ events.GenPart[
                 #print(f"\n genHiggs.delta_r(genBQuarks_sel1): {genHiggs.delta_r(genBQuarks_sel1).to_list()}")
                 #print(f"\n genHiggs.delta_r(LVGenB_0): {genHiggs.delta_r(events.GenPart[]).to_list()}")
                 print(f"\n ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0)], axis=-1): {ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1).to_list()}")
-                dr_GenH_GenB = ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1)
-                print(f"\n dr_GenH_GenB: {dr_GenH_GenB.to_list()}")
-
-                max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)
+                
+                print(f"\n dr_GenH_GenB: {dr_GenH_GenB.to_list()}")                
                 print(f"\n max_dr_GenH_GenB: {max_dr_GenH_GenB.to_list()} ")
                 
 
@@ -776,15 +784,20 @@ events.GenPart[
             selection.add("2GenAToBBbarPairs", ak.num(genBBar_pairs) == 2)
 
             
-            
-        sel_SR          = selection.all("nPV", "FatJetGet")
-        sel_SR_wGenCuts = selection.all("LHEHT")
-        sel_GenHToAATo4B = selection.all("1GenHiggs", "2GenA", "2GenAToBBbarPairs")
+        sel_names_all = OD([
+            ("SR",           ["nPV", "FatJetGet"]),
+            ("SR_wGenCuts",  ["LHEHT"]),
+            ("GenHToAATo4B", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
+        ])
+        #sel_SR          = selection.all("nPV", "FatJetGet")
+        sel_SR           = selection.all(* sel_names_all["SR"])
+        sel_SR_wGenCuts  = selection.all(* sel_names_all["SR_wGenCuts"])
+        sel_GenHToAATo4B = selection.all(* sel_names_all["GenHToAATo4B"])
 
         #print(f"\nsel_SR ({len(sel_SR)}): {sel_SR}   nEventsPass: {ak.sum(sel_SR, axis=0)}")
         #print(f"\nsel_SR_wGenCuts ({len(sel_SR_wGenCuts)}): {sel_SR_wGenCuts}   nEventsPass: {ak.sum(sel_SR_wGenCuts, axis=0)}")
         
-
+        
         # useful debugger for selection efficiency
         if shift_syst is None and printLevel >= 5:
             print(dataset)
@@ -864,8 +877,7 @@ events.GenPart[
                 print(f"\n\nevents.LHEReweightingWeight ({events.LHEReweightingWeight.fields}) ({len(events.LHEReweightingWeight)}): {events.LHEReweightingWeight.to_list()}")
 
                 
-
-               
+        
         
         ###################
         # FILL HISTOGRAMS
@@ -881,6 +893,16 @@ events.GenPart[
                 systList = [shift_syst]
         else:
             systList = ["noweight"]
+
+            
+        output['cutflow']['all events'] += len(events)
+        for n in selection.names:
+            output['cutflow'][n] += selection.all(n).sum()
+
+        for iSelection in sel_names_all.keys():
+            iName = f"{iSelection}: {sel_names_all[iSelection]}"
+            output['cutflow'][iName] += selection.all(* sel_names_all[iSelection]).sum()
+            
 
         for syst in systList:
 
@@ -1326,6 +1348,36 @@ events.GenPart[
                     weight=evtWeight_gen
                 )
 
+                output['hDeltaR_GenH_GenB_max'].fill(
+                    dataset=dataset,
+                    deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+                output['hMassGenH_vs_maxDRGenHGenB_all'].fill(
+                    dataset=dataset,
+                    Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
+                    deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+                output['hMassGenAHeavy_vs_maxDRGenHGenB_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
+                    deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+                output['hMassGenALight_vs_maxDRGenHGenB_all'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
+                    deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
                 
 
             '''

@@ -12,7 +12,7 @@ void PlotHistos1D() {
   std::vector<std::map<std::string, std::string>> vHistoDetails;
   /*
   vHistoDetails.push_back({			  
-      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
+      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-12_wH-70_wA-70_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
       {sHistoName,   "evt/SUSY_GluGluH_01J_HToAATo4B/hGenHiggsMass_all_central"},
       {sLegend,      "m (GEN H); mH 70, wH 70, mA 15, wA 50 GeV"},
       {sLineColor,   "1"},
@@ -21,7 +21,7 @@ void PlotHistos1D() {
     });
 
   vHistoDetails.push_back({			  
-      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
+      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-12_wH-70_wA-70_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
       {sHistoName,   "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenAApair_all_central"},
       {sLegend,      "m (GEN AA from HToAA); mH 70, wH 70, mA 15, wA 50 GeV"},
       {sLineColor,   "2"},
@@ -30,7 +30,7 @@ void PlotHistos1D() {
     });
   
   vHistoDetails.push_back({			  
-      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
+      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-12_wH-70_wA-70_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
       {sHistoName,   "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_Gen4BFromHToAA_all_1_central"},
       {sLegend,      "m (GEN 4B from HToAATo4B); mH 70, wH 70, mA 15, wA 50 GeV"},
       {sLineColor,   "3"},
@@ -43,7 +43,7 @@ void PlotHistos1D() {
   
   
   vHistoDetails.push_back({			  
-      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
+      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-12_wH-70_wA-70_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
       {sHistoName,   "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenA_all_central"},
       {sLegend,      "m (GEN A); mH 70, wH 70, mA 15, wA 50 GeV"},
       {sLineColor,   "3"},
@@ -52,7 +52,7 @@ void PlotHistos1D() {
     });
 
   vHistoDetails.push_back({			  
-      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-15_wH-70_wA-50_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
+      {sipFile,      "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_mH-70_mA-12_wH-70_wA-70_TuneCP5_13TeV_madgraph_pythia8_1_0.root"},
       {sHistoName,   "evt/SUSY_GluGluH_01J_HToAATo4B/hMass_GenAToBBbarpair_all_1_central"},
       {sLegend,      "m (GEN 2B from ATo2B); mH 70, wH 70, mA 15, wA 50 GeV"},
       {sLineColor,   "4"},
@@ -69,9 +69,9 @@ void PlotHistos1D() {
   
   std::string sXaxisName = "m (GEN A) [GeV]";
   std::string sYaxisName = "a.u.";
-  std::string sSaveAs = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp8/massGenA_mH-70_mA-15_wH-70_wA-50";
+  std::string sSaveAs = "/home/siddhesh/Work/CMS/htoaa/analysis/tmp9/massGenA_mH-70_mA-15_wH-70_wA-50";
   double      rangeXaxis[3] = {0, 10, 90}; // rangeXaxis[0]: set axis range flag
-  int         rebin = 50;
+  int         rebin = 5;
   double      normalizeHistos[2] = {0, 100}; // normalizeHistos[0]: mode, normalizeHistos[1]: norm. value
                                              // mode 0: don't scale/normalize histograms
                                              // mode 1: normalize w.r.t. area under histo
