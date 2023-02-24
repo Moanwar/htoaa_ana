@@ -43,14 +43,13 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+printLevel = 3
+nEventToReadInBatch = 20 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  20 # -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
 
-sWeighted = "Wtd: "
 
 
 # -----------------------------------------------------------------------------------
@@ -79,7 +78,7 @@ class ObjectSelection:
         self.tagger_btagDeepB = 'DeepCSV'
         self.wp_btagDeepB = 'M'
 
-        self.FatJetPtThsh  = 400 #170
+        self.FatJetPtThsh  = 170
         self.FatJetEtaThsh = 2.4
 
         self.FatJetMSoftDropThshLow  = 90
@@ -87,7 +86,9 @@ class ObjectSelection:
 
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
-        
+
+
+
         self.nFatJetMin = 1
         self.GenHTThsh  = 100.0
         self.LHEHTThsh  = 100.0
@@ -231,10 +232,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hLeadingFatJetTau2',                        {sXaxis: jetTau_axis,     sXaxisLabel: r"LeadingFatJetTau2"}),
             ('hLeadingFatJetTau3',                        {sXaxis: jetTau_axis,     sXaxisLabel: r"LeadingFatJetTau3"}),
             ('hLeadingFatJetTau4',                        {sXaxis: jetTau_axis,     sXaxisLabel: r"LeadingFatJetTau4"}),
-
-            ('hLeadingFatJetTau4by3',                     {sXaxis: jetTau_axis,     sXaxisLabel: r"LeadingFatJetTau4by3"}),
-            ('hLeadingFatJetTau3by2',                     {sXaxis: jetTau_axis,     sXaxisLabel: r"hLeadingFatJetTau3by2"}),
-            ('hLeadingFatJetTau2by1',                     {sXaxis: jetTau_axis,     sXaxisLabel: r"hLeadingFatJetTau2by1"}),
             
             ('hLeadingFatJetNBHadrons',                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNBHadrons"}),
             ('hLeadingFatJetNCHadrons',                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNCHadrons"}),            
@@ -370,11 +367,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"nEvents: {len(events)}")
         if printLevel >= 3:
             print(f"\n events.fields: {events.fields}")
-            #print(f"\n events.HLT.fields: {events.HLT.fields}")
-            #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
-            #print(f"\n events.L1.fields: {events.L1.fields}")
-            #printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
-            print(f"\n events.FatJet.fields: {events.FatJet.fields}")
+            print(f"\n events.HLT.fields: {events.HLT.fields}")
+            printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
+            print(f"\n events.L1.fields: {events.L1.fields}")
+            printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
         
         if self.datasetInfo[dataset]['isMC']:
             self.datasetInfo[dataset]['isSignal'] = True if "HToAATo4B" in dataset else False
@@ -503,7 +499,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # FatJet selection
         #selFatJet = self.objectSelector.selectFatJets(events)
 
-        '''
         mask_FatJetPt = (events.FatJet.pt > self.objectSelector.FatJetPtThsh)
         mask_FatJetEta = (abs(events.FatJet.eta) < self.objectSelector.FatJetEtaThsh)
         mask_FatJetBtagDeepB = (events.FatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB])
@@ -518,30 +513,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             mask_FatJetBtagDeepB #&
             #mask_FatJetMSoftDrop
         )]
-        '''
 
         
         ##################
         # EVENT VARIABLES
         ##################
         
-        #leadingFatJet = ak.firsts(selFatJet)
-        #leadingFatJet_asSingletons = ak.singletons(leadingFatJet)
+        leadingFatJet = ak.firsts(selFatJet)
+        leadingFatJet_asSingletons = ak.singletons(leadingFatJet)
 
-        #leadingFatJet = ak.singletons( ak.firsts(events.FatJet) )
-        leadingFatJet = ak.firsts(events.FatJet) # for e.g. [0.056304931640625, None, 0.12890625, 0.939453125, 0.0316162109375]
-        leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
-        
-        if printLevel >= 3:
-            #printVariable("\n ", )
-            printVariable("\n ak.firsts(events.FatJet)", ak.firsts(events.FatJet))
-            printVariable("\n ak.singletons( ak.firsts(events.FatJet) )", ak.singletons( ak.firsts(events.FatJet) ))
-
-            printVariable("\n leadingFatJet.btagDeepB", leadingFatJet.btagDeepB)
-            printVariable("\n ak.singletons(leadingFatJet.btagDeepB)", ak.singletons(leadingFatJet.btagDeepB))
-            printVariable("\n leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]", leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB])
-
-            
             
         #####################
         # EVENT SELECTION
@@ -558,45 +538,30 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #selection.add("FatJetGet", ak.num(selFatJet) >= self.objectSelector.nFatJetMin)
 
         selection.add(
-            "leadingFatJetPt",
-            leadingFatJet.pt > self.objectSelector.FatJetPtThsh
+            "FatJetPt",
+            ak.num(events.FatJet[mask_FatJetPt]) >= self.objectSelector.nFatJetMin
         )
 
         selection.add(
-            "leadingFatJetEta",
-            abs(leadingFatJet.eta) < self.objectSelector.FatJetEtaThsh
+            "FatJetEta",
+            ak.num(events.FatJet[mask_FatJetEta]) >= self.objectSelector.nFatJetMin
         )
 
         selection.add(
-            "leadingFatJetBtagDeepB",
-            leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]
+            "FatJetBtagDeepB",
+            ak.num(events.FatJet[mask_FatJetBtagDeepB]) >= self.objectSelector.nFatJetMin
         )
 
         selection.add(
-            "leadingFatJetMSoftDrop",
-            (leadingFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
-            (leadingFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
+            "FatJetMSoftDrop",
+            ak.num(events.FatJet[mask_FatJetMSoftDrop]) >= self.objectSelector.nFatJetMin
         )
 
-        selection.add(
-            "L1_SingleJet180",
-            events.L1.SingleJet180 == True
-        )
-
-        selection.add(
-            "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4",
-            events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
-        )
-
-        
 
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table
         sel_names_all = OD([
-            ("SR",                    ["nPV", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"]),
+            ("SR",                    ["nPV", "FatJetPt", "FatJetEta", "FatJetBtagDeepB", "FatJetMSoftDrop"]),
         ])
-        # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
-        cuts_reco = ["nPV", "dR_LeadingFatJet_GenB_0p8", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" ] 
-        
         #sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR           = selection.all(* sel_names_all["SR"])
         sel_GenHToAATo4B = None
@@ -606,11 +571,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             dr_LeadingFatJet_GenB = ak.concatenate([leadingFatJet_asSingletons.delta_r(LVGenB_0), leadingFatJet_asSingletons.delta_r(LVGenBbar_0), leadingFatJet_asSingletons.delta_r(LVGenB_1), leadingFatJet_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_LeadingFatJet_GenB = ak.max(dr_LeadingFatJet_GenB, axis=-1)
 
-            if printLevel >= 3:
-                printVariable("\n leadingFatJet_asSingletons.delta_r(LVGenB_0)", leadingFatJet_asSingletons.delta_r(LVGenB_0))
-                printVariable("\n dr_LeadingFatJet_GenB", dr_LeadingFatJet_GenB)
-                printVariable("\n max_dr_LeadingFatJet_GenB", max_dr_LeadingFatJet_GenB)
-                
             # GEN level selection
             selection.add("1GenHiggs", ak.num(genHiggs) == 1)
             selection.add("2GenA", ak.num(genACollection) == 2)
@@ -624,6 +584,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ("GenHToAATo4B_1", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
                 ("GenHToAATo4B", [*sel_names_GEN]),
             ]) )
+            # recoinstruction level cuts. Order of cuts is IMPORTANT
+            cuts_reco = ["nPV", "dR_LeadingFatJet_GenB_0p8", "FatJetPt", "FatJetEta", "FatJetBtagDeepB", "FatJetMSoftDrop"] 
             for idx, cutName in enumerate(cuts_reco):
                 if idx == 0:
                     sel_names_all.update( OD([
@@ -680,7 +642,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f" ({type()}) ({len()}): {} \n")
                     
         
-        if printLevel >= 30:
+        if printLevel >= 3:
             #printVariable("", )
             printVariable("\n events.FatJet.pt", events.FatJet.pt)
             printVariable("\n mask_FatJetPt", mask_FatJetPt)
@@ -711,7 +673,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             printVariable("\n ak.num(events.FatJet[mask_FatJetMSoftDrop]) >= self.objectSelector.nFatJetMin ", ak.num(events.FatJet[mask_FatJetMSoftDrop]) >= self.objectSelector.nFatJetMin )
             print(f'\n selection.all("FatJetMSoftDrop") ({type(selection.all("FatJetMSoftDrop"))}) ({len(selection.all("FatJetMSoftDrop"))}): {selection.all("FatJetMSoftDrop")}')
 
-
+            
             print(f"\n\nsel_names_all: {sel_names_all}")
             print(f'\n selection.all(* sel_names_all["SR"]) ({type(selection.all(* sel_names_all["SR"]))}) ({len(selection.all(* sel_names_all["SR"]))}): {selection.all(* sel_names_all["SR"])}')
             
@@ -805,19 +767,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 
 
-            if printLevel >= 13:                
+            if printLevel >= 30:                
                 printVariable("\n weights.weight()", weights.weight())
                 printVariable("\n weights_gen.weight()", weights_gen.weight())
                 printVariable("\n weights_GenHToAATo4B.weight()", weights_GenHToAATo4B.weight())
-                #printVariable("\n weights.weight().sum()", weights.weight().sum())
-                print(f"weights.weight().sum(): {weights.weight().sum()}")
-                printVariable("\n weights.weight()[sel_SR]", weights.weight()[sel_SR])
-                print(f"weights.weight()[sel_SR].sum(): {weights.weight()[sel_SR].sum()}")
 
-            if printLevel >= 30:
-                print(f"leadingFatJet.tau4[sel_SR]): {leadingFatJet.tau4[sel_SR]}")
-                print(f"leadingFatJet.tau3[sel_SR]): {leadingFatJet.tau3[sel_SR]}")
-                print(f"divide                     : {np.divide(leadingFatJet.tau4[sel_SR], leadingFatJet.tau3[sel_SR])} \n\n\n")
+                
         
         ###################
         # FILL HISTOGRAMS
@@ -836,15 +791,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             
         output['cutflow']['all events'] += len(events)
-        output['cutflow'][sWeighted+'all events'] += weights.weight().sum() 
-        #for n in selection.names:
-        #    output['cutflow'][n] += selection.all(n).sum()
+        for n in selection.names:
+            output['cutflow'][n] += selection.all(n).sum()
 
         for iSelection in sel_names_all.keys():
             iName = f"{iSelection}: {sel_names_all[iSelection]}"
-            sel_i = selection.all(* sel_names_all[iSelection])
-            output['cutflow'][iName] += sel_i.sum()
-            output['cutflow'][sWeighted+iName] +=  weights.weight()[sel_i].sum()
+            output['cutflow'][iName] += selection.all(* sel_names_all[iSelection]).sum()
             
 
         for syst in systList:
@@ -875,7 +827,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 print(f"evtWeight ({len(evtWeight)}): {evtWeight}")
                 print(f"evtWeight[sel_SR] ({len(evtWeight[sel_SR])}): {evtWeight[sel_SR]}")
 
-            if printLevel >= 30:
+            if printLevel >= 3:
                 printVariable("\n weights.weight()", weights.weight())
                 printVariable("\n weights.weight()[sel_SR]", weights.weight()[sel_SR])
                 printVariable("\n selFatJet.pt", selFatJet.pt)
@@ -883,14 +835,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable("\n leadingFatJet.pt", leadingFatJet.pt)
                 printVariable("\n leadingFatJet.pt[sel_SR]", leadingFatJet.pt[sel_SR])
                 
-            '''
+                
             output['nSelFatJet'].fill(
                 dataset=dataset,
                 nObject=ak.to_numpy(ak.num(selFatJet[sel_SR])),
                 systematic=syst,
                 weight=evtWeight[sel_SR]
             )
-            '''
             
             output['hLeadingFatJetPt'].fill(
                 dataset=dataset,
@@ -1054,47 +1005,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 systematic=syst,
                 weight=evtWeight[sel_SR]
             )
-
-            output['hLeadingFatJetTau4by3'].fill(
-                dataset=dataset,
-                TauN=(np.divide(leadingFatJet.tau4[sel_SR], leadingFatJet.tau3[sel_SR])),
-                systematic=syst,
-                weight=evtWeight[sel_SR]
-            )
-            output['hLeadingFatJetTau3by2'].fill(
-                dataset=dataset,
-                TauN=(np.divide(leadingFatJet.tau3[sel_SR], leadingFatJet.tau2[sel_SR])),
-                systematic=syst,
-                weight=evtWeight[sel_SR]
-            )
-            output['hLeadingFatJetTau2by1'].fill(
-                dataset=dataset,
-                TauN=(np.divide(leadingFatJet.tau2[sel_SR], leadingFatJet.tau1[sel_SR])),
-                systematic=syst,
-                weight=evtWeight[sel_SR]
-            )
             
-            
+            output['hLeadingFatJetNBHadrons'].fill(
+                dataset=dataset,
+                nObject=(leadingFatJet.nBHadrons[sel_SR]),
+                systematic=syst,
+                weight=evtWeight[sel_SR]
+            )
+            output['hLeadingFatJetNCHadrons'].fill(
+                dataset=dataset,
+                nObject=(leadingFatJet.nCHadrons[sel_SR]),
+                systematic=syst,
+                weight=evtWeight[sel_SR]
+            )            
             output['hLeadingFatJetNConstituents'].fill(
                 dataset=dataset,
                 nObject=(leadingFatJet.nConstituents[sel_SR]),
                 systematic=syst,
                 weight=evtWeight[sel_SR]
             )
-            if self.datasetInfo[dataset]['isMC']:
-                output['hLeadingFatJetNBHadrons'].fill(
-                    dataset=dataset,
-                    nObject=(leadingFatJet.nBHadrons[sel_SR]),
-                    systematic=syst,
-                    weight=evtWeight[sel_SR]
-                )
-                output['hLeadingFatJetNCHadrons'].fill(
-                    dataset=dataset,
-                    nObject=(leadingFatJet.nCHadrons[sel_SR]),
-                    systematic=syst,
-                    weight=evtWeight[sel_SR]
-                )            
-                
+
             
             output['hLeadingFatJetParticleNetMD_QCD'].fill(
                 dataset=dataset,
@@ -1399,20 +1329,18 @@ if __name__ == '__main__':
     
     config = GetDictFromJsonFile(sConfig)
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
-
-    lumiScale = 1
+    
     sInputFiles         = config["inputFiles"]
     sOutputFile         = config["outputFile"]
     sample_category     = config['sampleCategory']
     isMC                = config["isMC"]
     era                 = config['era']
-    if isMC:
-        luminosity          = Luminosities[era][0]
-        sample_crossSection = config["crossSection"]
-        sample_nEvents      = config["nEvents"]
-        sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
-        if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
-        lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
+    luminosity          = Luminosities[era][0]
+    sample_crossSection = config["crossSection"]
+    sample_nEvents      = config["nEvents"]
+    sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
+    if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
+    lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
 
@@ -1466,12 +1394,8 @@ if __name__ == '__main__':
 
     if 'cutflow' in output.keys():
         print("Cutflow::")
-        #for key, value in output['cutflow'].items():
-        for key in output['cutflow'].keys():
-            #print(key, value)
-            if key.startswith(sWeighted): continue
-
-            print("%10f\t%10d\t%s" % (output['cutflow'][sWeighted+key], output['cutflow'][key], key))
+        for key, value in output['cutflow'].items():
+            print(key, value)    
 
 
     

@@ -10,7 +10,13 @@ Samples2018 = OD([
 #        "/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD",
 #        "/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD",
 #        "/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
-#    ]),
+#    ]),    
+    (kData, [
+        "JetHT_Run2018A",
+        "JetHT_Run2018B",
+        "JetHT_Run2018C",
+        "JetHT_Run2018D"
+    ]),
     
     ("QCD_bEnrich",[
         "QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",
