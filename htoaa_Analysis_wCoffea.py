@@ -366,15 +366,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dataset = events.metadata["dataset"] # dataset label
         self.datasetInfo[dataset]['isSignal'] = False
 
-        if printLevel >= 3:
+        if printLevel >= 2:
             print(f"nEvents: {len(events)}")
-        if printLevel >= 3:
+        if printLevel >= 2:
             print(f"\n events.fields: {events.fields}")
-            #print(f"\n events.HLT.fields: {events.HLT.fields}")
+            print(f"\n events.HLT.fields: {events.HLT.fields}")
             #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
             #print(f"\n events.L1.fields: {events.L1.fields}")
             #printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
-            print(f"\n events.FatJet.fields: {events.FatJet.fields}")
+            #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
         
         if self.datasetInfo[dataset]['isMC']:
             self.datasetInfo[dataset]['isSignal'] = True if "HToAATo4B" in dataset else False
@@ -583,19 +583,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             events.L1.SingleJet180 == True
         )
 
-        selection.add(
-            "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4",
-            events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
-        )
-
+        # some files of Run2018A do not have HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 branch
+        HLT_AK8PFJet330_name = None
+        if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
+            HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
+            selection.add(
+                HLT_AK8PFJet330_name,
+                events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
+            )
+        elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
+            HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
+            selection.add(
+                HLT_AK8PFJet330_name,
+                events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True
+            )
         
 
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table
         sel_names_all = OD([
-            ("SR",                    ["nPV", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"]),
+            ("SR",                    ["nPV", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", HLT_AK8PFJet330_name]),
         ])
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
-        cuts_reco = ["nPV", "dR_LeadingFatJet_GenB_0p8", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" ] 
+        cuts_reco = ["nPV", "dR_LeadingFatJet_GenB_0p8", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180",  HLT_AK8PFJet330_name] 
         
         #sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR           = selection.all(* sel_names_all["SR"])
