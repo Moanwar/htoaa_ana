@@ -141,8 +141,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version',    type=str, default=None, required=True)
     parser.add_argument('-samples',           type=str, default=None, help='samples to run seperated by comma')
     parser.add_argument('-nFilesPerJob',      type=int, default=10)
-    parser.add_argument('-nResubMax',         type=int, default=30)
-    parser.add_argument('-ResubWaitingTime',  type=int, default=60, help='Resubmit failed jobs after every xx minutes')
+    parser.add_argument('-nResubMax',         type=int, default=80)
+    parser.add_argument('-ResubWaitingTime',  type=int, default=15, help='Resubmit failed jobs after every xx minutes')
     parser.add_argument('-iJobSubmission',    type=int, default=0,  help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-dryRun',            action='store_true', default=False)
     args=parser.parse_args()
@@ -296,11 +296,20 @@ if __name__ == '__main__':
                                         SearchFromEnd   = True):
                                     jobStatus = 4 # job aborted
                             else:
-                                jobStatus = 3 # job failed
+                                jobStatus = 3 # job failed due to some other error
+
+                                # check if job failed due to XRootD error
+                                if searchStringInFile(
+                                        sFileName       = sCondorError_to_use,
+                                        searchString    = 'OSError: XRootD error: [ERROR] Operation expired', 
+                                        nLinesToSearch  = 100,
+                                        SearchFromEnd   = True):
+                                    jobStatus = 5 # job failed due to XRootD error
+                                
                                 
 
                     OpRootFiles_Target.append(sOpRootFile_to_use)
-                    if jobStatus in [0, 3, 4]:
+                    if jobStatus in [0, 4, 5]: # [0, 3, 4]:
                         OpRootFiles_iJobSubmission.append(sOpRootFile_to_use)
 
                     if printLevel >= 0:
@@ -332,8 +341,8 @@ if __name__ == '__main__':
                         writeCondorExecFile(sCondorExec_to_use, sConfig_to_use)
 
 
-                    if jobStatus in [0, 3, 4]:
-                        if jobStatus == 3:
+                    if jobStatus in [0, 4, 5]: #[0, 3, 4]:
+                        if jobStatus == 5:
                             # save previos .out and .error files with another names
                             sCondorOutput_vPrevious = sCondorOutput_to_use.replace('.out', '_v%d.out' % (iJobSubmission-1))
                             sCondorError_vPrevious  = sCondorError_to_use.replace('.error', '_v%d.error' % (iJobSubmission-1))
@@ -353,6 +362,10 @@ if __name__ == '__main__':
                         # job is either running or succeeded
                         continue
 
+                    if jobStatus in [3]:
+                        # job failed, but failure reason needs investigation
+                        continue
+                    
                     if run_mode == 'condor':
                         cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
                         print("Now:  %s " % cmd1)

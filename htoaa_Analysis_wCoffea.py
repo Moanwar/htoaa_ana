@@ -10,6 +10,8 @@ import tracemalloc
 import math
 import numpy as np
 from copy import deepcopy
+#import uproot
+import uproot3 as uproot
 
 '''
 H->aa->4b boosted analysis macro
@@ -32,7 +34,7 @@ import uproot
 
 
 from htoaa_Settings import *
-from htoaa_CommonTools import GetDictFromJsonFile, calculate_lumiScale
+from htoaa_CommonTools import GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector
 '''
 from htoaa_Settings import *
 from htoaa_NanoAODBranches import htoaa_nanoAODBranchesToRead
@@ -43,7 +45,7 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
 
  
-printLevel = 0
+printLevel = 1
 nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
@@ -85,6 +87,8 @@ class ObjectSelection:
         self.FatJetMSoftDropThshLow  = 90
         self.FatJetMSoftDropThshHigh = 200
 
+        self.FatJetParticleNetMD_Xbb_Thsh = 0.8
+        
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
         
@@ -180,6 +184,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dataset_axis    = hist.Cat("dataset", "Dataset")
         systematic_axis = hist.Cat("systematic", "Systematic Uncertatinty")
 
+        cutFlow_axis  = hist.Bin("CutFlow",   r"Cuts",            21, -0.5, 20.5)
         nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
         eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
@@ -200,6 +205,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         sYaxisLabel = 'yAxisLabel'
         histos = OD([
             # ('histogram_name',  {sXaxis: hist.Bin() axis,  sXaxisLabel: "histogram axis label"})
+            ('hCutFlow',                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+            ('hCutFlowWeighted',                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+            
             ('nSelFatJet',                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
             ('hLeadingFatJetPt',                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
             ('hLeadingFatJetEta',                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
@@ -532,7 +540,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         leadingFatJet = ak.firsts(events.FatJet) # for e.g. [0.056304931640625, None, 0.12890625, 0.939453125, 0.0316162109375]
         leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
         
-        if printLevel >= 3:
+        if printLevel >= 13:
             #printVariable("\n ", )
             printVariable("\n ak.firsts(events.FatJet)", ak.firsts(events.FatJet))
             printVariable("\n ak.singletons( ak.firsts(events.FatJet) )", ak.singletons( ak.firsts(events.FatJet) ))
@@ -547,64 +555,97 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # EVENT SELECTION
         #####################
 
+        HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
+        
+        # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table
+        sel_names_all = OD([
+            ("SR",                    [
+                "nPV",
+                "leadingFatJetPt",
+                "leadingFatJetEta",
+                #"leadingFatJetBtagDeepB",
+                "leadingFatJetMSoftDrop",
+                "leadingFatJetParticleNetMD_Xbb",
+                "L1_SingleJet180",
+                HLT_AK8PFJet330_name
+            ]),
+        ])
+        # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
+        cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + sel_names_all["SR"] #.copy()
+
+        
         # create a PackedSelection object
         # this will help us later in composing the boolean selections easily
         selection = PackedSelection()
 
-        # nPVGood >= 1
-        selection.add("nPV", events.PV.npvsGood >= 1)
-        
-        # >=1 FatJet
-        #selection.add("FatJetGet", ak.num(selFatJet) >= self.objectSelector.nFatJetMin)
+        if "nPV" in sel_names_all["SR"]:
+            # nPVGood >= 1
+            selection.add("nPV", events.PV.npvsGood >= 1)
 
-        selection.add(
-            "leadingFatJetPt",
-            leadingFatJet.pt > self.objectSelector.FatJetPtThsh
-        )
-
-        selection.add(
-            "leadingFatJetEta",
-            abs(leadingFatJet.eta) < self.objectSelector.FatJetEtaThsh
-        )
-
-        selection.add(
-            "leadingFatJetBtagDeepB",
-            leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]
-        )
-
-        selection.add(
-            "leadingFatJetMSoftDrop",
-            (leadingFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
-            (leadingFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
-        )
-
-        selection.add(
-            "L1_SingleJet180",
-            events.L1.SingleJet180 == True
-        )
-
-        # some files of Run2018A do not have HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 branch
-        HLT_AK8PFJet330_name = None
-        if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
-            HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
-            selection.add(
-                HLT_AK8PFJet330_name,
-                events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
-            )
-        elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
-            HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
-            selection.add(
-                HLT_AK8PFJet330_name,
-                events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True
-            )
         
 
-        # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table
-        sel_names_all = OD([
-            ("SR",                    ["nPV", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180", HLT_AK8PFJet330_name]),
-        ])
-        # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
-        cuts_reco = ["nPV", "dR_LeadingFatJet_GenB_0p8", "leadingFatJetPt", "leadingFatJetEta", "leadingFatJetBtagDeepB", "leadingFatJetMSoftDrop", "L1_SingleJet180",  HLT_AK8PFJet330_name] 
+        if "leadingFatJetPt" in sel_names_all["SR"]:
+            # >=1 FatJet
+            #selection.add("FatJetGet", ak.num(selFatJet) >= self.objectSelector.nFatJetMin)
+            selection.add(
+                "leadingFatJetPt",
+                leadingFatJet.pt > self.objectSelector.FatJetPtThsh
+            )
+
+
+        if "leadingFatJetEta" in sel_names_all["SR"]:
+            selection.add(
+                "leadingFatJetEta",
+                abs(leadingFatJet.eta) < self.objectSelector.FatJetEtaThsh
+            )
+
+
+        if "leadingFatJetBtagDeepB" in sel_names_all["SR"]:
+            selection.add(
+                "leadingFatJetBtagDeepB",
+                leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]
+            )
+
+ 
+        if"leadingFatJetMSoftDrop"  in sel_names_all["SR"]:
+           selection.add(
+                "leadingFatJetMSoftDrop",
+                (leadingFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
+                (leadingFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
+            )
+
+ 
+        if "leadingFatJetParticleNetMD_Xbb" in sel_names_all["SR"]:
+            selection.add(
+                "leadingFatJetParticleNetMD_Xbb",
+                leadingFatJet.particleNetMD_Xbb > self.objectSelector.FatJetParticleNetMD_Xbb_Thsh
+            )
+            
+            
+        if "L1_SingleJet180" in sel_names_all["SR"]:
+            selection.add(
+                "L1_SingleJet180",
+                events.L1.SingleJet180 == True
+            )
+
+ 
+        if HLT_AK8PFJet330_name in sel_names_all["SR"]:
+            # some files of Run2018A do not have HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 branch
+            #HLT_AK8PFJet330_name = None
+            if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
+                HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
+                selection.add(
+                    HLT_AK8PFJet330_name,
+                    events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
+                )
+            elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
+                HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02"
+                selection.add(
+                    HLT_AK8PFJet330_name,
+                    events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True
+                )
+        
+
         
         #sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR           = selection.all(* sel_names_all["SR"])
@@ -615,7 +656,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             dr_LeadingFatJet_GenB = ak.concatenate([leadingFatJet_asSingletons.delta_r(LVGenB_0), leadingFatJet_asSingletons.delta_r(LVGenBbar_0), leadingFatJet_asSingletons.delta_r(LVGenB_1), leadingFatJet_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_LeadingFatJet_GenB = ak.max(dr_LeadingFatJet_GenB, axis=-1)
 
-            if printLevel >= 3:
+            if printLevel >= 13:
                 printVariable("\n leadingFatJet_asSingletons.delta_r(LVGenB_0)", leadingFatJet_asSingletons.delta_r(LVGenB_0))
                 printVariable("\n dr_LeadingFatJet_GenB", dr_LeadingFatJet_GenB)
                 printVariable("\n max_dr_LeadingFatJet_GenB", max_dr_LeadingFatJet_GenB)
@@ -865,6 +906,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown"]:
                 weightSyst = None
 
+            ones_list = np.ones(len(events))
+            
             if syst == "noweight":
                 evtWeight = np.ones(len(events))
             else:
@@ -891,7 +934,53 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable("\n selFatJet.pt[sel_SR]", selFatJet.pt[sel_SR])
                 printVariable("\n leadingFatJet.pt", leadingFatJet.pt)
                 printVariable("\n leadingFatJet.pt[sel_SR]", leadingFatJet.pt[sel_SR])
+
+            if printLevel >= 30:
+                printVariable("\n ones_list", ones_list)
+                printVariable("\n ones_list[sel_SR]", ones_list[sel_SR])
+
+                printVariable("\n evtWeight", evtWeight)
+                printVariable("\n evtWeight[sel_SR]", evtWeight[sel_SR])
+
+                k = 3
+                print(f"k: {k}")
+                printVariable("\n ones_list * k", ones_list * k)
+                printVariable("\n ones_list[sel_SR] * k", ones_list[sel_SR] * k)
                 
+                printVariable("\n evtWeight * k", evtWeight * k)
+                printVariable("\n evtWeight[sel_SR]", evtWeight[sel_SR] * k)
+                
+
+            # all events
+            iBin = 0
+            output['hCutFlow'].fill(
+                dataset=dataset,
+                CutFlow=(ones_list * iBin),
+                systematic=syst
+            )
+            output['hCutFlowWeighted'].fill(
+                dataset=dataset,
+                CutFlow=(ones_list * iBin),
+                systematic=syst,
+                weight=evtWeight
+            )
+
+            # events passing SR
+            iBin = 4
+            output['hCutFlow'].fill(
+                dataset=dataset,
+                CutFlow=(ones_list[sel_SR] * iBin),
+                systematic=syst
+            )
+            output['hCutFlowWeighted'].fill(
+                dataset=dataset,
+                CutFlow=(ones_list[sel_SR] * iBin),
+                systematic=syst,
+                weight=evtWeight[sel_SR]
+            )
+
+            
+            
             '''
             output['nSelFatJet'].fill(
                 dataset=dataset,
@@ -1396,6 +1485,9 @@ def printWithType(sX, X):
     print(f"{sX} : {X}")
 
 
+        
+    
+    
 if __name__ == '__main__':
     print("htoaa_Analysis:: main: {}".format(sys.argv)); sys.stdout.flush()
 
@@ -1431,10 +1523,14 @@ if __name__ == '__main__':
         if "*" in sInputFile:  sInputFiles_toUse.extend( glob.glob( sInputFile ) )
         else:                  sInputFiles_toUse.append( sInputFile )
     sInputFiles = sInputFiles_toUse
-    for iFile in range(len(sInputFiles)):
+    for iFile in range(len(sInputFiles)):        
         if sInputFiles[iFile].startswith("/store/"): # LFN: Logical File Name
-            sInputFiles[iFile] = xrootd_redirectorName + sInputFiles[iFile]
-    print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}): {sInputFiles}"); sys.stdout.flush()
+            #sInputFiles[iFile] = xrootd_redirectorName + sInputFiles[iFile]
+            sInputFiles[iFile] = setXRootDRedirector(sInputFiles[iFile])
+    print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
+    for sInputFile in sInputFiles:
+        print(f"\t{sInputFile}")
+    sys.stdout.flush()
 
 
     startTime = time.time()

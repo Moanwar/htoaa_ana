@@ -1,12 +1,36 @@
 import json
+#import uproot
+import uproot3 as uproot
 
-
+from htoaa_Settings import * 
 
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
     lumiScale = 1
-    if sumEvents != 0: lumiScale = luminosity * crossSection / sumEvents
+    # as crosssection is in pb and luminosity in fb
+    pb_to_fb_conversionFactor = 1000
+    
+    if sumEvents != 0: lumiScale = luminosity * crossSection * pb_to_fb_conversionFactor / sumEvents
     return lumiScale
+
+
+def setXRootDRedirector(fileName):
+    if not fileName.startswith("/store/"):
+        return fileName
+    
+    redirector_toUse = None
+    for redirector in xrootd_redirectorNames:
+        with uproot.open(redirector + fileName) as file1:
+            #print(f"\n{redirector + fileName}: file1.keys(): {file1.keys()}")
+            #print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].num_entries}")
+
+            #if file1['Events'].num_entries > 0:
+            if file1['Events'].numentries > 0:
+                redirector_toUse = redirector
+                break
+    #print(f"redirector_toUse: {redirector_toUse}")
+    
+    return redirector + fileName
 
 
 def GetDictFromJsonFile(filePath):
