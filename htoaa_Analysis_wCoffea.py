@@ -633,13 +633,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # some files of Run2018A do not have HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 branch
             #HLT_AK8PFJet330_name = None
             if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
-                HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
+                #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4"
                 selection.add(
                     HLT_AK8PFJet330_name,
                     events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
                 )
             elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
-                HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02"
+                #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02"
                 selection.add(
                     HLT_AK8PFJet330_name,
                     events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True

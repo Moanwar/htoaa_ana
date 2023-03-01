@@ -20,9 +20,10 @@ def setXRootDRedirector(fileName):
     
     redirector_toUse = None
     for redirector in xrootd_redirectorNames:
+        print(f"setXRootDRedirector():: Checking {redirector + fileName}")
         with uproot.open(redirector + fileName) as file1:
             #print(f"\n{redirector + fileName}: file1.keys(): {file1.keys()}")
-            #print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].num_entries}")
+            print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}")
 
             #if file1['Events'].num_entries > 0:
             if file1['Events'].numentries > 0:

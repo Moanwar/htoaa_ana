@@ -95,6 +95,10 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         f.write("notification = never \n")
         f.write("should_transfer_files = YES \n")
         f.write("when_to_transfer_output = ON_EXIT \n")
+
+        f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
+        f.write("use_x509userproxy = true \n")        
+        
         #f.write("+JobFlavour = \"longlunch\" \n")
         f.write("+JobFlavour = \"%s\" \n" % (jobFlavours[iJobFlavour]))
         f.write("queue \n")
@@ -204,6 +208,7 @@ if __name__ == '__main__':
         OpRootFiles_Target         = []
         OpRootFiles_Exist          = []
         OpRootFiles_iJobSubmission = []
+        jobStatus_dict             = {} # OD([])
         
         for sample_category, samples in samplesList.items():
             #print("sample_category {}, samples {}".format(sample_category, samples))
@@ -277,6 +282,7 @@ if __name__ == '__main__':
                     
                     # JobStatus
                     jobStatus = -1
+                    jobStatusForJobSubmission = [0, 3, 4, 5]
 
                     if not isConfigExist:
                         jobStatus = 0 # job not yet submitted
@@ -285,32 +291,53 @@ if __name__ == '__main__':
                         OpRootFiles_Exist.append(sOpRootFile_to_use)
                     else:
                         if isCondorLogExist:
-                            if not isCondorErrorExist:
-                                jobStatus = 2 # job is running
-
-                                # check wheter sCondorError does not exist due to Job was aborted
-                                if searchStringInFile(
-                                        sFileName       = sCondorLog_to_use,
-                                        searchString    = 'Job was aborted',
-                                        nLinesToSearch  = 10,
-                                        SearchFromEnd   = True):
-                                    jobStatus = 4 # job aborted
-                            else:
+                            
+                            if searchStringInFile(
+                                    sFileName       = sCondorLog_to_use,
+                                    searchString    = 'Job terminated',
+                                    nLinesToSearch  = 5,
+                                    SearchFromEnd   = True):
+                                # check wheter the job was terminated or not
                                 jobStatus = 3 # job failed due to some other error
 
                                 # check if job failed due to XRootD error
-                                if searchStringInFile(
+                                if   searchStringInFile(
                                         sFileName       = sCondorError_to_use,
-                                        searchString    = 'OSError: XRootD error: [ERROR] Operation expired', 
-                                        nLinesToSearch  = 100,
-                                        SearchFromEnd   = True):
+                                        searchString    = 'OSError: XRootD error: [ERROR]', 
+                                        nLinesToSearch  = 150,
+                                        SearchFromEnd   = True
+                                ) or searchStringInFile(
+                                        sFileName       = sCondorError_to_use,
+                                        searchString    = '[ERROR] Invalid redirect URL', 
+                                        nLinesToSearch  = 150,
+                                        SearchFromEnd   = True
+                                )
+                                
+                                :
                                     jobStatus = 5 # job failed due to XRootD error
+
+                            elif searchStringInFile(
+                                    sFileName       = sCondorLog_to_use,
+                                    searchString    = 'Job was aborted',
+                                    nLinesToSearch  = 5,
+                                    SearchFromEnd   = True):
+                                    # check wheter sCondorError does not exist due to Job was aborted
+                                    jobStatus = 4 # job aborted
+
+                            else:
+                                jobStatus = 2 # job is running
                                 
                                 
 
                     OpRootFiles_Target.append(sOpRootFile_to_use)
-                    if jobStatus in [0, 4, 5]: # [0, 3, 4]:
+                    if jobStatus in jobStatusForJobSubmission : # [0, 3, 4]:
                         OpRootFiles_iJobSubmission.append(sOpRootFile_to_use)
+
+                    if jobStatus not in jobStatus_dict.keys():
+                        jobStatus_dict[jobStatus] = [sOpRootFile_to_use]
+                    else:
+                        jobStatus_dict[jobStatus].append(sOpRootFile_to_use)
+                    
 
                     if printLevel >= 0:
                         print(f"\t {sOpRootFile_to_use}:: jobStatus: {jobStatus}, isConfigExist: {isConfigExist}, isOpRootFileExist: {isOpRootFileExist}, isCondorExecExist: {isCondorExecExist}, isCondorSubmitExist: {isCondorSubmitExist}, isCondorLogExist: {isCondorLogExist}, isCondorOutputExist: {isCondorOutputExist}, isCondorErrorExist: {isCondorErrorExist}")
@@ -341,8 +368,8 @@ if __name__ == '__main__':
                         writeCondorExecFile(sCondorExec_to_use, sConfig_to_use)
 
 
-                    if jobStatus in [0, 4, 5]: #[0, 3, 4]:
-                        if jobStatus == 5:
+                    if jobStatus in jobStatusForJobSubmission: #[0, 3, 4]:
+                        if jobStatus == [3, 5]:
                             # save previos .out and .error files with another names
                             sCondorOutput_vPrevious = sCondorOutput_to_use.replace('.out', '_v%d.out' % (iJobSubmission-1))
                             sCondorError_vPrevious  = sCondorError_to_use.replace('.error', '_v%d.error' % (iJobSubmission-1))
@@ -362,9 +389,11 @@ if __name__ == '__main__':
                         # job is either running or succeeded
                         continue
 
+                    '''
                     if jobStatus in [3]:
                         # job failed, but failure reason needs investigation
                         continue
+                    '''
                     
                     if run_mode == 'condor':
                         cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
@@ -388,11 +417,22 @@ if __name__ == '__main__':
                 fJobSubLog.write('OpRootFiles_iJobSubmission (%d): ' % (len(OpRootFiles_iJobSubmission)))
                 for f in OpRootFiles_iJobSubmission:
                     fJobSubLog.write('\t %s \n' % (f))
+
+                fJobSubLog.write('\n\nJob status wise output files: \n')
+                for jobStatus in jobStatus_dict.keys():
+                    fJobSubLog.write('\t jobStatus %d (%d) \n' % (jobStatus, len(jobStatus_dict[jobStatus])))
+                    if jobStatus in [0, 1]: continue
+                    
+                    for f in jobStatus_dict[jobStatus]:
+                        fJobSubLog.write('\t\t %s \n' % (f))
                 
             fJobSubLog.write('%s\n\n\n' % ('-'*10))
         
 
-        print('\n\n\n%s \t iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
+        jobStatus_list = [ (jobStatus, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
+        print('\n\n\n%s \t iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
+        print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()
+        
             
         if dryRun:
             print('%s \t druRun with iJobSubmission: %d  \nTerminating...\n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
