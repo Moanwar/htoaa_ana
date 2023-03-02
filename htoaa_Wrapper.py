@@ -295,7 +295,7 @@ if __name__ == '__main__':
                             if searchStringInFile(
                                     sFileName       = sCondorLog_to_use,
                                     searchString    = 'Job terminated',
-                                    nLinesToSearch  = 5,
+                                    nLinesToSearch  = 3,
                                     SearchFromEnd   = True):
                                 # check wheter the job was terminated or not
                                 jobStatus = 3 # job failed due to some other error
@@ -311,15 +311,13 @@ if __name__ == '__main__':
                                         searchString    = '[ERROR] Invalid redirect URL', 
                                         nLinesToSearch  = 150,
                                         SearchFromEnd   = True
-                                )
-                                
-                                :
+                                ) :
                                     jobStatus = 5 # job failed due to XRootD error
 
                             elif searchStringInFile(
                                     sFileName       = sCondorLog_to_use,
                                     searchString    = 'Job was aborted',
-                                    nLinesToSearch  = 5,
+                                    nLinesToSearch  = 3,
                                     SearchFromEnd   = True):
                                     # check wheter sCondorError does not exist due to Job was aborted
                                     jobStatus = 4 # job aborted
