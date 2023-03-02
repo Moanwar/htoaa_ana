@@ -26,7 +26,7 @@ sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
 sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 
-printLevel = 0
+printLevel = 3
 
 def writeCondorExecFile(condor_exec_file, sConfig_to_use):
     if not os.path.isfile(condor_exec_file):    
@@ -80,7 +80,8 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         (5, 'testmatch'),
         (6, 'nextweek'),
     ])
-    iJobFlavour = 2
+    #iJobFlavour = 2 # 2, 'longlunch' 2 hours
+    iJobFlavour = 1 # 1, 'microcentury' 
     if increaseJobFlavour: iJobFlavour += 1
     
     
@@ -279,6 +280,8 @@ if __name__ == '__main__':
                     isCondorOutputExist  = os.path.isfile(sCondorOutput_to_use)
                     isCondorErrorExist   = os.path.isfile(sCondorError_to_use)
 
+                    if printLevel >= 3:
+                        print(f"sOpRootFile_to_use: {sOpRootFile_to_use} ")
                     
                     # JobStatus
                     jobStatus = -1
@@ -286,44 +289,60 @@ if __name__ == '__main__':
 
                     if not isConfigExist:
                         jobStatus = 0 # job not yet submitted
+                        if printLevel >= 3:
+                            print(f"  jobStatus = 0")
+
                     elif isOpRootFileExist:
                         jobStatus = 1 # job ran successfully
                         OpRootFiles_Exist.append(sOpRootFile_to_use)
+                        if printLevel >= 3:
+                            print(f"  jobStatus = 1")
+                            
                     else:
                         if isCondorLogExist:
                             
-                            if searchStringInFile(
+                            if (searchStringInFile(                                    
                                     sFileName       = sCondorLog_to_use,
                                     searchString    = 'Job terminated',
                                     nLinesToSearch  = 3,
-                                    SearchFromEnd   = True):
+                                    SearchFromEnd   = True)):
                                 # check wheter the job was terminated or not
                                 jobStatus = 3 # job failed due to some other error
-
+                                if printLevel >= 3:
+                                    print(f"  jobStatus = 3")
+                                    
+                                    
                                 # check if job failed due to XRootD error
-                                if   searchStringInFile(
+                                if (searchStringInFile(                                        
                                         sFileName       = sCondorError_to_use,
                                         searchString    = 'OSError: XRootD error: [ERROR]', 
                                         nLinesToSearch  = 150,
-                                        SearchFromEnd   = True
-                                ) or searchStringInFile(
+                                        SearchFromEnd   = True) or \
+                                    searchStringInFile(
                                         sFileName       = sCondorError_to_use,
                                         searchString    = '[ERROR] Invalid redirect URL', 
                                         nLinesToSearch  = 150,
-                                        SearchFromEnd   = True
-                                ) :
+                                        SearchFromEnd   = True) ):
                                     jobStatus = 5 # job failed due to XRootD error
+                                    if printLevel >= 3:
+                                        print(f"  jobStatus = 5")
+                                        
 
-                            elif searchStringInFile(
+                            elif (searchStringInFile(
                                     sFileName       = sCondorLog_to_use,
                                     searchString    = 'Job was aborted',
                                     nLinesToSearch  = 3,
-                                    SearchFromEnd   = True):
-                                    # check wheter sCondorError does not exist due to Job was aborted
-                                    jobStatus = 4 # job aborted
-
+                                    SearchFromEnd   = True)):
+                                # check wheter sCondorError does not exist due to Job was aborted
+                                jobStatus = 4 # job aborted
+                                if printLevel >= 3:
+                                    print(f"  jobStatus = 4")
+                                    
+                                    
                             else:
                                 jobStatus = 2 # job is running
+                                if printLevel >= 3:
+                                    print(f"  jobStatus = 2")
                                 
                                 
 
@@ -338,7 +357,7 @@ if __name__ == '__main__':
                     
 
                     if printLevel >= 0:
-                        print(f"\t {sOpRootFile_to_use}:: jobStatus: {jobStatus}, isConfigExist: {isConfigExist}, isOpRootFileExist: {isOpRootFileExist}, isCondorExecExist: {isCondorExecExist}, isCondorSubmitExist: {isCondorSubmitExist}, isCondorLogExist: {isCondorLogExist}, isCondorOutputExist: {isCondorOutputExist}, isCondorErrorExist: {isCondorErrorExist}")
+                        print(f"\t {sOpRootFile_to_use}:: jobStatus: {jobStatus}, isConfigExist: {isConfigExist}, isOpRootFileExist: {isOpRootFileExist}, isCondorExecExist: {isCondorExecExist}, isCondorSubmitExist: {isCondorSubmitExist}, isCondorLogExist: {isCondorLogExist}, isCondorOutputExist: {isCondorOutputExist}, isCondorErrorExist: {isCondorErrorExist}"); sys.stdout.flush()
                         
 
                     #if iJobSubmission == 0:

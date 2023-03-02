@@ -1,3 +1,4 @@
+import sys
 import json
 #import uproot
 import uproot3 as uproot
@@ -20,13 +21,14 @@ def setXRootDRedirector(fileName):
     
     redirector_toUse = None
     for redirector in xrootd_redirectorNames:
-        print(f"setXRootDRedirector():: Checking {redirector + fileName}")
+        print(f"setXRootDRedirector():: Checking {redirector + fileName}"); sys.stdout.flush()
         with uproot.open(redirector + fileName) as file1:
             #print(f"\n{redirector + fileName}: file1.keys(): {file1.keys()}")
-            print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}")
+            #print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}"); sys.stdout.flush()
 
             #if file1['Events'].num_entries > 0:
             if file1['Events'].numentries > 0:
+                print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}"); sys.stdout.flush()
                 redirector_toUse = redirector
                 break
     #print(f"redirector_toUse: {redirector_toUse}")
