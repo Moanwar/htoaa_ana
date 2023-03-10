@@ -1,6 +1,6 @@
 # htoaa Analysis Framework using Coffea
 
-## Seting environment using conda
+## Seting up environment using conda
 1. Install 'conda' on your system/lxplus. Suggestion: Follow https://docs.anaconda.com/anaconda/install/linux/
 2. Once conda is installed, set up conda environment named ' myCondaEnv' to install the required software libraries/packages using
    ```
