@@ -43,11 +43,12 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 '''
 
 
+# use GOldenJSON
 
  
-printLevel = 1
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+printLevel = 2
+nEventToReadInBatch = 20 #0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  20 #-1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -187,6 +188,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         cutFlow_axis  = hist.Bin("CutFlow",   r"Cuts",            21, -0.5, 20.5)
         nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
+        ptLow_axis    = hist.Bin("PtLow",     r"$p_{T}$ [GeV]",   200, 0, 50)
         eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
@@ -197,7 +199,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
         jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
         jetTau_axis   = hist.Bin("TauN",      r"TauN",            100, 0, 1)
-        deltaR_axis   = hist.Bin("deltaR",     r"$delta$ r ",     500, 0, 5)
+        deltaR_axis   = hist.Bin("deltaR",    r"$delta$ r ",      500, 0, 5)
+        HT_axis       = hist.Bin("HT",        r"HT",             2500, 0, 2500)
 
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
@@ -264,14 +267,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
 
-            ('hGenHiggsMass_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
-            ('hMass_GenA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
-            ('hMass_GenAApair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HToAA) [GeV]"}),
-            ('hMass_GenAToBBbarpair_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
-            ('hMass_Gen4BFromHToAA_all',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
-            ('hMass_GenAToBBbarpair_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
-            ('hMass_Gen4BFromHToAA_all_1',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
-            ('hDeltaR_GenH_GenB_max',                        {sXaxis: deltaR_axis,       sXaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
+            ('hGenHiggsMass_all',                         {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
+            ('hMass_GenA_all',                            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
+            ('hMass_GenAApair_all',                       {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HToAA) [GeV]"}),
+            ('hMass_GenAToBBbarpair_all',                 {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
+            ('hMass_Gen4BFromHToAA_all',                  {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
+            ('hMass_GenAToBBbarpair_all_1',               {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN AToBB) [GeV]"}),
+            ('hMass_Gen4BFromHToAA_all_1',                {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
+            ('hDeltaR_GenH_GenB_max',                     {sXaxis: deltaR_axis,     sXaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
+
+            # QCD sample sticking
+            ('hGenLHE_HT_all',                            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenBQuarkPt_all',                          {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B) [GeV]"}),
+            
 
             # 2-D distribution
             ('hMass_GenA1_vs_GenA2_all',                       {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A1) [GeV]",
@@ -373,19 +381,24 @@ class HToAATo4bProcessor(processor.ProcessorABC):
     def process(self, events):
         dataset = events.metadata["dataset"] # dataset label
         self.datasetInfo[dataset]['isSignal'] = False
+        self.datasetInfo[dataset]['isQCD'] = False
 
         if printLevel >= 2:
             print(f"nEvents: {len(events)}")
         if printLevel >= 2:
             print(f"\n events.fields: {events.fields}")
-            print(f"\n events.HLT.fields: {events.HLT.fields}")
+            #print(f"\n events.HLT.fields: {events.HLT.fields}")
             #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
             #print(f"\n events.L1.fields: {events.L1.fields}")
             #printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
+            print(f"\n events.LHE.fields: {events.LHE.fields}")
+            print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
         
         if self.datasetInfo[dataset]['isMC']:
             self.datasetInfo[dataset]['isSignal'] = True if "HToAATo4B" in dataset else False
+            self.datasetInfo[dataset]['isQCD']    = True if "QCD"       in dataset else False
+            
             output = self.accumulator.identity()
             systematics_shift = [None]
             for _syst in systematics_shift:
@@ -506,6 +519,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)            
 
                 
+        # QCD MC ----------------------------------------------
+        if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
+            genBQuarks_QCD = events.GenPart[(
+                (abs(events.GenPart.pdgId) == 5)
+            )]
+
+            if printLevel >= 2:
+                #print(f"genBQuarks_QCD")
+                printVariable('\n genBQuarks_QCD', genBQuarks_QCD)
+                printVariable('\n genBQuarks_QCD.status', genBQuarks_QCD.status)
+                printVariable('\n genBQuarks_QCD.statusFlags', genBQuarks_QCD.statusFlags)
+            
 
         # Reco-level -----------------------------------------------------------------------------------
         # FatJet selection
@@ -549,7 +574,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             printVariable("\n ak.singletons(leadingFatJet.btagDeepB)", ak.singletons(leadingFatJet.btagDeepB))
             printVariable("\n leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]", leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB])
 
-            
+        #if printLevel >= 2:
+        #    print(f" : {}")
             
         #####################
         # EVENT SELECTION
@@ -1416,8 +1442,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
+
+                
+            # QCD MC ----------------------------------------------
+            if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
+                output['hGenLHE_HT_all'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
                 
 
+
+                
             '''
             output[''].fill(
                 dataset=dataset,

@@ -37,8 +37,14 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
             f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
             #f.write("cd ")
-            f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
-            f.write("eval \n")
+            #f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+
+            # Using x509 proxy without shipping it with the job  https://batchdocs.web.cern.ch/tutorial/exercise2e_proxy.html
+            f.write("export X509_USER_PROXY=$1 \n")
+            f.write("voms-proxy-info -all \n")
+            f.write("voms-proxy-info -all -file $1 \n")
+            
+            #f.write("eval \n")
             f.write("cd %s \n" % (pwd))
             f.write("source /afs/cern.ch/user/s/ssawant/.bashrc \n")
             f.write("which conda \n")
@@ -88,6 +94,8 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
     #if not os.path.isfile(condor_submit_file):
     with open(condor_submit_file, 'w') as f:
         f.write("universe = vanilla \n")
+        
+        
         f.write("executable = %s \n" % condor_exec_file)
         f.write("getenv = TRUE \n")
         f.write("log = %s \n" % (sCondorLog_to_use))
@@ -97,8 +105,10 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         f.write("should_transfer_files = YES \n")
         f.write("when_to_transfer_output = ON_EXIT \n")
 
-        f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
-        f.write("use_x509userproxy = true \n")        
+        #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
+        #f.write("use_x509userproxy = true \n")
+        f.write("x509userproxy=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+        f.write("arguments = ${x509userproxy}  \n")        
         
         #f.write("+JobFlavour = \"longlunch\" \n")
         f.write("+JobFlavour = \"%s\" \n" % (jobFlavours[iJobFlavour]))

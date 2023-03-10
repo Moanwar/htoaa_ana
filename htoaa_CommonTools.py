@@ -28,7 +28,7 @@ def setXRootDRedirector(fileName):
 
             #if file1['Events'].num_entries > 0:
             if file1['Events'].numentries > 0:
-                print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}"); sys.stdout.flush()
+                print(f"{redirector + fileName}: file1.keys(): {file1['Events'].numentries}"); sys.stdout.flush()
                 redirector_toUse = redirector
                 break
     #print(f"redirector_toUse: {redirector_toUse}")
