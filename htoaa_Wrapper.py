@@ -37,26 +37,26 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
             f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
             #f.write("cd ")
-            #f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+            f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
 
             # Using x509 proxy without shipping it with the job  https://batchdocs.web.cern.ch/tutorial/exercise2e_proxy.html
-            f.write("export X509_USER_PROXY=$1 \n")
-            f.write("voms-proxy-info -all \n")
-            f.write("voms-proxy-info -all -file $1 \n")
+            #f.write("export X509_USER_PROXY=$1 \n")
+            #f.write("voms-proxy-info -all \n")
+            #f.write("voms-proxy-info -all -file $1 \n")
             
             #f.write("eval \n")
             f.write("cd %s \n" % (pwd))
             f.write("source /afs/cern.ch/user/s/ssawant/.bashrc \n")
-            f.write("which conda \n")
-            f.write("time conda env list \n")
+            #f.write("which conda \n")
+            #f.write("time conda env list \n")
             f.write("conda activate ana_htoaa \n")
-            f.write("time conda env list \n")
+            #f.write("time conda env list \n")
 
-            f.write("time conda list \n")
-            f.write("which python3 \n")
-            f.write("python3 -V \n")
+            #f.write("time conda list \n")
+            #f.write("which python3 \n")
+            #f.write("python3 -V \n")
             #f.write(" \n")
-            f.write("conda activate ana_htoaa \n")
+            #f.write("conda activate ana_htoaa \n")
             #f.write("time python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
             f.write("time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/bin/python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
 
@@ -95,6 +95,10 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
     with open(condor_submit_file, 'w') as f:
         f.write("universe = vanilla \n")
         
+        #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
+        #f.write("use_x509userproxy = true \n")
+        f.write("X509_USER_PROXY = /afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+        f.write("arguments = $(X509_USER_PROXY)  \n")        
         
         f.write("executable = %s \n" % condor_exec_file)
         f.write("getenv = TRUE \n")
@@ -104,11 +108,6 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         f.write("notification = never \n")
         f.write("should_transfer_files = YES \n")
         f.write("when_to_transfer_output = ON_EXIT \n")
-
-        #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
-        #f.write("use_x509userproxy = true \n")
-        f.write("x509userproxy=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
-        f.write("arguments = ${x509userproxy}  \n")        
         
         #f.write("+JobFlavour = \"longlunch\" \n")
         f.write("+JobFlavour = \"%s\" \n" % (jobFlavours[iJobFlavour]))
@@ -152,7 +151,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
-    parser.add_argument('-run_mode',          type=str, default='local', choices=['local', 'condor'])
+    parser.add_argument('-run_mode',          type=str, default='condor', choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None, required=True)
     parser.add_argument('-samples',           type=str, default=None, help='samples to run seperated by comma')
     parser.add_argument('-nFilesPerJob',      type=int, default=10)

@@ -35,6 +35,10 @@ import uproot
 
 from htoaa_Settings import *
 from htoaa_CommonTools import GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector
+from htoaa_Samples import (
+    kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
+)
+
 '''
 from htoaa_Settings import *
 from htoaa_NanoAODBranches import htoaa_nanoAODBranchesToRead
@@ -46,9 +50,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 # use GOldenJSON
 
  
-printLevel = 2
-nEventToReadInBatch = 20 #0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  20 #-1 # 1000 # 100000 # -1
+printLevel = 0
+nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -394,10 +398,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             print(f"\n events.LHE.fields: {events.LHE.fields}")
             print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
+
+        self.datasetInfo[dataset]['isSignal'] = False
+        self.datasetInfo[dataset]['isQCD'] = False
+        self.datasetInfo[dataset]['isQCDIncl'] = False
+        self.datasetInfo[dataset]['isQCD_bEnrich'] = False
+        self.datasetInfo[dataset]['isQCD_bGen'] = False
         
         if self.datasetInfo[dataset]['isMC']:
-            self.datasetInfo[dataset]['isSignal'] = True if "HToAATo4B" in dataset else False
-            self.datasetInfo[dataset]['isQCD']    = True if "QCD"       in dataset else False
+            self.datasetInfo[dataset]['isSignal']      = True if "HToAATo4B"   in dataset else False
+            self.datasetInfo[dataset]['isQCD']         = True if "QCD"         in dataset else False
+            self.datasetInfo[dataset]['isQCDIncl']     = True if kQCDIncl      in dataset else False
+            self.datasetInfo[dataset]['isQCD_bEnrich'] = True if kQCD_bEnrich  in dataset else False
+            self.datasetInfo[dataset]['isQCD_bGen']    = True if kQCD_bGen     in dataset else False
             
             output = self.accumulator.identity()
             systematics_shift = [None]
@@ -530,6 +543,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable('\n genBQuarks_QCD', genBQuarks_QCD)
                 printVariable('\n genBQuarks_QCD.status', genBQuarks_QCD.status)
                 printVariable('\n genBQuarks_QCD.statusFlags', genBQuarks_QCD.statusFlags)
+                printVariable('\n genBQuarks_QCD.genPartIdxMotherG', genBQuarks_QCD.genPartIdxMotherG)
+                printVariable('\n genBQuarks_QCD.distinctParentIdxG', genBQuarks_QCD.distinctParentIdxG)
+                printVariable('\n genBQuarks_QCD.childrenIdxG', genBQuarks_QCD.childrenIdxG)
+                printVariable('\n genBQuarks_QCD.distinctChildrenIdxG', genBQuarks_QCD.distinctChildrenIdxG)
+                #printVariable('\n genBQuarks_QCD', genBQuarks_QCD)
+
             
 
         # Reco-level -----------------------------------------------------------------------------------
@@ -596,6 +615,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 HLT_AK8PFJet330_name
             ]),
         ])
+        #if self.datasetInfo[dataset]['isQCD']: sel_names_all["SR"].append("QCDStitch")
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
         cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + sel_names_all["SR"] #.copy()
 
@@ -672,7 +692,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
         
 
-        
+        #if "QCDStitch" in sel_names_all["SR"]:
+        #    if self.datasetInfo[dataset]['isQCD_bEnrich'] or self.datasetInfo[dataset]['isQCD_bGen']:
+            
+
+            
         #sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR           = selection.all(* sel_names_all["SR"])
         sel_GenHToAATo4B = None

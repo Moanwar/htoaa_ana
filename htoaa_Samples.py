@@ -2,6 +2,9 @@
 from collections import OrderedDict as OD
 
 kData = "Data" # dict key for Datasets
+kQCD_bEnrich = "QCD_bEnrich"
+kQCD_bGen = "QCD_bGen"
+kQCDIncl = "QCDIncl"
 
 Samples2018 = OD([
 
@@ -18,7 +21,7 @@ Samples2018 = OD([
         "JetHT_Run2018D"
     ]),
     
-    ("QCD_bEnrich",[
+    (kQCD_bEnrich,[
         "QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8",
@@ -29,7 +32,7 @@ Samples2018 = OD([
         "QCD_bEnriched_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8"
     ]),
 
-    ("QCD_bGen",[
+    (kQCD_bGen,[
         "QCD_HT100to200_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_HT200to300_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_HT300to500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
@@ -40,7 +43,7 @@ Samples2018 = OD([
         "QCD_HT2000toInf_BGenFilter_TuneCP5_13TeV-madgraph-pythia8"
     ]),
 
-    ("QCDIncl",[
+    (kQCDIncl,[
         "QCD_HT50to100_TuneCP5_13TeV-madgraphMLM-pythia8",
         "QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8",
