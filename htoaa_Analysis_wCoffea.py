@@ -50,9 +50,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 # use GOldenJSON
 
  
-printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
+printLevel = 1
+nEventToReadInBatch = 20 #0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze =  20 #-1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -205,6 +205,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         jetTau_axis   = hist.Bin("TauN",      r"TauN",            100, 0, 1)
         deltaR_axis   = hist.Bin("deltaR",    r"$delta$ r ",      500, 0, 5)
         HT_axis       = hist.Bin("HT",        r"HT",             2500, 0, 2500)
+        PytPartStatus_axis = hist.Bin("PytPartStatus",        r"PytPartStatus",       421,-210.5, 210.5)
 
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
@@ -282,7 +283,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # QCD sample sticking
             ('hGenLHE_HT_all',                            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-            ('hGenBQuarkPt_all',                          {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B) [GeV]"}),
+            ('hGenBquark_Status_all',                     {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN Bquark Pythia status"}),
+            ('hGenBquark_leadingPt_all',                  {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, leading pT) [GeV]"}),
+            ('hGenBquark_subleadingPt_all',               {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, subleading pT) [GeV]"}),
+            ('hGenBquark_thirdLeadingPt_all',             {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, third leading pT) [GeV]"}),
+            ('hGenBquark_forthLeadingPt_all',             {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, forth leading pT) [GeV]"}),
             
 
             # 2-D distribution
@@ -549,7 +554,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable('\n genBQuarks_QCD.distinctChildrenIdxG', genBQuarks_QCD.distinctChildrenIdxG)
                 #printVariable('\n genBQuarks_QCD', genBQuarks_QCD)
 
-            
+            genBQuarks_pT = ak.sort(genBQuarks_QCD.pt, axis=-1)
 
         # Reco-level -----------------------------------------------------------------------------------
         # FatJet selection
@@ -1476,7 +1481,46 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen
                 )
-                
+                output['hGenBquark_Status_all'].fill(
+                    dataset=dataset,
+                    PytPartStatus=(ak.flatten(genBQuarks_QCD.status)),
+                    systematic=syst
+                )
+                '''
+                output['hGenBquark_leadingPt_all'].fill(
+                    dataset=dataset,
+                    PtLow=(genBQuarks_pT[:, 0]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                if ak.count(genBQuarks_pT, axis=-1):
+                output['hGenBquark_subleadingPt_all'].fill(
+                    dataset=dataset,
+                    PtLow=(genBQuarks_pT[:, 1]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenBquark_thirdLeadingPt_all'].fill(
+                    dataset=dataset,
+                    PtLow=(genBQuarks_pT[:, 2]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenBquark_forthLeadingPt_all'].fill(
+                    dataset=dataset,
+                    PtLow=(genBQuarks_pT[:, 3]),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                '''
+                if printLevel >= 1:                    
+                    printVariable("\n genBQuarks_pT", genBQuarks_pT)
+                    printVariable("\n ak.count(genBQuarks_pT, axis=-1)", ak.count(genBQuarks_pT, axis=-1))
+                    printVariable("\n (ak.count(genBQuarks_pT, axis=-1) > 2)", (ak.count(genBQuarks_pT, axis=-1) > 2))
+                    printVariable("\n evtWeight_gen", evtWeight_gen)
+                    printVariable("\n evtWeight_gen[(ak.count(genBQuarks_pT, axis=-1) > 2)]", evtWeight_gen[(ak.count(genBQuarks_pT, axis=-1) > 2)])
+
+                    
 
 
                 
