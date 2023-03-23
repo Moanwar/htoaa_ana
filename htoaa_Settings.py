@@ -9,7 +9,8 @@ xrootd_redirectorName  = "root://xrootd-cms.infn.it//"
 xrootd_redirectorNames = [
     "root://xrootd-cms.infn.it/",
     "root://cms-xrd-global.cern.ch/",
-    "root://cmsxrootd.fnal.gov/"        
+    "root://cmsxrootd.fnal.gov/",
+    "root://cms-xrd-global.cern.ch:1094/",
 ]
 sampleFormat = "nanoAOD"
 
@@ -43,6 +44,25 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         },
     },
 }
+
+
+GENPART_STATUSFLAGS = [
+    "isPrompt",
+    "isDecayedLeptonHadron",
+    "isTauDecayProduct",
+    "isPromptTauDecayProduct",
+    "isDirectTauDecayProduct",
+    "isDirectPromptTauDecayProduct",
+    "isDirectHadronDecayProduct",
+    "isHardProcess",
+    "fromHardProcess",
+    "isHardProcessTauDecayProduct",
+    "isDirectHardProcessTauDecayProduct",
+    "fromHardProcessBeforeFSR",
+    "isFirstCopy",
+    "isLastCopy",
+    "isLastCopyBeforeFSR",
+]
 
 
 

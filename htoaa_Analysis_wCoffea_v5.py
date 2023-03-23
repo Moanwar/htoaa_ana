@@ -52,9 +52,9 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 # use GOldenJSON
 
  
-printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = -1 # 1000 # 100000 # -1
+printLevel = 2
+nEventToReadInBatch = 1 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = 20 #-1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -209,7 +209,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         cutFlow_axis  = hist.Bin("CutFlow",   r"Cuts",            21, -0.5, 20.5)
         nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
-        ptLow_axis    = hist.Bin("PtLow",     r"$p_{T}$ [GeV]",   200, 0, 100)
+        ptLow_axis    = hist.Bin("PtLow",     r"$p_{T}$ [GeV]",   200, 0, 50)
         eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -5, 5)
         phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
@@ -302,10 +302,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # QCD sample sticking
             ('hGenLHE_HT_all',                            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-            ('hGenLHE_HT_QCDStitch',                      {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenBquark_Status_all',                     {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN Bquark Pythia status"}),
             ('hGenBquark_first_Status_all',               {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN first Bquark Pythia status"}),
-            ('hGenBquark_first_PdgId_all',                {sXaxis: pdgId_axis,       sXaxisLabel: r"GEN first Bquark pdgId"}),
+            ('hGenBquark_first_PdgId_all',               {sXaxis: pdgId_axis,       sXaxisLabel: r"GEN first Bquark pdgId"}),
 
             #('hGenBquark_first_isPrompt_all',             {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark isPrompt"}),
 
@@ -315,10 +314,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenBquark_subleadingPt_all',               {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, subleading pT) [GeV]"}),
             ('hGenBquark_thirdLeadingPt_all',             {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, third leading pT) [GeV]"}),
             ('hGenBquark_forthLeadingPt_all',             {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, forth leading pT) [GeV]"}),
-            ('hGenBquark_leadingPt_QCDStitch',            {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, leading pT) [GeV]"}),
-            ('hGenBquark_subleadingPt_QCDStitch',         {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, subleading pT) [GeV]"}),
-            ('hGenBquark_thirdLeadingPt_QCDStitch',       {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, third leading pT) [GeV]"}),
-            ('hGenBquark_forthLeadingPt_QCDStitch',       {sXaxis: ptLow_axis,      sXaxisLabel: r"pT (GEN B, forth leading pT) [GeV]"}),
             
 
             # 2-D distribution
@@ -594,12 +589,178 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             mask_genBQuarks = (ak.count(genBQuarks_QCD.pdgId, axis=1) >= 1)
 
             
+            if printLevel >= 4:
+                #printVariable('\n ', ); sys.stdout.flush()
+                printVariable('\n mask_genBQuarks', mask_genBQuarks); sys.stdout.flush()
+                printVariable('\n genBQuarks_QCD[mask_genBQuarks]', genBQuarks_QCD[mask_genBQuarks]); sys.stdout.flush()
+                printVariable('\n genBQuarks_QCD.pdgId', genBQuarks_QCD.pdgId); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.pdgId', genBQuarks_first.pdgId); sys.stdout.flush()
+                printVariable('\n abs(genBQuarks_first.pdgId)', abs(genBQuarks_first.pdgId)); sys.stdout.flush()
+                #print(f"\n ak.drop_none(abs(genBQuarks_first.pdgId)): {ak.drop_none(abs(genBQuarks_first.pdgId))}"); sys.stdout.flush()
+                print(f"\n ak.to_numpy(abs(genBQuarks_first.pdgId)) {type(ak.to_numpy(abs(genBQuarks_first.pdgId)))}: {ak.to_numpy(abs(genBQuarks_first.pdgId))}"); sys.stdout.flush()
+                print(f"\n ak.to_numpy(abs(genBQuarks_first[mask_genBQuarks].pdgId)) {type(ak.to_numpy(abs(genBQuarks_first[mask_genBQuarks].pdgId)))}: {ak.to_numpy(abs(genBQuarks_first[mask_genBQuarks].pdgId))}"); sys.stdout.flush()
+                #print(f"\n ak.flatten(abs(genBQuarks_first.pdgId)): {ak.flatten(abs(genBQuarks_first.pdgId))}"); sys.stdout.flush()
+                
+                
+            if printLevel >= 4:
+                #print(f"genBQuarks_QCD")
+                #printVariable('\n ', ); sys.stdout.flush()
+                #printVariable('\n mask: genBQuarks_QCD', (abs(events.GenPart.pdgId) == 5)); sys.stdout.flush()
+                #printVariable('\n events.GenPart', events.GenPart); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD', genBQuarks_QCD); sys.stdout.flush()
+                printVariable('\n genBQuarks_QCD.status', genBQuarks_QCD.status); sys.stdout.flush()
+                printVariable('\n genBQuarks_QCD.statusFlags', genBQuarks_QCD.statusFlags); sys.stdout.flush()
+                printVariable('\n genBQuarks_QCD.genPartIdxMother', genBQuarks_QCD.genPartIdxMother); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD.genPartIdxMotherG', genBQuarks_QCD.genPartIdxMotherG); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD.distinctParentIdxG', genBQuarks_QCD.distinctParentIdxG); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD.childrenIdxG', genBQuarks_QCD.childrenIdxG); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD.distinctChildrenIdxG', genBQuarks_QCD.distinctChildrenIdxG); sys.stdout.flush()
+                #printVariable('\n genBQuarks_QCD', genBQuarks_QCD)
+                
+                #printVariable('\n ak.first(genBQuarks_QCD)', ak.firsts(genBQuarks_QCD)); sys.stdout.flush()
+
+                # genBQuarks_QCD[:, 0] status, IdxMother
+
+                for flag_ in GENPART_STATUSFLAGS:
+                    printVariable('\n genBQuarks_first.hasFlags(%s))' % (flag_), genBQuarks_first.hasFlags(flag_)); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.parent', genBQuarks_first.parent); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.parent.pdgId', genBQuarks_first.parent.pdgId); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.parent.status', genBQuarks_first.parent.status); sys.stdout.flush()
+                
+                printVariable('\n genBQuarks_first.distinctParent', genBQuarks_first.distinctParent); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.distinctParent.pdgId', genBQuarks_first.distinctParent.pdgId); sys.stdout.flush()
+                printVariable('\n genBQuarks_first.distinctParent.status', genBQuarks_first.distinctParent.status); sys.stdout.flush()
+
+            
+            if printLevel >= 4:
+                #printVariable('\n ', ); sys.stdout.flush()
+                printVariable('\n *** genBQuarks_first', genBQuarks_first); sys.stdout.flush()
+                #printVariable('\n mask_genBQuarks_wMotherIdx', mask_genBQuarks_wMotherIdx); sys.stdout.flush()
+                #printVariable('\n events.GenPart[mask_genBQuarks_wMotherIdx]', events.GenPart[mask_genBQuarks_wMotherIdx]); sys.stdout.flush()
+                #printVariable('\n events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother', events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother); sys.stdout.flush()
+                printVariable('\n ak.firsts( events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ] )', ak.firsts( events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ] ) ); sys.stdout.flush()
+                printVariable('\n ak.firsts( events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ].pdgId )', ak.firsts( events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ].pdgId )); sys.stdout.flush()
+
+
+                '''
+                printVariable('\n ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother)', ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ); sys.stdout.flush()
+                #printVariable('\n ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, highlevel=False)', ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, highlevel=False ) ); sys.stdout.flush()
+                print(f"\n ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, highlevel=False ): {ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, highlevel=False )}")
+                #print(f"\n ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, behavior=dict ): {ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, behavior=dict )}")
+                print(f"\n ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, behavior=ak.behavior ): {ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother, behavior=ak.behavior )}")
+                
+                #printVariable('\n events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ]', events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ]); sys.stdout.flush()
+                printVariable('\n events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ].pdgId', events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ].pdgId); sys.stdout.flush()
+                #printVariable('\n ak.count( events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ] )', ak.count( events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ] )); sys.stdout.flush()
+                print(f"\n ak.count( events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ].pdgId, axis=-1 ): {  ak.count( events.GenPart[ ak.firsts( events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ) ].pdgId, axis=-1 ).to_list() }")
+                '''
+
+                
+
+                
+                print(f"\n ak.count(events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ].pdgId, axis=-1): {ak.count(events.GenPart[ events.GenPart[mask_genBQuarks_wMotherIdx].genPartIdxMother ].pdgId, axis=-1).to_list()}")
+                print(f"\n ak.count(events.GenPart.pdgId, axis=-1): {ak.count(events.GenPart.pdgId, axis=-1).to_list()}")
+                
+                '''
+                printVariable('\n events.GenPart[(genBQuarks_first.genPartIdxMother)]', events.GenPart[(genBQuarks_first.genPartIdxMother)]); sys.stdout.flush()
+                printVariable('\n events.GenPart[(genBQuarks_first.genPartIdxMother)].pdgId', events.GenPart[(genBQuarks_first.genPartIdxMother)].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[(genBQuarks_first.genPartIdxMother)].status', events.GenPart[(genBQuarks_first.genPartIdxMother)].status); sys.stdout.flush()
+                '''
+
+
+            '''    
+            def bitwiseTransformer(layout, **kwarg):
+                print(f"layout {type(layout)} : {layout}")
+
+            #genPart_copy = ak.with_field(events.GenPart)
+            #genPart_copy = events.GenPart.statusFlags
+            genPart_copy = copy(events.GenPart)
+            #genPart_copy['statusFlags_inBits'] = genPart_copy.statusFlags.apply(lambda x: bin(x), axis=1)
+            #genPart_copy1 = ak.transform(genPart_copy.statusFlags)
+            #ak.transform(bitwiseTransformer, genPart_copy.statusFlags)
+
+            if printLevel >= 2:
+                printVariable('\n genPart_copy', genPart_copy); sys.stdout.flush()
+                printVariable('\n genPart_copy[statusFlags]', genPart_copy['statusFlags']); sys.stdout.flush()
+                printVariable('\n events.GenPart.statusFlags', events.GenPart.statusFlags); sys.stdout.flush()
+                #print(f"bin(genPart_copy.statusFlags): {bin(genPart_copy.statusFlags)}")
+
+                #print(f"genBQuarks_first.statusFlags: {genBQuarks_first.statusFlags}")
+                #print(f"np.binary_repr(genBQuarks_first.statusFlags): {np.binary_repr(genBQuarks_first.statusFlags)}")
+
+                #printVariable('\n ', ); sys.stdout.flush()
+                #printVariable('\n genBQuarks_first.statusFlags', genBQuarks_first.statusFlags); sys.stdout.flush()
+                #printVariable('\n ak.drop_none(genBQuarks_first.statusFlags)', ak.drop_none(genBQuarks_first.statusFlags)); sys.stdout.flush()
+                #printVariable('\n ak.fill_none(genBQuarks_first.statusFlags, value=0)', ak.fill_none(genBQuarks_first.statusFlags, value=0)); sys.stdout.flush()
+                #printVariable('\n np.unpackbits(genBQuarks_first.statusFlags)', np.unpackbits(genBQuarks_first.statusFlags)); sys.stdout.flush()
+                #print(f"\n np.unpackbits(ak.fill_none(genBQuarks_first.statusFlags, value=0)): {np.unpackbits(ak.fill_none(genBQuarks_first.statusFlags, value=0))}")
+
+            '''
+
+            #print(f"events.GenPart.hasFlags(['isHardProcess']): {events.GenPart.hasFlags(['isHardProcess'])}")
+            
+            if printLevel >= 4:
+                mask_genBQuarks_first_isHardProcess = (
+                    #(ak.num(genBQuarks_QCD.pdgId, axis=1) >=1) &
+                    (genBQuarks_first.hasFlags('isHardProcess'))                    
+                ) 
+                mask_genBQuarks_first_isHardProcess = ak.fill_none(mask_genBQuarks_first_isHardProcess, value=False)
+                #printVariable("\n mask_genBQuarks_first_isHardProcess", mask_genBQuarks_first_isHardProcess)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess]", genBQuarks_first[mask_genBQuarks_first_isHardProcess])
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].pdgId", genBQuarks_first[mask_genBQuarks_first_isHardProcess].pdgId)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].status", genBQuarks_first[mask_genBQuarks_first_isHardProcess].status)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].genPartIdxMother", genBQuarks_first[mask_genBQuarks_first_isHardProcess].genPartIdxMother)
+                
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent", genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].children", genBQuarks_first[mask_genBQuarks_first_isHardProcess].children)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren)
+                #printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildrenDeep", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildrenDeep)
+                #printVariable("\n ", )
+                #printVariable("\n ", )
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent.pdgId", genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent.pdgId)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent.status", genBQuarks_first[mask_genBQuarks_first_isHardProcess].parent.status)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent.pdgId", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent.pdgId)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent.status", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctParent.status)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].children.pdgId", genBQuarks_first[mask_genBQuarks_first_isHardProcess].children.pdgId)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].children.status", genBQuarks_first[mask_genBQuarks_first_isHardProcess].children.status)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren.pdgId", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren.pdgId)
+                printVariable("\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren.status", genBQuarks_first[mask_genBQuarks_first_isHardProcess].distinctChildren.status)
+            
+                for flag_ in GENPART_STATUSFLAGS:
+                    printVariable('\n genBQuarks_first[mask_genBQuarks_first_isHardProcess].hasFlags(%s))' % (flag_), genBQuarks_first[mask_genBQuarks_first_isHardProcess].hasFlags(flag_)); sys.stdout.flush()
+
+                printVariable("\n\n\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess]", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess])
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].pdgId", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].pdgId)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].status", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].status)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].genPartIdxMother", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].genPartIdxMother)
+
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren)
+                #printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildrenDeep", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildrenDeep)
+                
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent.pdgId", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent.pdgId)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent.status", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].parent.status)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent.pdgId", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent.pdgId)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent.status", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctParent.status)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children.pdgId", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children.pdgId)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children.status", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].children.status)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren.pdgId", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren.pdgId)
+                printVariable("\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren.status", genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].distinctChildren.status)
+
+                for flag_ in GENPART_STATUSFLAGS:
+                    printVariable('\n genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].hasFlags(%s))' % (flag_), genBQuarks_QCD[mask_genBQuarks_first_isHardProcess].hasFlags(flag_)); sys.stdout.flush()
+                
+
+
             if printLevel >= 2:
                 printVariable('\n events.GenPart[(events.GenPart.status == 2)].pdgId', events.GenPart[(events.GenPart.status == 2)].pdgId); sys.stdout.flush()
 
 
-            # Check if event has B-hadron with pythia status==2, which are QCD-BGenFilter requirement -----------------
             mask_genBHadrons_status2 = None
+            #PDGID_BHadrons = [511, 521, 513, 523]
             for ipdgId_tmp in range(len(self.pdgId_BHadrons)):
                 pdgId_tmp = self.pdgId_BHadrons[ipdgId_tmp]
                 mask_genBHadrons_status2_i = (
@@ -616,31 +777,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     printVariable('\n\n %d \t mask_genBHadrons_status2_i' % pdgId_tmp, mask_genBHadrons_status2_i); sys.stdout.flush()
                     printVariable('\n     \t mask_genBHadrons_status2  ', mask_genBHadrons_status2); sys.stdout.flush()
                     
+            genBHadrons_status2 = events.GenPart[mask_genBHadrons_status2]
             mask_genBHadrons_status2_eventwise = ak.any(mask_genBHadrons_status2, axis=1)
                     
             if printLevel >= 2:
-                genBHadrons_status2 = events.GenPart[mask_genBHadrons_status2]
                 printVariable('\n genBHadrons_status2', genBHadrons_status2); sys.stdout.flush()
                 printVariable(' genBHadrons_status2.pdgId', genBHadrons_status2.pdgId); sys.stdout.flush()
                 printVariable(' ak.any(mask_genBHadrons_status2, axis=1)', ak.any(mask_genBHadrons_status2, axis=1)); sys.stdout.flush()
 
-
-            # Check if events has b-quark outgoing from hard subprocess -----------------------------------------------
             mask_genBQuarks_hardSctred = (
                 (abs(events.GenPart.pdgId) == 5) &
                 (abs(events.GenPart.status) == 23)
             )
+            genBQuarks_hardSctred = events.GenPart[mask_genBQuarks_hardSctred]
             mask_genBQuarks_hardSctred_eventwise = ak.any(mask_genBQuarks_hardSctred, axis=1)
             
             if printLevel >= 2:
-                genBQuarks_hardSctred = events.GenPart[mask_genBQuarks_hardSctred]
                 printVariable('\n genBQuarks_hardSctred', genBQuarks_hardSctred); sys.stdout.flush()
                 printVariable(' genBQuarks_hardSctred.hasFlags("isHardProcess")', genBQuarks_hardSctred.hasFlags("isHardProcess")); sys.stdout.flush()
                 printVariable(' genBQuarks_hardSctred.hasFlags("fromHardProcess")', genBQuarks_hardSctred.hasFlags("fromHardProcess")); sys.stdout.flush()
                 printVariable(' ak.any(mask_genBQuarks_hardSctred, axis=1)', ak.any(mask_genBQuarks_hardSctred, axis=1)); sys.stdout.flush()
 
 
-            # QCD stitch conditions -----------------------------------------------------------------------------------
             if self.datasetInfo[dataset]['isQCD_bEnrich']:
                 mask_QCD_stitch_eventwise = trues_list
             elif self.datasetInfo[dataset]['isQCD_bGen']:
@@ -1139,7 +1297,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     CutFlow=(ones_list[mask_genBHadrons_status2_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight[mask_genBHadrons_status2_eventwise]
+                    weight=evtWeight
                 )
 
                 # genBHadrons_status2 events
@@ -1153,7 +1311,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     CutFlow=(ones_list[mask_genBQuarks_hardSctred_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight[mask_genBQuarks_hardSctred_eventwise]
+                    weight=evtWeight
                 )
 
                 # QCD_stitch events
@@ -1167,7 +1325,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     CutFlow=(ones_list[mask_QCD_stitch_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight[mask_QCD_stitch_eventwise]
+                    weight=evtWeight
                 )
 
                 
