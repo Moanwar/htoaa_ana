@@ -1,6 +1,7 @@
 
 import os
 import sys
+from pathlib import Path
 import json
 import glob
 import argparse
@@ -28,6 +29,9 @@ sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 
 printLevel = 3
 
+#UserHomePath = os.path.expanduser("~")
+UserHomePath = str(Path.home()) # Python 3.5+
+
 def writeCondorExecFile(condor_exec_file, sConfig_to_use):
     if not os.path.isfile(condor_exec_file):    
         with open(condor_exec_file, 'w') as f:
@@ -37,7 +41,8 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
             f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
             #f.write("cd ")
-            f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+            #f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+            f.write("export X509_USER_PROXY=%s/x509up_u108989  \n" % (UserHomePath))
 
             # Using x509 proxy without shipping it with the job  https://batchdocs.web.cern.ch/tutorial/exercise2e_proxy.html
             #f.write("export X509_USER_PROXY=$1 \n")
@@ -46,7 +51,7 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             
             #f.write("eval \n")
             f.write("cd %s \n" % (pwd))
-            f.write("source /afs/cern.ch/user/s/ssawant/.bashrc \n")
+            f.write("source %s/.bashrc \n" % (UserHomePath))
             #f.write("which conda \n")
             #f.write("time conda env list \n")
             f.write("conda activate ana_htoaa \n")
@@ -57,8 +62,10 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             #f.write("python3 -V \n")
             #f.write(" \n")
             #f.write("conda activate ana_htoaa \n")
+            f.write("pythonPath=$(which python3) \n")
             #f.write("time python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
-            f.write("time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/bin/python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+            #f.write("time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/bin/python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+            f.write("time ${pythonPath} %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
 
         os.system("chmod a+x %s" % condor_exec_file)
 
@@ -97,7 +104,7 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         
         #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
         #f.write("use_x509userproxy = true \n")
-        f.write("X509_USER_PROXY = /afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
+        f.write("X509_USER_PROXY = %s/x509up_u108989  \n" % (UserHomePath))
         f.write("arguments = $(X509_USER_PROXY)  \n")        
         
         f.write("executable = %s \n" % condor_exec_file)
@@ -173,9 +180,7 @@ if __name__ == '__main__':
     dryRun           = args.dryRun
 
     pwd = os.getcwd()
-    DestinationDir = "./%s" % (anaVersion)
-    if   "/home/siddhesh/" in pwd: DestinationDir = "/home/siddhesh/Work/CMS/htoaa/analysis/%s" % (anaVersion)
-    elif "/afs/cern.ch/"   in pwd: DestinationDir = "/afs/cern.ch/work/s/ssawant/private/htoaa/analysis/%s" % (anaVersion)
+    DestinationDir = "../analysis/%s" % (anaVersion)
     sFileRunCommand = "%s/%s" % (DestinationDir, sRunCommandFile)
     sFileJobSubLog  = "%s/%s" % (DestinationDir, sJobSubLogFile)
     if not os.path.exists(DestinationDir): os.mkdir( DestinationDir )
