@@ -2,14 +2,22 @@
 
 ## Seting up environment using conda
 1. Install 'conda' on your system/lxplus. Suggestion: Follow https://docs.anaconda.com/anaconda/install/linux/
+1.1
 2. Once conda is installed, set up conda environment named ' myCondaEnv' to install the required software libraries/packages using
    ```
    conda env create --name myCondaEnv -f environment_lxplus.yml
    ```
 3. Activate conda envirnment every time you login into your system/lxplus
    ```
-   conda env create --name myCondaEnv -f environment_lxplus.yml
+   conda activate myCondaEnv 
    ```
+
+
+## Set proxy every time before submitting HT condor jobs.
+```
+voms-proxy-init --rfc --voms cms -valid 192:00
+cp /tmp/x509up_u108989 ~/
+```
 
 
 ## Running analysis
