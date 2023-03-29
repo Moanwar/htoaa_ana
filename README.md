@@ -5,7 +5,7 @@
 1.1
 2. Once conda is installed, set up conda environment named ' myCondaEnv' to install the required software libraries/packages using
    ```
-   conda create --name myCondaEnv -f environment_lxplus.yml
+   conda env create --name myCondaEnv  --file environment_lxplus.yml 
    ```
 3. Activate conda envirnment every time you login into your system/lxplus
    ```
