@@ -13,7 +13,7 @@
    ```
 
 
-## Set proxy every time before submitting HT condor jobs.
+## Set proxy when you open a new terminal on lxplus
 ```
 voms-proxy-init --rfc --voms cms -valid 192:00
 cp /tmp/x509up_u108989 ~/
