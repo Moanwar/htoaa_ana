@@ -53,7 +53,7 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
  
 printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
@@ -477,7 +477,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.LHE.fields: {events.LHE.fields}")
             #print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
             
-        if nEventToReadInBatch != -1:
+        if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
 
         self.datasetInfo[dataset]['isSignal'] = False
@@ -623,6 +623,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_QCD_stitch_CutBQuarkPt_eventwise = None
         mask_QCD_stitch_eventwise             = None
         if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
+            mask_genLHEHTLt100 = (events.LHE.HT < 100)
+
+            if printLevel >= 2:
+                printVariable('\n events.LHE.HT', events.LHE.HT); sys.stdout.flush()
+                printVariable('\n mask_genLHEHTLt100', mask_genLHEHTLt100); sys.stdout.flush()
+            
+            
             genBQuarks = events.GenPart[(
                 (abs(events.GenPart.pdgId) == 5)
             )]
@@ -720,7 +727,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo[dataset]['isQCD_bEnrich'] or self.datasetInfo[dataset]['isQCD_bGen']:
                 mask_QCD_stitch_CutBQuarkPt_eventwise = mask_genBQuarks_pTAbvTrsh
             elif self.datasetInfo[dataset]['isQCDIncl']:
-                mask_QCD_stitch_CutBQuarkPt_eventwise = (mask_genBQuarks_pTAbvTrsh == False)
+                mask_QCD_stitch_CutBQuarkPt_eventwise = (
+                    (mask_genBQuarks_pTAbvTrsh == False) |
+                    (mask_genLHEHTLt100 == True)
+                )
                 
             if printLevel >= 2:
                 printVariable('\n mask_QCD_stitch_CutBQuarkPt_eventwise', mask_QCD_stitch_CutBQuarkPt_eventwise); sys.stdout.flush()
@@ -735,8 +745,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             elif self.datasetInfo[dataset]['isQCDIncl']:
                 mask_QCD_stitch_CutBHadron_eventwise = (
-                    (mask_genBQuarks_hardSctred_eventwise == False) &
-                    (mask_genBHadrons_status2_eventwise == False)
+                    (
+                        (mask_genBQuarks_hardSctred_eventwise == False) &
+                        (mask_genBHadrons_status2_eventwise == False)
+                    ) |
+                    (
+                        (mask_genLHEHTLt100 == True)
+                    )
                 )
                 
             if printLevel >= 2:
@@ -2047,7 +2062,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                if printLevel >= 2:
+                if printLevel >= 20:
                     mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 1)
                     printVariable("\n genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 0].pt", genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 0].pt)
                     printVariable("\n mask_tmp", mask_tmp)
