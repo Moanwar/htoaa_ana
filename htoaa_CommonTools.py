@@ -1,4 +1,6 @@
+import os
 import sys
+import subprocess
 import json
 #import uproot
 import uproot3 as uproot
@@ -54,6 +56,23 @@ def setXRootDRedirector(fileName):
     
     return redirector_toUse + fileName
 
+def xrdcpFile(sFileName, sFileNameLocal, nTry = 3):
+    command_ = "time xrdcp %s %s" % (sFileName, sFileNameLocal)
+    command_list_ = command_.split(" ")
+    print(f"{command_ = }")
+    for iTry in range(nTry):
+        process = subprocess.Popen(command_list_,
+                                   stdout=subprocess.PIPE, 
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True
+                                   )
+        stdout, stderr = process.communicate()
+        print(f"  {iTry = } {stdout = }, {stderr = }");  sys.stdout.flush()
+        if 'FATAL' not in stderr: # download was successful
+            return True
+
+    return False
+    
 
 def GetDictFromJsonFile(filePath):
     # Lines starting with '#' are not read out, and also content between '/* .... */' are not read.

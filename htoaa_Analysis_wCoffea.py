@@ -2,6 +2,7 @@
 
 import os
 import sys
+import subprocess
 import json
 import glob
 from collections import OrderedDict as OD
@@ -36,7 +37,10 @@ from particle import Particle # For PDG particle listing https://github.com/scik
 
 
 from htoaa_Settings import *
-from htoaa_CommonTools import GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector
+from htoaa_CommonTools import (
+    GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector,
+    xrdcpFile
+)
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
@@ -2170,13 +2174,14 @@ if __name__ == '__main__':
     sample_category     = config['sampleCategory']
     isMC                = config["isMC"]
     era                 = config['era']
+    downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     if isMC:
         luminosity          = Luminosities[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
-        lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
+        lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
 
@@ -2192,8 +2197,27 @@ if __name__ == '__main__':
             sInputFiles[iFile] = setXRootDRedirector(sInputFiles[iFile])
     print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
-        print(f"\t{sInputFile}")
-    sys.stdout.flush()
+        print(f"\t{sInputFile}");  sys.stdout.flush()
+
+    if downloadIpFiles:
+        sInputFiles_toUse = []
+        for sInputFile in sInputFiles:
+            sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
+
+            if xrdcpFile(sInputFile, sFileLocal, nTry = 3):
+                sInputFiles_toUse.append(sFileLocal)
+            else:
+                print(f"Ip file {sInputFile} failed to download \t **** ERROR ****")
+                exit(1)
+            
+            
+        sInputFiles = sInputFiles_toUse
+        print(f"sInputFiles ({len(sInputFiles)}) local files to use:");
+        for sInputFile in sInputFiles:
+            isFileExist = os.path.isfile(sInputFile)
+            print(f"\t{sInputFile} {isFileExist}")
+        sys.stdout.flush()
+
 
 
     startTime = time.time()

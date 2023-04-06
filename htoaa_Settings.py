@@ -76,5 +76,6 @@ config_Template = OD([
     #("Luminosity", 0),
     ("crossSection", 0),
     ("nEvents", -1),
-    ("sumEvents", -1),    
+    ("sumEvents", -1),
+    ("downloadIpFiles", False),    
 ])

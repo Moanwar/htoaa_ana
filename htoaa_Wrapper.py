@@ -27,31 +27,39 @@ sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
 sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 
-printLevel = 3
+printLevel = 6
 
 #UserHomePath = os.path.expanduser("~")
 UserHomePath = str(Path.home()) # Python 3.5+
+UserName     = os.getlogin()
 
-def writeCondorExecFile(condor_exec_file, sConfig_to_use):
+def writeCondorExecFile(
+        condor_exec_file,
+        sConfig_to_use,
+        sOpFile_to_use,
+        EosDestinationDir_to_use
+):
     if not os.path.isfile(condor_exec_file):    
         with open(condor_exec_file, 'w') as f:
             f.write("#!/bin/bash  \n\n")
-            f.write("cd %s \n" % pwd)
+            #f.write("cd %s \n" % pwd)
             f.write("export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch \n")
-            f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
+            #f.write("export SCRAM_ARCH=slc6_amd64_gcc700  \n")
+            f.write("export SCRAM_ARCH=slc7_amd64_gcc10  \n")
             f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
             #f.write("cd ")
             #f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
             f.write("export X509_USER_PROXY=%s/x509up_u108989  \n" % (UserHomePath))
 
             # Using x509 proxy without shipping it with the job  https://batchdocs.web.cern.ch/tutorial/exercise2e_proxy.html
-            #f.write("export X509_USER_PROXY=$1 \n")
-            #f.write("voms-proxy-info -all \n")
-            #f.write("voms-proxy-info -all -file $1 \n")
+            f.write("export X509_USER_PROXY=$1 \n")
+            f.write("export EOS_MGM_URL=root://eoscms.cern.ch  \n")
+            f.write("voms-proxy-info -all \n")
+            f.write("voms-proxy-info -all -file $1 \n")
             
             #f.write("eval \n")
-            f.write("cd %s \n" % (pwd))
-            f.write("source %s/.bashrc \n" % (UserHomePath))
+            #f.write("cd %s \n" % (pwd))
+            f.write("\nsource %s/.bashrc \n" % (UserHomePath))
             #f.write("which conda \n")
             #f.write("time conda env list \n")
             f.write("conda activate ana_htoaa \n")
@@ -62,17 +70,44 @@ def writeCondorExecFile(condor_exec_file, sConfig_to_use):
             #f.write("python3 -V \n")
             #f.write(" \n")
             #f.write("conda activate ana_htoaa \n")
-            f.write("pythonPath=$(which python3) \n")
+            f.write("\ncp -r %s/* . \n" % (SourceCodeDir))
+
+            f.write("printf \"pwd: \\n\" \n")
+            f.write("pwd \n")
+            f.write("printf \"ls: \\n\" \n")
+            f.write("ls \n")
+            f.write("echo \"$1 \" $1 \n")
+            f.write("echo \"$2 \" $2 \n")
+            
+            f.write("\npythonPath=$(which python3) \n")
             #f.write("time python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
             #f.write("time /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/bin/python3 %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
-            f.write("time ${pythonPath} %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+            #f.write("time ${pythonPath} %s/%s  %s \n" % (pwd,sAnalysis, sConfig_to_use))
+            f.write("time ${pythonPath} %s  $2 \n" % (sAnalysis))
+
+            f.write("printf \"After execution pwd: \\n\" \n")
+            f.write("pwd \n")
+            f.write("printf \"ls: \\n\" \n")
+            f.write("ls \n")
+            
+            f.write("time eos cp %s %s   \n" % (sOpFile_to_use, EosDestinationDir_to_use) )
+            f.write("rm -rf ./inputFiles \n")
+            #f.write(" \n")
 
         os.system("chmod a+x %s" % condor_exec_file)
 
     return;
 
 
-def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use, sCondorOutput_to_use, sCondorError_to_use, increaseJobFlavour=False):
+def writeCondorSumitFile(
+        condor_submit_file,
+        condor_exec_file,
+        sCondorLog_to_use,
+        sCondorOutput_to_use,
+        sCondorError_to_use,
+        sIpConfig_to_use,
+        increaseJobFlavour=False
+):
     '''
     Job Flavours::
     espresso     = 20 minutes
@@ -105,13 +140,15 @@ def writeCondorSumitFile(condor_submit_file, condor_exec_file, sCondorLog_to_use
         #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
         #f.write("use_x509userproxy = true \n")
         f.write("X509_USER_PROXY = %s/x509up_u108989  \n" % (UserHomePath))
-        f.write("arguments = $(X509_USER_PROXY)  \n")        
+        f.write("arguments = $(X509_USER_PROXY) %s \n"  % (sIpConfig_to_use) )       
         
         f.write("executable = %s \n" % condor_exec_file)
         f.write("getenv = TRUE \n")
         f.write("log = %s \n" % (sCondorLog_to_use))
         f.write("output = %s \n" % (sCondorOutput_to_use))
         f.write("error = %s \n" % (sCondorError_to_use))
+        f.write("transfer_input_files = $(X509_USER_PROXY), %s \n" % (sIpConfig_to_use) )
+        f.write("transfer_output_files = \"\" \n")
         f.write("notification = never \n")
         f.write("should_transfer_files = YES \n")
         f.write("when_to_transfer_output = ON_EXIT \n")
@@ -161,10 +198,11 @@ if __name__ == '__main__':
     parser.add_argument('-run_mode',          type=str, default='condor', choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None, required=True)
     parser.add_argument('-samples',           type=str, default=None, help='samples to run seperated by comma')
-    parser.add_argument('-nFilesPerJob',      type=int, default=10)
+    parser.add_argument('-nFilesPerJob',      type=int, default=5)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15, help='Resubmit failed jobs after every xx minutes')
     parser.add_argument('-iJobSubmission',    type=int, default=0,  help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
+    parser.add_argument('-xrdcpIpAftNResub',  type=int, default=3, help='Download input files after n job failures')
     parser.add_argument('-dryRun',            action='store_true', default=False)
     args=parser.parse_args()
     print("args: {}".format(args))
@@ -177,20 +215,12 @@ if __name__ == '__main__':
     nResubmissionMax = args.nResubMax
     ResubWaitingTime = args.ResubWaitingTime
     iJobSubmission   = args.iJobSubmission
+    xrdcpIpAftNResub = args.xrdcpIpAftNResub
     dryRun           = args.dryRun
 
-    pwd = os.getcwd()
-    DestinationDir = "../analysis/%s" % (anaVersion)
-    sFileRunCommand = "%s/%s" % (DestinationDir, sRunCommandFile)
-    sFileJobSubLog  = "%s/%s" % (DestinationDir, sJobSubLogFile)
-    if not os.path.exists(DestinationDir): os.mkdir( DestinationDir )
-
-    # save run command into a .txt tile
-    with open(sFileRunCommand, 'a') as fRunCommand:
-        datatime_now = datetime.now()
-        sCommand = ' '.join(sys.argv)
-        fRunCommand.write('%s    %s \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sCommand))
-
+    SourceCodeDir     = os.getcwd()
+    DestinationDir    = "../analysis/%s" % (anaVersion)
+    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s" % (UserName, anaVersion)
 
 
     samplesList = None
@@ -210,15 +240,32 @@ if __name__ == '__main__':
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
 
+    
+    os.chdir( SourceCodeDir )
+    os.makedirs( DestinationDir, exist_ok=True )
+    os.chdir( DestinationDir )
+    DestinationDirAbsolute = os.getcwd() # save absolute path
+    #os.makedirs( DestinationDirAbsolute, exist_ok=True )
+    try:
+        os.makedirs( EosDestinationDir, exist_ok=True )
+    except:
+        EosDestinationDir = DestinationDirAbsolute # if /eos area for user is not available then save histograms in DestinationDir
+    
+    sFileRunCommand = "%s/%s" % (DestinationDirAbsolute, sRunCommandFile)
+    sFileJobSubLog  = "%s/%s" % (DestinationDirAbsolute, sJobSubLogFile)
 
-    #config = config_Template
+    # save run command into a .txt tile
+    with open(sFileRunCommand, 'a') as fRunCommand:
+        datatime_now = datetime.now()
+        sCommand = ' '.join(sys.argv)
+        fRunCommand.write('%s    %s \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sCommand))    
 
-
-    #iJobSubmission = 0
+    
+    jobSubmissionInfo_dict = {}
     
     while iJobSubmission <= nResubmissionMax:
 
-        print('\n\n%s \t Startiing iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+        print('\n\n%s \t Starting iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
 
         OpRootFiles_Target         = []
         OpRootFiles_Exist          = []
@@ -235,6 +282,13 @@ if __name__ == '__main__':
                     if skipThisSample:
                         continue
 
+                #
+                OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
+                JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)
+                os.makedirs( OpRootFileFinalDir, exist_ok=True )
+                os.makedirs( JobLogsDir, exist_ok=True )                
+                os.chdir( JobLogsDir )
+                    
                 print(f"sample_category: {sample_category}, sample: {sample}")
 
                 sampleInfo = samplesInfo[sample]
@@ -269,33 +323,49 @@ if __name__ == '__main__':
                 print("files_splitted: {}".format(files_splitted))
                 '''
                 for iJob in range(len(files_splitted)):
+                    JobStage = 0
+                    
+                    #JobDestinationDir = "%s/%s_%s_%s" % (DestinationDirAbsolute, sample,str(JobStage),str(iJob))
+                    #os.makedirs( JobDestinationDir, exist_ok=True)
+                    #os.chdir( JobDestinationDir )
+                    #print(f"0:JobDestinationDir {os.getcwd() = }")
+                    
                     #config = config_Template.deepcopy()
                     config = copy.deepcopy(config_Template)
 
                     # Job related files
-                    sOpRootFile_to_use    = '%s/%s' % (DestinationDir, sOpRootFile)
-                    sOpRootFile_to_use    = sOpRootFile_to_use.replace('$SAMPLE', sample)
-                    sOpRootFile_to_use    = sOpRootFile_to_use.replace('$STAGE', str(0))
-                    sOpRootFile_to_use    = sOpRootFile_to_use.replace('$IJOB', str(iJob))
-
-                    sConfig_to_use        = sOpRootFile_to_use.replace('.root', '_config.json')
-                    sCondorExec_to_use    = sOpRootFile_to_use.replace('.root', '_condor_exec.sh')
-                    sCondorSubmit_to_use  = sOpRootFile_to_use.replace('.root', '_condor_submit.sh')
-                    sCondorLog_to_use     = sOpRootFile_to_use.replace('.root', '_condor.log')
-                    sCondorOutput_to_use  = sOpRootFile_to_use.replace('.root', '_condor.out')
-                    sCondorError_to_use   = sOpRootFile_to_use.replace('.root', '_condor.error')
+                    #sOpRootFile_to_use      = '%s/%s' % (DestinationDir, sOpRootFile)
+                    sOpRootFile_to_use      = '%s' % (sOpRootFile)
+                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$SAMPLE', sample)
+                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$STAGE', str(JobStage))
+                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$IJOB', str(iJob))
+                    sOpRootFileFinal_to_use = '%s/%s' % (OpRootFileFinalDir, sOpRootFile_to_use)
+                    
+                    sConfig_to_use          = sOpRootFile_to_use.replace('.root', '_config.json')
+                    sCondorExec_to_use      = sOpRootFile_to_use.replace('.root', '_condor_exec.sh')
+                    sCondorSubmit_to_use    = sOpRootFile_to_use.replace('.root', '_condor_submit.sh')
+                    sCondorLog_to_use       = sOpRootFile_to_use.replace('.root', '_condor.log')
+                    sCondorOutput_to_use    = sOpRootFile_to_use.replace('.root', '_condor.out')
+                    sCondorError_to_use     = sOpRootFile_to_use.replace('.root', '_condor.error')
 
                     # Check if job related file exist or not
-                    isConfigExist        = os.path.isfile(sConfig_to_use)
-                    isOpRootFileExist    = os.path.isfile(sOpRootFile_to_use)
-                    isCondorExecExist    = os.path.isfile(sCondorExec_to_use)
-                    isCondorSubmitExist  = os.path.isfile(sCondorSubmit_to_use)
-                    isCondorLogExist     = os.path.isfile(sCondorLog_to_use)
-                    isCondorOutputExist  = os.path.isfile(sCondorOutput_to_use)
-                    isCondorErrorExist   = os.path.isfile(sCondorError_to_use)
+                    isConfigExist           = os.path.isfile(sConfig_to_use)
+                    isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use)
+                    isCondorExecExist       = os.path.isfile(sCondorExec_to_use)
+                    isCondorSubmitExist     = os.path.isfile(sCondorSubmit_to_use)
+                    isCondorLogExist        = os.path.isfile(sCondorLog_to_use)
+                    isCondorOutputExist     = os.path.isfile(sCondorOutput_to_use)
+                    isCondorErrorExist      = os.path.isfile(sCondorError_to_use)
 
                     if printLevel >= 3:
                         print(f"sOpRootFile_to_use: {sOpRootFile_to_use} ")
+                        #print(f" {sConfig_to_use = }: {isConfigExist = } ")
+                        #print(f" {sOpRootFileFinal_to_use = }: {isOpRootFileExist = } ")
+                        #print(f" {sCondorExec_to_use = }: {isCondorExecExist = } ")
+                        #print(f" {sCondorSubmit_to_use = }: {isCondorSubmitExist = } ")
+                        #print(f" {sCondorLog_to_use = }: {isCondorLogExist = } ")
+                        #print(f" {sCondorOutput_to_use = }: {isCondorOutputExist = } ")
+                        #print(f" {sCondorError_to_use = }: {isCondorErrorExist = } ")
                     
                     # JobStatus
                     jobStatus = -1
@@ -369,13 +439,24 @@ if __name__ == '__main__':
                     else:
                         jobStatus_dict[jobStatus].append(sOpRootFile_to_use)
                     
-
+                    if sOpRootFile_to_use not in jobSubmissionInfo_dict:
+                        jobSubmissionInfo_dict[sOpRootFile_to_use] = {}
+                        jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = 0
+                    else:
+                        if jobStatus in jobStatusForJobSubmission :
+                            jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] + 1
+                    jobSubmissionInfo_dict[sOpRootFile_to_use]['JobStatusLast'] = jobStatus
+                        
+                    
+                    
+                        
                     if printLevel >= 0:
                         print(f"\t {sOpRootFile_to_use}:: jobStatus: {jobStatus}, isConfigExist: {isConfigExist}, isOpRootFileExist: {isOpRootFileExist}, isCondorExecExist: {isCondorExecExist}, isCondorSubmitExist: {isCondorSubmitExist}, isCondorLogExist: {isCondorLogExist}, isCondorOutputExist: {isCondorOutputExist}, isCondorErrorExist: {isCondorErrorExist}"); sys.stdout.flush()
                         
 
                     #if iJobSubmission == 0:
-                    if jobStatus == 0:
+                    #if jobStatus == 0 or 1==1:
+                    if jobStatus in jobStatusForJobSubmission:
                         config["era"] = era
                         config["inputFiles"] = list( files_splitted[iJob] )
                         config["outputFile"] = sOpRootFile_to_use 
@@ -389,6 +470,7 @@ if __name__ == '__main__':
                         else:
                             del config["crossSection"]
                             del config["sumEvents"]
+                        config["downloadIpFiles"] = True if jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub else False
 
 
                         print("config {}: {}".format(sConfig_to_use, config))
@@ -396,7 +478,12 @@ if __name__ == '__main__':
                             json.dump( config,  fConfig, indent=4)
 
 
-                        writeCondorExecFile(sCondorExec_to_use, sConfig_to_use)
+                        writeCondorExecFile(
+                            sCondorExec_to_use,
+                            sConfig_to_use,
+                            sOpRootFile_to_use,
+                            OpRootFileFinalDir 
+                        )
 
 
                     if jobStatus in jobStatusForJobSubmission: #[0, 3, 4]:
@@ -408,11 +495,17 @@ if __name__ == '__main__':
                             os.rename(sCondorError_to_use,  sCondorError_vPrevious)
 
                         increaseJobFlavour = False
-                        if jobStatus == 4:
+                        if jobStatus == 4 or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
                             increaseJobFlavour = True
                             
-                        writeCondorSumitFile(sCondorSubmit_to_use, sCondorExec_to_use, sCondorLog_to_use, sCondorOutput_to_use, sCondorError_to_use,
-                                             increaseJobFlavour)
+                        writeCondorSumitFile(
+                            sCondorSubmit_to_use,
+                            sCondorExec_to_use,
+                            sCondorLog_to_use,
+                            sCondorOutput_to_use,
+                            sCondorError_to_use,
+                            sConfig_to_use,
+                            increaseJobFlavour)
 
 
 
