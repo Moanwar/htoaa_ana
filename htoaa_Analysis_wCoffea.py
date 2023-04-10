@@ -845,12 +845,47 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if printLevel >= 2:
                 printVariable('\n mask_QCD_stitch_CutBHadron_eventwise', mask_QCD_stitch_CutBHadron_eventwise); sys.stdout.flush()
 
-            if printLevel >= 1:
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
+            if printLevel >= 10:
+                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
+                #mask_tmp1 = (genBHadrons_status2[idx_genBHadrons_status2_pTsort].pt < 0.01)
                 
-                printVariable('\n (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)].pt)', (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)].pt)); sys.stdout.flush()
-                printVariable('\n (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)][:, 2].pt)', (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)][:, 2].pt)); sys.stdout.flush()
+                #printVariable('\n (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)].pt)', (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)].pt)); sys.stdout.flush()
+                printVariable('\n (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)][:, 3].pt)', (genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)][:, 2].pt)); sys.stdout.flush()
 
+                genBHadrons_status2_fourth_pt = genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp)][:, 2].pt
+                mask_tmp1_ = (genBHadrons_status2_fourth_pt < 0.01)
+                printVariable('\n genBHadrons_status2_fourth_pt[mask_tmp1_]', genBHadrons_status2_fourth_pt[mask_tmp1_]); sys.stdout.flush()
+
+            if printLevel >= 3:
+                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
+                genBQuarks_fourth_pT = genBQuarks_pT[mask_tmp][:, 3]
+                mask_tmp1_ = (genBQuarks_fourth_pT < 0.01)
+
+                printVariable('\n genBQuarks_pT[mask_tmp][:, 3]', genBQuarks_pT[mask_tmp][:, 3]); sys.stdout.flush()
+                printVariable('\n genBQuarks_fourth_pT[mask_tmp1_]', genBQuarks_fourth_pT[mask_tmp1_]); sys.stdout.flush()
+
+            if printLevel >= 10:
+                mask_tmp1_ = (genBQuarks.pt < 1e-3)
+                mask_tmp2_ = ak.any(mask_tmp1_, axis=1)
+
+                # genBQuarks_pT[mask_tmp][:, 3]
+                #printVariable('\n ', ); sys.stdout.flush()
+                #printVariable('\n aw.count(genBQuarks.pt, axis=1)', ak.count(genBQuarks.pt, axis=1)); sys.stdout.flush()
+                printVariable('\n aw.count(genBQuarks.pt[mask_tmp1_], axis=1)', ak.count(genBQuarks.pt[mask_tmp1_], axis=1)); sys.stdout.flush()
+                printVariable('\n genBQuarks[mask_tmp2_].pt', genBQuarks[mask_tmp2_].pt); sys.stdout.flush()
+                printVariable('\n genBQuarks_pT[mask_tmp2_]', genBQuarks_pT[mask_tmp2_]); sys.stdout.flush()
+
+            if printLevel >= 1:
+                mask_tmp1_ = (genBQuarks.pt < 1e-3)
+                mask_tmp2_ = ak.any(mask_tmp1_, axis=1)
+
+                # genBQuarks_pT[mask_tmp][:, 3]
+                #printVariable('\n ', ); sys.stdout.flush()
+                #printVariable('\n aw.count(genBQuarks.pt, axis=1)', ak.count(genBQuarks.pt, axis=1)); sys.stdout.flush()
+                printVariable('\n aw.count(genBQuarks.pt[mask_tmp1_], axis=1)', ak.count(genBQuarks.pt[mask_tmp1_], axis=1)); sys.stdout.flush()
+                printVariable('\n genBQuarks[mask_tmp2_].pt', genBQuarks[mask_tmp2_].pt); sys.stdout.flush()
+                #printVariable('\n genBQuarks_pT[mask_tmp2_]', genBQuarks_pT[mask_tmp2_]); sys.stdout.flush()
+                printVariable('\n genBQuarks[mask_tmp2_]', genBQuarks[mask_tmp2_]); sys.stdout.flush()
 
             mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 

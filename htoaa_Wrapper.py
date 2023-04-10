@@ -49,8 +49,8 @@ def writeCondorExecFile(
             f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n\n")
             #f.write("cd ")
             #f.write("export X509_USER_PROXY=/afs/cern.ch/user/s/ssawant/x509up_u108989  \n")
-            f.write("export X509_USER_PROXY=%s/x509up_u108989  \n" % (UserHomePath))
-
+            f.write("export X509_USER_PROXY=%s/x509up_u108989  \n" % (UserHomePath)) # voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989 
+            
             # Using x509 proxy without shipping it with the job  https://batchdocs.web.cern.ch/tutorial/exercise2e_proxy.html
             f.write("export X509_USER_PROXY=$1 \n")
             f.write("export EOS_MGM_URL=root://eoscms.cern.ch  \n")
@@ -285,8 +285,8 @@ if __name__ == '__main__':
                 #
                 OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
                 JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)
-                os.makedirs( OpRootFileFinalDir, exist_ok=True )
-                os.makedirs( JobLogsDir, exist_ok=True )                
+                if os.path.exists(OpRootFileFinalDir): os.makedirs( OpRootFileFinalDir, exist_ok=True )
+                if os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )                
                 os.chdir( JobLogsDir )
                     
                 print(f"sample_category: {sample_category}, sample: {sample}")
