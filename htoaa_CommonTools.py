@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import shlex
 import json
 #import uproot
 import uproot3 as uproot
@@ -100,6 +101,29 @@ def GetDictFromJsonFile(filePath):
     return dictionary
 
 
+def executeBashCommand(sCmd1):
+    cmd1 = None
+    if isinstance(sCmd1, str):
+        cmd1 = shlex.split(sCmd1)
+    elif isinstance(sCmd1, list):
+        cmd1 = sCmd1
+    #print(f"executeBashCommand():: {sCmd1 = } \t {cmd1 = }")
+
+    result = subprocess.run(
+        cmd1,
+        capture_output=True,
+        text = True
+    )
+    print(f"{sCmd1}: ")
+    print("result.stdout: %s" % (result.stdout))
+    if result.stderr:
+        #print(f"{result.stderr = }")
+        print("result.stderr: %s" % (result.stderr))
+        
+    return result.stdout
+    
+    
+    
 def DfColLabel_convert_bytes_to_string(df):
     cols_rename = {}
     for col in df.columns:

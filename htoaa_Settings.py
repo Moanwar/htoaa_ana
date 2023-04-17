@@ -69,6 +69,7 @@ GENPART_STATUSFLAGS = [
 config_Template = OD([
     ("nEventsToAnalyze", -1),
     ("era", ''),
+    ("dataset", ''), 
     ("inputFiles", ''),
     ("outputFile", ''),
     ("sampleCategory", ''),

@@ -1,6 +1,7 @@
 
 import os
 import sys
+import subprocess
 from pathlib import Path
 import json
 import glob
@@ -16,12 +17,15 @@ from htoaa_Samples import (
     Samples2018,
     kData
 )
+from htoaa_CommonTools import (
+    executeBashCommand,
+)
 
 
 
 
 
-sAnalysis         = "htoaa_Analysis_wCoffea.py"  # "htoaa_Analysis.py"
+#sAnalysis         = "htoaa_Analysis_wCoffea.py"  # "htoaa_Analysis.py"
 sConfig           = "config_htoaa.json"
 sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
@@ -194,19 +198,21 @@ if __name__ == '__main__':
     print("htoaa_Wrapper:: main: {}".format(sys.argv)); sys.stdout.flush()
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
-    parser.add_argument('-era', dest='era',   type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
-    parser.add_argument('-run_mode',          type=str, default='condor', choices=['local', 'condor'])
-    parser.add_argument('-v', '--version',    type=str, default=None, required=True)
-    parser.add_argument('-samples',           type=str, default=None, help='samples to run seperated by comma')
+    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py"], required=True)
+    parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
+    parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
+    parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
+    parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-nFilesPerJob',      type=int, default=5)
     parser.add_argument('-nResubMax',         type=int, default=80)
-    parser.add_argument('-ResubWaitingTime',  type=int, default=15, help='Resubmit failed jobs after every xx minutes')
-    parser.add_argument('-iJobSubmission',    type=int, default=0,  help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
-    parser.add_argument('-xrdcpIpAftNResub',  type=int, default=3, help='Download input files after n job failures')
+    parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
+    parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
+    parser.add_argument('-xrdcpIpAftNResub',  type=int, default=3,                           help='Download input files after n job failures')
     parser.add_argument('-dryRun',            action='store_true', default=False)
     args=parser.parse_args()
     print("args: {}".format(args))
 
+    sAnalysis        = args.analyze
     era              = args.era
     run_mode         = args.run_mode
     nFilesPerJob     = args.nFilesPerJob
@@ -227,9 +233,9 @@ if __name__ == '__main__':
     samplesInfo = None
     Luminosity  = None
     if era == Era_2018:
-        samplesList = Samples2018
+        samplesList = Samples2018 # htoaa_Samples.py
         with open(sFileSamplesInfo[era]) as fSamplesInfo:
-            samplesInfo = json.load(fSamplesInfo)
+            samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
         Luminosity = Luminosities[era][0]
 
     selSamplesToRun_list = []
@@ -262,11 +268,16 @@ if __name__ == '__main__':
 
     
     jobSubmissionInfo_dict = {}
+
+    allJobsSuccessful          = False
+    OpRootFiles_Target         = None
+    OpRootFilesAbsPath_Target  = None
     
     while iJobSubmission <= nResubmissionMax:
 
         print('\n\n%s \t Starting iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
 
+        OpRootFilesAbsPath_Target  = []
         OpRootFiles_Target         = []
         OpRootFiles_Exist          = []
         OpRootFiles_iJobSubmission = []
@@ -285,19 +296,20 @@ if __name__ == '__main__':
                 #
                 OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
                 JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)
-                if os.path.exists(OpRootFileFinalDir): os.makedirs( OpRootFileFinalDir, exist_ok=True )
-                if os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )                
+                if not os.path.exists(OpRootFileFinalDir): os.makedirs( OpRootFileFinalDir, exist_ok=True )
+                if not os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )
                 os.chdir( JobLogsDir )
                     
                 print(f"sample_category: {sample_category}, sample: {sample}")
 
-                sampleInfo = samplesInfo[sample]
+                sampleInfo = samplesInfo[sample] # Samples_Era.json                
                 fileList = sampleInfo[sampleFormat]
                 files = []
                 for iEntry in fileList:
                     # file name with wildcard charecter *
                     if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
                     else:              files.append( iEntry )
+                sample_dataset     = sampleInfo["dataset"]
                 sample_cossSection = sampleInfo["cross_section"] if (sample_category != kData) else None
                 sample_nEvents     = sampleInfo["nEvents"]
                 sample_sumEvents   = sampleInfo["sumEvents"] if (sample_category != kData) else None
@@ -325,12 +337,6 @@ if __name__ == '__main__':
                 for iJob in range(len(files_splitted)):
                     JobStage = 0
                     
-                    #JobDestinationDir = "%s/%s_%s_%s" % (DestinationDirAbsolute, sample,str(JobStage),str(iJob))
-                    #os.makedirs( JobDestinationDir, exist_ok=True)
-                    #os.chdir( JobDestinationDir )
-                    #print(f"0:JobDestinationDir {os.getcwd() = }")
-                    
-                    #config = config_Template.deepcopy()
                     config = copy.deepcopy(config_Template)
 
                     # Job related files
@@ -429,8 +435,8 @@ if __name__ == '__main__':
                                     print(f"  jobStatus = 2")
                                 
                                 
-
                     OpRootFiles_Target.append(sOpRootFile_to_use)
+                    OpRootFilesAbsPath_Target.append(sOpRootFileFinal_to_use)
                     if jobStatus in jobStatusForJobSubmission : # [0, 3, 4]:
                         OpRootFiles_iJobSubmission.append(sOpRootFile_to_use)
 
@@ -458,6 +464,7 @@ if __name__ == '__main__':
                     #if jobStatus == 0 or 1==1:
                     if jobStatus in jobStatusForJobSubmission:
                         config["era"] = era
+                        config["dataset"]    = sample_dataset 
                         config["inputFiles"] = list( files_splitted[iJob] )
                         config["outputFile"] = sOpRootFile_to_use 
                         config["sampleCategory"] = sample_category
@@ -563,13 +570,40 @@ if __name__ == '__main__':
             exit(0)
             
         if len(OpRootFiles_Target) == len(OpRootFiles_Exist):
+            allJobsSuccessful = True
             break
         else:
             time.sleep( ResubWaitingTime * 60 )
             iJobSubmission += 1
 
 
-    with open(sFileJobSubLog, 'a') as fJobSubLog:
-        fJobSubLog.write('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+    fJobSubLog = open(sFileJobSubLog, 'a')
+    fJobSubLog.write('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
     print('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
 
+    if allJobsSuccessful:
+        os.chdir( EosDestinationDir )
+
+        sOpRootFile_stage0 = sOpRootFile
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$SAMPLE',  '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$STAGE',   '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$IJOB',    '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('.root',     '*.root')
+        
+        sOpRootFile_stage1 = sOpRootFile
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
+
+        cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
+        for opFileName in OpRootFilesAbsPath_Target:
+            cmd_hadd += " %s" % (opFileName)
+        
+        cmd_hadd_stdout = executeBashCommand(cmd_hadd)
+        fJobSubLog.write('\n\n%s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
+        fJobSubLog.write('\n\n%s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
+        
+        executeBashCommand("pwd")
+        executeBashCommand("ls")
+
+    fJobSubLog.close()
