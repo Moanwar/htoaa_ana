@@ -38,7 +38,9 @@ from particle import Particle # For PDG particle listing https://github.com/scik
 
 from htoaa_Settings import *
 from htoaa_CommonTools import (
-    GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector,
+    GetDictFromJsonFile,
+    calculate_lumiScale, update_crosssection,
+    setXRootDRedirector,
     xrdcpFile
 )
 from htoaa_Samples import (
@@ -189,8 +191,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ak.behavior.update(nanoaod.behavior)
 
         self.datasetInfo = datasetInfo
-        #self.isMC = isMC
         self.objectSelector = ObjectSelection(era=self.datasetInfo["era"])
+                
         
         # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement
         self.pdgId_BHadrons = []
@@ -555,7 +557,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if printLevel >= 20:
             print(f"nEvents: {len(events)}")
         if printLevel >= 20:
-            print(f"\n events.fields: {events.fields}")
+            print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             print(f"\n events.GenPart.fields: {events.GenPart.fields}")
             #print(f"\n events.HLT.fields: {events.HLT.fields}")
             #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
@@ -568,11 +570,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
 
-        self.datasetInfo[dataset]['isSignal'] = False
-        self.datasetInfo[dataset]['isQCD'] = False
-        self.datasetInfo[dataset]['isQCDIncl'] = False
-        self.datasetInfo[dataset]['isQCD_bEnrich'] = False
-        self.datasetInfo[dataset]['isQCD_bGen'] = False
+        self.datasetInfo[dataset]['isSignal'     ]  = False
+        self.datasetInfo[dataset]['isQCD'        ]  = False
+        self.datasetInfo[dataset]['isQCDIncl'    ]  = False
+        self.datasetInfo[dataset]['isQCD_bEnrich']  = False
+        self.datasetInfo[dataset]['isQCD_bGen'   ]  = False
         
         if self.datasetInfo[dataset]['isMC']:
             self.datasetInfo[dataset]['isSignal']      = True if "HToAATo4B"   in dataset else False
@@ -1208,7 +1210,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         weights     = Weights(len(events))
         weights_gen = Weights(len(events))
         weights_GenHToAATo4B = Weights(len(events))
-
+        
 
         if self.datasetInfo[dataset]["isMC"]:
             weights.add(
@@ -1262,7 +1264,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 print(f"leadingFatJet.tau4[sel_SR]): {leadingFatJet.tau4[sel_SR]}")
                 print(f"leadingFatJet.tau3[sel_SR]): {leadingFatJet.tau3[sel_SR]}")
                 print(f"divide                     : {np.divide(leadingFatJet.tau4[sel_SR], leadingFatJet.tau3[sel_SR])} \n\n\n")
-        
+
+
+
+
+
+
+
+                
         ###################
         # FILL HISTOGRAMS
         ###################
@@ -1857,6 +1866,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
 
+
+
+            # 
+            if self.datasetInfo[dataset]['isMC'] and 'LHE' in events.fields :
+                output['hGenLHE_HT_all'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+
+                
                 
             # QCD MC ----------------------------------------------
             if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD']:
@@ -2905,6 +2927,7 @@ if __name__ == '__main__':
     lumiScale = 1
     sInputFiles         = config["inputFiles"]
     sOutputFile         = config["outputFile"]
+    sample_dataset      = config["dataset"] 
     sample_category     = config['sampleCategory']
     isMC                = config["isMC"]
     era                 = config['era']
@@ -2915,6 +2938,9 @@ if __name__ == '__main__':
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
+
+        sample_crossSection = update_crosssection(sample_category=sample_category, sample_dataset=sample_dataset, sample_crossSection=sample_crossSection)
+        
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))

@@ -2,11 +2,16 @@ import os
 import sys
 import subprocess
 import shlex
+import logging
 import json
 #import uproot
 import uproot3 as uproot
+import ROOT as R
 
 from htoaa_Settings import * 
+from htoaa_Samples import (
+    kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
+)
 
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
@@ -17,6 +22,50 @@ def calculate_lumiScale(luminosity, crossSection, sumEvents):
     if sumEvents != 0: lumiScale = luminosity * crossSection * pb_to_fb_conversionFactor / sumEvents
     return lumiScale
 
+def update_crosssection(sample_category, sample_dataset, sample_crossSection):
+    if sample_category not in [kQCD_bGen]: return sample_crossSection
+
+    # HTSamplesStitch SF -------------------------------------------------------------------
+    sample_HT_Min = sample_HT_Max = None
+    # for e.g. sample_dataset: "QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8"
+    for sample_dataset_parts in sample_dataset.split('_'):
+        if 'HT' in sample_dataset_parts and 'to' in sample_dataset_parts:
+            # HT100to200
+            sample_HT_Min = sample_dataset_parts.split('HT')[1].split('to')[0]
+            sample_HT_Max = sample_dataset_parts.split('HT')[1].split('to')[1]
+            break
+    sample_HT_toUse = int(sample_HT_Min)
+    
+    sIpFile_HTSamplesStitchSF        = Corrections['HTSamplesStitch']['inputFile']
+    sHistogramName_HTSamplesStitchSF = Corrections['HTSamplesStitch']['histogramName']
+    sHistogramName_HTSamplesStitchSF = sHistogramName_HTSamplesStitchSF.replace('$SAMPLECATEGORY', sample_category)
+
+    HTSamplesStitchSF = None
+    ipFile_HTSamplesStitchSF = R.TFile(sIpFile_HTSamplesStitchSF)
+    if not ipFile_HTSamplesStitchSF.IsOpen():
+        logging.error   ("update_crosssection(): Colud not open inputfile %s ." % (sIpFile_HTSamplesStitchSF), exc_info=True)        
+        exit(0)
+
+    hHTSamplesStitchSF = None
+    hHTSamplesStitchSF = ipFile_HTSamplesStitchSF.Get(sHistogramName_HTSamplesStitchSF)
+    if not hHTSamplesStitchSF:
+        logging.error   ("update_crosssection(): Histogram %s could not read from inputfile %s ." % (sHistogramName_HTSamplesStitchSF, sIpFile_HTSamplesStitchSF), exc_info=True)
+        exit(0)
+        
+    try:
+        HTSamplesStitchSF = hHTSamplesStitchSF.GetBinContent( hHTSamplesStitchSF.FindBin(sample_HT_toUse) )
+    except:
+        logging.error   ("update_crosssection(): Could not read SF @HT %g from histogram %s could not open." % (sample_HT_toUse, sHistogramName_HTSamplesStitchSF), exc_info=True)
+        exit(0)
+
+    sample_crossSection_corr = sample_crossSection * HTSamplesStitchSF
+    print(f"update_crosssection():: sample_category: {sample_category}, sample_dataset: {sample_dataset}, sample_crossSection (original): {sample_crossSection}, HTSamplesStitchSF(@HT {sample_HT_toUse}): {HTSamplesStitchSF}, sample_crossSection_corr: {sample_crossSection_corr}")
+    ipFile_HTSamplesStitchSF.Close()
+    # ----------------------------------------------------------------------------------------
+    
+    return sample_crossSection_corr
+    
+    
 
 def setXRootDRedirector(fileName):
     if not fileName.startswith("/store/"):
@@ -69,7 +118,7 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3):
                                    )
         stdout, stderr = process.communicate()
         print(f"  {iTry = } {stdout = }, {stderr = }");  sys.stdout.flush()
-        if 'FATAL' not in stderr: # download was successful
+        if 'FATAL' not in stderr and 'ERROR' not in stderr : # download was successful
             return True
 
     return False

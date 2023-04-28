@@ -16,35 +16,27 @@ sIpFiles = OD([
     #(sAnaVersion, '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD_HT100to200/analyze_hadded_QCD_HT100to200.root')
     #(sAnaVersion, '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD.root')
     #(sAnaVersion, '')
-    ('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230407_QCD/analyze_hadded_QCD.root')
-    #('QCD_HT100to200', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT100to200.root')
-    #('QCD_HT200to300', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT200to300.root')
-    #('QCD_HT300to500', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT300to500.root')
-    #('QCD_HT500to700', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT500to700.root')
-    #('QCD_HT700to1000', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT700to1000.root')
-    #('QCD_HT1000to1500', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT1000to1500.root')
-    #('QCD_HT1500to2000', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT1500to2000.root')
-    #('QCD_HT2000toInf', '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD_HT2000toInf.root')
-    
+    #('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230407_QCD/analyze_hadded_QCD.root')
+    ('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230427_DataMCComparison_wHTSamplesStitch/2018/analyze_htoaa_stage1.root')
 ])
 sAnaVersion = list(sIpFiles.keys())[0]
 print(f"HistogramListForPlotting_QCDStitch_HT:: sAnaVersion: {sAnaVersion}")
 
 #sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD_HT100to200/plots'
-sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230407_QCD/plots_HT/%s' % (sAnaVersion)
+sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230427_DataMCComparison_wHTSamplesStitch/2018/plots_afterHTSamplesStitch/%s' % (sAnaVersion)
 
 HTRangesForPlotting = [
-    #[50, 150],
-    #[150, 250],
-    #[250, 350],
-    #[450, 550],
-    #[650, 750],
-    #[950, 1050],
-    #[1450, 1550],
-    #[1950, 2050],
+    [50, 150],
+    [150, 250],
+    [250, 350],
+    [450, 550],
+    [650, 750],
+    [950, 1050],
+    [1450, 1550],
+    [1950, 2050],
     
     #150, 350],
-    [175, 325],
+    #[175, 325],
 ]
 
 print(f"{HTRangesForPlotting = }")

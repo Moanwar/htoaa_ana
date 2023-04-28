@@ -30,6 +30,13 @@ Luminosities = { # [<lumi>, <uncertainty in percent> ]
     Era_2018: [59.83, 2.5],
 }
 
+Corrections = {
+    'HTSamplesStitch': {
+        'inputFile':     './data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root',
+        'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step1_HTCorrSFFromHighToLowHT'
+    }
+}
+
 bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
     Era_2018: {
         'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18

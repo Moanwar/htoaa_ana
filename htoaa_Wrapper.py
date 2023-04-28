@@ -225,8 +225,8 @@ if __name__ == '__main__':
     dryRun           = args.dryRun
 
     SourceCodeDir     = os.getcwd()
-    DestinationDir    = "../analysis/%s" % (anaVersion)
-    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s" % (UserName, anaVersion)
+    DestinationDir    = "../analysis/%s/%s" % (anaVersion, era)
+    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s/%s" % (UserName, anaVersion, era)
 
 
     samplesList = None
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     if selSamplesToRun:
         selSamplesToRun_list = selSamplesToRun.split(',')
 
-    print("samplesList: {}".format(samplesList))
+    print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
 

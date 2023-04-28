@@ -36,25 +36,26 @@ if __name__ == "__main__":
     era              = args.era
 
 
-    
-    sFIn_analysis_stage1_2018 = "data/countSumEventsInSamples/analyze_htoaa_stage1_2018.root"
-
+    sFIn_analysis_stage1_dict = {
+        Era_2016: "",
+        Era_2017: "",
+        Era_2018: "data/countSumEventsInSamples/analyze_htoaa_stage1_2018.root"
+    }
+        
     sHistogramName = 'evt/$DATASETNAME/hCutFlowWeighted_central'
 
     
+    sFIn_analysis_stage1 = sFIn_analysis_stage1_dict[era]
+    
+    samplesInfo               = None    
+    with open(sFileSamplesInfo[era]) as fSamplesInfo:
+        samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
 
-    samplesInfo               = None
-    sFIn_analysis_stage1      = None
-    sFileSamplesInfo_updated  = None
-    if era == Era_2018:
-        sFIn_analysis_stage1 = sFIn_analysis_stage1_2018
-        with open(sFileSamplesInfo[era]) as fSamplesInfo:
-            samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
+    sFileSamplesInfo_updated = sFileSamplesInfo[era]
+    sFileSamplesInfo_updated = sFileSamplesInfo_updated.replace('.json', '_updated.json')
 
-        sFileSamplesInfo_updated = sFileSamplesInfo[era]
-        sFileSamplesInfo_updated = sFileSamplesInfo_updated.replace('.json', '_updated.json')
-
-    fIn_analysis_stage1 = R.TFile(sFIn_analysis_stage1_2018)
+    
+    fIn_analysis_stage1 = R.TFile(sFIn_analysis_stage1)
     print(f"{sFIn_analysis_stage1 = } \n")
 
     if printLevel >= 10:
