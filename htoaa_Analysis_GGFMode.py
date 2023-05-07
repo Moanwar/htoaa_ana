@@ -39,7 +39,7 @@ from particle import Particle # For PDG particle listing https://github.com/scik
 from htoaa_Settings import *
 from htoaa_CommonTools import (
     GetDictFromJsonFile,
-    calculate_lumiScale, update_crosssection,
+    calculate_lumiScale, update_crosssection, getSampleHTRange,
     setXRootDRedirector,
     xrdcpFile
 )
@@ -213,6 +213,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         systematic_axis = hist.Cat("systematic", "Systematic Uncertatinty")
 
         cutFlow_axis  = hist.Bin("CutFlow",   r"Cuts",            21, -0.5, 20.5)
+        cutFlow50_axis= hist.Bin("CutFlow50", r"Cuts",            51, -0.5, 50.5)
         nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
         pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
         ptLow_axis    = hist.Bin("PtLow",     r"$p_{T}$ [GeV]",   400, 0, 200)
@@ -242,6 +243,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # ('histogram_name',  {sXaxis: hist.Bin() axis,  sXaxisLabel: "histogram axis label"})
             ('hCutFlow',                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
             ('hCutFlowWeighted',                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+            ('hNEventsQCD',                               {sXaxis: cutFlow50_axis,  sXaxisLabel: 'Cuts'}),
+            ('hNEventsQCDUnweighted',                     {sXaxis: cutFlow50_axis,  sXaxisLabel: 'Cuts'}),
             
             ('nSelFatJet',                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
             ('hLeadingFatJetPt',                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
@@ -310,6 +313,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # QCD sample sticking
             ('hGenLHE_HT_all',                            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_SelQCDbEnrich',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_SelQCDbGen',                     {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBQuarkPt',           {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBHadron',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             #('hGenBquark_Status_all',                     {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN Bquark Pythia status"}),
@@ -583,6 +589,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             self.datasetInfo[dataset]['isQCD_bEnrich'] = True if kQCD_bEnrich  in dataset else False
             self.datasetInfo[dataset]['isQCD_bGen']    = True if kQCD_bGen     in dataset else False
             self.datasetInfo[dataset]['isQCD'] = self.datasetInfo[dataset]['isQCDIncl'] or self.datasetInfo[dataset]['isQCD_bEnrich'] or self.datasetInfo[dataset]['isQCD_bGen']
+            sample_HT_Min, sample_HT_Max = getSampleHTRange( self.datasetInfo[dataset]["datasetNameFull"] )
+            self.datasetInfo[dataset]['sample_HT_Min'] = sample_HT_Min
+            self.datasetInfo[dataset]['sample_HT_Max'] = sample_HT_Max
                
             
             output = self.accumulator.identity()
@@ -707,11 +716,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 
         # QCD MC ----------------------------------------------
-        mask_genBHadrons_status2_eventwise   = None
-        mask_genBQuarks_hardSctred_eventwise = None
-        mask_QCD_stitch_CutBHadron_eventwise  = None
-        mask_QCD_stitch_CutBQuarkPt_eventwise = None
-        mask_QCD_stitch_eventwise             = None
+        mask_genBHadrons_status2_eventwise                            = None
+        mask_genBQuarks_hardSctred_eventwise                          = None
+        mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = None
+        mask_QCD_stitch_CutBHadron_eventwise                          = None
+        mask_QCD_stitch_CutBQuarkPt_eventwise                         = None
+        mask_QCD_stitch_eventwise                                     = None
         if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
             mask_genLHEHTLt100 = (events.LHE.HT < 100)
 
@@ -812,7 +822,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 printVariable(' genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort].pt', genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort].pt); sys.stdout.flush()
 
-            # QCD stitch conditions -----------------------------------------------------------------------------------
+            # QCD stitch cut-based: conditions -----------------------------------------------------------------------------------
             # option 1: GEN b-quark pT > 15 GeV for QCD BEnrich and QCD bGen samples.
             if self.datasetInfo[dataset]['isQCD_bEnrich'] or self.datasetInfo[dataset]['isQCD_bGen']:
                 mask_QCD_stitch_CutBQuarkPt_eventwise = mask_genBQuarks_pTAbvTrsh
@@ -890,6 +900,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable('\n genBQuarks[mask_tmp2_]', genBQuarks[mask_tmp2_]); sys.stdout.flush()
 
             mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
+
+            mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = (
+                (mask_genBHadrons_status2_eventwise == True) &
+                (mask_genBQuarks_hardSctred_eventwise == False)
+            )
+            # --------------------------------------------------------------------------------------------------
 
                     
         # Reco-level -----------------------------------------------------------------------------------
@@ -1411,6 +1427,67 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight[mask_QCD_stitch_eventwise]
                 )
+                
+                # NEvents in QCD HT samples
+                QCDSamplesHTBins_LowEdge = [50, 100, 200, 300, 500, 700, 1000, 1500, 2000]
+                idx_QCDSampleHTBin = None
+                for idx_ in range(0, len(QCDSamplesHTBins_LowEdge)):
+                    if self.datasetInfo[dataset]['sample_HT_Min'] == QCDSamplesHTBins_LowEdge[idx_]:
+                        idx_QCDSampleHTBin = idx_                
+                iBin = (idx_QCDSampleHTBin * 5) 
+                output['hNEventsQCD'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list * iBin),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 1
+                output['hNEventsQCD'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBHadrons_status2_eventwise] * iBin),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBHadrons_status2_eventwise]
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 2
+                output['hNEventsQCD'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBQuarks_hardSctred_eventwise] * iBin),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 3
+                output['hNEventsQCD'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise] * iBin),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
+                )
+                
+                iBin = (idx_QCDSampleHTBin * 5)
+                output['hNEventsQCDUnweighted'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list * iBin),
+                    systematic=syst
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 1
+                output['hNEventsQCDUnweighted'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBHadrons_status2_eventwise] * iBin),
+                    systematic=syst
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 2
+                output['hNEventsQCDUnweighted'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBQuarks_hardSctred_eventwise] * iBin),
+                    systematic=syst
+                )
+                iBin = (idx_QCDSampleHTBin * 5) + 3
+                output['hNEventsQCDUnweighted'].fill(
+                    dataset=dataset,
+                    CutFlow50=(ones_list[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise] * iBin),
+                    systematic=syst
+                )
+
 
                 
 
@@ -1868,16 +1945,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-            # 
-            if self.datasetInfo[dataset]['isMC'] and 'LHE' in events.fields :
-                output['hGenLHE_HT_all'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT),
-                    systematic=syst,
-                    weight=evtWeight_gen
-                )
-
-
                 
                 
             # QCD MC ----------------------------------------------
@@ -1888,6 +1955,25 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen
                 )
+                output['hGenLHE_HT_SelQCDbHadron'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_genBHadrons_status2_eventwise]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBHadrons_status2_eventwise]
+                )
+                output['hGenLHE_HT_SelQCDbGen'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
+                )
+                output['hGenLHE_HT_SelQCDbEnrich'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_genBQuarks_hardSctred_eventwise]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
+                )
+                
                 output['hGenLHE_HT_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_stitch_CutBQuarkPt_eventwise]),
@@ -1900,6 +1986,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[mask_QCD_stitch_CutBHadron_eventwise]
                 )
+
+
+                
 
                 '''
                 output['hGenBquark_Status_all'].fill(
@@ -2925,6 +3014,7 @@ if __name__ == '__main__':
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
 
     lumiScale = 1
+    nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventToReadInBatch
     sInputFiles         = config["inputFiles"]
     sOutputFile         = config["outputFile"]
     sample_dataset      = config["dataset"] 
@@ -2939,7 +3029,7 @@ if __name__ == '__main__':
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
 
-        sample_crossSection = update_crosssection(sample_category=sample_category, sample_dataset=sample_dataset, sample_crossSection=sample_crossSection)
+        #sample_crossSection = update_crosssection(sample_category=sample_category, sample_dataset=sample_dataset, sample_crossSection=sample_crossSection)
         
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
     #branchesToRead = htoaa_nanoAODBranchesToRead
@@ -2983,8 +3073,6 @@ if __name__ == '__main__':
     startTime = time.time()
     
     tracemalloc.start()
-    
-
 
 
     #client = Client("tls://localhost:8786")
@@ -3009,7 +3097,7 @@ if __name__ == '__main__':
         processor_instance=HToAATo4bProcessor(
             datasetInfo={
                 "era": era, 
-                sample_category: {"isMC": isMC, "lumiScale": lumiScale}
+                sample_category: {"isMC": isMC, "lumiScale": lumiScale, "datasetNameFull": sample_dataset}
             }
         )
     )

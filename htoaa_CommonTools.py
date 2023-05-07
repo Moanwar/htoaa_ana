@@ -22,19 +22,28 @@ def calculate_lumiScale(luminosity, crossSection, sumEvents):
     if sumEvents != 0: lumiScale = luminosity * crossSection * pb_to_fb_conversionFactor / sumEvents
     return lumiScale
 
+def getSampleHTRange(sample_datasetNameFull):
+    sample_HT_Min = sample_HT_Max = None
+    # for e.g. sample_dataset: "QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8"
+    for sample_dataset_parts in sample_datasetNameFull.split('_'):
+        if 'HT' in sample_dataset_parts and 'to' in sample_dataset_parts:
+            # HT100to200
+            sample_HT_Min = int(sample_dataset_parts.split('HT')[1].split('to')[0])
+            sample_HT_Max = sample_dataset_parts.split('HT')[1].split('to')[1]
+            try:
+                sample_HT_Max = int(sample_HT_Max) # to take care of sample_HT_Max = 'Inf'
+            except:
+                sample_HT_Max = -1
+            break
+    return sample_HT_Min, sample_HT_Max
+    
+
 def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     if sample_category not in [kQCD_bGen]: return sample_crossSection
 
     # HTSamplesStitch SF -------------------------------------------------------------------
-    sample_HT_Min = sample_HT_Max = None
-    # for e.g. sample_dataset: "QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8"
-    for sample_dataset_parts in sample_dataset.split('_'):
-        if 'HT' in sample_dataset_parts and 'to' in sample_dataset_parts:
-            # HT100to200
-            sample_HT_Min = sample_dataset_parts.split('HT')[1].split('to')[0]
-            sample_HT_Max = sample_dataset_parts.split('HT')[1].split('to')[1]
-            break
-    sample_HT_toUse = int(sample_HT_Min)
+    sample_HT_Min, sample_HT_Max = getSampleHTRange(sample_dataset)
+    sample_HT_toUse = sample_HT_Min # int(sample_HT_Min)
     
     sIpFile_HTSamplesStitchSF        = Corrections['HTSamplesStitch']['inputFile']
     sHistogramName_HTSamplesStitchSF = Corrections['HTSamplesStitch']['histogramName']

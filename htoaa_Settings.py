@@ -34,6 +34,7 @@ Corrections = {
     'HTSamplesStitch': {
         'inputFile':     './data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root',
         'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step1_HTCorrSFFromHighToLowHT'
+        #'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step0_HTCorrSFFromHighToLowHT'
     }
 }
 
