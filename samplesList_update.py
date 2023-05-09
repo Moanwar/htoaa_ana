@@ -96,5 +96,14 @@ if __name__ == "__main__":
     with open(sFileSamplesInfo_updated, "w") as fSampleInfo:
         json.dump(samplesInfo, fSampleInfo, indent=4)
 
-        print(f"\n\n Updated sample list wrote to {sFileSamplesInfo_updated}")
+        print(f"\n\n Updated sample list wrote to {sFileSamplesInfo_updated}. Copy it to {sFileSamplesInfo[era]}")
+
+
+        
+    ### -------------------------------------------------------------------------------------------------------------
+    ### -------------------------------------------------------------------------------------------------------------
+    ### Calculate QCD lumiScale with PhaseSpaceOverlapRewght
+    ### -------------------------------------------------------------------------------------------------------------
+    ### -------------------------------------------------------------------------------------------------------------
+
     

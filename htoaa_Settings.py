@@ -24,7 +24,7 @@ sFileSamplesInfo = {
     Era_2018: "Samples_2018UL.json"
 }
 
-Luminosities = { # [<lumi>, <uncertainty in percent> ]
+Luminosities = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
     Era_2018: [59.83, 2.5],
@@ -52,6 +52,10 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         },
     },
 }
+
+
+### Miscellaneous
+kLHE_HT_Max = 99999.0
 
 
 GENPART_STATUSFLAGS = [

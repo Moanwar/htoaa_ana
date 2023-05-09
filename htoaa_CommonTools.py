@@ -30,10 +30,14 @@ def getSampleHTRange(sample_datasetNameFull):
             # HT100to200
             sample_HT_Min = int(sample_dataset_parts.split('HT')[1].split('to')[0])
             sample_HT_Max = sample_dataset_parts.split('HT')[1].split('to')[1]
-            try:
-                sample_HT_Max = int(sample_HT_Max) # to take care of sample_HT_Max = 'Inf'
-            except:
-                sample_HT_Max = -1
+            if sample_HT_Max == 'Inf':
+                sample_HT_Max = kLHE_HT_Max
+            else:
+                sample_HT_Max = int(sample_HT_Max)            
+#            try:
+#                sample_HT_Max = int(sample_HT_Max) # to take care of sample_HT_Max = 'Inf'
+#            except:
+#                sample_HT_Max = -1
             break
     return sample_HT_Min, sample_HT_Max
     
