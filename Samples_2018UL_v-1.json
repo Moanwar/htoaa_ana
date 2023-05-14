@@ -3,7 +3,7 @@
         "dataset": "/QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1117000.0,
         "nEvents": 36118282,
-        "sumEvents": -1,
+        "sumEvents": 36118282.0,
         "nanoAOD_nFiles": 30,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/120000/F71572ED-674F-F243-89F5-5FE4304EDFA0.root",
@@ -42,7 +42,7 @@
         "dataset": "/QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 80430.0,
         "nEvents": 18462183,
-        "sumEvents": -1,
+        "sumEvents": 18462183.0,
         "nanoAOD_nFiles": 17,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/A60A1585-27A1-C141-B286-D208115957D5.root",
@@ -68,7 +68,7 @@
         "dataset": "/QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 16620.0,
         "nEvents": 11197722,
-        "sumEvents": -1,
+        "sumEvents": 11197722.0,
         "nanoAOD_nFiles": 11,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/4D0D782E-44DF-7C41-9F65-C84078F8A9A7.root",
@@ -88,7 +88,7 @@
         "dataset": "/QCD_bEnriched_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1487.0,
         "nEvents": 9246898,
-        "sumEvents": -1,
+        "sumEvents": 9246898.0,
         "nanoAOD_nFiles": 13,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/6CEB351C-87FE-0D48-BAFA-8F6B58BCA014.root",
@@ -110,7 +110,7 @@
         "dataset": "/QCD_bEnriched_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 296.5,
         "nEvents": 1844165,
-        "sumEvents": -1,
+        "sumEvents": 1844165.0,
         "nanoAOD_nFiles": 5,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/814375F9-232C-9043-9658-C2006761F3FA.root",
@@ -124,7 +124,7 @@
         "dataset": "/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 46.61,
         "nEvents": 1330829,
-        "sumEvents": -1,
+        "sumEvents": 1330829.0,
         "nanoAOD_nFiles": 11,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/85D1C47D-6204-2F4D-A166-25BBF41120B4.root",
@@ -144,7 +144,7 @@
         "dataset": "/QCD_bEnriched_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 3.72,
         "nEvents": 1431254,
-        "sumEvents": -1,
+        "sumEvents": 1431254.0,
         "nanoAOD_nFiles": 11,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/C7B2B5AA-8A7D-4141-9DC1-4BC9C788AEF1.root",
@@ -164,7 +164,7 @@
         "dataset": "/QCD_bEnriched_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 0.6462,
         "nEvents": 1357334,
-        "sumEvents": -1,
+        "sumEvents": 1357334.0,
         "nanoAOD_nFiles": 11,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/73EFA4B7-D1C8-6742-AF30-99C0B6AFDDD4.root",
@@ -184,7 +184,7 @@
         "dataset": "/QCD_HT100to200_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 1275000.0,
         "nEvents": 35884072,
-        "sumEvents": -1,
+        "sumEvents": 35884072.0,
         "nanoAOD_nFiles": 41,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT100to200_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/250000/2BD6F052-F047-F548-8161-D5B84C124E92.root",
@@ -234,7 +234,7 @@
         "dataset": "/QCD_HT200to300_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 111700.0,
         "nEvents": 14830551,
-        "sumEvents": -1,
+        "sumEvents": 14830551.0,
         "nanoAOD_nFiles": 22,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT200to300_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2520000/FAD19728-6066-AA43-91B3-728519FE3B5D.root",
@@ -265,7 +265,7 @@
         "dataset": "/QCD_HT300to500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 27960.0,
         "nEvents": 14144826,
-        "sumEvents": -1,
+        "sumEvents": 14144826.0,
         "nanoAOD_nFiles": 46,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT300to500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/30000/250725ED-2F36-6945-9C93-5178BAD7F1FE.root",
@@ -320,7 +320,7 @@
         "dataset": "/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 3078.0,
         "nEvents": 8004808,
-        "sumEvents": -1,
+        "sumEvents": 8004808.0,
         "nanoAOD_nFiles": 20,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root",
@@ -349,7 +349,7 @@
         "dataset": "/QCD_HT700to1000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 721.8,
         "nEvents": 4642245,
-        "sumEvents": -1,
+        "sumEvents": 4642245.0,
         "nanoAOD_nFiles": 26,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT700to1000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2540000/892C77D5-5089-F940-96FF-D8A85C392E7A.root",
@@ -384,7 +384,7 @@
         "dataset": "/QCD_HT1000to1500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 138.2,
         "nEvents": 1537452,
-        "sumEvents": -1,
+        "sumEvents": 1537452.0,
         "nanoAOD_nFiles": 4,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1000to1500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2540000/1F5C9C7C-56C7-204B-847C-1DEC83E0AA9A.root",
@@ -397,7 +397,7 @@
         "dataset": "/QCD_HT1500to2000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 13.61,
         "nEvents": 1263157,
-        "sumEvents": -1,
+        "sumEvents": 1263157.0,
         "nanoAOD_nFiles": 12,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1500to2000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/30000/F06FFEE3-8BC0-5B48-9160-02F74E43CD71.root",
@@ -418,7 +418,7 @@
         "dataset": "/QCD_HT2000toInf_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 2.92,
         "nEvents": 1300672,
-        "sumEvents": -1,
+        "sumEvents": 1300672.0,
         "nanoAOD_nFiles": 28,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT2000toInf_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2540000/7B0FFC84-FEC3-0242-8561-4174443AD4CD.root",
@@ -455,7 +455,7 @@
         "dataset": "/QCD_HT50to100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 185300000.0,
         "nEvents": 38521609,
-        "sumEvents": -1,
+        "sumEvents": 38521609.0,
         "nanoAOD_nFiles": 64,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT50to100_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/7DBE0344-B7D7-9A47-8BF3-7619DC7A4276.root",
@@ -528,7 +528,7 @@
         "dataset": "/QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 23590000.0,
         "nEvents": 79857456,
-        "sumEvents": -1,
+        "sumEvents": 79857456.0,
         "nanoAOD_nFiles": 104,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/60000/7E3B03BA-DE7A-4944-97E4-61A20C0EB31B.root",
@@ -641,7 +641,7 @@
         "dataset": "/QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1551000.0,
         "nEvents": 61542214,
-        "sumEvents": -1,
+        "sumEvents": 61542214.0,
         "nanoAOD_nFiles": 63,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2830000/B888BF3D-72B0-7C46-8D08-C0C5B29BE214.root",
@@ -713,7 +713,7 @@
         "dataset": "/QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 323400.0,
         "nEvents": 56214199,
-        "sumEvents": -1,
+        "sumEvents": 56214199.0,
         "nanoAOD_nFiles": 96,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/659AA48B-BC92-A346-87DF-0271DAFCB618.root",
@@ -818,7 +818,7 @@
         "dataset": "/QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 30140.0,
         "nEvents": 61097673,
-        "sumEvents": -1,
+        "sumEvents": 61097673.0,
         "nanoAOD_nFiles": 102,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2830000/38CD62B0-4A80-C444-8BE7-75941B7E29D0.root",
@@ -929,7 +929,7 @@
         "dataset": "/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 6344.0,
         "nEvents": 47314826,
-        "sumEvents": -1,
+        "sumEvents": 47314826.0,
         "nanoAOD_nFiles": 95,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2830000/8397BE81-8DF6-C148-B421-9FCF155D827E.root",
@@ -1033,7 +1033,7 @@
         "dataset": "/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1092.0,
         "nEvents": 15230975,
-        "sumEvents": -1,
+        "sumEvents": 15230975.0,
         "nanoAOD_nFiles": 52,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/11B75502-5F85-6544-9120-8EFA3A35063B.root",
@@ -1094,7 +1094,7 @@
         "dataset": "/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 99.76,
         "nEvents": 11887406,
-        "sumEvents": -1,
+        "sumEvents": 11887406.0,
         "nanoAOD_nFiles": 80,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/1CC5D38E-4A9D-544B-845F-201FB7F8AD5E.root",
@@ -1183,7 +1183,7 @@
         "dataset": "/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 20.35,
         "nEvents": 5710430,
-        "sumEvents": -1,
+        "sumEvents": 5710430.0,
         "nanoAOD_nFiles": 48,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2830000/E525F9B5-E0EE-7547-86BC-8974F559382C.root",
@@ -1240,7 +1240,7 @@
         "dataset": "/QCD_HT50to100_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 187300000.0,
         "nEvents": 38599389,
-        "sumEvents": -1,
+        "sumEvents": 38599389.0,
         "nanoAOD_nFiles": 59,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT50to100_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/3F8A5799-6D93-9F41-B8AD-20F73CE460CB.root",
@@ -1308,7 +1308,7 @@
         "dataset": "/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 23590000.0,
         "nEvents": 84434559,
-        "sumEvents": -1,
+        "sumEvents": 84434559.0,
         "nanoAOD_nFiles": 82,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2520000/9374A959-B58A-114E-A57C-C4EEA57A8E69.root",
@@ -1399,7 +1399,7 @@
         "dataset": "/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1555000.0,
         "nEvents": 57336623,
-        "sumEvents": -1,
+        "sumEvents": 57336623.0,
         "nanoAOD_nFiles": 46,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/9072FB34-9A52-0A40-8234-EA18C6C7FC48.root",
@@ -1454,7 +1454,7 @@
         "dataset": "/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 324500.0,
         "nEvents": 61609663,
-        "sumEvents": -1,
+        "sumEvents": 61609663.0,
         "nanoAOD_nFiles": 154,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/838ABEF8-7B04-004C-BEF2-94E4CB783C69.root",
@@ -1617,7 +1617,7 @@
         "dataset": "/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 30310.0,
         "nEvents": 49184771,
-        "sumEvents": -1,
+        "sumEvents": 49184771.0,
         "nanoAOD_nFiles": 48,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2550000/4956027E-F14E-F448-A177-251061F76A9A.root",
@@ -1674,7 +1674,7 @@
         "dataset": "/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 6444.0,
         "nEvents": 48506751,
-        "sumEvents": -1,
+        "sumEvents": 48506751.0,
         "nanoAOD_nFiles": 68,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/230000/6C519F96-A120-0149-BB24-D27852E61214.root",
@@ -1751,7 +1751,7 @@
         "dataset": "/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1127.0,
         "nEvents": 14394786,
-        "sumEvents": -1,
+        "sumEvents": 14394786.0,
         "nanoAOD_nFiles": 51,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/3AD21532-1E4C-F74F-AE29-358C64FD924E.root",
@@ -1811,7 +1811,7 @@
         "dataset": "/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 109.8,
         "nEvents": 10411831,
-        "sumEvents": -1,
+        "sumEvents": 10411831.0,
         "nanoAOD_nFiles": 15,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/E5AD9C66-069F-ED41-B02A-DE2D48E9A937.root",
@@ -1835,7 +1835,7 @@
         "dataset": "/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 21.98,
         "nEvents": 5374711,
-        "sumEvents": -1,
+        "sumEvents": 5374711.0,
         "nanoAOD_nFiles": 8,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2540000/AB1DD1C2-9E5A-2D47-BC3A-16027B51DBED.root",
@@ -1852,7 +1852,7 @@
         "dataset": "/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 831.76,
         "nEvents": 304895029,
-        "sumEvents": -1,
+        "sumEvents": 110615139.0,
         "nanoAOD_nFiles": 354,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/50000/2C90D8D6-E120-1241-A6DA-F6E675FA0DB4.root",
@@ -2215,7 +2215,7 @@
         "dataset": "/ZJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 1012.0,
         "nEvents": 15002757,
-        "sumEvents": -1,
+        "sumEvents": 15002757.0,
         "nanoAOD_nFiles": 44,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/ZJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2540000/49369D5F-5E46-FD41-A7EB-EDFD74FDE9C8.root",
@@ -2268,7 +2268,7 @@
         "dataset": "/ZJetsToQQ_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 114.2,
         "nEvents": 13930474,
-        "sumEvents": -1,
+        "sumEvents": 13930474.0,
         "nanoAOD_nFiles": 24,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/ZJetsToQQ_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/C9E002CC-759A-0E40-A97F-AC9691668B57.root",
@@ -2301,7 +2301,7 @@
         "dataset": "/ZJetsToQQ_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 25.34,
         "nEvents": 12029507,
-        "sumEvents": -1,
+        "sumEvents": 12029507.0,
         "nanoAOD_nFiles": 44,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/ZJetsToQQ_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/80000/63893BE3-D6AC-6248-9DA2-FBE3A4A5EBC6.root",
@@ -2352,9 +2352,9 @@
     },
     "ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8": {
         "dataset": "/ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
-        "cross_section": 190.2,
+        "cross_section": 12.99,
         "nEvents": 9681521,
-        "sumEvents": -1,
+        "sumEvents": 9681521.0,
         "nanoAOD_nFiles": 59,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/80000/21935FFB-6689-1445-9842-4C2F42542789.root",
@@ -2422,7 +2422,7 @@
         "dataset": "/WJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 2549.0,
         "nEvents": 14494966,
-        "sumEvents": -1,
+        "sumEvents": 14494966.0,
         "nanoAOD_nFiles": 22,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/WJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/BDEB3B46-4717-8149-9E43-5D9BF215840A.root",
@@ -2453,7 +2453,7 @@
         "dataset": "/WJetsToQQ_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 276.5,
         "nEvents": 9335298,
-        "sumEvents": -1,
+        "sumEvents": 9335298.0,
         "nanoAOD_nFiles": 33,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/WJetsToQQ_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/250000/2EC2D4CC-3CC3-3145-A8C1-36C3CBEFA27E.root",
@@ -2495,7 +2495,7 @@
         "dataset": "/WJetsToQQ_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 59.25,
         "nEvents": 13633226,
-        "sumEvents": -1,
+        "sumEvents": 13633226.0,
         "nanoAOD_nFiles": 32,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/WJetsToQQ_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/2500000/54A36C15-C0A8-A64A-B67D-EE10F28A59B7.root",
@@ -2536,7 +2536,7 @@
         "dataset": "/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM",
         "cross_section": 28.75,
         "nEvents": 13581343,
-        "sumEvents": -1,
+        "sumEvents": 13581343.0,
         "nanoAOD_nFiles": 67,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/80000/7F70C50A-18E0-6148-A21E-6FD57A2BB8B6.root",
@@ -2612,7 +2612,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 398764,
-        "sumEvents": -1,
+        "sumEvents": 398764.0,
         "nanoAOD_nFiles": 16,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2560000/B573B8AF-4FE6-2F40-903D-170310D1AFF3.root",
@@ -2637,7 +2637,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 399773,
-        "sumEvents": -1,
+        "sumEvents": 399773.0,
         "nanoAOD_nFiles": 2,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/F0EF5D10-0252-AB43-A923-E6ACB6E7F444.root",
@@ -2648,7 +2648,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 401047,
-        "sumEvents": -1,
+        "sumEvents": 401047.0,
         "nanoAOD_nFiles": 5,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/8850F07F-92D4-9346-A844-91A30AB5E9B7.root",
@@ -2662,7 +2662,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 406546,
-        "sumEvents": -1,
+        "sumEvents": 406546.0,
         "nanoAOD_nFiles": 5,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/C03B64C6-9170-D244-A562-8EF246FDCC80.root",
@@ -2676,7 +2676,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 393660,
-        "sumEvents": -1,
+        "sumEvents": 393660.0,
         "nanoAOD_nFiles": 1,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/F2CF297F-97F9-BD42-92A2-541C51FBEBA8.root"
@@ -2686,7 +2686,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 391085,
-        "sumEvents": -1,
+        "sumEvents": 391085.0,
         "nanoAOD_nFiles": 5,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2540000/4E51F2B5-ACA9-1A40-8111-E5416E37A586.root",
@@ -2700,7 +2700,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 405005,
-        "sumEvents": -1,
+        "sumEvents": 405005.0,
         "nanoAOD_nFiles": 2,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/D312C343-BEBE-0D4C-B249-1F6107929692.root",
@@ -2711,7 +2711,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 398831,
-        "sumEvents": -1,
+        "sumEvents": 398831.0,
         "nanoAOD_nFiles": 7,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/B88E3CCA-2BF8-9044-BF50-841627223607.root",
@@ -2727,7 +2727,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 398288,
-        "sumEvents": -1,
+        "sumEvents": 398288.0,
         "nanoAOD_nFiles": 3,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/7F6A3882-C659-E843-B5F0-155C08DA4273.root",
@@ -2739,7 +2739,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 397885,
-        "sumEvents": -1,
+        "sumEvents": 397885.0,
         "nanoAOD_nFiles": 2,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/7A12582E-156C-7B42-904F-A222AA9C9BB6.root",
@@ -2750,7 +2750,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 403293,
-        "sumEvents": -1,
+        "sumEvents": 403293.0,
         "nanoAOD_nFiles": 13,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/43077EED-2BB0-6F47-A700-55D90E265701.root",
@@ -2772,7 +2772,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 468175,
-        "sumEvents": -1,
+        "sumEvents": 468175.0,
         "nanoAOD_nFiles": 16,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/D12F9621-5AD0-A940-B739-0F5FD615B381.root",
@@ -2797,7 +2797,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 468518,
-        "sumEvents": -1,
+        "sumEvents": 468518.0,
         "nanoAOD_nFiles": 12,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2550000/ED1F064D-E946-FC40-81A5-23A0D68A99BE.root",
@@ -2818,7 +2818,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 452529,
-        "sumEvents": -1,
+        "sumEvents": 452529.0,
         "nanoAOD_nFiles": 23,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2550000/BC10B8D4-88BC-CB47-9746-7E93AE25CD7B.root",
@@ -2850,7 +2850,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 503270,
-        "sumEvents": -1,
+        "sumEvents": 503270.0,
         "nanoAOD_nFiles": 25,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/3E6CAD0E-9497-614A-BF11-ED2650C2B58F.root",
@@ -2884,7 +2884,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 464480,
-        "sumEvents": -1,
+        "sumEvents": 464480.0,
         "nanoAOD_nFiles": 23,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2810000/72B04F10-938E-E14A-BB61-32632739292C.root",
@@ -2916,7 +2916,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 463836,
-        "sumEvents": -1,
+        "sumEvents": 463836.0,
         "nanoAOD_nFiles": 18,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/80000/BAE428B8-56DA-3A40-8A6F-0B8CAB3FDC36.root",
@@ -2943,7 +2943,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 480773,
-        "sumEvents": -1,
+        "sumEvents": 480773.0,
         "nanoAOD_nFiles": 25,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2550000/C076A295-FC7D-9748-A7E4-8CAD3316FBB3.root",
@@ -2977,7 +2977,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 502951,
-        "sumEvents": -1,
+        "sumEvents": 502951.0,
         "nanoAOD_nFiles": 20,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/3EFA7A62-B577-9943-BED8-84A7CF18B5CC.root",
@@ -3006,7 +3006,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 496168,
-        "sumEvents": -1,
+        "sumEvents": 496168.0,
         "nanoAOD_nFiles": 23,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/7022AEF2-F28B-FD46-9A63-2C19AA75DEC6.root",
@@ -3038,7 +3038,7 @@
         "dataset": "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
         "cross_section": 1.0,
         "nEvents": 460168,
-        "sumEvents": -1,
+        "sumEvents": 460168.0,
         "nanoAOD_nFiles": 20,
         "nanoAOD": [
             "/store/mc/RunIISummer20UL18NanoAODv9/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/100D4104-1336-D64D-8DBE-77385589ABAB.root",

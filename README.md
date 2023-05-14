@@ -2,7 +2,7 @@
 
 ## Seting up environment using conda
 1. Install 'conda' on your system/lxplus. Suggestion: Follow https://docs.anaconda.com/anaconda/install/linux/
-1.1
+
 2. Once conda is installed, set up conda environment named ' myCondaEnv' to install the required software libraries/packages using
    ```
    conda env create --name myCondaEnv  --file environment_lxplus.yml 
@@ -18,8 +18,34 @@
 voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989
 ```
 
+## Analysis steps
 
-## Running analysis
+### Prepare samples' list with all details (Samples_2018UL.csv)
+Add/update dataset name and cross-sections for all samples in 'samplesList_prepare.py'.\
+To run:
+```
+python3 samplesList_prepare.py -era <era>\
+cp Samples_2018UL_v0.json Samples_2018UL.json
+```
+Add commandline option '-updateCrossSections' to update cross-section value in the existing sample list.\
+
+
+### Calculate sumEvents
+Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\
+Run:
+```
+python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
+```
+It runs jobs in HT Condor, and produces final output hadd root file.
+Set path of the output hadd root file in 'samplesList_update.py' and run
+```
+python3 samplesList_update.py -era <era>
+```
+This updates samples' full detail list with sumEvents. Now samples' full detail list (Samples_2018UL.csv) is ready for the further analysis. Now on the previous analysis steps need not to run again.
+
+
+
+### Running analysis
 'htoaa_Analysis_wCoffea.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
 ```
 python3 htoaa_Analysis_wCoffea.py config.json

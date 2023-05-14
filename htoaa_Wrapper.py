@@ -1,4 +1,9 @@
 
+'''
+
+'''
+
+
 import os
 import sys
 import subprocess
@@ -12,15 +17,19 @@ import time
 from datetime import datetime
 import copy
 
+print(f"htoaa_Wraper:: here1 {datetime.now() = }")
+
 from htoaa_Settings import *
+print(f"htoaa_Wraper:: here2 {datetime.now() = }")
 from htoaa_Samples import (
     Samples2018,
     kData
 )
+print(f"htoaa_Wraper:: here3 {datetime.now() = }")
 from htoaa_CommonTools import (
     executeBashCommand,
 )
-
+print(f"htoaa_Wraper:: here4 {datetime.now() = }")
 
 
 
@@ -36,6 +45,7 @@ printLevel = 6
 #UserHomePath = os.path.expanduser("~")
 UserHomePath = str(Path.home()) # Python 3.5+
 UserName     = os.getlogin()
+print(f"htoaa_Wraper:: here5 {datetime.now() = }")
 
 def writeCondorExecFile(
         condor_exec_file,
@@ -195,6 +205,7 @@ def searchStringInFile(sFileName, searchString, nLinesToSearch, SearchFromEnd=Tr
 
 if __name__ == '__main__':
 
+    print(f"htoaa_Wraper:: here6 {datetime.now() = }"); sys.stdout.flush()
     print("htoaa_Wrapper:: main: {}".format(sys.argv)); sys.stdout.flush()
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
@@ -211,6 +222,7 @@ if __name__ == '__main__':
     parser.add_argument('-dryRun',            action='store_true', default=False)
     args=parser.parse_args()
     print("args: {}".format(args))
+    print(f"htoaa_Wraper:: here7 {datetime.now() = }"); sys.stdout.flush()
 
     sAnalysis        = args.analyze
     era              = args.era
@@ -316,7 +328,7 @@ if __name__ == '__main__':
 
                 if printLevel >= 6:
                     print("\nsample: {}".format(sample))
-                    print("samplesInfo[sample]: {}".format(samplesInfo[sample]))
+                    print("samplesInfo[{}]: {}".format(sample, samplesInfo[sample]))
                     print("files ({}): {}".format(len(files), files))
 
 
@@ -464,7 +476,8 @@ if __name__ == '__main__':
                     #if jobStatus == 0 or 1==1:
                     if jobStatus in jobStatusForJobSubmission:
                         config["era"] = era
-                        config["dataset"]    = sample_dataset 
+                        config["dataset"]    = sample_dataset
+                        #config["dataset"]    = list( sample_dataset )
                         config["inputFiles"] = list( files_splitted[iJob] )
                         config["outputFile"] = sOpRootFile_to_use 
                         config["sampleCategory"] = sample_category
