@@ -4,6 +4,7 @@ from collections import OrderedDict as OD
 
 sXRange = "xAxisRange"; sYRange = "yAxisRange";
 sXLabel = 'xAxisLabel'; sYLabel = 'yAxisLabel';
+sXScale = 'xAxisScale';
 sNRebin = "nRebin"
 sHistosToOverlay = 'histosToOverlay'
 sHistosToHadd = 'histosToHadd'
@@ -17,13 +18,13 @@ sIpFiles = OD([
     #(sAnaVersion, '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD/analyze_hadded_QCD.root')
     #(sAnaVersion, '')
     #('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230407_QCD/analyze_hadded_QCD.root')
-    ('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230427_DataMCComparison_wHTSamplesStitch/2018/analyze_htoaa_stage1.root')
+    ('QCD_fullHT', '/home/siddhesh/Work/CMS/htoaa/analysis/20230516_MC_OverlapPhSpRemoveral_v1/2018/analyze_htoaa_stage1.root')
 ])
 sAnaVersion = list(sIpFiles.keys())[0]
 print(f"HistogramListForPlotting_QCDStitch_HT:: sAnaVersion: {sAnaVersion}")
 
 #sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD_HT100to200/plots'
-sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230427_DataMCComparison_wHTSamplesStitch/2018/plots_afterHTSamplesStitch/%s' % (sAnaVersion)
+sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230516_MC_OverlapPhSpRemoveral_v1/2018/plots/%s' % (sAnaVersion)
 
 HTRangesForPlotting = [
     [50, 150],
@@ -47,6 +48,7 @@ for HTRange in HTRangesForPlotting:
     HTMin = HTRange[0]
     HTMax = HTRange[1]
     
+    '''
     histograms_dict["hGenLHE_HT%dto%d_all" % (HTMin, HTMax)] = {
         sXLabel: 'LHE HT [GeV]', sYLabel: 'Events',
         sXRange: [HTMin, HTMax],
@@ -91,6 +93,7 @@ for HTRange in HTRangesForPlotting:
             ]),
         ])
     }
+    '''
 
     histograms_dict["hGenLHE_HT%dto%d_QCD_bEnrich" % (HTMin, HTMax)] = {
         sXLabel: 'LHE HT [GeV]', sYLabel: 'Events',
@@ -120,9 +123,23 @@ for HTRange in HTRangesForPlotting:
         sXRange: [HTMin, HTMax],
         #sNRebin: 2,
         sHistosToOverlay: OD([# ('h1', [{histoToOverlay1}]),  ('h2', [{histoToOverlay2}]), ('h3', [{histoTohadd3p1}, {histoTohadd3p2}, ...]), ('hi',[{}]), ...]
-            ("QCDIncl all", [
-                {sIpFileNameNice: sAnaVersion, sHistName: 'evt/QCDIncl/hGenLHE_HT_all_central'}
+            ("QCD_Incl-madgraph_PSWeights all", [
+                {sIpFileNameNice: sAnaVersion, sHistName: 'evt/QCD_Incl_PSWeight/hGenLHE_HT_all_central'}
+            ]),
+            ("QCD_Incl-madgraphMLM all", [
+                {sIpFileNameNice: sAnaVersion, sHistName: 'evt/QCD_Incl/hGenLHE_HT_all_central'}
             ]),
         ])
     }
-    
+    '''
+    histograms_dict["hGenLHE_HT%dto%d_QCD_Incl_PSWeight" % (HTMin, HTMax)] = {
+        sXLabel: 'LHE HT [GeV]', sYLabel: 'Events',
+        sXRange: [HTMin, HTMax],
+        #sNRebin: 2,
+        sHistosToOverlay: OD([# ('h1', [{histoToOverlay1}]),  ('h2', [{histoToOverlay2}]), ('h3', [{histoTohadd3p1}, {histoTohadd3p2}, ...]), ('hi',[{}]), ...]
+            ("QCD_Incl-madgraph_PSWeights all", [
+                {sIpFileNameNice: sAnaVersion, sHistName: 'evt/QCD_Incl_PSWeight/hGenLHE_HT_all_central'}
+            ]),
+        ])
+    }
+    '''

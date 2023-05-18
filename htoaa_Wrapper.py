@@ -214,27 +214,29 @@ if __name__ == '__main__':
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
+    parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
     parser.add_argument('-nFilesPerJob',      type=int, default=5)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=3,                           help='Download input files after n job failures')
-    parser.add_argument('-dryRun',            action='store_true', default=False)
+    parser.add_argument('-dryRun',            action='store_true', default=False)    
     args=parser.parse_args()
     print("args: {}".format(args))
     print(f"htoaa_Wraper:: here7 {datetime.now() = }"); sys.stdout.flush()
 
-    sAnalysis        = args.analyze
-    era              = args.era
-    run_mode         = args.run_mode
-    nFilesPerJob     = args.nFilesPerJob
-    selSamplesToRun  = args.samples
-    anaVersion       = args.version
-    nResubmissionMax = args.nResubMax
-    ResubWaitingTime = args.ResubWaitingTime
-    iJobSubmission   = args.iJobSubmission
-    xrdcpIpAftNResub = args.xrdcpIpAftNResub
-    dryRun           = args.dryRun
+    sAnalysis               = args.analyze
+    era                     = args.era
+    run_mode                = args.run_mode
+    nFilesPerJob            = args.nFilesPerJob
+    selSamplesToRun         = args.samples
+    selSamplesToExclude     = args.excludeSamples
+    anaVersion              = args.version
+    nResubmissionMax        = args.nResubMax
+    ResubWaitingTime        = args.ResubWaitingTime
+    iJobSubmission          = args.iJobSubmission
+    xrdcpIpAftNResub        = args.xrdcpIpAftNResub
+    dryRun                  = args.dryRun
 
     SourceCodeDir     = os.getcwd()
     DestinationDir    = "../analysis/%s/%s" % (anaVersion, era)
@@ -253,10 +255,14 @@ if __name__ == '__main__':
     selSamplesToRun_list = []
     if selSamplesToRun:
         selSamplesToRun_list = selSamplesToRun.split(',')
+    selSamplesToExclude_list = []
+    if selSamplesToExclude:
+        selSamplesToExclude_list = selSamplesToExclude.split(',')
 
     print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
+    print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
 
     
     os.chdir( SourceCodeDir )
@@ -305,6 +311,13 @@ if __name__ == '__main__':
                     if skipThisSample:
                         continue
 
+                if len(selSamplesToExclude_list) > 0:
+                    skipThisSample = False
+                    for selSample in selSamplesToExclude_list:
+                        if sample.startswith(selSample): skipThisSample = True
+                    if skipThisSample:
+                        continue
+                    
                 #
                 OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
                 JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)

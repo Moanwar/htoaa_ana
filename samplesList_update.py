@@ -62,7 +62,8 @@ if __name__ == "__main__":
         print(f"samplesInfo ({type(samplesInfo)}) ({len(samplesInfo)}): {json.dumps(samplesInfo, indent=4)}")
 
     for sampleName in samplesInfo:
-        datasetName           = samplesInfo[sampleName]["dataset"]
+        #datasetName           = samplesInfo[sampleName]["dataset"]
+        datasetName           = samplesInfo[sampleName]["dataset"][0]
         
         datasetName_trim      = datasetName[1:] if datasetName.startswith('/') else datasetName
         datasetName_parts     = datasetName.split('/')
@@ -76,7 +77,8 @@ if __name__ == "__main__":
         
         #sHistoName = 'evt/%s/hCutFlowWeighted_central' % (datasetName_trim)
         sHistoName_toUse = sHistogramName
-        sHistoName_toUse = sHistoName_toUse.replace('$DATASETNAME', datasetName_trim)
+        #sHistoName_toUse = sHistoName_toUse.replace('$DATASETNAME', datasetName_trim)
+        sHistoName_toUse = sHistoName_toUse.replace('$DATASETNAME', sampleName)
         
         h = None
         h = fIn_analysis_stage1.Get(sHistoName_toUse)
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     with open(sFileSamplesInfo_updated, "w") as fSampleInfo:
         json.dump(samplesInfo, fSampleInfo, indent=4)
 
-        print(f"\n\n Updated sample list wrote to {sFileSamplesInfo_updated}. Copy it to {sFileSamplesInfo[era]}")
+        print(f"\n\n Updated sample list wrote to {sFileSamplesInfo_updated}. \n cp {sFileSamplesInfo_updated} {sFileSamplesInfo[era]}   if you are satisfied with {sFileSamplesInfo_updated}")
 
 
         

@@ -4,6 +4,7 @@ from collections import OrderedDict as OD
 
 sXRange = "xAxisRange"; sYRange = "yAxisRange";
 sXLabel = 'xAxisLabel'; sYLabel = 'yAxisLabel';
+sXScale = 'xAxisScale';
 sNRebin = "nRebin"
 sHistosToOverlay = 'histosToOverlay'
 sHistosToHadd = 'histosToHadd'

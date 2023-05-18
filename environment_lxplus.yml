@@ -303,4 +303,5 @@ dependencies:
   - jupyter_server
   - hyperopt
   - coffea
+  - particle
 prefix: /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa

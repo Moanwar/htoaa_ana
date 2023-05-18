@@ -1945,16 +1945,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                
-                
-            # QCD MC ----------------------------------------------
-            if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD']:
+            if self.datasetInfo[dataset]['isMC']:
                 output['hGenLHE_HT_all'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT),
                     systematic=syst,
                     weight=evtWeight_gen
                 )
+                 
+                
+            # QCD MC ----------------------------------------------
+            if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD']:
                 output['hGenLHE_HT_SelQCDbHadron'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_genBHadrons_status2_eventwise]),
@@ -3034,6 +3035,7 @@ if __name__ == '__main__':
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
+    sample_dataset = sample_dataset[0] if isinstance(sample_dataset, list) else sample_dataset # dataset is list of datasets w/ same sample name, as they are considered together recently. Those set of datasets are extension of the same samples.
 
     print(f"isMC: {isMC}, lumiScale: {lumiScale}")
     sInputFiles_toUse = []

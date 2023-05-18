@@ -13,7 +13,7 @@
    ```
 
 
-## Set proxy when you open a new terminal on lxplus
+## Set proxy when you open a new terminal on lxplus or after every few days
 ```
 voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989
 ```
@@ -27,7 +27,7 @@ To run:
 python3 samplesList_prepare.py -era <era>\
 cp Samples_2018UL_v0.json Samples_2018UL.json
 ```
-Add commandline option '-updateCrossSections' to update cross-section value in the existing sample list.\
+Add commandline option '-updateCrossSections' to update cross-section value in the existing sample list.
 
 
 ### Calculate sumEvents
@@ -46,15 +46,15 @@ This updates samples' full detail list with sumEvents. Now samples' full detail 
 
 
 ### Running analysis
-'htoaa_Analysis_wCoffea.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
+'htoaa_Analysis_GGFMode.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
 ```
-python3 htoaa_Analysis_wCoffea.py config.json
+python3 htoaa_Analysis_wCoffea.py <config>.json
 ```
 
-'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_wCoffea.py as parallel HT Condor jobs.
+'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_GGFMode.py in parallel HT Condor jobs.
 Command to run htoaa analysis macro on data and MC samples:
 ```
-python3 htoaa_Wrapper.py -era <era> -run_mode condor -v <version name>
+python3 htoaa_Wrapper.py -analyze htoaa_Analysis_GGFMode.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
 ```
 
 
@@ -67,4 +67,4 @@ python3 htoaa_Wrapper.py -era <era> -run_mode condor -v <version name>
 
 **Samples_2018UL.csv**: Dictionary of all data and MC samples with NanoAOD files, cross-section etc listed for each sample.
 
-**prepare_SamplesList.py**: Prepare 'Samples_2018UL.csv' from needed samples using CMS-DAS (Data Aggregation System) tool.
+**samplesList_prepare.py**: Prepare 'Samples_2018UL.csv' from needed samples using CMS-DAS (Data Aggregation System) tool.

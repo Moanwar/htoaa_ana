@@ -378,7 +378,8 @@ if __name__ == '__main__':
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
-
+    sample_dataset = sample_dataset[0] if isinstance(sample_dataset, list) else sample_dataset # dataset is list of datasets w/ same sample name, as they are considered together recently. Those set of datasets are extension of the same samples.
+    
     print(f"isMC: {isMC}, lumiScale: {lumiScale}")
     sInputFiles_toUse = []
     for sInputFile in sInputFiles:
@@ -465,9 +466,12 @@ if __name__ == '__main__':
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sDir1 = 'evt/%s' % (sample_category)
-        sample_dataset_toUse = sample_dataset[1:] if sample_dataset.startswith('/') else sample_dataset
-        sDir1 = 'evt/%s' % (sample_dataset_toUse) #
-
+        #sample_dataset_toUse = sample_dataset[1:] if sample_dataset.startswith('/') else sample_dataset
+        #sDir1 = 'evt/%s' % (sample_dataset_toUse) #
+        sample_dataset_toUse = sample_dataset[0] if isinstance(sample_dataset, list) else sample_dataset
+        sample_name_toUse = sample_dataset_toUse.split('/')[1]
+        sDir1 = 'evt/%s' % (sample_name_toUse)
+        print(f"Output file: {sOutputFile}, directory: {sDir1} ")
         
         with uproot.recreate(sOutputFile) as fOut:
             for key, value in output.items():
