@@ -8,6 +8,7 @@ import ROOT as R
 
 if __name__ == "__main__":
 
+    '''
     sIpFile = "/home/siddhesh/Work/CMS/htoaa/analysis/20230419_forHTSamplesStitch/2018/analyze_htoaa_stage1.root"
     sOpFile = "/home/siddhesh/Work/CMS/htoaa/htoaa/data/correction/mc/HTSamplesStitch/LHE_HT_2018.root"
 
@@ -39,7 +40,89 @@ if __name__ == "__main__":
         
     ])
 
+    '''
 
+
+    sIpFile = "/home/siddhesh/Work/CMS/htoaa/analysis/20230519_StitchOverlapPhSpRemoval/2018/analyze_htoaa_stage1.root"
+    sOpFile = "/home/siddhesh/Work/CMS/htoaa/htoaa/data/correction/mc/HTSamplesStitch/LHE_HT_2018.root"
+
+    sHistos_list = OD([
+        # (<histogram name in input file>,   <histogram name in output file. If empty, use input file histogram name>)
+        ("evt/QCD_bEnrich/hCutFlow_central",                     ""),
+        ("evt/QCD_bEnrich/hCutFlowWeighted_central",             ""),
+        ("evt/QCD_bEnrich/hGenLHE_HT_all_central",               ""),
+        ("evt/QCD_bEnrich/hGenLHE_HT_SelQCDbEnrich_central",     ""),
+        
+        ("evt/QCD_bGen/hCutFlow_central",                    ""),
+        ("evt/QCD_bGen/hCutFlowWeighted_central",            ""),
+        ("evt/QCD_bGen/hGenLHE_HT_all_central",              ""),
+        ("evt/QCD_bGen/hGenLHE_HT_SelQCDbGen_central",       ""),
+        
+        ("evt/QCD_Incl/hCutFlow_central",                     ""),
+        ("evt/QCD_Incl/hCutFlowWeighted_central",             ""),
+        ("evt/QCD_Incl/hGenLHE_HT_all_central",               ""),
+        ("evt/QCD_Incl/hGenLHE_HT_SelQCDbEnrich_central",     ""),
+        ("evt/QCD_Incl/hGenLHE_HT_SelQCDbGen_central",        ""),
+        
+        ("evt/QCD_Incl_PSWeight/hCutFlow_central",                     ""),
+        ("evt/QCD_Incl_PSWeight/hCutFlowWeighted_central",             ""),
+        ("evt/QCD_Incl_PSWeight/hGenLHE_HT_all_central",               ""),
+        ("evt/QCD_Incl_PSWeight/hGenLHE_HT_SelQCDbEnrich_central",     ""),
+        ("evt/QCD_Incl_PSWeight/hGenLHE_HT_SelQCDbGen_central",        ""),
+        
+        ("evt/TTJets_NLO/hCutFlow_central",               ""),
+        ("evt/TTJets_NLO/hCutFlowWeighted_central",       ""),
+        ("evt/TTJets_NLO/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/TTJets_Incl/hCutFlow_central",               ""),
+        ("evt/TTJets_Incl/hCutFlowWeighted_central",       ""),
+        ("evt/TTJets_Incl/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/TTJets_HT/hCutFlow_central",               ""),
+        ("evt/TTJets_HT/hCutFlowWeighted_central",       ""),
+        ("evt/TTJets_HT/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/ZJetsToQQ_HT/hCutFlow_central",               ""),
+        ("evt/ZJetsToQQ_HT/hCutFlowWeighted_central",       ""),
+        ("evt/ZJetsToQQ_HT/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/WJetsToQQ_HT/hCutFlow_central",               ""),
+        ("evt/WJetsToQQ_HT/hCutFlowWeighted_central",       ""),
+        ("evt/WJetsToQQ_HT/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/WJetsToLNu_Incl/hCutFlow_central",               ""),
+        ("evt/WJetsToLNu_Incl/hCutFlowWeighted_central",       ""),
+        ("evt/WJetsToLNu_Incl/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/WJetsToLNu_HT/hCutFlow_central",               ""),
+        ("evt/WJetsToLNu_HT/hCutFlowWeighted_central",       ""),
+        ("evt/WJetsToLNu_HT/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/W1JetsToLNu/hCutFlow_central",               ""),
+        ("evt/W1JetsToLNu/hCutFlowWeighted_central",       ""),
+        ("evt/W1JetsToLNu/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/W2JetsToLNu/hCutFlow_central",               ""),
+        ("evt/W2JetsToLNu/hCutFlowWeighted_central",       ""),
+        ("evt/W2JetsToLNu/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/W3JetsToLNu/hCutFlow_central",               ""),
+        ("evt/W3JetsToLNu/hCutFlowWeighted_central",       ""),
+        ("evt/W3JetsToLNu/hGenLHE_HT_all_central",         ""),
+        
+        ("evt/W4JetsToLNu/hCutFlow_central",               ""),
+        ("evt/W4JetsToLNu/hCutFlowWeighted_central",       ""),
+        ("evt/W4JetsToLNu/hGenLHE_HT_all_central",         ""),
+        
+    ])
+
+
+
+
+
+
+
+    
     fIpFile = R.TFile(sIpFile)
     print(f"Input file: {sIpFile}")
     if not fIpFile.IsOpen():

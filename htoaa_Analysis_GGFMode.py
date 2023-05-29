@@ -59,7 +59,7 @@ from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEt
 
  
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
@@ -212,29 +212,32 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dataset_axis    = hist.Cat("dataset", "Dataset")
         systematic_axis = hist.Cat("systematic", "Systematic Uncertatinty")
 
-        cutFlow_axis  = hist.Bin("CutFlow",   r"Cuts",            21, -0.5, 20.5)
-        cutFlow50_axis= hist.Bin("CutFlow50", r"Cuts",            51, -0.5, 50.5)
-        nObject_axis  = hist.Bin("nObject",   r"No. of object",   21, -0.5, 20.5)
-        pt_axis       = hist.Bin("Pt",        r"$p_{T}$ [GeV]",   200, 0, 1000)
-        ptLow_axis    = hist.Bin("PtLow",     r"$p_{T}$ [GeV]",   400, 0, 200)
-        ptUltraLow_axis = hist.Bin("PtUltraLow",     r"$p_{T}$ [GeV]",   200, 0, 0.1)
-        pt1to10_axis  = hist.Bin("Pt1to10",   r"$p_{T}$ [GeV]",   100, 0,  10)
-        eta_axis      = hist.Bin("Eta",       r"$#eta$",          100, -6, 6)
-        phi_axis      = hist.Bin("Phi",       r"$\phi$",          100, -3.14, 3.13)
+        cutFlow_axis          = hist.Bin("CutFlow",                r"Cuts",                       21,    -0.5,    20.5)
+        cutFlow50_axis        = hist.Bin("CutFlow50",              r"Cuts",                       51,    -0.5,    50.5)
+        nObject_axis          = hist.Bin("nObject",                r"No. of object",              21,    -0.5,    20.5)
+        nObject50_axis        = hist.Bin("nObject50",              r"No. of object",              51,    -0.5,    50.5)
+        nObject200_axis       = hist.Bin("nObject200",             r"No. of object",             201,    -0.5,   200.5)
+        pt_axis               = hist.Bin("Pt",                     r"$p_{T}$ [GeV]",             200,       0,    1000)
+        ptLow_axis            = hist.Bin("PtLow",                  r"$p_{T}$ [GeV]",             400,       0,     200)
+        ptUltraLow_axis         = hist.Bin("PtUltraLow",           r"$p_{T}$ [GeV]",             200,       0,     0.1)
+        pt1to10_axis          = hist.Bin("Pt1to10",                r"$p_{T}$ [GeV]",             100,       0,      10)
+        eta_axis              = hist.Bin("Eta",                    r"$#eta$",                    100,      -6,       6)
+        phi_axis              = hist.Bin("Phi",                    r"$\phi$",                    100,   -3.14,    3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
-        #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       300, 0, 300)
-        mass_axis1    = hist.Bin("Mass1",     r"$m$ [GeV]",       300, 0, 300)
-        mlScore_axis  = hist.Bin("MLScore",   r"ML score",        100, -1.1, 1.1)
-        jetN2_axis    = hist.Bin("N2",        r"N2b1",            100, 0, 3)
-        jetN3_axis    = hist.Bin("N3",        r"N3b1",            100, 0, 5)
-        jetTau_axis   = hist.Bin("TauN",      r"TauN",            100, 0, 1)
-        deltaR_axis   = hist.Bin("deltaR",    r"$delta$ r ",      500, 0, 5)
-        HT_axis       = hist.Bin("HT",        r"HT",             2500, 0, 2500)
-        PytPartStatus_axis = hist.Bin("PytPartStatus",        r"PytPartStatus",       421,-210.5, 210.5)
-        boolean_axis  = hist.Bin("Boolean",   r"Boolean",           2,-0.5,1.5)
-        pdgId_axis    = hist.Bin("PdgId",     r"PdgId",           101,-0.5,100.5)
-
+        #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
+        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
+        mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",                 300,       0,     300)
+        mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
+        jetN2_axis            = hist.Bin("N2",                     r"N2b1",                      100,       0,       3)
+        jetN3_axis            = hist.Bin("N3",                     r"N3b1",                      100,       0,       5)
+        jetTau_axis           = hist.Bin("TauN",                   r"TauN",                      100,       0,       1)
+        deltaR_axis           = hist.Bin("deltaR",                 r"$delta$ r ",                500,       0,       5)
+        HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
+        PytPartStatus_axis    = hist.Bin("PytPartStatus",          r"PytPartStatus",             421,  -210.5,   210.5)
+        boolean_axis          = hist.Bin("Boolean",                r"Boolean",                     2,    -0.5,     1.5)
+        pdgId_axis            = hist.Bin("PdgId",                  r"PdgId",                     101,    -0.5,   100.5)
+        alphaS_axis           = hist.Bin("alphaS",                 r"alphaS",                    101,    0.01,     0.2)
+        
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
         sYaxis      = 'yAxis'
@@ -245,6 +248,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hCutFlowWeighted',                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
             ('hNEventsQCD',                               {sXaxis: cutFlow50_axis,  sXaxisLabel: 'Cuts'}),
             ('hNEventsQCDUnweighted',                     {sXaxis: cutFlow50_axis,  sXaxisLabel: 'Cuts'}),
+
+            ('hGenLHE_HT_all',                            {sXaxis: HT_axis,                sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HTIncoming_all',                    {sXaxis: HT_axis,                sXaxisLabel: r"LHE HTIncoming [GeV]"}),
+            ('hGenLHE_Vpt_all',                           {sXaxis: HT_axis,                sXaxisLabel: r"LHE Vpt [GeV]"}),
+            ('hGenLHE_AlphaS_all',                        {sXaxis: alphaS_axis,             sXaxisLabel: r"LHE AlphaS [GeV]"}),
+            ('hGenLHE_Njets_all',                         {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Njets [GeV]"}),
+            ('hGenLHE_Nb_all',                            {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Nb [GeV]"}),
+            ('hGenLHE_Nc_all',                            {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Nc [GeV]"}),
+            ('hGenLHE_Nuds_all',                          {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Nuds [GeV]"}),
+            ('hGenLHE_Nglu_all',                          {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Nglu [GeV]"}),
+            ('hGenLHE_NpNLO_all',                         {sXaxis: nObject200_axis,        sXaxisLabel: r"LHE NpNLO [GeV]"}),
+            ('hGenLHE_NpLO_all',                          {sXaxis: nObject200_axis,        sXaxisLabel: r"LHE NpLO [GeV]"}),
             
             ('nSelFatJet',                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
             ('hLeadingFatJetPt',                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
@@ -299,6 +314,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hLeadingFatJetParticleNet_mass',            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_mass"}),
 
             ('hGenHiggsPt_all',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
+            ('hGenHiggsPt_GenHToAATo4B',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
 
@@ -311,8 +327,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hMass_Gen4BFromHToAA_all_1',                {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HTOAATo4B) [GeV]"}),
             ('hDeltaR_GenH_GenB_max',                     {sXaxis: deltaR_axis,     sXaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
 
-            # QCD sample sticking
-            ('hGenLHE_HT_all',                            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            # QCD sample sticking            
             ('hGenLHE_HT_SelQCDbEnrich',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_SelQCDbGen',                     {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
@@ -564,7 +579,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"nEvents: {len(events)}")
         if printLevel >= 20:
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
-            print(f"\n events.GenPart.fields: {events.GenPart.fields}")
+            #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
             #print(f"\n events.HLT.fields: {events.HLT.fields}")
             #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
             #print(f"\n events.L1.fields: {events.L1.fields}")
@@ -572,6 +587,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             #print(f"\n events.LHE.fields: {events.LHE.fields}")
             #print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
+            print(f"{events.LHE.fields = } ")
+            #print(f"{events.LHE = } ")
+            printVariable('events.LHE', events.LHE)
             
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
@@ -1780,19 +1798,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isSignal']: 
                 output['hGenHiggsPt_all'].fill(
                     dataset=dataset,
-                    Pt=(ak.flatten(genHiggs.pt[sel_GenHToAATo4B])),
+                    #Pt=(ak.flatten(genHiggs.pt)),
+                    Pt=(ak.firsts(genHiggs.pt)),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenHiggsPt_GenHToAATo4B'].fill(
+                    dataset=dataset,
+                    Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
                 output['hGenHiggsPt_sel'].fill(
                     dataset=dataset,
-                    Pt=(ak.flatten(genHiggs.pt[sel_SR])),
+                    Pt=(ak.firsts(genHiggs.pt[sel_SR])),
                     systematic=syst,
                     weight=evtWeight_gen[sel_SR]
                 )
                 output['hGenHiggsPt_sel_wGenCuts'].fill(
                     dataset=dataset,
-                    Pt=(ak.flatten(genHiggs.pt[sel_GenHToAATo4B])),
+                    Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
@@ -1949,6 +1974,66 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 output['hGenLHE_HT_all'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_HTIncoming_all'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HTIncoming),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Vpt_all'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.Vpt),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_AlphaS_all'].fill(
+                    dataset=dataset,
+                    alphaS=(events.LHE.AlphaS),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Njets_all'].fill(
+                    dataset=dataset,
+                    nObject50=(events.LHE.Njets),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Nb_all'].fill(
+                    dataset=dataset,
+                    nObject50=(events.LHE.Nb),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Nc_all'].fill(
+                    dataset=dataset,
+                    nObject50=(events.LHE.Nc),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Nuds_all'].fill(
+                    dataset=dataset,
+                    nObject50=(events.LHE.Nuds),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_Nglu_all'].fill(
+                    dataset=dataset,
+                    nObject50=(events.LHE.Nglu),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_NpNLO_all'].fill(
+                    dataset=dataset,
+                    nObject200=(events.LHE.NpNLO),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hGenLHE_NpLO_all'].fill(
+                    dataset=dataset,
+                    nObject200=(events.LHE.NpLO),
                     systematic=syst,
                     weight=evtWeight_gen
                 )
