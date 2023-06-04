@@ -4,9 +4,11 @@ import subprocess
 import shlex
 import logging
 import json
+import numpy as np
 #import uproot
 import uproot3 as uproot
 import ROOT as R
+from parse import *
 
 from htoaa_Settings import * 
 from htoaa_Samples import (
@@ -161,6 +163,37 @@ def GetDictFromJsonFile(filePath):
 
     dictionary =  json.loads( contents )
     return dictionary
+
+
+
+def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
+    wgt_HT = None
+    
+    # 'Corrections' variable defined in htoaa_Settings
+    if sFitFunctionFormat == "{p0} + ({p1} * (x - {HTBinMin}))":
+        fitResult_        = parse(sFitFunctionFormat, sFitFunction) # https://pypi.org/project/parse/
+        fitParam_p0       = float(fitResult_['p0'])
+        fitParam_p1       = float(fitResult_['p1'])
+        fitConst_HTBinMin = float(fitResult_['HTBinMin'])
+
+        # for e.g. HT500to700
+        fitResult_  = parse("HT{FitRangeMin}to{FitRangeMax}", sFitFunctionRange)
+        fitRangeMin = float(fitResult_['FitRangeMin'])
+        fitRangeMax = float(fitResult_['FitRangeMax'])
+
+        wgt_HT_cal = fitParam_p0 + (fitParam_p1 * (HT_list - fitConst_HTBinMin))
+        wgt_HT = np.where(
+            np.logical_and( np.greater_equal(HT_list, fitRangeMin), np.less(HT_list, fitRangeMax) ),
+            wgt_HT_cal,
+            np.ones(len(HT_list))
+        )
+
+    else:
+        print(f'htoaa_CommonTools.py::getHTReweight():: {Corrections["HTRewgt"]["QCD_bGen"]["FitFunctionFormat"] = } is not implemented \t\t **** ERROR **** \n')
+        exit(0)
+
+    return wgt_HT
+
 
 
 def executeBashCommand(sCmd1):

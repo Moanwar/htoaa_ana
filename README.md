@@ -32,6 +32,7 @@ Add commandline option '-updateCrossSections' to update cross-section value in t
 
 ### Calculate sumEvents
 Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\
+In htoaa_Samples.py, set 'QCDInclMode = 0'.\ 
 Run:
 ```
 python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
@@ -42,6 +43,33 @@ Set path of the output hadd root file in 'samplesList_update.py' and run
 python3 samplesList_update.py -era <era>
 ```
 This updates samples' full detail list with sumEvents. Now samples' full detail list (Samples_2018UL.csv) is ready for the further analysis. Now on the previous analysis steps need not to run again.
+
+
+
+### Calculate HT reweight SFs for QCD_bGenFilter sample
+In scripts/CopyHistos.py, update 'sIpFile' to point to the latest analyze_htoaa_stage1.root file. \
+Run to copy the required histograms into a seperate file stored in data/:
+```
+cd scripts/
+python3 CopyHistos.py
+```
+Calculate HT reweights for QCD_bGen sample:
+```
+cd corrections/
+python3 cal_HTRewght_QCDbGen.py -era <era>
+```
+Copy "HTRewgt" SFs printed on the terminal into "Corrections" variable in htoaa_Settings.py file.
+
+
+
+### Calculate lumi-scale for MC samples stitch with reweighting overlapping phase space
+Calculate lumi-scale for MC samples stitch with reweighting overlapping phase space, instead of removing overlapping phase space.\
+In htoaa_Samples.py, set 'QCDInclMode = 2' to use QCD_Incl_madgraph-PSWeights sample for QCD_Incl.\
+Run:
+```
+python3 calculateLumiscale.py -era <era>
+```
+ 
 
 
 

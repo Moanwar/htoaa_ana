@@ -31,11 +31,29 @@ Luminosities = { # [<lumi>, <uncertainty in percent> ] in fb^-1
 }
 
 Corrections = {
+    
     'HTSamplesStitch': {
         'inputFile':     './data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root',
         'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step1_HTCorrSFFromHighToLowHT'
         #'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step0_HTCorrSFFromHighToLowHT'
-    }
+    },
+    
+    "HTRewgt" : { # ./data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root
+        "QCD_bGen": {
+            "2018": {
+                "FitFunctionFormat": "{p0} + ({p1} * (x - {HTBinMin}))",
+                "HT100to200": "0.927235 + (0.001153 * (x - 100))",
+                "HT200to300": "0.936276 + (0.000820 * (x - 200))",
+                "HT300to500": "0.936325 + (0.000512 * (x - 300))",
+                "HT500to700": "0.968147 + (0.000378 * (x - 500))",
+                "HT700to1000": "0.931336 + (0.000229 * (x - 700))",
+                "HT1000to1500": "0.956714 + (0.000122 * (x - 1000))",
+                "HT1500to2000": "0.965210 + (0.000068 * (x - 1500))",
+                "HT2000to3000": "1.006649 + (0.000030 * (x - 2000))"
+            }
+        }
+    }, 
+
 }
 
 bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation

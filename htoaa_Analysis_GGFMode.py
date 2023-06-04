@@ -13,6 +13,8 @@ import numpy as np
 from copy import copy, deepcopy
 #import uproot
 import uproot3 as uproot
+#import parse
+from parse import *
 
 '''
 GGF -> H->aa->4b boosted analysis macro
@@ -41,7 +43,8 @@ from htoaa_CommonTools import (
     GetDictFromJsonFile,
     calculate_lumiScale, update_crosssection, getSampleHTRange,
     setXRootDRedirector,
-    xrdcpFile
+    xrdcpFile,
+    getHTReweight
 )
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
@@ -232,7 +235,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         jetN3_axis            = hist.Bin("N3",                     r"N3b1",                      100,       0,       5)
         jetTau_axis           = hist.Bin("TauN",                   r"TauN",                      100,       0,       1)
         deltaR_axis           = hist.Bin("deltaR",                 r"$delta$ r ",                500,       0,       5)
-        HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
+        #HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
+        HT_axis               = hist.Bin("HT",                     r"HT",                       4000,       0,    4000)
         PytPartStatus_axis    = hist.Bin("PytPartStatus",          r"PytPartStatus",             421,  -210.5,   210.5)
         boolean_axis          = hist.Bin("Boolean",                r"Boolean",                     2,    -0.5,     1.5)
         pdgId_axis            = hist.Bin("PdgId",                  r"PdgId",                     101,    -0.5,   100.5)
@@ -318,6 +322,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
             ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
 
+            ('hGenHiggsMass_all_0',                         {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
+            ('hMass_GenA_all_0',                            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
             ('hGenHiggsMass_all',                         {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
             ('hMass_GenA_all',                            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
             ('hMass_GenAApair_all',                       {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN HToAA) [GeV]"}),
@@ -610,6 +616,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             sample_HT_Min, sample_HT_Max = getSampleHTRange( self.datasetInfo[dataset]["datasetNameFull"] )
             self.datasetInfo[dataset]['sample_HT_Min'] = sample_HT_Min
             self.datasetInfo[dataset]['sample_HT_Max'] = sample_HT_Max
+
+            if self.datasetInfo[dataset]['isQCD_bGen']:
+                # 'Corrections' variable defined in htoaa_Settings.py
+                fitFunctionFormat_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]]["FitFunctionFormat"] 
+                fitFunctionHTRange_ = ""
+                for sHTBin in Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]]:
+                    if "HT%dto" % (self.datasetInfo[dataset]['sample_HT_Min']) in sHTBin:
+                        fitFunctionHTRange_ = sHTBin
+                        fitFunction_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]][sHTBin]
+
+                        
+                self.datasetInfo[dataset]['HTRewgt'] = {
+                    "fitFunctionFormat":  fitFunctionFormat_,
+                    "fitFunction":        fitFunction_,
+                    "fitFunctionHTRange": fitFunctionHTRange_,                    
+                }
                
             
             output = self.accumulator.identity()
@@ -1301,6 +1323,29 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
+            if self.datasetInfo[dataset]['isQCD_bGen']:
+                wgt_HT = getHTReweight(
+                    HT_list            = events.LHE.HT,
+                    sFitFunctionFormat = self.datasetInfo[dataset]['HTRewgt']["fitFunctionFormat"],
+                    sFitFunction       = self.datasetInfo[dataset]['HTRewgt']["fitFunction"],
+                    sFitFunctionRange  = self.datasetInfo[dataset]['HTRewgt']["fitFunctionHTRange"]
+                )
+                weights.add(
+                    "HTRewgt",
+                    weight=wgt_HT
+                )
+
+                weights_gen.add(
+                    "HTRewgt",
+                    weight=wgt_HT
+                )
+               
+                if printLevel >= 30:
+                    printVariable("\n events.LHE.HT", events.LHE.HT)
+                    printVariable("wgt_HT", wgt_HT)
+                
+            
+                
 
 
 
@@ -1824,6 +1869,27 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 
                 # m(2b from ATo2B) and m(4b from HToAATo4b) --------------                   
+                output['hGenHiggsMass_all_0'].fill(
+                    dataset=dataset,
+                    Mass=(ak.flatten(genHiggs.mass)),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                    
+                output['hMass_GenA_all_0'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[:, 0].mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+                output['hMass_GenA_all_0'].fill(
+                    dataset=dataset,
+                    Mass=(genACollection[:, 1].mass),
+                    systematic=syst,
+                    weight=evtWeight_gen
+                )
+
+
                 output['hGenHiggsMass_all'].fill(
                     dataset=dataset,
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
@@ -1843,6 +1909,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
+               
                 '''
                 output['hMass_GenA_all'].fill(
                     dataset=dataset,
@@ -3141,7 +3208,9 @@ if __name__ == '__main__':
         for sInputFile in sInputFiles:
             sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
 
-            if xrdcpFile(sInputFile, sFileLocal, nTry = 3):
+            if   os.path.exists(sFileLocal):
+                print(f"{sFileLocal = } exists")
+            elif xrdcpFile(sInputFile, sFileLocal, nTry = 3):
                 sInputFiles_toUse.append(sFileLocal)
             else:
                 print(f"Ip file {sInputFile} failed to download \t **** ERROR ****")

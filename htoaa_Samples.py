@@ -8,7 +8,7 @@ kQCDIncl      = "QCD_Incl"
 kZJets        = "ZJets"
 kWJets        = "WJets"
 
-QCDInclMode = 0 # 1: run "QCDIncl", 2: run "QCDIncl_PSWeight", 0: run both "QCDIncl" and "QCDIncl_PSWeight". Use 2 as "QCDIncl_PSWeight"
+QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight"
 
 Samples2018 = OD([
 
@@ -315,16 +315,16 @@ Samples2018 = OD([
 
 # run either "QCDIncl" or "QCDIncl_PSWeight" or both
 if   QCDInclMode == 1: # "QCDIncl"
-    list_tmp_ = Samples2018["QCDIncl"]
-    Samples2018.pop("QCDIncl",          None)
-    Samples2018.pop("QCDIncl_PSWeight", None)
+    list_tmp_ = Samples2018["QCD_Incl"]
+    Samples2018.pop("QCD_Incl",          None)
+    Samples2018.pop("QCD_Incl_PSWeight", None)
     Samples2018[kQCDIncl] = list_tmp_
     #del list_tmp_
     
 elif QCDInclMode == 2: # "QCDIncl_PSWeight"
-    list_tmp_ = Samples2018["QCDIncl_PSWeight"]
-    Samples2018.pop("QCDIncl",          None)
-    Samples2018.pop("QCDIncl_PSWeight", None)
+    list_tmp_ = Samples2018["QCD_Incl_PSWeight"]
+    Samples2018.pop("QCD_Incl",          None)
+    Samples2018.pop("QCD_Incl_PSWeight", None)
     Samples2018[kQCDIncl] = list_tmp_
     #del list_tmp_
 

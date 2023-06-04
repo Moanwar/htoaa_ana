@@ -34,7 +34,7 @@ if __name__ == "__main__":
         ("evt/ZJets/hCutFlowWeighted_central",       ""),
         ("evt/ZJets/hGenLHE_HT_all_central",         ""),
         
-        ("evt/WJets/hCutFlow_central",               ""),
+        ("evt/WJets/hCutFlow_central",               ""), 
         ("evt/WJets/hCutFlowWeighted_central",       ""),
         ("evt/WJets/hGenLHE_HT_all_central",         ""),
         
