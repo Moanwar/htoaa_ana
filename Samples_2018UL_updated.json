@@ -889,7 +889,7 @@
         ]
     },
     "QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraph-pythia8": {
-        "cross_section": 30310.0,
+        "cross_section": 30980.0,
         "nEvents": 49184771,
         "sumEvents": 49184771.0,
         "nDatasets": 1,
@@ -4176,7 +4176,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 468175,
         "sumEvents": 468175.0,
         "nDatasets": 1,
@@ -4204,7 +4204,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 468518,
         "sumEvents": 468518.0,
         "nDatasets": 1,
@@ -4228,7 +4228,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 452529,
         "sumEvents": 452529.0,
         "nDatasets": 1,
@@ -4263,7 +4263,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 503270,
         "sumEvents": 503270.0,
         "nDatasets": 1,
@@ -4300,7 +4300,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 464480,
         "sumEvents": 464480.0,
         "nDatasets": 1,
@@ -4335,7 +4335,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 463836,
         "sumEvents": 463836.0,
         "nDatasets": 1,
@@ -4365,7 +4365,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 480773,
         "sumEvents": 480773.0,
         "nDatasets": 1,
@@ -4402,7 +4402,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 502951,
         "sumEvents": 502951.0,
         "nDatasets": 1,
@@ -4434,7 +4434,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 460142,
         "sumEvents": 460142.0,
         "nDatasets": 1,
@@ -4447,7 +4447,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 496168,
         "sumEvents": 496168.0,
         "nDatasets": 1,
@@ -4482,7 +4482,7 @@
         ]
     },
     "SUSY_GluGluH_01J_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 2.77077,
+        "cross_section": 48.61,
         "nEvents": 460168,
         "sumEvents": 460168.0,
         "nDatasets": 1,
@@ -4671,7 +4671,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 194401,
         "sumEvents": 194401.0,
         "nDatasets": 1,
@@ -4685,7 +4685,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 195823,
         "sumEvents": 195823.0,
         "nDatasets": 1,
@@ -4711,7 +4711,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 197952,
         "sumEvents": 197952.0,
         "nDatasets": 1,
@@ -4729,7 +4729,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 199104,
         "sumEvents": 199104.0,
         "nDatasets": 1,
@@ -4743,7 +4743,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 183328,
         "sumEvents": 183328.0,
         "nDatasets": 1,
@@ -4762,7 +4762,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 192347,
         "sumEvents": 192347.0,
         "nDatasets": 1,
@@ -4785,7 +4785,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 186254,
         "sumEvents": 186254.0,
         "nDatasets": 1,
@@ -4808,7 +4808,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 187659,
         "sumEvents": 187659.0,
         "nDatasets": 1,
@@ -4824,7 +4824,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 207777,
         "sumEvents": 207777.0,
         "nDatasets": 1,
@@ -4838,7 +4838,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 202133,
         "sumEvents": 202133.0,
         "nDatasets": 1,
@@ -4861,7 +4861,7 @@
         ]
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.6515179999999999,
+        "cross_section": 3.766,
         "nEvents": 203354,
         "sumEvents": 203354.0,
         "nDatasets": 1,
@@ -5026,7 +5026,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 94170,
         "sumEvents": 94170.0,
         "nDatasets": 1,
@@ -5048,7 +5048,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 103447,
         "sumEvents": 103447.0,
         "nDatasets": 1,
@@ -5061,7 +5061,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 86681,
         "sumEvents": 86681.0,
         "nDatasets": 1,
@@ -5075,7 +5075,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 100712,
         "sumEvents": 100712.0,
         "nDatasets": 1,
@@ -5089,7 +5089,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 104740,
         "sumEvents": 104740.0,
         "nDatasets": 1,
@@ -5103,7 +5103,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 100347,
         "sumEvents": 100347.0,
         "nDatasets": 1,
@@ -5117,7 +5117,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 101174,
         "sumEvents": 101174.0,
         "nDatasets": 1,
@@ -5130,7 +5130,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 101364,
         "sumEvents": 101364.0,
         "nDatasets": 1,
@@ -5152,7 +5152,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 100499,
         "sumEvents": 100499.0,
         "nDatasets": 1,
@@ -5168,7 +5168,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 104342,
         "sumEvents": 104342.0,
         "nDatasets": 1,
@@ -5188,7 +5188,7 @@
         ]
     },
     "SUSY_WH_WToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.17925600000000003,
+        "cross_section": 1.358,
         "nEvents": 104636,
         "sumEvents": 104636.0,
         "nDatasets": 1,
@@ -5366,7 +5366,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 101633,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5382,7 +5382,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 106743,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5395,7 +5395,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 97716,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5421,7 +5421,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 100766,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5434,7 +5434,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 101445,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5453,7 +5453,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 102774,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5467,7 +5467,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 100835,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5480,7 +5480,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 102724,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5493,7 +5493,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 95624,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5517,7 +5517,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 95365,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5545,7 +5545,7 @@
         ]
     },
     "SUSY_ZH_ZToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.11352000000000001,
+        "cross_section": 0.88,
         "nEvents": 100569,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5732,7 +5732,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 199812,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5754,7 +5754,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 188898,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5777,7 +5777,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 188884,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5792,7 +5792,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 200687,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5812,7 +5812,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 196711,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5835,7 +5835,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 197161,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5855,7 +5855,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 199334,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5872,7 +5872,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 191927,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5896,7 +5896,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 194429,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5920,7 +5920,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 198645,
         "sumEvents": 0,
         "nDatasets": 1,
@@ -5933,7 +5933,7 @@
         ]
     },
     "SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
-        "cross_section": 0.0084645,
+        "cross_section": 0.0297,
         "nEvents": 203990,
         "sumEvents": 0,
         "nDatasets": 1,
