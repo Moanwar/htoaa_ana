@@ -1,5 +1,6 @@
 
 from collections import OrderedDict as OD
+import enum
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookXrootdService
 # cms-xrd-global.cern.ch "global redirector"
@@ -30,14 +31,23 @@ Luminosities = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2018: [59.83, 2.5],
 }
 
+kMCSamplesStitch_PhSpOverlapRemove = 'MCSamplesStitch_PhSpOverlapRemove'
+kMCSamplesStitch_PhSpOverlapRewgt  = 'MCSamplesStitch_PhSpOverlapRewgt'
+
+class MCSamplesStitchOptions(enum.Enum):
+    PhSpOverlapRemove = 'PhSpOverlapRemove'
+    PhSpOverlapRewgt  = 'PhSpOverlapRewgt' 
+
+
+sFileLumiScalesPhSpOverlapRewgt = {
+    Era_2018: {
+        "inputFile":     "data/lumiScale/2018.root",
+        "histogramName": "$SAMPLECATEGORY/$SAMPLECATEGORY_LumiScale_PhSpOverlapRewghted",
+    }
+}
+
 Corrections = {
-    
-    'HTSamplesStitch': {
-        'inputFile':     './data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root',
-        'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step1_HTCorrSFFromHighToLowHT'
-        #'histogramName': '$SAMPLECATEGORY/hHTSamplesStitchSF_step0_HTCorrSFFromHighToLowHT'
-    },
-    
+        
     "HTRewgt" : { # ./data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root
         "QCD_bGen": {
             "2018": {

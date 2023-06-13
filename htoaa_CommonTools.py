@@ -9,6 +9,7 @@ import numpy as np
 import uproot3 as uproot
 import ROOT as R
 from parse import *
+import logging
 
 from htoaa_Settings import * 
 from htoaa_Samples import (
@@ -23,6 +24,35 @@ def calculate_lumiScale(luminosity, crossSection, sumEvents):
     
     if sumEvents != 0: lumiScale = luminosity * crossSection * pb_to_fb_conversionFactor / sumEvents
     return lumiScale
+
+
+def getLumiScaleForPhSpOverlapRewgtMode(
+        hLumiScale ,
+        sample_category ,
+        sample_HT_value ,
+        mask_PhSp_dict ):
+    lumiScale = None
+    
+    if 'QCD' in sample_category:
+        xBin = None
+        for iBin in range(len(hLumiScale.axes[0])):
+            if sample_HT_value >= hLumiScale.axes[0][iBin][0] and sample_HT_value < hLumiScale.axes[0][iBin][1]:
+                xBin = iBin
+                break
+
+        nEvents = len(list(mask_PhSp_dict.values())[0])
+        lumiScale = np.ones(nEvents)
+        for PhSpName, mask_PhSp in mask_PhSp_dict.items():
+            lumiScale_value = hLumiScale[xBin, PhSpName]
+            lumiScale = np.where(mask_PhSp, np.ones(nEvents) * lumiScale_value, lumiScale)
+            #print(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = }, {sample_HT_value = }, {xBin = }, {PhSpName = }, {lumiScale_value = }, ')
+                            
+    else:
+        logging.error(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = } not implemented')
+        exit(0)
+
+    return lumiScale
+
 
 def getSampleHTRange(sample_datasetNameFull):
     sample_HT_Min = sample_HT_Max = None
@@ -82,9 +112,37 @@ def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     
     
 
-def setXRootDRedirector(fileName):
+def setXRootDRedirector(fileName, useLocalFileIfExists = True):
+    # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+    # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+
+    # DAS file:
+    # eos file:
+    
     if not fileName.startswith("/store/"):
         return fileName
+
+    if useLocalFileIfExists:
+        fileNameTemplate_DAS = "/store/{IsMC}/{SampleProductionCampaign}/{SampleName}/{DatasetTier}/{GT}/{SampleDir}/{SampleFileName}"
+        fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+
+        r_ = parse(fileNameTemplate_DAS, fileName)
+        IsMC = r_['IsMC']
+        SampleProductionCampaign = r_['SampleProductionCampaign']
+        SampleName = r_['SampleName']
+        DatasetTier = r_['DatasetTier']
+        GT = r_['GT']
+        SampleDir = r_['SampleDir']
+        SampleFileName = r_['SampleFileName']
+        Era = None
+        if 'UL16' in SampleProductionCampaign:
+            Era = '2016'
+        elif 'UL17' in SampleProductionCampaign:
+            Era = '2017'
+        elif 'UL18' in SampleProductionCampaign:
+            Era = '2018'
+           
+        fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
     
     redirector_toUse = None
     for redirector in xrootd_redirectorNames:
@@ -193,7 +251,6 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
         exit(0)
 
     return wgt_HT
-
 
 
 def executeBashCommand(sCmd1):

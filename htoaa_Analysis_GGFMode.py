@@ -12,9 +12,12 @@ import math
 import numpy as np
 from copy import copy, deepcopy
 #import uproot
-import uproot3 as uproot
+#import uproot3 as uproot
+import uproot as uproot
 #import parse
 from parse import *
+import logging
+
 
 '''
 GGF -> H->aa->4b boosted analysis macro
@@ -41,7 +44,7 @@ from particle import Particle # For PDG particle listing https://github.com/scik
 from htoaa_Settings import *
 from htoaa_CommonTools import (
     GetDictFromJsonFile,
-    calculate_lumiScale, update_crosssection, getSampleHTRange,
+    calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, update_crosssection, getSampleHTRange,
     setXRootDRedirector,
     xrdcpFile,
     getHTReweight
@@ -50,12 +53,10 @@ from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
 
-'''
-from htoaa_Settings import *
-from htoaa_NanoAODBranches import htoaa_nanoAODBranchesToRead
-from htoaa_CommonTools import GetDictFromJsonFile, DfColLabel_convert_bytes_to_string, calculate_lumiScale
-from htoaa_CommonTools import cut_ObjectMultiplicity, cut_ObjectPt, cut_ObjectEta, cut_ObjectPt_1
-'''
+
+from inspect import currentframe, getframeinfo
+frameinfo = getframeinfo(currentframe())
+
 
 
 # use GOldenJSON
@@ -339,6 +340,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBQuarkPt',           {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBHadron',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_QCDStitch',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             #('hGenBquark_Status_all',                     {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN Bquark Pythia status"}),
             #('hGenBquark_first_Status_all',               {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN first Bquark Pythia status"}),
             #('hGenBquark_first_PdgId_all',                {sXaxis: pdgId_axis,       sXaxisLabel: r"GEN first Bquark pdgId"}),
@@ -600,6 +602,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
 
+        print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
+
         self.datasetInfo[dataset]['isSignal'     ]  = False
         self.datasetInfo[dataset]['isQCD'        ]  = False
         self.datasetInfo[dataset]['isQCDIncl'    ]  = False
@@ -608,23 +612,24 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         if self.datasetInfo[dataset]['isMC']:
             self.datasetInfo[dataset]['isSignal']      = True if "HToAATo4B"   in dataset else False
-            #self.datasetInfo[dataset]['isQCD']         = True if "QCD"         in dataset else False
             self.datasetInfo[dataset]['isQCDIncl']     = True if kQCDIncl      in dataset else False
             self.datasetInfo[dataset]['isQCD_bEnrich'] = True if kQCD_bEnrich  in dataset else False
             self.datasetInfo[dataset]['isQCD_bGen']    = True if kQCD_bGen     in dataset else False
-            self.datasetInfo[dataset]['isQCD'] = self.datasetInfo[dataset]['isQCDIncl'] or self.datasetInfo[dataset]['isQCD_bEnrich'] or self.datasetInfo[dataset]['isQCD_bGen']
+            self.datasetInfo[dataset]['isQCD']         = (self.datasetInfo[dataset]['isQCDIncl']     or \
+                                                          self.datasetInfo[dataset]['isQCD_bEnrich'] or \
+                                                          self.datasetInfo[dataset]['isQCD_bGen'])
             sample_HT_Min, sample_HT_Max = getSampleHTRange( self.datasetInfo[dataset]["datasetNameFull"] )
             self.datasetInfo[dataset]['sample_HT_Min'] = sample_HT_Min
             self.datasetInfo[dataset]['sample_HT_Max'] = sample_HT_Max
 
             if self.datasetInfo[dataset]['isQCD_bGen']:
                 # 'Corrections' variable defined in htoaa_Settings.py
-                fitFunctionFormat_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]]["FitFunctionFormat"] 
+                fitFunctionFormat_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo["era"]]["FitFunctionFormat"] 
                 fitFunctionHTRange_ = ""
-                for sHTBin in Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]]:
+                for sHTBin in Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo["era"]]:
                     if "HT%dto" % (self.datasetInfo[dataset]['sample_HT_Min']) in sHTBin:
                         fitFunctionHTRange_ = sHTBin
-                        fitFunction_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo[dataset]["era"]][sHTBin]
+                        fitFunction_  = Corrections["HTRewgt"]["QCD_bGen"][self.datasetInfo["era"]][sHTBin]
 
                         
                 self.datasetInfo[dataset]['HTRewgt'] = {
@@ -632,6 +637,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "fitFunction":        fitFunction_,
                     "fitFunctionHTRange": fitFunctionHTRange_,                    
                 }
+
                
             
             output = self.accumulator.identity()
@@ -762,6 +768,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_QCD_stitch_CutBHadron_eventwise                          = None
         mask_QCD_stitch_CutBQuarkPt_eventwise                         = None
         mask_QCD_stitch_eventwise                                     = None
+        mask_QCD_bEnrich_PhSp                                         = None
+        mask_QCD_bGen_PhSp                                            = None
+        mask_QCD_Incl_Remnant_PhSp                                    = None
         if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
             mask_genLHEHTLt100 = (events.LHE.HT < 100)
 
@@ -939,12 +948,42 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('\n genBQuarks_pT[mask_tmp2_]', genBQuarks_pT[mask_tmp2_]); sys.stdout.flush()
                 printVariable('\n genBQuarks[mask_tmp2_]', genBQuarks[mask_tmp2_]); sys.stdout.flush()
 
-            mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
+
+            # Phase space_ QCD_bEnrich, QCD_bGen, QCD_Incl_Remnant
+            mask_QCD_bEnrich_PhSp = (mask_genBQuarks_hardSctred_eventwise == True)
+            mask_QCD_bGen_PhSp = (
+                (mask_genBQuarks_hardSctred_eventwise == False) &
+                (mask_genBHadrons_status2_eventwise   == True)
+            )
+            mask_QCD_Incl_Remnant_PhSp = (
+                (
+                    (mask_genBQuarks_hardSctred_eventwise == False) &
+                    (mask_genBHadrons_status2_eventwise   == False)
+                ) |
+                (
+                    (mask_genLHEHTLt100 == True)
+                )
+            )
+                
+            if self.datasetInfo[dataset]["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
+                mask_QCD_stitch_eventwise = trues_list # select all events
+            else:
+                mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 
             mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = (
                 (mask_genBHadrons_status2_eventwise == True) &
                 (mask_genBQuarks_hardSctred_eventwise == False)
             )
+
+            if printLevel >= 100:
+                mask_phsp_1 = (
+                    mask_QCD_bEnrich_PhSp | mask_QCD_bGen_PhSp | mask_QCD_Incl_Remnant_PhSp
+                )
+                print(f" {ak.sum(mask_QCD_bEnrich_PhSp & mask_QCD_bGen_PhSp) = }")
+                print(f" {ak.sum(mask_QCD_bGen_PhSp & mask_QCD_Incl_Remnant_PhSp) = }")
+                print(f" {ak.sum(mask_QCD_bEnrich_PhSp & mask_QCD_Incl_Remnant_PhSp) = }")
+                print(f" {ak.sum(   (mask_QCD_bEnrich_PhSp | mask_QCD_bGen_PhSp | mask_QCD_Incl_Remnant_PhSp) ) = } ") 
+                print(f" {ak.sum( ~ (mask_QCD_bEnrich_PhSp | mask_QCD_bGen_PhSp | mask_QCD_Incl_Remnant_PhSp) ) = } ")
             # --------------------------------------------------------------------------------------------------
 
                     
@@ -1269,23 +1308,41 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         if self.datasetInfo[dataset]["isMC"]:
+            # lumiScale --
+            lumiScale_toUse = None
+            if self.datasetInfo[dataset]["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+               self.datasetInfo[dataset]['isQCD']:
+                mask_PhSp_dict_ = {
+                    "QCD_bEnrich": mask_QCD_bEnrich_PhSp,
+                    "QCD_bGen": mask_QCD_bGen_PhSp,
+                    "QCD_Incl_Remnant": mask_QCD_Incl_Remnant_PhSp,
+                }
+                lumiScale_toUse = getLumiScaleForPhSpOverlapRewgtMode(
+                    hLumiScale      = self.datasetInfo[dataset]["hMCSamplesStitch"],
+                    sample_category = dataset,
+                    sample_HT_value = self.datasetInfo[dataset]['sample_HT_Min'],
+                    mask_PhSp_dict  = mask_PhSp_dict_ )
+            else:
+                lumiScale_toUse = np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
+
+            
             weights.add(
                 "lumiWeight",
-                weight=np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
+                weight = lumiScale_toUse
             )
             weights.add(
                 "genWeight",
-                weight=np.copysign(np.ones(len(events)), events.genWeight)
+                weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
             weights.add(
                 "btagWeight",
-                weight=(events.btagWeight.DeepCSVB)
+                weight = (events.btagWeight.DeepCSVB)
             )
             
  
             weights_gen.add(
                 "lumiWeight",
-                weight=np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
+                weight = lumiScale_toUse 
             )
             weights_gen.add(
                 "genWeight",
@@ -1323,6 +1380,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
+            ''' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Disabled QCD_bGen HTRewgt
             if self.datasetInfo[dataset]['isQCD_bGen']:
                 wgt_HT = getHTReweight(
                     HT_list            = events.LHE.HT,
@@ -1344,7 +1402,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     printVariable("\n events.LHE.HT", events.LHE.HT)
                     printVariable("wgt_HT", wgt_HT)
                 
-            
+            '''
                 
 
 
@@ -2138,6 +2196,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     HT=(events.LHE.HT[mask_QCD_stitch_CutBHadron_eventwise]),
                     systematic=syst,
                     weight=evtWeight_gen[mask_QCD_stitch_CutBHadron_eventwise]
+                )
+                output['hGenLHE_HT_QCDStitch'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_QCD_stitch_eventwise]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_QCD_stitch_eventwise]
                 )
 
 
@@ -3181,10 +3245,33 @@ if __name__ == '__main__':
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
+        lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
 
-        #sample_crossSection = update_crosssection(sample_category=sample_category, sample_dataset=sample_dataset, sample_crossSection=sample_crossSection)
+        MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt if ("MCSamplesStitchOption" in config and \
+                                                                            config["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt.value) \
+            else MCSamplesStitchOptions.PhSpOverlapRemove
         
-        lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
+        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
+            if "MCSamplesStitchInputs" not in config:
+                print(frameinfo.filename, frameinfo.lineno, ' ERROR: "MCSamplesStitchInputs" not in config') # https://stackoverflow.com/questions/3056048/filename-and-line-number-of-python-script
+                
+            MCSamplesStitchInputFileName      = config["MCSamplesStitchInputs"]["inputFile"]
+            MCSamplesStitchInputHistogramName = config["MCSamplesStitchInputs"]["histogramName"]
+            MCSamplesStitchInputHistogramName = MCSamplesStitchInputHistogramName.replace(
+                '$SAMPLECATEGORY', sample_category.split('_')[0]
+            )
+            print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
+            if not os.path.exists(MCSamplesStitchInputFileName):
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
+                print(f'htoaa_Analysis_GGFMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
+                exit(0)
+            print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
+            with uproot.open(MCSamplesStitchInputFileName) as f_:
+                print(f"{f_.keys() = }"); sys.stdout.flush() 
+                hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
+        
+        
+        
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
     sample_dataset = sample_dataset[0] if isinstance(sample_dataset, list) else sample_dataset # dataset is list of datasets w/ same sample name, as they are considered together recently. Those set of datasets are extension of the same samples.
@@ -3225,9 +3312,17 @@ if __name__ == '__main__':
         sys.stdout.flush()
 
 
+    sampleInfo = {
+        "isMC": isMC,
+        "datasetNameFull": sample_dataset,
+        "lumiScale": lumiScale,
+        "MCSamplesStitchOption": MCSamplesStitchOption,
+    }
+    if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
+        sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
 
+        
     startTime = time.time()
-    
     tracemalloc.start()
 
 
@@ -3252,8 +3347,8 @@ if __name__ == '__main__':
         treename="Events",
         processor_instance=HToAATo4bProcessor(
             datasetInfo={
-                "era": era, 
-                sample_category: {"isMC": isMC, "lumiScale": lumiScale, "datasetNameFull": sample_dataset}
+                "era":           era, 
+                sample_category: sampleInfo,
             }
         )
     )

@@ -11,16 +11,27 @@ import numpy as np
 from copy import copy, deepcopy
 #import uproot
 import uproot as uproot
+#import uproot3 as uproot
 #import parse
 from parse import *
+import enum
 
 import hist
 
 from coffea import hist as histC
 
 
+class TestStrEnum(enum.StrEnum):
+    Test1 = "test1"
+    Test2 = "test2"
+
+class TestEnum(enum.Enum):
+    Test1 = 1
+    Test2 = 2
+    
+
 if __name__ == '__main__':
-    sFile = 'data/lumiScale/2018.root'
+    sFile = '../data/lumiScale/2018.root'
     sHisto = 'QCD/QCD_LumiScale_PhSpOverlapRewghted'
 
     fIn = uproot.open(sFile)
@@ -58,6 +69,8 @@ if __name__ == '__main__':
     for iHTBin in range(len(h1.axes[0])):
         print(f"{iHTBin = }, {h1.axes[0][iHTBin] = }, {h1.axes[0][iHTBin][0] = },  \t {h1[iHTBin, 'QCD_Incl_Remnant'] = },  {h1[iHTBin, 'QCD_bGen'] = },  {h1[iHTBin, 'QCD_bEnrich'] = } ")
 
+    
+
 
 
 
@@ -89,5 +102,20 @@ if __name__ == '__main__':
     fOut['test/hCtest1'] = hC2.to_hist()
     fOut['test/hCtest1_1'] = hC2_1.to_hist()
     fOut.close()
+
+    
+
+    print(f"\n\n {TestEnum.Test2 = }")
+    tmp1 = TestEnum.Test2
+    print(f" {tmp1 = },  {tmp1.value = }, {tmp1.name = }, ") 
+    print(f" {(tmp1 == TestEnum.Test1) =}")
+    print(f" {(tmp1 == TestEnum.Test2) =}")
+
+    print(f"\n\n {TestStrEnum.Test2 = }")
+    tmp1 = TestStrEnum.Test2
+    print(f" {tmp1 = },  {tmp1.value = }, {tmp1.name = }, ")
+    print(f" {(tmp1 == TestStrEnum.Test1) =}")
+    print(f" {(tmp1 == TestStrEnum.Test2) =}")
+
 
     

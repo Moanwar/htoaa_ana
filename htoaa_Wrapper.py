@@ -16,6 +16,7 @@ import numpy as np
 import time
 from datetime import datetime
 import copy
+import enum
 
 print(f"htoaa_Wraper:: here1 {datetime.now() = }")
 
@@ -23,7 +24,7 @@ from htoaa_Settings import *
 print(f"htoaa_Wraper:: here2 {datetime.now() = }")
 from htoaa_Samples import (
     Samples2018,
-    kData
+    kData, kQCDIncl, kQCD_bGen, kQCD_bEnrich
 )
 print(f"htoaa_Wraper:: here3 {datetime.now() = }")
 from htoaa_CommonTools import (
@@ -46,6 +47,16 @@ printLevel = 6
 UserHomePath = str(Path.home()) # Python 3.5+
 UserName     = os.getlogin()
 print(f"htoaa_Wraper:: here5 {datetime.now() = }")
+
+
+class JobStatus(enum.Enum):
+    NotSubmitted  = 'NotSubmitted'
+    Finished      = 'Finished'
+    Running       = 'Running'
+    Failed_Misc   = 'Failed_Misc'
+    Failed_Abort  = 'Failed_Abort'
+    Failed_XRootD = 'Failed_XRootD'
+    
 
 def writeCondorExecFile(
         condor_exec_file,
@@ -264,6 +275,11 @@ if __name__ == '__main__':
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
     print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
 
+    ## Settings ---------------------------------------------------------------------------------
+    MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt 
+    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
+    ## ------------------------------------------------------------------------------------------
+
     
     os.chdir( SourceCodeDir )
     os.makedirs( DestinationDir, exist_ok=True )
@@ -400,15 +416,23 @@ if __name__ == '__main__':
                     
                     # JobStatus
                     jobStatus = -1
-                    jobStatusForJobSubmission = [0, 3, 4, 5]
+                    #jobStatusForJobSubmission = [0, 3, 4, 5]
+                    jobStatusForJobSubmission = [
+                        JobStatus.NotSubmitted, #0
+                        #JobStatus.Finished, #1
+                        #JobStatus.Running, #2
+                        JobStatus.Failed_Misc, #3
+                        JobStatus.Failed_Abort, #4
+                        JobStatus.Failed_XRootD, #5
+                    ]
 
                     if not isConfigExist:
-                        jobStatus = 0 # job not yet submitted
+                        jobStatus = JobStatus.NotSubmitted #0 # job not yet submitted
                         if printLevel >= 3:
                             print(f"  jobStatus = 0")
 
                     elif isOpRootFileExist:
-                        jobStatus = 1 # job ran successfully
+                        jobStatus = JobStatus.Finished #1 # job ran successfully
                         OpRootFiles_Exist.append(sOpRootFile_to_use)
                         if printLevel >= 3:
                             print(f"  jobStatus = 1")
@@ -422,7 +446,7 @@ if __name__ == '__main__':
                                     nLinesToSearch  = 3,
                                     SearchFromEnd   = True)):
                                 # check wheter the job was terminated or not
-                                jobStatus = 3 # job failed due to some other error
+                                jobStatus = JobStatus.Failed_Misc #3 # job failed due to some other error
                                 if printLevel >= 3:
                                     print(f"  jobStatus = 3")
                                     
@@ -438,7 +462,7 @@ if __name__ == '__main__':
                                         searchString    = '[ERROR] Invalid redirect URL', 
                                         nLinesToSearch  = 150,
                                         SearchFromEnd   = True) ):
-                                    jobStatus = 5 # job failed due to XRootD error
+                                    jobStatus = JobStatus.Failed_XRootD #5 # job failed due to XRootD error
                                     if printLevel >= 3:
                                         print(f"  jobStatus = 5")
                                         
@@ -449,13 +473,13 @@ if __name__ == '__main__':
                                     nLinesToSearch  = 3,
                                     SearchFromEnd   = True)):
                                 # check wheter sCondorError does not exist due to Job was aborted
-                                jobStatus = 4 # job aborted
+                                jobStatus = JobStatus.Failed_Abort #4 # job aborted
                                 if printLevel >= 3:
                                     print(f"  jobStatus = 4")
                                     
                                     
                             else:
-                                jobStatus = 2 # job is running
+                                jobStatus = JobStatus.Running #2 # job is running
                                 if printLevel >= 3:
                                     print(f"  jobStatus = 2")
                                 
@@ -500,6 +524,13 @@ if __name__ == '__main__':
                         if (sample_category != kData):
                             config["crossSection"] = sample_cossSection
                             config["sumEvents"] = sample_sumEvents
+                            
+                            if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+                               sample_category in samples_wMCSamplesStitch_PhSpOverlapRewgt:
+                                # MCSamplesStitch_PhSpOverlapRewgt: Read lumiScale from histogram saved in a ROOT file 
+                                config["MCSamplesStitchOption"] = MCSamplesStitchOptions.PhSpOverlapRewgt.value 
+                                config["MCSamplesStitchInputs"] = sFileLumiScalesPhSpOverlapRewgt[era]
+                                
                         else:
                             del config["crossSection"]
                             del config["sumEvents"]
@@ -520,7 +551,7 @@ if __name__ == '__main__':
 
 
                     if jobStatus in jobStatusForJobSubmission: #[0, 3, 4]:
-                        if jobStatus == [3, 5]:
+                        if jobStatus == [JobStatus.Failed_Misc, JobStatus.Failed_XRootD]: #[3, 5]:
                             # save previos .out and .error files with another names
                             sCondorOutput_vPrevious = sCondorOutput_to_use.replace('.out', '_v%d.out' % (iJobSubmission-1))
                             sCondorError_vPrevious  = sCondorError_to_use.replace('.error', '_v%d.error' % (iJobSubmission-1))
@@ -528,7 +559,8 @@ if __name__ == '__main__':
                             os.rename(sCondorError_to_use,  sCondorError_vPrevious)
 
                         increaseJobFlavour = False
-                        if jobStatus == 4 or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
+                        #if jobStatus == 4 or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
+                        if jobStatus == JobStatus.Failed_Abort or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
                             increaseJobFlavour = True
                             
                         writeCondorSumitFile(
@@ -542,7 +574,7 @@ if __name__ == '__main__':
 
 
 
-                    if jobStatus in [1, 2]:
+                    if jobStatus in [JobStatus.Finished, JobStatus.Running]: #[1, 2]:
                         # job is either running or succeeded
                         continue
 
@@ -577,8 +609,9 @@ if __name__ == '__main__':
 
                 fJobSubLog.write('\n\nJob status wise output files: \n')
                 for jobStatus in jobStatus_dict.keys():
-                    fJobSubLog.write('\t jobStatus %d (%d) \n' % (jobStatus, len(jobStatus_dict[jobStatus])))
-                    if jobStatus in [0, 1]: continue
+                    fJobSubLog.write('\t jobStatus %s (%d) \n' % (str(jobStatus.value), len(jobStatus_dict[jobStatus])))
+                    #if jobStatus in [0, 1]: continue
+                    if jobStatus in [JobStatus.NotSubmitted, JobStatus.Finished]: continue
                     
                     for f in jobStatus_dict[jobStatus]:
                         fJobSubLog.write('\t\t %s \n' % (f))
@@ -586,7 +619,7 @@ if __name__ == '__main__':
             fJobSubLog.write('%s\n\n\n' % ('-'*10))
         
 
-        jobStatus_list = [ (jobStatus, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
+        jobStatus_list = [ (jobStatus.value, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
         print('\n\n\n%s \t iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
         print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()
         
