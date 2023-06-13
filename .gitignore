@@ -7,4 +7,5 @@ cout*.txt
 plots/
 dataVsMCDist_tmp/
 pickles/
+.conda/
 *~

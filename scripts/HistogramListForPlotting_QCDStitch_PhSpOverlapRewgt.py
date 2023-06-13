@@ -14,10 +14,10 @@ sHistName   = 'histogramName'
 
 sIpFiles = OD([
     # (<file name to refer>, <file path+name>
-    ('20230519_StitchOverlapPhSpRemoval',                '/Users/siddhesh/Work/CMS/htoaa/analysis/20230519_StitchOverlapPhSpRemoval/2018/analyze_htoaa_stage1.root'), 
-    ('20230602_StitchOverlapPhSpRemoval_QCDbGenHTRewgt', '/Users/siddhesh/Work/CMS/htoaa/analysis/20230602_StitchOverlapPhSpRemoval_QCDbGenHTRewgt/2018/analyze_htoaa_stage1.root'), 
-    ('20230608_QCDStitchPhSpOverlapRewgt',               '/Users/siddhesh/Work/CMS/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt/2018/analyze_htoaa_stage1.root'),
-    ('20230608_QCDStitchPhSpOverlapRewgt_woQCDbGenHTRewgt', '/Users/siddhesh/Work/CMS/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt_woQCDbGenHTRewgt/2018/analyze_htoaa_stage1.root')
+    ('20230519_StitchOverlapPhSpRemoval',                '/eos/cms/store/user/ssawant/htoaa/analysis/20230519_StitchOverlapPhSpRemoval/2018/analyze_htoaa_stage1.root'), 
+    ('20230602_StitchOverlapPhSpRemoval_QCDbGenHTRewgt', '/eos/cms/store/user/ssawant/htoaa/analysis/20230602_StitchOverlapPhSpRemoval_QCDbGenHTRewgt/2018/analyze_htoaa_stage1.root'), 
+    ('20230608_QCDStitchPhSpOverlapRewgt',               '/eos/cms/store/user/ssawant/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt/2018/analyze_htoaa_stage1.root'),
+    ('20230608_QCDStitchPhSpOverlapRewgt_woQCDbGenHTRewgt', '/eos/cms/store/user/ssawant/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt_woQCDbGenHTRewgt/2018/analyze_htoaa_stage1.root')
 ])
 sAnaVersion = 'QCDStitch' #list(sIpFiles.keys())[0]
 print(f"sAnaVersion: {sAnaVersion}")
@@ -25,7 +25,8 @@ print(f"sAnaVersion: {sAnaVersion}")
 #sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230324_QCD_HT100to200/plots'
 #sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230519_StitchOverlapPhSpRemoval/2018/plots/%s' % (sAnaVersion)
 #sOpDir  = '/home/siddhesh/Work/CMS/htoaa/analysis/20230504_v2_QCD_wHTSamplesStitchSF_step1/2018/plots/%s' % (sAnaVersion)
-sOpDir  = '/Users/siddhesh/Work/CMS/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt/2018/plots/' 
+#sOpDir  = '/Users/siddhesh/Work/CMS/htoaa/analysis/20230608_QCDStitchPhSpOverlapRewgt/2018/plots/' 
+sOpDir  = '../../analysis/20230608_QCDStitchPhSpOverlapRewgt/2018/plots_1/' 
 
 histograms_dict = OD([
     #("hLeadingPtGenBquark_pt_all", {sXLabel: 'Leading FatJet mass [GeV]', sYLabel: 'Events', sXRange: [0, 200]}),

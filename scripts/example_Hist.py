@@ -21,7 +21,8 @@ import hist
 from coffea import hist as histC
 
 
-class TestStrEnum(enum.StrEnum):
+#class TestStrEnum(enum.StrEnum):
+class TestStrEnum(enum.Enum):
     Test1 = "test1"
     Test2 = "test2"
 
@@ -31,8 +32,9 @@ class TestEnum(enum.Enum):
     
 
 if __name__ == '__main__':
-    sFile = '../data/lumiScale/2018.root'
-    sHisto = 'QCD/QCD_LumiScale_PhSpOverlapRewghted'
+    #sFile = '../data/lumiScale/2018.root' # test1
+    sFile = './data/lumiScale/2018.root' # test1
+    sHisto = 'QCD/QCD_LumiScale_PhSpOverlapRewghted' 
 
     fIn = uproot.open(sFile)
     h = fIn[sHisto]

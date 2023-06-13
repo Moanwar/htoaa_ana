@@ -111,6 +111,106 @@ def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     return sample_crossSection_corr
     
     
+def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, fileNameLocal = './inputFiles/fLocal.root', nTriesToDownload = 3):
+    # MC:
+    # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+    # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+    # Data:
+    # DAS file:
+    # eos file:
+
+    if downloadFile  and  os.path.exists(fileNameLocal):
+        # local copy of the i/p file exists
+        print(f"{fileNameLocal = } exists")
+        return fileNameLocal
+
+    fileName_toUse = fileName
+
+    if useLocalFileIfExists and fileName.startswith("/store/"):
+        # check if NanoAOD exists in /eos area
+        fileNameTemplate_DAS = "/store/{IsMC}/{SampleProductionCampaign}/{SampleName}/{DatasetTier}/{GT}/{SampleDir}/{SampleFileName}"
+        fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+
+        r_ = parse(fileNameTemplate_DAS, fileName)
+        IsMC                       = 'MC' if r_['IsMC'].lower() == 'mc' else 'data'
+        SampleProductionCampaign   = r_['SampleProductionCampaign']
+        SampleName                 = r_['SampleName']
+        DatasetTier                = r_['DatasetTier']
+        GT                         = r_['GT']
+        SampleDir                  = r_['SampleDir']
+        SampleFileName             = r_['SampleFileName']
+        Era                        = None
+        if 'UL16' in SampleProductionCampaign:
+            Era = '2016'
+        elif 'UL17' in SampleProductionCampaign:
+            Era = '2017'
+        elif 'UL18' in SampleProductionCampaign:
+            Era = '2018'
+        
+        fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
+        print(f"Checking for eos file: {fileName_EOS = }") 
+
+        if os.path.exists(fileName_EOS):
+            print(f"Using {fileName_EOS = }")
+            fileName_toUse = fileName_EOS
+
+
+    if not fileName_toUse.startswith("/store/"):  
+        # File is on /eos
+        # eoc cp /eos/.../abc.root  ./abc.root 
+        if downloadFile:
+            if  xrdcpFile(fileName_toUse, fileNameLocal, nTry = 3):
+                print(f"{fileNameLocal = } xrdcp successfully")
+                fileName_toUse = fileNameLocal
+        return fileName_toUse
+        
+
+    if fileName_toUse.startswith("/store/"):
+        # Copy of the NanoAOD file is not on /eos
+        for redirector in xrootd_redirectorNames:
+            fileName_toUse_i = redirector + fileName_toUse
+            print(f"getNanoAODFile():: Checking {fileName_toUse_i}"); sys.stdout.flush()
+
+            if downloadFile:
+                if  xrdcpFile(fileName_toUse_i, fileNameLocal, nTry = 3):
+                    print(f"{fileNameLocal = } xrdcp successfully")
+                    fileName_toUse = fileNameLocal
+                    break
+                
+            else:
+                file1 = None
+                try:
+                    file1 = uproot.open(fileName_toUse_i)
+                except:
+                    print(f"getNanoAODFile():: File open {fileName_toUse_i} failed"); sys.stdout.flush()
+                else:
+                    #print(f"\n{redirector + fileName}: file1.keys(): {file1.keys()}")
+                    #print(f"\n{redirector + fileName}: file1.keys(): {file1['Events'].numentries}"); sys.stdout.flush()
+
+                    nEntries = file1['Events'].numentries
+                    file1.close()
+                    #if file1['Events'].num_entries > 0:
+                    if nEntries > 0:
+                        print(f"{fileName_toUse_i}: {nEntries}"); sys.stdout.flush()
+                        fileName_toUse = fileName_toUse_i
+                        break
+
+        return fileName_toUse
+
+
+
+
+    
+       
+
+
+
+
+
+
+
+
+
 
 def setXRootDRedirector(fileName, useLocalFileIfExists = True):
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"

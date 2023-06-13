@@ -45,8 +45,7 @@ from htoaa_Settings import *
 from htoaa_CommonTools import (
     GetDictFromJsonFile,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, update_crosssection, getSampleHTRange,
-    setXRootDRedirector,
-    xrdcpFile,
+    getNanoAODFile, setXRootDRedirector,  xrdcpFile,
     getHTReweight
 )
 from htoaa_Samples import (
@@ -340,7 +339,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBQuarkPt',           {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             ('hGenLHE_HT_QCDStitchCutBHadron',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-            ('hGenLHE_HT_QCDStitch',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_QCDStitch',                      {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_QCD_bEnrich_PhSp',               {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_QCD_bGen_PhSp',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
+            ('hGenLHE_HT_QCD_Incl_Remnant_PhSp',          {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
             #('hGenBquark_Status_all',                     {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN Bquark Pythia status"}),
             #('hGenBquark_first_Status_all',               {sXaxis: PytPartStatus_axis, sXaxisLabel: r"GEN first Bquark Pythia status"}),
             #('hGenBquark_first_PdgId_all',                {sXaxis: pdgId_axis,       sXaxisLabel: r"GEN first Bquark pdgId"}),
@@ -1380,7 +1382,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-            ''' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Disabled QCD_bGen HTRewgt
+            ''' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Disabled QCD_bGen HTRewgt 
             if self.datasetInfo[dataset]['isQCD_bGen']:
                 wgt_HT = getHTReweight(
                     HT_list            = events.LHE.HT,
@@ -2202,6 +2204,24 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     HT=(events.LHE.HT[mask_QCD_stitch_eventwise]),
                     systematic=syst,
                     weight=evtWeight_gen[mask_QCD_stitch_eventwise]
+                )
+                output['hGenLHE_HT_QCD_bEnrich_PhSp'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_QCD_bEnrich_PhSp]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_QCD_bEnrich_PhSp]
+                )
+                output['hGenLHE_HT_QCD_bGen_PhSp'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_QCD_bGen_PhSp]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_QCD_bGen_PhSp]
+                )
+                output['hGenLHE_HT_QCD_Incl_Remnant_PhSp'].fill(
+                    dataset=dataset,
+                    HT=(events.LHE.HT[mask_QCD_Incl_Remnant_PhSp]),
+                    systematic=syst,
+                    weight=evtWeight_gen[mask_QCD_Incl_Remnant_PhSp]
                 )
 
 
@@ -3282,34 +3302,24 @@ if __name__ == '__main__':
         if "*" in sInputFile:  sInputFiles_toUse.extend( glob.glob( sInputFile ) )
         else:                  sInputFiles_toUse.append( sInputFile )
     sInputFiles = sInputFiles_toUse
-    for iFile in range(len(sInputFiles)):        
-        if sInputFiles[iFile].startswith("/store/"): # LFN: Logical File Name
-            #sInputFiles[iFile] = xrootd_redirectorName + sInputFiles[iFile]
-            sInputFiles[iFile] = setXRootDRedirector(sInputFiles[iFile])
-    print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
+    print(f"Initial sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile}");  sys.stdout.flush()
 
-    if downloadIpFiles:
-        sInputFiles_toUse = []
-        for sInputFile in sInputFiles:
-            sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
+    for iFile in range(len(sInputFiles)):     
+        sInputFile = sInputFiles[iFile]
+        sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))   
+        sInputFiles[iFile] = getNanoAODFile(
+            fileName = sInputFile, 
+            useLocalFileIfExists = True, 
+            downloadFile = True, 
+            fileNameLocal = './inputFiles/%s' %(os.path.basename(sInputFile)), 
+            nTriesToDownload = 3)
+        
+    print(f"\nActual  sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
+    for sInputFile in sInputFiles:
+        print(f"\t{sInputFile}");  sys.stdout.flush()
 
-            if   os.path.exists(sFileLocal):
-                print(f"{sFileLocal = } exists")
-            elif xrdcpFile(sInputFile, sFileLocal, nTry = 3):
-                sInputFiles_toUse.append(sFileLocal)
-            else:
-                print(f"Ip file {sInputFile} failed to download \t **** ERROR ****")
-                exit(1)
-            
-            
-        sInputFiles = sInputFiles_toUse
-        print(f"sInputFiles ({len(sInputFiles)}) local files to use:");
-        for sInputFile in sInputFiles:
-            isFileExist = os.path.isfile(sInputFile)
-            print(f"\t{sInputFile} {isFileExist}")
-        sys.stdout.flush()
 
 
     sampleInfo = {
