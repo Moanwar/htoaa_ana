@@ -28,7 +28,7 @@ from htoaa_Samples import (
 )
 print(f"htoaa_Wraper:: here3 {datetime.now() = }")
 from htoaa_CommonTools import (
-    executeBashCommand,
+    executeBashCommand
 )
 print(f"htoaa_Wraper:: here4 {datetime.now() = }")
 
@@ -641,6 +641,7 @@ if __name__ == '__main__':
     print('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
 
     if allJobsSuccessful:
+        print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
         os.chdir( EosDestinationDir )
 
         sOpRootFile_stage0 = sOpRootFile

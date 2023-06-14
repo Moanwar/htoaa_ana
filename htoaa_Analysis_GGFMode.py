@@ -1382,7 +1382,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-            ''' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Disabled QCD_bGen HTRewgt 
             if self.datasetInfo[dataset]['isQCD_bGen']:
                 wgt_HT = getHTReweight(
                     HT_list            = events.LHE.HT,
@@ -1403,11 +1402,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 if printLevel >= 30:
                     printVariable("\n events.LHE.HT", events.LHE.HT)
                     printVariable("wgt_HT", wgt_HT)
-                
-            '''
-                
-
-
 
 
                 
@@ -3318,7 +3312,8 @@ if __name__ == '__main__':
         
     print(f"\nActual  sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
-        print(f"\t{sInputFile}");  sys.stdout.flush()
+        print(f"\t{sInputFile} \t {os.path.exists(sInputFile) = }");  
+    sys.stdout.flush()
 
 
 

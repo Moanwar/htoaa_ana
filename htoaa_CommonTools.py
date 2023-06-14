@@ -138,7 +138,7 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
         DatasetTier                = r_['DatasetTier']
         GT                         = r_['GT']
         SampleDir                  = r_['SampleDir']
-        SampleFileName             = r_['SampleFileName']
+        SampleFileName             = r_['SampleFileName'] 
         Era                        = None
         if 'UL16' in SampleProductionCampaign:
             Era = '2016'
@@ -150,20 +150,15 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
         fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
         print(f"Checking for eos file: {fileName_EOS = }") 
 
-        if os.path.exists(fileName_EOS):
-            print(f"Using {fileName_EOS = }")
-            fileName_toUse = fileName_EOS
+        print(f"{fileName_EOS = }: {os.path.exists(fileName_EOS) = } ")
+        # os.path.exists() for files on /eos are always return False. So try 'eos cp' to check if the file on eos exists or not
+        if  xrdcpFile(fileName_EOS, fileNameLocal, nTry = 3, cp_command = 'eos cp'):
+            print(f"Forced xrdcp for {fileName_EOS = } successful.")
+        print(f"{fileNameLocal = }: {os.path.exists(fileNameLocal) = } ")            
+        print(f"List directory {os.path.dirname(fileNameLocal) = }:  {os.listdir(os.path.dirname(fileNameLocal)) = }")
+        if os.path.exists(fileNameLocal):
+            return fileNameLocal
 
-
-    if not fileName_toUse.startswith("/store/"):  
-        # File is on /eos
-        # eoc cp /eos/.../abc.root  ./abc.root 
-        if downloadFile:
-            if  xrdcpFile(fileName_toUse, fileNameLocal, nTry = 3):
-                print(f"{fileNameLocal = } xrdcp successfully")
-                fileName_toUse = fileNameLocal
-        return fileName_toUse
-        
 
     if fileName_toUse.startswith("/store/"):
         # Copy of the NanoAOD file is not on /eos
@@ -279,9 +274,12 @@ def setXRootDRedirector(fileName, useLocalFileIfExists = True):
     
     return redirector_toUse + fileName
 
-def xrdcpFile(sFileName, sFileNameLocal, nTry = 3):
-    command_ = "time xrdcp %s %s" % (sFileName, sFileNameLocal)
+def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
+    command_ = "time %s %s %s" % (cp_command, sFileName, sFileNameLocal)
     command_list_ = command_.split(" ")
+    dirName_ = os.path.dirname(sFileNameLocal)
+    os.makedirs(dirName_, exist_ok=True)
+    print(f"{dirName_ = }: {os.path.exists(dirName_)} ")
     print(f"{command_ = }")
     for iTry in range(nTry):
         process = subprocess.Popen(command_list_,
@@ -291,7 +289,10 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3):
                                    )
         stdout, stderr = process.communicate()
         print(f"  {iTry = } {stdout = }, {stderr = }");  sys.stdout.flush()
-        if 'FATAL' not in stderr and 'ERROR' not in stderr : # download was successful
+        stderr_lower = stderr.lower()
+        #if 'FATAL' not in stderr and 'ERROR' not in stderr : # download was successful
+        if ('fatal' not in stderr_lower and 'error' not in stderr_lower) or \
+            (os.path.exists(sFileNameLocal)) : # download was successful
             return True
 
     return False
