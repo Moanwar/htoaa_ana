@@ -282,10 +282,18 @@ list_datasetAndXs_2018 = OD([
     ## JetHT
     # dasgoclient --query="dataset=/JetHT/*2018*UL*MiniAODv2_NanoAODv9-*/NANOAOD"
     # XS (cross-section) does not matter for data sample
-    ("/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD", {sXS: -1}),
-    ("/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD", {sXS: -1}),
-    ("/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD", {sXS: -1}),
-    ("/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD", {sXS: -1}),
+    # Use JetHT/NanoAOD_GT38 instead
+    #("/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD", {sXS: -1}),
+    #("/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD", {sXS: -1}),
+    #("/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD", {sXS: -1}),
+    #("/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD", {sXS: -1}),
+    
+    # dasgoclient --query="dataset=/JetHT/*2018*UL*MiniAODv2_NanoAODv9_GT36*/NANOAOD"
+    # XS (cross-section) does not matter for data sample
+    ("/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    ("/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    ("/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    ("/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
 
     
     #("", {sXS: }),    
