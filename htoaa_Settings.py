@@ -13,7 +13,7 @@ xrootd_redirectorNames = [
     "root://cmsxrootd.fnal.gov/",
     "root://cms-xrd-global.cern.ch:1094/",
 ]
-sampleFormat = "nanoAOD"
+sampleFormat = "nanoAOD" 
 
 Era_2016 = '2016'
 Era_2017 = '2017'
@@ -29,6 +29,12 @@ Luminosities = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
     Era_2018: [59.83, 2.5],
+}
+
+sFilesGoldenJSON = {
+    Era_2016: '',
+    Era_2017: '',    
+    Era_2018: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt',    
 }
 
 kMCSamplesStitch_PhSpOverlapRemove = 'MCSamplesStitch_PhSpOverlapRemove'

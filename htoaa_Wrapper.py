@@ -361,7 +361,8 @@ if __name__ == '__main__':
                     print("files ({}): {}".format(len(files), files))
 
 
-                nSplits = int(len(files) / nFilesPerJob) + 1 if nFilesPerJob > 0 else 1
+                #nSplits = int(len(files) / nFilesPerJob) + 1 if nFilesPerJob > 0 else 1
+                nSplits = int(len(files) / nFilesPerJob) + 1 if (nFilesPerJob > 0) and (len(files) != nFilesPerJob) else 1
 
 
                 files_splitted = np.array_split(files, nSplits)
@@ -655,6 +656,7 @@ if __name__ == '__main__':
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
 
+        '''
         cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
         for opFileName in OpRootFilesAbsPath_Target:
             cmd_hadd += " %s" % (opFileName)
@@ -662,7 +664,42 @@ if __name__ == '__main__':
         cmd_hadd_stdout = executeBashCommand(cmd_hadd)
         fJobSubLog.write('\n\n%s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
         fJobSubLog.write('\n\n%s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
+        '''
+
+        nFilesPerBatchForHadd              = 100
+        nBatchesForHadd                    = int(len(OpRootFilesAbsPath_Target) / nFilesPerBatchForHadd) + 1 if len(OpRootFilesAbsPath_Target) != nFilesPerBatchForHadd else 1
+        OpRootFilesAbsPath_Target_splitted = np.array_split(OpRootFilesAbsPath_Target, nBatchesForHadd)
+        sOpRootFile_stage1_batches         = []
+        #print(f"\n\nNo. of {nFilesPerBatchForHadd} files splits in OpRootFilesAbsPath_Target_splitted: {len(OpRootFilesAbsPath_Target_splitted)}")
+        print(f"\n\n{nFilesPerBatchForHadd = }. {len(OpRootFilesAbsPath_Target)} files split into {nBatchesForHadd} batches as {[len(iL) for iL in OpRootFilesAbsPath_Target_splitted]}")
+        #print(f"{OpRootFilesAbsPath_Target_splitted = }")
+        for iHadd in range(len(OpRootFilesAbsPath_Target_splitted)):
+            sOpRootFile_stage1_toUse        = sOpRootFile_stage1.replace('.root', '_batch%d.root' % (iHadd))
+            OpRootFilesAbsPath_Target_toUse = OpRootFilesAbsPath_Target_splitted[iHadd]
+            sOpRootFile_stage1_batches.append(sOpRootFile_stage1_toUse)
+            print(f"\n\n{iHadd = }, No. of files to hadd: {len(OpRootFilesAbsPath_Target_toUse)}")
+
+            cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1_toUse)
+            for opFileName in OpRootFilesAbsPath_Target_toUse:
+                cmd_hadd += " %s" % (opFileName)
+            
+            cmd_hadd_stdout = executeBashCommand(cmd_hadd)
+            fJobSubLog.write('\n\n{iHadd = } \t %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
+            fJobSubLog.write('\n\n{iHadd = } \t %s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1_toUse))
+
+        # Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1
+        print(f"\n\n\n Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1 ")
+
+        cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
+        for opFileName in sOpRootFile_stage1_batches:
+            cmd_hadd += " %s" % (opFileName)
         
+        cmd_hadd_stdout = executeBashCommand(cmd_hadd)
+        fJobSubLog.write('\n\nHadd stage1_batches %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
+        fJobSubLog.write('\n\n%s:add stage1_batches: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
+
+
+
         executeBashCommand("pwd")
         executeBashCommand("ls")
 

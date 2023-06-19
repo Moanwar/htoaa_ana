@@ -116,8 +116,8 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
     # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
     # Data:
-    # DAS file:
-    # eos file:
+    # DAS file: "/store/data/Run2018A/JetHT/NANOAOD/UL2018_MiniAODv2_NanoAODv9_GT36-v1/2820000/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
+    # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9_GT36-v1/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
 
     if downloadFile  and  os.path.exists(fileNameLocal):
         # local copy of the i/p file exists
@@ -133,18 +133,18 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
 
         r_ = parse(fileNameTemplate_DAS, fileName)
         IsMC                       = 'MC' if r_['IsMC'].lower() == 'mc' else 'data'
-        SampleProductionCampaign   = r_['SampleProductionCampaign']
+        SampleProductionCampaign   = r_['SampleProductionCampaign'] if r_['IsMC'].lower() == 'mc' else '%s-%s' % (r_['SampleProductionCampaign'], r_['GT'])
         SampleName                 = r_['SampleName']
         DatasetTier                = r_['DatasetTier']
         GT                         = r_['GT']
         SampleDir                  = r_['SampleDir']
         SampleFileName             = r_['SampleFileName'] 
         Era                        = None
-        if 'UL16' in SampleProductionCampaign:
+        if   'UL16' in SampleProductionCampaign or 'UL2016' in SampleProductionCampaign:
             Era = '2016'
-        elif 'UL17' in SampleProductionCampaign:
+        elif 'UL17' in SampleProductionCampaign or 'UL2017' in SampleProductionCampaign:
             Era = '2017'
-        elif 'UL18' in SampleProductionCampaign:
+        elif 'UL18' in SampleProductionCampaign or 'UL2018' in SampleProductionCampaign:
             Era = '2018'
         
         fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
@@ -211,8 +211,8 @@ def setXRootDRedirector(fileName, useLocalFileIfExists = True):
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
     # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
 
-    # DAS file:
-    # eos file:
+    # DAS file: "/store/data/Run2018A/JetHT/NANOAOD/UL2018_MiniAODv2_NanoAODv9_GT36-v1/2820000/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
+    # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9_GT36-v1/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
     
     if not fileName.startswith("/store/"):
         return fileName
@@ -222,7 +222,7 @@ def setXRootDRedirector(fileName, useLocalFileIfExists = True):
         fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
 
         r_ = parse(fileNameTemplate_DAS, fileName)
-        IsMC = r_['IsMC']
+        IsMC = 'MC' if 'mc' in r_['IsMC'].lower() else 'data'
         SampleProductionCampaign = r_['SampleProductionCampaign']
         SampleName = r_['SampleName']
         DatasetTier = r_['DatasetTier']

@@ -38,7 +38,7 @@ from particle import Particle # For PDG particle listing https://github.com/scik
 
 from htoaa_Settings import *
 from htoaa_CommonTools import (
-    GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector,
+    GetDictFromJsonFile, calculate_lumiScale, setXRootDRedirector, getNanoAODFile,
     xrdcpFile
 )
 from htoaa_Samples import (
@@ -386,33 +386,20 @@ if __name__ == '__main__':
         if "*" in sInputFile:  sInputFiles_toUse.extend( glob.glob( sInputFile ) )
         else:                  sInputFiles_toUse.append( sInputFile )
     sInputFiles = sInputFiles_toUse
-    for iFile in range(len(sInputFiles)):        
-        if sInputFiles[iFile].startswith("/store/"): # LFN: Logical File Name
-            #sInputFiles[iFile] = xrootd_redirectorName + sInputFiles[iFile]
-            sInputFiles[iFile] = setXRootDRedirector(sInputFiles[iFile])
-    print(f"sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
+    print(f"Initial sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile}");  sys.stdout.flush()
 
-    if downloadIpFiles:
-        sInputFiles_toUse = []
-        for sInputFile in sInputFiles:
-            sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
-
-            if xrdcpFile(sInputFile, sFileLocal, nTry = 3):
-                sInputFiles_toUse.append(sFileLocal)
-            else:
-                print(f"Ip file {sInputFile} failed to download \t **** ERROR ****")
-                exit(1)
-            
-            
-        sInputFiles = sInputFiles_toUse
-        print(f"sInputFiles ({len(sInputFiles)}) local files to use:");
-        for sInputFile in sInputFiles:
-            isFileExist = os.path.isfile(sInputFile)
-            print(f"\t{sInputFile} {isFileExist}")
-        sys.stdout.flush()
-
+    for iFile in range(len(sInputFiles)):     
+        sInputFile = sInputFiles[iFile]
+        sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))   
+        sInputFiles[iFile] = getNanoAODFile(
+            fileName = sInputFile, 
+            useLocalFileIfExists = True, 
+            downloadFile = True, 
+            fileNameLocal = './inputFiles/%s' %(os.path.basename(sInputFile)), 
+            nTriesToDownload = 3)
+        
 
 
     startTime = time.time()

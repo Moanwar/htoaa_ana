@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import json
+from urllib.request import urlopen
 import glob
 from collections import OrderedDict as OD
 import time
@@ -195,6 +196,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         self.datasetInfo = datasetInfo
         self.objectSelector = ObjectSelection(era=self.datasetInfo["era"])
+        dataLSSelGoldenJSON = None
+        if kData in self.datasetInfo:
+            # data LS selection Golden JSON
+            print(f'{kData} {self.datasetInfo["era"]}: Reading {sFilesGoldenJSON[self.datasetInfo["era"]]} ')
+            with urlopen(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
+                dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
+                print(f"{dataLSSelGoldenJSON = }")
                 
         
         # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement
@@ -3257,7 +3265,7 @@ if __name__ == '__main__':
         luminosity          = Luminosities[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
-        sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
+        sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)
 

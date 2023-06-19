@@ -8,7 +8,7 @@ kQCDIncl      = "QCD_Incl"
 kZJets        = "ZJets"
 kWJets        = "WJets"
 
-QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight"
+QCDInclMode = 0 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight"
 
 Samples2018 = OD([
 
