@@ -270,16 +270,19 @@ if __name__ == '__main__':
     if selSamplesToExclude:
         selSamplesToExclude_list = selSamplesToExclude.split(',')
 
+    ## Settings ---------------------------------------------------------------------------------
+    MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt 
+    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
+
+    #selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", "WJetsToLNu"])
+    selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B"])
+    ## ------------------------------------------------------------------------------------------
+
+
     print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
     print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
-
-    ## Settings ---------------------------------------------------------------------------------
-    MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt 
-    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
-    ## ------------------------------------------------------------------------------------------
-
     
     os.chdir( SourceCodeDir )
     os.makedirs( DestinationDir, exist_ok=True )

@@ -1,21 +1,30 @@
 import os
 import sys
+from datetime import datetime
+print(f"htoaa_CommonTools:: here1 {datetime.now() = }")
 import subprocess
 import shlex
 import logging
 import json
+print(f"htoaa_CommonTools:: here2 {datetime.now() = }")
 import numpy as np
+import awkward as ak
+print(f"htoaa_CommonTools:: here3 {datetime.now() = }")
 #import uproot
 import uproot3 as uproot
+print(f"htoaa_CommonTools:: here4 {datetime.now() = }")
 import ROOT as R
+print(f"htoaa_CommonTools:: here5 {datetime.now() = }")
 from parse import *
 import logging
 
+print(f"htoaa_CommonTools:: here6 {datetime.now() = }")
 from htoaa_Settings import * 
+print(f"htoaa_CommonTools:: here7 {datetime.now() = }")
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
 )
-
+print(f"htoaa_CommonTools:: here8 {datetime.now() = }")
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
     lumiScale = 1
@@ -195,18 +204,6 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
 
 
 
-    
-       
-
-
-
-
-
-
-
-
-
-
 def setXRootDRedirector(fileName, useLocalFileIfExists = True):
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
     # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
@@ -314,7 +311,7 @@ def GetDictFromJsonFile(filePath):
     fh.close
     
     #while "/*" in contents:
-    #    preComment, postComment = contents.split("/*", 1)
+    #    preComment, postComment = contents.split("/*", 1)ß
     #    contents = preComment + postComment.split("*/", 1)[1]
     while "'''" in contents:
         preComment, postComment = contents.split("'''", 1)
@@ -323,6 +320,42 @@ def GetDictFromJsonFile(filePath):
     dictionary =  json.loads( contents )
     return dictionary
 
+
+def selectRunLuminosityBlock_ApprochEventBase(golden_json_path, runNumber_list, luminosityBlock_list):
+    print(f" selectRunLuminosityBlock "); sys.stdout.flush();
+    with open(golden_json_path) as fDataGoldenJSON:
+        dataLSSelGoldenJSON = json.load(fDataGoldenJSON)    
+        #print(f"0 : {dataLSSelGoldenJSON = }")
+        dataLSSelGoldenJSON = {int(k): v for k, v in dataLSSelGoldenJSON.items()}
+
+    #mask_run_ls = []
+    mask_run_ls = np.full(len(runNumber_list), False, dtype=bool)
+    #print(f"zip(runNumber_list, luminosityBlock_list) ({type(zip(runNumber_list, luminosityBlock_list))}) ({len(zip(runNumber_list, luminosityBlock_list))}): {zip(runNumber_list, luminosityBlock_list)} ")
+    for idx_, (r,ls) in enumerate(zip(runNumber_list, luminosityBlock_list)):
+        #mask_ = False
+        if r in dataLSSelGoldenJSON:
+            for ls_range in dataLSSelGoldenJSON[r]:
+                if ls >= ls_range[0] and ls <= ls_range[1]:
+                    #mask_ = True
+                    mask_run_ls[idx_] = True
+                    break
+        #mask_run_ls.append(mask_)
+
+    #print(f"mask_run_ls ({type(mask_run_ls)}) ({len(mask_run_ls)}){' '*6}: {mask_run_ls}")
+    return mask_run_ls
+
+def selectRunLuminosityBlock(dataLSSelGoldenJSON, runNumber_list, luminosityBlock_list):
+    mask_run_ls = np.full(len(runNumber_list), False, dtype=bool)
+    #print(f"zip(runNumber_list, luminosityBlock_list) ({type(zip(runNumber_list, luminosityBlock_list))}) ({len(zip(runNumber_list, luminosityBlock_list))}): {zip(runNumber_list, luminosityBlock_list)} ")
+    for idx_, (r,ls) in enumerate(zip(runNumber_list, luminosityBlock_list)):
+        #mask_ = False
+        if r in dataLSSelGoldenJSON:
+            for ls_range in dataLSSelGoldenJSON[r]:
+                if ls >= ls_range[0] and ls <= ls_range[1]:
+                    #mask_ = True
+                    mask_run_ls[idx_] = True
+                    break
+    return mask_run_ls
 
 
 def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):

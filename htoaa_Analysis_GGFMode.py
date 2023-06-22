@@ -2,6 +2,8 @@
 
 import os
 import sys
+from datetime import datetime
+print(f"htoaa_Analysis_GGFMode:: here1 {datetime.now() = }")
 import subprocess
 import json
 from urllib.request import urlopen
@@ -10,14 +12,18 @@ from collections import OrderedDict as OD
 import time
 import tracemalloc
 import math
+print(f"htoaa_Analysis_GGFMode:: here2 {datetime.now() = }")
 import numpy as np
 from copy import copy, deepcopy
+print(f"htoaa_Analysis_GGFMode:: here3 {datetime.now() = }")
 #import uproot
 #import uproot3 as uproot
 import uproot as uproot
+print(f"htoaa_Analysis_GGFMode:: here4 {datetime.now() = }")
 #import parse
 from parse import *
 import logging
+print(f"htoaa_Analysis_GGFMode:: here5 {datetime.now() = }")
 
 # comment test3
 '''
@@ -27,36 +33,41 @@ References:
   * Coffea framework used for TTGamma analysis: https://github.com/nsmith-/TTGamma_LongExercise/blob/FullAnalysis/ttgamma/processor.py
 * Coffea installation: /home/siddhesh/anaconda3/envs/ana_htoaa/lib/python3.10/site-packages/coffea
 '''
-
+print(f"htoaa_Analysis_GGFMode:: here6 {datetime.now() = }")
 #import coffea.processor as processor
 from coffea import processor, util
 from coffea.nanoevents import schemas
 from coffea.nanoevents.methods import nanoaod, vector
 from coffea.analysis_tools import PackedSelection, Weights
+#from coffea.lumi_tools import LumiMask
 #import hist
 from coffea import hist
 import awkward as ak
-import uproot
+#import uproot
 #from dask.distributed import Client
+print(f"htoaa_Analysis_GGFMode:: here7 {datetime.now() = }")
 from particle import Particle # For PDG particle listing https://github.com/scikit-hep/particle
-
+print(f"htoaa_Analysis_GGFMode:: here8 {datetime.now() = }")
 
 
 from htoaa_Settings import *
+print(f"htoaa_Analysis_GGFMode:: here9 {datetime.now() = }")
 from htoaa_CommonTools import (
-    GetDictFromJsonFile,
+    GetDictFromJsonFile, selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, update_crosssection, getSampleHTRange,
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
     getHTReweight
 )
+print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }")
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
-
+print(f"htoaa_Analysis_GGFMode:: here11 {datetime.now() = }")
 
 from inspect import currentframe, getframeinfo
+print(f"htoaa_Analysis_GGFMode:: here12 {datetime.now() = }")
 frameinfo = getframeinfo(currentframe())
-
+print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }")
 
 
 # use GOldenJSON
@@ -199,10 +210,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dataLSSelGoldenJSON = None
         if kData in self.datasetInfo:
             # data LS selection Golden JSON
+            dataLSSelGoldenJSON = None  
             print(f'{kData} {self.datasetInfo["era"]}: Reading {sFilesGoldenJSON[self.datasetInfo["era"]]} ')
-            with urlopen(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
-                dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
-                print(f"{dataLSSelGoldenJSON = }")
+            if 'https:' in sFilesGoldenJSON[self.datasetInfo["era"]]:
+                with urlopen(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
+                    dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
+            else: 
+                with open(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
+                    dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
+            if dataLSSelGoldenJSON == None:
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sFilesGoldenJSON[self.datasetInfo["era"]] = } could not read.')
+                exit(0) 
+
+            # convert runNumber in str to int
+            dataLSSelGoldenJSON = {int(k): v for k, v in dataLSSelGoldenJSON.items()} 
+            self.datasetInfo[kData]['dataLSSelGoldenJSON'] = dataLSSelGoldenJSON
+            #print(f"{dataLSSelGoldenJSON = }")
                 
         
         # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement
@@ -590,12 +613,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
     def process(self, events):
         dataset = events.metadata["dataset"] # dataset label
-        self.datasetInfo[dataset]['isSignal'] = False
-        self.datasetInfo[dataset]['isQCD'] = False
 
         if printLevel >= 20:
             print(f"nEvents: {len(events)}")
-        if printLevel >= 20:
+        if printLevel >= 0:
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
             #print(f"\n events.HLT.fields: {events.HLT.fields}")
@@ -605,14 +626,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             #print(f"\n events.LHE.fields: {events.LHE.fields}")
             #print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
-            print(f"{events.LHE.fields = } ")
+            #print(f"{events.LHE.fields = } ")
             #print(f"{events.LHE = } ")
-            printVariable('events.LHE', events.LHE)
-            
+            #printVariable('events.LHE', events.LHE)
+            print(f"{events.run.fields = }")
+            printVariable('events.run', events.run)
+            print(f"{events.luminosityBlock.fields = }")
+            printVariable('events.luminosityBlock', events.luminosityBlock)
+             
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
 
-        print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
+        #print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
 
         self.datasetInfo[dataset]['isSignal'     ]  = False
         self.datasetInfo[dataset]['isQCD'        ]  = False
@@ -1023,11 +1048,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # EVENT VARIABLES
         ##################
         
-        #leadingFatJet = ak.firsts(selFatJet)
-        #leadingFatJet_asSingletons = ak.singletons(leadingFatJet)
+        leadingFatJet = None
+        if ( not self.datasetInfo[dataset]['isMC']) and (self.datasetInfo["era"] == Era_2018):
+            '''
+            HEM15/16 issue in jets with -3.2<eta<-1.3 and -1.57<phi< -0.87 in 2018 data (runs>=319077, i.e. last certified run of 2018B, and all of 2018C+D) https://twiki.cern.ch/twiki/bin/view/CMS/JetMET#
+            '''
+            run_FatJetEta_FatJetPhi = ak.zip({'run': events.run, 'FatJetEta': events.FatJet.eta, 'FatJetPhi': events.FatJet.phi})   
+            mask_jets_surviving_HEM15_16_issue = ~ (
+                (run_FatJetEta_FatJetPhi.run >= 319077) &
+                (run_FatJetEta_FatJetPhi.FatJetEta > -3.2 ) & (run_FatJetEta_FatJetPhi.FatJetEta < -1.3 ) &
+                (run_FatJetEta_FatJetPhi.FatJetPhi > -1.57) & (run_FatJetEta_FatJetPhi.FatJetPhi < -0.87)
+            )
+            leadingFatJet = ak.firsts(events.FatJet[mask_jets_surviving_HEM15_16_issue]) 
+        else:   
+            leadingFatJet = ak.firsts(events.FatJet) # for e.g. [0.056304931640625, None, 0.12890625, 0.939453125, 0.0316162109375]
 
-        #leadingFatJet = ak.singletons( ak.firsts(events.FatJet) )
-        leadingFatJet = ak.firsts(events.FatJet) # for e.g. [0.056304931640625, None, 0.12890625, 0.939453125, 0.0316162109375]
+
         leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
         
         if printLevel >= 13:
@@ -1061,14 +1097,29 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 HLT_AK8PFJet330_name
             ]),
         ])
-        if self.datasetInfo[dataset]['isQCD']: sel_names_all["SR"].append("QCDStitch")
+        if not self.datasetInfo[dataset]['isMC']: 
+            sel_names_all["SR"].insert(0, "run:ls")
+        else:
+            if self.datasetInfo[dataset]['isQCD']: sel_names_all["SR"].append("QCDStitch")
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
         cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + sel_names_all["SR"] #.copy()
 
-        
+       
         # create a PackedSelection object
         # this will help us later in composing the boolean selections easily
         selection = PackedSelection()
+
+        if "run:ls" in sel_names_all["SR"]:
+            # self.datasetInfo[dataset]['dataLSSelGoldenJSON']
+            # using Coffea built-in function: mask_lumi = LumiMask(golden_json_path)(events.run,events.luminosityBlock)
+            #selection.add("run:ls", LumiMask(sFilesGoldenJSON[self.datasetInfo["era"]])(events.run,events.luminosityBlock) )
+            
+            # using selectRunLuminosityBlock function from htoaa_CommonTools
+            selection.add("run:ls", selectRunLuminosityBlock(
+                dataLSSelGoldenJSON  = self.datasetInfo[dataset]['dataLSSelGoldenJSON'], 
+                runNumber_list       = events.run, 
+                luminosityBlock_list = events.luminosityBlock 
+                ))
 
         if "nPV" in sel_names_all["SR"]:
             # nPVGood >= 1
@@ -3241,7 +3292,7 @@ def printWithType(sX, X):
     
 if __name__ == '__main__':
     print("htoaa_Analysis:: main: {}".format(sys.argv)); sys.stdout.flush()
-
+    print(f"htoaa_Analysis_GGFMode:: here14 {datetime.now() = }")
 
     if len(sys.argv) != 2:
         print("htoaa_Analysis:: Command-line config file missing.. \t **** ERROR **** \n")
@@ -3251,6 +3302,7 @@ if __name__ == '__main__':
     
     config = GetDictFromJsonFile(sConfig)
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
+    print(f"htoaa_Analysis_GGFMode:: here15 {datetime.now() = }")
 
     lumiScale = 1
     nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventToReadInBatch
@@ -3291,7 +3343,7 @@ if __name__ == '__main__':
             with uproot.open(MCSamplesStitchInputFileName) as f_:
                 print(f"{f_.keys() = }"); sys.stdout.flush() 
                 hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
-        
+    print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
         
         
     #branchesToRead = htoaa_nanoAODBranchesToRead
@@ -3307,6 +3359,7 @@ if __name__ == '__main__':
     print(f"Initial sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile}");  sys.stdout.flush()
+    print(f"htoaa_Analysis_GGFMode:: here17 {datetime.now() = }")
 
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
@@ -3322,18 +3375,19 @@ if __name__ == '__main__':
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile} \t {os.path.exists(sInputFile) = }");  
     sys.stdout.flush()
-
+    print(f"htoaa_Analysis_GGFMode:: here18 {datetime.now() = }")
 
 
     sampleInfo = {
         "isMC": isMC,
         "datasetNameFull": sample_dataset,
-        "lumiScale": lumiScale,
-        "MCSamplesStitchOption": MCSamplesStitchOption,
+        "lumiScale": lumiScale
     }
-    if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-        sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
-
+    if isMC:
+        sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
+        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
+            sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
+    print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }")
         
     startTime = time.time()
     tracemalloc.start()
