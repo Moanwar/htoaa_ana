@@ -1044,7 +1044,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         '''
 
         
-        ##################
+        ################## 
         # EVENT VARIABLES
         ##################
         

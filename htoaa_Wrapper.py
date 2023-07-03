@@ -271,11 +271,15 @@ if __name__ == '__main__':
         selSamplesToExclude_list = selSamplesToExclude.split(',')
 
     ## Settings ---------------------------------------------------------------------------------
-    MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt 
-    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
+    # MCSamplesStitchOptions.PhSpOverlapRewgt
+    #MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRewgt 
+    #samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
+    # MCSamplesStitchOptions.PhSpOverlapRemove
+    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove 
+    samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
-    #selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", "WJetsToLNu"])
-    selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B"])
+
+    selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu"])
     ## ------------------------------------------------------------------------------------------
 
 
