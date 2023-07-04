@@ -74,8 +74,8 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }")
 
  
 printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = -1 # 1000 # 100000 # -1
+nEventToReadInBatch =  10 #0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = 10 #-1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -619,20 +619,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if printLevel >= 0:
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
-            #print(f"\n events.HLT.fields: {events.HLT.fields}")
-            #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
-            #print(f"\n events.L1.fields: {events.L1.fields}")
-            #printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
+            print(f"\n events.HLT.fields: {events.HLT.fields}")
+            printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
+            print(f"\n events.L1.fields: {events.L1.fields}")
+            printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             #print(f"\n events.LHE.fields: {events.LHE.fields}")
             #print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
             #print(f"{events.LHE.fields = } ")
             #print(f"{events.LHE = } ")
             #printVariable('events.LHE', events.LHE)
-            print(f"{events.run.fields = }")
-            printVariable('events.run', events.run)
-            print(f"{events.luminosityBlock.fields = }")
-            printVariable('events.luminosityBlock', events.luminosityBlock)
+            #print(f"{events.run.fields = }")
+            #printVariable('events.run', events.run)
+            #print(f"{events.luminosityBlock.fields = }")
+            #printVariable('events.luminosityBlock', events.luminosityBlock)
              
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
@@ -696,6 +696,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         ones_list  = np.ones(len(events))
         trues_list = np.ones(len(events), dtype=bool)
+        falses_list = np.full(len(events), False)
 
 
           
@@ -1181,12 +1182,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     HLT_AK8PFJet330_name,
                     events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 == True
                 )
-            elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
-                #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02"
+#            elif "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02" in events.HLT.fields:
+#                #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02"
+#                selection.add(
+#                    HLT_AK8PFJet330_name,
+#                    events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True
+#                )
+            else:
                 selection.add(
                     HLT_AK8PFJet330_name,
-                    events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_p02 == True
+                    falses_list
                 )
+
         
 
         if "QCDStitch" in sel_names_all["SR"]:
