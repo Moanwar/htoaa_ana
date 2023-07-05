@@ -25,12 +25,18 @@ sFileSamplesInfo = {
     Era_2018: "Samples_2018UL.json"
 }
 
-Luminosities = { # [<lumi>, <uncertainty in percent> ] in fb^-1
+Luminosities_Inclusive = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
-    #Era_2018: [59.83, 2.5], # 2018 recommendation - inclusive 
-    Era_2018: [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
+    Era_2018: [59.83, 2.5]
 }
+
+Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
+    Era_2016: [36.31, 1.2],
+    Era_2017: [41.48, 2.3],
+    Era_2018: [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
+}
+
 
 sFilesGoldenJSON = {
     Era_2016: '',

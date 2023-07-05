@@ -284,7 +284,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight=evtWeight
             )
 
-            # QCD MC ----------------------------------------------
+            # MC ----------------------------------------------
             if self.datasetInfo[dataset]['isMC'] :
                 # proper GenWeights
                 iBin = 1
@@ -369,6 +369,8 @@ if __name__ == '__main__':
     isMC                = config["isMC"]
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
+    '''
+    # lumiScale is not applied for countSumEventsInSample.py
     if isMC:
         luminosity          = Luminosities[era][0]
         sample_crossSection = config["crossSection"]
@@ -376,6 +378,7 @@ if __name__ == '__main__':
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] != -1 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
         lumiScale = calculate_lumiScale(luminosity=luminosity, crossSection=sample_crossSection, sumEvents=sample_sumEvents)    
+    '''    
     #branchesToRead = htoaa_nanoAODBranchesToRead
     #print("branchesToRead: {}".format(branchesToRead))
     sample_dataset = sample_dataset[0] if isinstance(sample_dataset, list) else sample_dataset # dataset is list of datasets w/ same sample name, as they are considered together recently. Those set of datasets are extension of the same samples.

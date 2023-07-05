@@ -3,7 +3,7 @@
 import os
 import sys
 from datetime import datetime
-print(f"htoaa_Analysis_GGFMode:: here1 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here1 {datetime.now() = }"); sys.stdout.flush()
 import subprocess
 import json
 from urllib.request import urlopen
@@ -12,18 +12,19 @@ from collections import OrderedDict as OD
 import time
 import tracemalloc
 import math
-print(f"htoaa_Analysis_GGFMode:: here2 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here2 {datetime.now() = }"); sys.stdout.flush()
 import numpy as np
 from copy import copy, deepcopy
-print(f"htoaa_Analysis_GGFMode:: here3 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
 #import uproot3 as uproot
 import uproot as uproot
-print(f"htoaa_Analysis_GGFMode:: here4 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here4 {datetime.now() = }"); sys.stdout.flush()
 #import parse
 from parse import *
+print(f"htoaa_Analysis_GGFMode:: here4.1 {datetime.now() = }"); sys.stdout.flush()
 import logging
-print(f"htoaa_Analysis_GGFMode:: here5 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here5 {datetime.now() = }"); sys.stdout.flush()
 
 # comment test3
 '''
@@ -33,7 +34,7 @@ References:
   * Coffea framework used for TTGamma analysis: https://github.com/nsmith-/TTGamma_LongExercise/blob/FullAnalysis/ttgamma/processor.py
 * Coffea installation: /home/siddhesh/anaconda3/envs/ana_htoaa/lib/python3.10/site-packages/coffea
 '''
-print(f"htoaa_Analysis_GGFMode:: here6 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here6 {datetime.now() = }"); sys.stdout.flush()
 #import coffea.processor as processor
 from coffea import processor, util
 from coffea.nanoevents import schemas
@@ -45,37 +46,37 @@ from coffea import hist
 import awkward as ak
 #import uproot
 #from dask.distributed import Client
-print(f"htoaa_Analysis_GGFMode:: here7 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here7 {datetime.now() = }"); sys.stdout.flush()
 from particle import Particle # For PDG particle listing https://github.com/scikit-hep/particle
-print(f"htoaa_Analysis_GGFMode:: here8 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here8 {datetime.now() = }"); sys.stdout.flush()
 
 
 from htoaa_Settings import *
-print(f"htoaa_Analysis_GGFMode:: here9 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here9 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_CommonTools import (
     GetDictFromJsonFile, selectRunLuminosityBlock,
-    calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, update_crosssection, getSampleHTRange,
+    calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
     getHTReweight
 )
-print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
-print(f"htoaa_Analysis_GGFMode:: here11 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here11 {datetime.now() = }"); sys.stdout.flush()
 
 from inspect import currentframe, getframeinfo
-print(f"htoaa_Analysis_GGFMode:: here12 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here12 {datetime.now() = }"); sys.stdout.flush()
 frameinfo = getframeinfo(currentframe())
-print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }")
+print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush()
 
 
 # use GOldenJSON
 
  
 printLevel = 0
-nEventToReadInBatch =  10 #0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = 10 #-1 # 1000 # 100000 # -1
+nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -620,9 +621,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
             print(f"\n events.HLT.fields: {events.HLT.fields}")
-            printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
-            print(f"\n events.L1.fields: {events.L1.fields}")
-            printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
+            #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
+            #print(f"\n events.L1.fields: {events.L1.fields}")
+            # printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             #print(f"\n events.LHE.fields: {events.LHE.fields}")
             #print(f"\n events.LHE.HT: {events.LHE.HT.to_list()}")
@@ -635,7 +636,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #printVariable('events.luminosityBlock', events.luminosityBlock)
              
         if nEventsToAnalyze != -1:
-            print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")
+            print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")            
+
+        if not self.datasetInfo[dataset]['isMC']:
+            print(f" {np.unique(events.run, return_counts=True) = } ")  
 
         #print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
 
@@ -1048,12 +1052,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ################## 
         # EVENT VARIABLES
         ##################
-        
+        '''
         leadingFatJet = None
         if ( not self.datasetInfo[dataset]['isMC']) and (self.datasetInfo["era"] == Era_2018):
-            '''
-            HEM15/16 issue in jets with -3.2<eta<-1.3 and -1.57<phi< -0.87 in 2018 data (runs>=319077, i.e. last certified run of 2018B, and all of 2018C+D) https://twiki.cern.ch/twiki/bin/view/CMS/JetMET#
-            '''
+            #  HEM15/16 issue in jets with -3.2<eta<-1.3 and -1.57<phi< -0.87 in 2018 data (runs>=319077, i.e. last certified run of 2018B, and all of 2018C+D) https://twiki.cern.ch/twiki/bin/view/CMS/JetMET#
             run_FatJetEta_FatJetPhi = ak.zip({'run': events.run, 'FatJetEta': events.FatJet.eta, 'FatJetPhi': events.FatJet.phi})   
             mask_jets_surviving_HEM15_16_issue = ~ (
                 (run_FatJetEta_FatJetPhi.run >= 319077) &
@@ -1063,8 +1065,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             leadingFatJet = ak.firsts(events.FatJet[mask_jets_surviving_HEM15_16_issue]) 
         else:   
             leadingFatJet = ak.firsts(events.FatJet) # for e.g. [0.056304931640625, None, 0.12890625, 0.939453125, 0.0316162109375]
+        '''
 
-
+        leadingFatJet = ak.firsts(events.FatJet)
+        
         leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
         
         if printLevel >= 13:
@@ -1344,7 +1348,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ))
             #printVariable("\n ", )
 
-            
+        if printLevel >= 10:
+            printVariable('events.run', events.run)
+            printVariable(f"selection.all({HLT_AK8PFJet330_name})", selection.all(HLT_AK8PFJet330_name))
+            if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
+                printVariable('events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
+        if printLevel >= 10:
+            #printVariable('events.run', events.run)
+            print(f" {np.unique(events.run, return_counts=True) = } ")
+            print(f"{selection.all(HLT_AK8PFJet330_name).sum() = },  {len(events) = } ")
+            if "AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" in events.HLT.fields:
+                print(f"{np.sum(events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4) = },  {selection.all(HLT_AK8PFJet330_name).sum() = },  {len(events) = } ")
             
             
             '''
@@ -3321,7 +3335,7 @@ if __name__ == '__main__':
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     if isMC:
-        luminosity          = Luminosities[era][0]
+        luminosity          = Luminosities_forGGFMode[era][0]  # Luminosities_Inclusive[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
@@ -3350,6 +3364,8 @@ if __name__ == '__main__':
             with uproot.open(MCSamplesStitchInputFileName) as f_:
                 print(f"{f_.keys() = }"); sys.stdout.flush() 
                 hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
+
+        print(f"isMC: {isMC}, luminosity: {luminosity}, lumiScale: {lumiScale}")
     print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
         
         

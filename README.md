@@ -96,3 +96,35 @@ python3 htoaa_Wrapper.py -analyze htoaa_Analysis_GGFMode.py -era <era> -run_mode
 **Samples_2018UL.csv**: Dictionary of all data and MC samples with NanoAOD files, cross-section etc listed for each sample.
 
 **samplesList_prepare.py**: Prepare 'Samples_2018UL.csv' from needed samples using CMS-DAS (Data Aggregation System) tool.
+
+
+## Persistent screen session on lxplus
+Instructions from reference https://hsf-training.github.io/analysis-essentials/shell-extras/persistent-screen.html worked in early 2023, but somehow not working now.
+
+Currently working instructions are from https://frankenthal.dev/post/ssh_kerberos_keytabs_macos/
+
+### Setting up password-less kerberos token
+Store encrypted passwork for lxplus in '~/keytab' file by running the following commands on lxplus terminal:
+```
+$ ktutil 
+addent -password -p user@CERN.CH -k 3 -e arcfour-hmac-md5
+(type your password)
+wkt ~/keytab
+quit
+``` 
+Replace 'user' with your lxplus username.
+
+### Making use of the keytab
+
+Use the keytab file to authenticate to kinit.
+
+```
+kinit -kt ~/keytab user@CERN.CH
+```
+If the last command runs without any error then passwordless kerberos token is generated successfully.
+
+### Using k5reauth to automatically refresh your kerberos token
+Start screen session using
+```
+k5reauth -f -i 3600 -p <user> -k  ~/keytab  -- screen -S <session name>
+```

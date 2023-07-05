@@ -1,30 +1,30 @@
 import os
 import sys
 from datetime import datetime
-print(f"htoaa_CommonTools:: here1 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here1 {datetime.now() = }"); sys.stdout.flush()
 import subprocess
 import shlex
 import logging
 import json
-print(f"htoaa_CommonTools:: here2 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here2 {datetime.now() = }"); sys.stdout.flush()
 import numpy as np
 import awkward as ak
-print(f"htoaa_CommonTools:: here3 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
 import uproot3 as uproot
-print(f"htoaa_CommonTools:: here4 {datetime.now() = }")
-import ROOT as R
-print(f"htoaa_CommonTools:: here5 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here4 {datetime.now() = }"); sys.stdout.flush()
+#import ROOT as R
+print(f"htoaa_CommonTools:: here5 {datetime.now() = }"); sys.stdout.flush()
 from parse import *
 import logging
 
-print(f"htoaa_CommonTools:: here6 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here6 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Settings import * 
-print(f"htoaa_CommonTools:: here7 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here7 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
 )
-print(f"htoaa_CommonTools:: here8 {datetime.now() = }")
+print(f"htoaa_CommonTools:: here8 {datetime.now() = }"); sys.stdout.flush()
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
     lumiScale = 1
@@ -82,7 +82,7 @@ def getSampleHTRange(sample_datasetNameFull):
             break
     return sample_HT_Min, sample_HT_Max
     
-
+'''
 def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     if sample_category not in [kQCD_bGen]: return sample_crossSection
 
@@ -118,7 +118,7 @@ def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     # ----------------------------------------------------------------------------------------
     
     return sample_crossSection_corr
-    
+'''    
     
 def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, fileNameLocal = './inputFiles/fLocal.root', nTriesToDownload = 3):
     # MC:
@@ -134,6 +134,7 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
         return fileNameLocal
 
     fileName_toUse = fileName
+    print(f"htoaa_CommonTools::getNanoAODFile() here1 {datetime.now() = }"); sys.stdout.flush()
 
     if useLocalFileIfExists and fileName.startswith("/store/"):
         # check if NanoAOD exists in /eos area
@@ -158,27 +159,31 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
         
         fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
         print(f"Checking for eos file: {fileName_EOS = }") 
+        print(f"htoaa_CommonTools::getNanoAODFile() here2 {datetime.now() = }"); sys.stdout.flush()
 
         print(f"{fileName_EOS = }: {os.path.exists(fileName_EOS) = } ")
         # os.path.exists() for files on /eos are always return False. So try 'eos cp' to check if the file on eos exists or not
         if  xrdcpFile(fileName_EOS, fileNameLocal, nTry = 3, cp_command = 'eos cp'):
             print(f"Forced xrdcp for {fileName_EOS = } successful.")
+            print(f"htoaa_CommonTools::getNanoAODFile() here3 {datetime.now() = }"); sys.stdout.flush()
         print(f"{fileNameLocal = }: {os.path.exists(fileNameLocal) = } ")            
         print(f"List directory {os.path.dirname(fileNameLocal) = }:  {os.listdir(os.path.dirname(fileNameLocal)) = }")
         if os.path.exists(fileNameLocal):
             return fileNameLocal
 
-
+    print(f"htoaa_CommonTools::getNanoAODFile() here4 {datetime.now() = }"); sys.stdout.flush()
     if fileName_toUse.startswith("/store/"):
         # Copy of the NanoAOD file is not on /eos
         for redirector in xrootd_redirectorNames:
             fileName_toUse_i = redirector + fileName_toUse
             print(f"getNanoAODFile():: Checking {fileName_toUse_i}"); sys.stdout.flush()
+            print(f"htoaa_CommonTools::getNanoAODFile() here5 {datetime.now() = }"); sys.stdout.flush()
 
             if downloadFile:
                 if  xrdcpFile(fileName_toUse_i, fileNameLocal, nTry = 3):
                     print(f"{fileNameLocal = } xrdcp successfully")
                     fileName_toUse = fileNameLocal
+                    print(f"htoaa_CommonTools::getNanoAODFile() here6 {datetime.now() = }"); sys.stdout.flush()
                     break
                 
             else:
@@ -198,7 +203,8 @@ def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, f
                         print(f"{fileName_toUse_i}: {nEntries}"); sys.stdout.flush()
                         fileName_toUse = fileName_toUse_i
                         break
-
+            print(f"htoaa_CommonTools::getNanoAODFile() here7 {datetime.now() = }"); sys.stdout.flush()
+        print(f"htoaa_CommonTools::getNanoAODFile() here8 {datetime.now() = }"); sys.stdout.flush()
         return fileName_toUse
 
 
@@ -277,8 +283,9 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
     dirName_ = os.path.dirname(sFileNameLocal)
     os.makedirs(dirName_, exist_ok=True)
     print(f"{dirName_ = }: {os.path.exists(dirName_)} ")
-    print(f"{command_ = }")
+    print(f"{command_ = }")    
     for iTry in range(nTry):
+        print(f"htoaa_CommonTools::xrdcpFile() here1 {iTry = } {datetime.now() = }"); sys.stdout.flush()
         process = subprocess.Popen(command_list_,
                                    stdout=subprocess.PIPE, 
                                    stderr=subprocess.PIPE,

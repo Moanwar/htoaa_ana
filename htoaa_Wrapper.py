@@ -230,7 +230,7 @@ if __name__ == '__main__':
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
-    parser.add_argument('-xrdcpIpAftNResub',  type=int, default=3,                           help='Download input files after n job failures')
+    parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
     parser.add_argument('-dryRun',            action='store_true', default=False)    
     args=parser.parse_args()
     print("args: {}".format(args))
@@ -256,13 +256,10 @@ if __name__ == '__main__':
 
     samplesList = None
     samplesInfo = None
-    Luminosity  = None
     if era == Era_2018:
         samplesList = Samples2018 # htoaa_Samples.py
-        with open(sFileSamplesInfo[era]) as fSamplesInfo:
-            samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
-        Luminosity = Luminosities[era][0]
-
+    with open(sFileSamplesInfo[era]) as fSamplesInfo:
+        samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
     selSamplesToRun_list = []
     if selSamplesToRun:
         selSamplesToRun_list = selSamplesToRun.split(',')
@@ -271,15 +268,21 @@ if __name__ == '__main__':
         selSamplesToExclude_list = selSamplesToExclude.split(',')
 
     ## Settings ---------------------------------------------------------------------------------
-    # MCSamplesStitchOptions.PhSpOverlapRewgt
-    #MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRewgt 
-    #samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
-    # MCSamplesStitchOptions.PhSpOverlapRemove
-    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove 
-    samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
+    ## MCSamplesStitchOptions.PhSpOverlapRewgt
+    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRewgt 
+    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
+    ## MCSamplesStitchOptions.PhSpOverlapRemove
+    #MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove 
+    #samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
-    selSamplesToExclude_list.extend(["SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu"])
+    #  Settings for GGF H->aa->4b analysis
+    if sAnalysis in ["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py"]:
+        # exclude irrelevant samples from running
+        selSamplesToExclude_list.extend( [
+                "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
+                "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu" 
+        ] )
     ## ------------------------------------------------------------------------------------------
 
 
@@ -527,7 +530,6 @@ if __name__ == '__main__':
                         config["outputFile"] = sOpRootFile_to_use 
                         config["sampleCategory"] = sample_category
                         config["isMC"] = (sample_category != kData)
-                        #config["Luminosity"] = Luminosity
                         config["nEvents"] = sample_nEvents
                         if (sample_category != kData):
                             config["crossSection"] = sample_cossSection
