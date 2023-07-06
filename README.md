@@ -19,6 +19,7 @@ voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989
 ```
 
 ## Analysis steps
+Analysis is iterative process, and different corrections are needed to take into account. The different corrections considered so far are listed below with details on obtaining those correction. If you want to run the analysis for the first iteration or intermediate corrections are already calculated then you can jump to 'Running analysis' sub-section.
 
 ### Prepare samples' list with all details (Samples_2018UL.csv)
 Add/update dataset name and cross-sections for all samples in 'samplesList_prepare.py'.\
@@ -71,6 +72,20 @@ python3 calculateLumiscale.py -era <era>
 ```
  
 
+### Calculate luminosity for triggers used in the analysis
+HLT paths for Run2 can be found at https://twiki.cern.ch/twiki/bin/viewauth/CMS/HLTPathsRunIIList. \
+Recommendations for Run2 luminosityis at https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2. However, luminosity for the triggers used in the analysis can be computed using brilcalc tool (https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart) by running the following commands on lxplus. However, always refer https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart for the latest recommendations. 
+```
+source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
+
+brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i <Golden JSON file> --hltpath "<your trigger paths>_v*" -o output.csv
+```
+
+Provide Golden JSON file recommended for the data era and HLT path of your interest. \
+For e.g. luminosity for "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 path in 2018 data can be calculated using
+```
+brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt --hltpath "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v*" -o output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v.csv
+```
 
 
 ### Running analysis

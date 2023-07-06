@@ -98,12 +98,19 @@ def get_GenPartDaughters(awkArray, index_GenPart):
 def printVariable(sName, var):
     printInDetail=True
     #if nEventsToAnalyze == -1: printInDetail = False
-    if str(type(var)) in ['numpy.ndarray', "<class 'numpy.ndarray'>"]: printInDetail = False # as gave error
+    if str(type(var)) in ['numpy.ndarray', "<class 'numpy.ndarray'>", "<class 'numpy.ma.core.MaskedArray'>"]: printInDetail = False # as gave error
     #print(f"printInDetail: {printInDetail} {sName} ({type(var)}) ({len(var)}): {var}")
     if not printInDetail:
-        print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+        #print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+        try:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var.tolist()}")
+        except:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
     else:
-        print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")
+        try:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")
+        except:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
 
 # -----------------------------------------------------------------------------------
 class ObjectSelection:
@@ -303,7 +310,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hLeadingFatJetPhi',                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
             ('hLeadingFatJetMass',                        {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet) [GeV]"}),
             ('hLeadingFatJetMSoftDrop',                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop} (leading FatJet) [GeV]"}),
-            
+
+            ('hLeadingFatJetPt_HEM1516IssueEtaPhiCut',    {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
+            ('hLeadingFatJetEta_HEM1516IssuePhiCut',      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
+            ('hLeadingFatJetPhi_HEM1516IssueEtaCut',      {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
+
             ('hLeadingFatJetBtagDeepB',                   {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetBtagDeepB"}),
             ('hLeadingFatJetBtagDDBvLV2',                 {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetBtagDDBvLV2"}),
 
@@ -1106,6 +1117,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             sel_names_all["SR"].insert(0, "run:ls")
         else:
             if self.datasetInfo[dataset]['isQCD']: sel_names_all["SR"].append("QCDStitch")
+        if self.datasetInfo["era"] == Era_2018:
+            sel_names_all["SR"].append("2018HEM1516Issue")
+
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
         cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + sel_names_all["SR"] #.copy()
 
@@ -1199,6 +1213,30 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
 
         
+        if "2018HEM1516Issue" in sel_names_all["SR"]:
+            scaleAK4ToAK8 = 0.4
+            # mask satisfying 
+            mask_HEM1516Issue = (
+                (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
+                (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+            )
+            if not self.datasetInfo[dataset]['isMC']:
+                mask_HEM1516Issue = mask_HEM1516Issue & (events.run >= 319077)
+            else:
+                mask_HEM1516Issue = mask_HEM1516Issue & (np.random.uniform(0, 1, len(events)) < DataFractionAffectedBy2018HEM1516Issue)
+            
+            # Reject events satisfying HEM1516 issue conditions
+            selection.add(
+                "2018HEM1516Issue", 
+                ~ mask_HEM1516Issue
+            )
+            if printLevel >= 10:
+                printVariable("\n mask_HEM1516Issue", mask_HEM1516Issue); sys.stdout.flush()
+                printVariable("\n ~ mask_HEM1516Issue",~ mask_HEM1516Issue ); sys.stdout.flush()
+
+
+
+
 
         if "QCDStitch" in sel_names_all["SR"]:
             selection.add(
@@ -1720,8 +1758,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 Pt=(leadingFatJet.pt[sel_SR]),
                 systematic=syst,
                 weight=evtWeight[sel_SR]
-            )
-            
+            )            
             output['hLeadingFatJetEta'].fill(
                 dataset=dataset,
                 Eta=(leadingFatJet.eta[sel_SR]),
@@ -1734,6 +1771,89 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 systematic=syst,
                 weight=evtWeight[sel_SR]
             )
+
+            # 2018 HEM15/16 issue ----------------------
+            if self.datasetInfo["era"] == Era_2018:
+                scaleAK4ToAK8 = 0.4
+                mask_HEM1516Issue_Eta = (
+                    (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
+                )
+                mask_HEM1516Issue_Phi = (
+                    (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+                )
+                evtWeight_HEM1516Issue = None
+                if not self.datasetInfo[dataset]['isMC']:
+                    mask_HEM1516Issue_Eta = mask_HEM1516Issue_Eta & (events.run >= 319077)
+                    mask_HEM1516Issue_Phi = mask_HEM1516Issue_Phi & (events.run >= 319077)
+                    evtWeight_HEM1516Issue = evtWeight
+                else:
+                    if "2018HEM1516Issue" in sel_names_all["SR"]:
+                        evtWeight_HEM1516Issue = evtWeight
+                    else:
+                        evtWeight_HEM1516Issue = evtWeight * DataFractionAffectedBy2018HEM1516Issue # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365 
+                
+                # mask_HEM1516Issue_Eta has 'None' entry for events faling FatJetCut. None entries in mask gives error in numpy.array[mask]. 
+                # Hence use coffea.PackedSelection which returns mask having 'True' and 'False' values and treating 'None' as 'False'.
+                selection.add("mask_HEM1516Issue_Eta", mask_HEM1516Issue_Eta)
+                selection.add("mask_HEM1516Issue_Phi", mask_HEM1516Issue_Phi)
+
+                if printLevel >= 10:
+                    printVariable("\nevents.run", events.run); sys.stdout.flush()
+                    printVariable("\nleadingFatJet.eta", leadingFatJet.eta); sys.stdout.flush()
+                    printVariable("\nleadingFatJet.phi", leadingFatJet.phi); sys.stdout.flush()
+                    printVariable("\nmask_HEM1516Issue_Eta", mask_HEM1516Issue_Eta); sys.stdout.flush()
+                    printVariable("\nmask_HEM1516Issue_Phi", mask_HEM1516Issue_Phi); sys.stdout.flush()
+                    printVariable("\nsel_SR", sel_SR); sys.stdout.flush()
+                    #print(f"\n {sel_SR.tolist() = }")
+                    printVariable("\nsel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi", sel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi); sys.stdout.flush()
+                    printVariable("\n(sel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi) == True", (sel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi) == True); sys.stdout.flush()
+                    printVariable("\nak.to_numpy(sel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi, allow_missing=True)", ak.to_numpy(sel_SR & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi, allow_missing=True)); sys.stdout.flush()
+
+                    printVariable("\n selection.all('mask_HEM1516Issue_Eta')",  selection.all('mask_HEM1516Issue_Eta')); sys.stdout.flush()
+                    printVariable("\n selection.all('mask_HEM1516Issue_Phi')",  selection.all('mask_HEM1516Issue_Phi')); sys.stdout.flush()
+                    printVariable("\n selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi')", selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ); sys.stdout.flush()
+                    printVariable("\n sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi')", sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ); sys.stdout.flush()
+
+                    printVariable("\n leadingFatJet.pt", leadingFatJet.pt); sys.stdout.flush()
+                    printVariable("\n leadingFatJet.pt[sel_SR]", leadingFatJet.pt[sel_SR]); sys.stdout.flush()
+                    printVariable("\n leadingFatJet.pt[sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]", leadingFatJet.pt[sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]); sys.stdout.flush()
+                    printVariable("\n evtWeight_HEM1516Issue", evtWeight_HEM1516Issue); sys.stdout.flush()
+                    printVariable("\n evtWeight_HEM1516Issue[sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]", evtWeight_HEM1516Issue[sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]); sys.stdout.flush()
+
+                if printLevel >= 10:
+                    print(f" {np.sum(sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi')) = }, {len(events) = } ")
+
+
+
+                output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut'].fill(
+                    dataset=dataset,
+                    #Pt=ak.flatten(selFatJet.pt[sel_SR][:, 0]),
+                    #Pt=(selFatJet.pt[sel_SR][:, 0]),
+                    Pt=(leadingFatJet.pt[ sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]),
+                    systematic=syst,
+                    weight=evtWeight_HEM1516Issue[ sel_SR & selection.all('mask_HEM1516Issue_Eta', 'mask_HEM1516Issue_Phi') ]
+                )            
+                output['hLeadingFatJetEta_HEM1516IssuePhiCut'].fill(
+                    dataset=dataset,
+                    Eta=(leadingFatJet.eta[ sel_SR & selection.all('mask_HEM1516Issue_Phi') ]),
+                    systematic=syst,
+                    weight=evtWeight_HEM1516Issue[ sel_SR & selection.all('mask_HEM1516Issue_Phi') ]
+                )
+                output['hLeadingFatJetPhi_HEM1516IssueEtaCut'].fill(
+                    dataset=dataset,
+                    Phi=(leadingFatJet.phi[ sel_SR & selection.all('mask_HEM1516Issue_Eta') ]),
+                    systematic=syst,
+                    weight=evtWeight_HEM1516Issue[ sel_SR & selection.all('mask_HEM1516Issue_Eta') ]
+                )
+            # # 2018 HEM15/16 issue end ------------------
+
+
+
+
+
+
+
+
             output['hLeadingFatJetMass'].fill(
                 dataset=dataset,
                 Mass=(leadingFatJet.mass[sel_SR]),
