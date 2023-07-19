@@ -1081,7 +1081,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         leadingFatJet = ak.firsts(events.FatJet)
         
         leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
-        
+
+        scaleAK4ToAK8 = 0.4
+        # mask satisfying HEM1516 issues conditions
+        mask_HEM1516Issue = (
+            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        )
+
         if printLevel >= 13:
             #printVariable("\n ", )
             printVariable("\n ak.firsts(events.FatJet)", ak.firsts(events.FatJet))
@@ -1115,10 +1122,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ])
         if not self.datasetInfo[dataset]['isMC']: 
             sel_names_all["SR"].insert(0, "run:ls")
+
+            if self.datasetInfo["era"] == Era_2018:
+                sel_names_all["SR"].append("2018HEM1516Issue")
         else:
             if self.datasetInfo[dataset]['isQCD']: sel_names_all["SR"].append("QCDStitch")
-        if self.datasetInfo["era"] == Era_2018:
-            sel_names_all["SR"].append("2018HEM1516Issue")
 
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
         cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + sel_names_all["SR"] #.copy()
@@ -1212,27 +1220,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     falses_list
                 )
 
-        
+
         if "2018HEM1516Issue" in sel_names_all["SR"]:
-            scaleAK4ToAK8 = 0.4
-            # mask satisfying 
-            mask_HEM1516Issue = (
-                (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
-                (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-            )
-            if not self.datasetInfo[dataset]['isMC']:
-                mask_HEM1516Issue = mask_HEM1516Issue & (events.run >= 319077)
-            else:
-                mask_HEM1516Issue = mask_HEM1516Issue & (np.random.uniform(0, 1, len(events)) < DataFractionAffectedBy2018HEM1516Issue)
-            
-            # Reject events satisfying HEM1516 issue conditions
-            selection.add(
-                "2018HEM1516Issue", 
-                ~ mask_HEM1516Issue
-            )
-            if printLevel >= 10:
-                printVariable("\n mask_HEM1516Issue", mask_HEM1516Issue); sys.stdout.flush()
-                printVariable("\n ~ mask_HEM1516Issue",~ mask_HEM1516Issue ); sys.stdout.flush()
+            # it runs for 2018 data
+            mask_HEM1516Issue = mask_HEM1516Issue & (events.run >= 319077)
+        
+        # Reject events satisfying HEM1516 issue conditions in 2018 data with run >= 319077
+        # Use selection.add('2018HEM1516Issue') for event selection for 2018 data and for event reweight for 2018 MC
+        selection.add(
+            "2018HEM1516Issue", 
+            ~ mask_HEM1516Issue
+        )
+        if printLevel >= 10:
+            printVariable("\n mask_HEM1516Issue", mask_HEM1516Issue); sys.stdout.flush()
+            printVariable("\n ~ mask_HEM1516Issue",~ mask_HEM1516Issue ); sys.stdout.flush()
 
 
 
@@ -1445,7 +1446,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             else:
                 lumiScale_toUse = np.full(len(events), self.datasetInfo[dataset]["lumiScale"])
 
-            
+            # MC wgt for HEM1516Issue -- 
+            wgt_HEM1516Issue = None
+            if self.datasetInfo["era"] == Era_2018:
+                wgt_HEM1516Issue = ak.where(
+                    selection.all("2018HEM1516Issue"), # events surviving HEM15/16 issue condition, i.e. outside HEM15/16 affected phase space 
+                    ones_list,
+                    np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue))
+                )
+                if printLevel >= 10:
+                    printVariable("\n mask_HEM1516Issue", mask_HEM1516Issue)
+                    printVariable("\n wgt_HEM1516Issue", wgt_HEM1516Issue)
+
             weights.add(
                 "lumiWeight",
                 weight = lumiScale_toUse
@@ -1454,10 +1466,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
+            if self.datasetInfo["era"] == Era_2018:
+                weights.add(
+                    "2018HEM1516IssueWeight",
+                    weight = wgt_HEM1516Issue
+                )
+            '''
             weights.add(
                 "btagWeight",
                 weight = (events.btagWeight.DeepCSVB)
             )
+            '''    
             
  
             weights_gen.add(
