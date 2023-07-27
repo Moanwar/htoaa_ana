@@ -41,7 +41,7 @@ sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
 sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 
-printLevel = 6
+printLevel = 2
 
 #UserHomePath = os.path.expanduser("~")
 UserHomePath = str(Path.home()) # Python 3.5+
@@ -62,7 +62,8 @@ def writeCondorExecFile(
         condor_exec_file,
         sConfig_to_use,
         sOpFile_to_use,
-        EosDestinationDir_to_use
+        EosDestinationDir_to_use,
+        server
 ):
     if not os.path.isfile(condor_exec_file):    
         with open(condor_exec_file, 'w') as f:
@@ -115,7 +116,12 @@ def writeCondorExecFile(
             f.write("printf \"ls: \\n\" \n")
             f.write("ls \n")
             
-            f.write("time eos cp %s %s   \n" % (sOpFile_to_use, EosDestinationDir_to_use) )
+            cp_commandToUse = ''
+            if server in ['lxplus']:
+                cp_commandToUse = 'eos cp' # works on lxplus
+            else:
+                cp_commandToUse = 'cp'
+            f.write("time %s %s %s   \n" % (cp_commandToUse, sOpFile_to_use, EosDestinationDir_to_use) )
             f.write("rm -rf ./inputFiles \n")
             #f.write(" \n")
 
@@ -231,6 +237,7 @@ if __name__ == '__main__':
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
+    parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
     parser.add_argument('-dryRun',            action='store_true', default=False)    
     args=parser.parse_args()
     print("args: {}".format(args))
@@ -247,13 +254,24 @@ if __name__ == '__main__':
     ResubWaitingTime        = args.ResubWaitingTime
     iJobSubmission          = args.iJobSubmission
     xrdcpIpAftNResub        = args.xrdcpIpAftNResub
+    server                  = args.server
     dryRun                  = args.dryRun
 
     SourceCodeDir     = os.getcwd()
     DestinationDir    = "../analysis/%s/%s" % (anaVersion, era)
     EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s/%s" % (UserName, anaVersion, era)
 
+    os.chdir( SourceCodeDir )
+    os.makedirs( DestinationDir, exist_ok=True )
+    os.chdir( DestinationDir )
+    DestinationDirAbsolute = os.getcwd() # save absolute path
+    #os.makedirs( DestinationDirAbsolute, exist_ok=True )
+    try:
+        os.makedirs( EosDestinationDir, exist_ok=True )
+    except:
+        EosDestinationDir = DestinationDirAbsolute # if /eos area for user is not available then save histograms in DestinationDir
 
+    os.chdir( SourceCodeDir )
     samplesList = None
     samplesInfo = None
     if era == Era_2018:
@@ -277,7 +295,7 @@ if __name__ == '__main__':
     #samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
     #  Settings for GGF H->aa->4b analysis
-    if sAnalysis in ["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py"]:
+    if sAnalysis in ["htoaa_Analysis_GGFMode.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
                 "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
@@ -290,20 +308,10 @@ if __name__ == '__main__':
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
     print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
-    
-    os.chdir( SourceCodeDir )
-    os.makedirs( DestinationDir, exist_ok=True )
-    os.chdir( DestinationDir )
-    DestinationDirAbsolute = os.getcwd() # save absolute path
-    #os.makedirs( DestinationDirAbsolute, exist_ok=True )
-    try:
-        os.makedirs( EosDestinationDir, exist_ok=True )
-    except:
-        EosDestinationDir = DestinationDirAbsolute # if /eos area for user is not available then save histograms in DestinationDir
-    
+        
     sFileRunCommand = "%s/%s" % (DestinationDirAbsolute, sRunCommandFile)
     sFileJobSubLog  = "%s/%s" % (DestinationDirAbsolute, sJobSubLogFile)
-
+    
     # save run command into a .txt tile
     with open(sFileRunCommand, 'a') as fRunCommand:
         datatime_now = datetime.now()
@@ -316,7 +324,8 @@ if __name__ == '__main__':
     allJobsSuccessful          = False
     OpRootFiles_Target         = None
     OpRootFilesAbsPath_Target  = None
-    
+    os.chdir( DestinationDirAbsolute )
+
     while iJobSubmission <= nResubmissionMax:
 
         print('\n\n%s \t Starting iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
@@ -371,21 +380,13 @@ if __name__ == '__main__':
                     print("files ({}): {}".format(len(files), files))
 
 
-                #nSplits = int(len(files) / nFilesPerJob) + 1 if nFilesPerJob > 0 else 1
                 nSplits = int(len(files) / nFilesPerJob) + 1 if (nFilesPerJob > 0) and (len(files) != nFilesPerJob) else 1
 
 
                 files_splitted = np.array_split(files, nSplits)
                 if printLevel >= 6:
                     print("files_splitted: {}".format(files_splitted))
-                '''        
-                files_splitted = []
-                for iSplit in range(nSplits):
-                    idxStart = iSplit*nFilesPerJob
-                    idxEnd   = idxStart + nFilesPerJob if iSplit < (nSplits - 1) else None
-                    files_splitted.append( files[ idxStart : idxEnd ]  )
-                print("files_splitted: {}".format(files_splitted))
-                '''
+
                 for iJob in range(len(files_splitted)):
                     JobStage = 0
                     
@@ -517,7 +518,8 @@ if __name__ == '__main__':
                     
                         
                     if printLevel >= 0:
-                        print(f"\t {sOpRootFile_to_use}:: jobStatus: {jobStatus}, isConfigExist: {isConfigExist}, isOpRootFileExist: {isOpRootFileExist}, isCondorExecExist: {isCondorExecExist}, isCondorSubmitExist: {isCondorSubmitExist}, isCondorLogExist: {isCondorLogExist}, isCondorOutputExist: {isCondorOutputExist}, isCondorErrorExist: {isCondorErrorExist}"); sys.stdout.flush()
+                        #print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist}, CondorExec: {isCondorExecExist}, CondorSubmit: {isCondorSubmitExist}, CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
+                        print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist},  CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
                         
 
                     #if iJobSubmission == 0:
@@ -545,9 +547,10 @@ if __name__ == '__main__':
                             del config["crossSection"]
                             del config["sumEvents"]
                         config["downloadIpFiles"] = True if jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub else False
+                        config["server"] = server
 
-
-                        print("config {}: {}".format(sConfig_to_use, config))
+                        if printLevel >= 4:
+                            print("config {}: {}".format(sConfig_to_use, config))
                         with open(sConfig_to_use, "w") as fConfig:
                             json.dump( config,  fConfig, indent=4)
 
@@ -556,7 +559,8 @@ if __name__ == '__main__':
                             sCondorExec_to_use,
                             sConfig_to_use,
                             sOpRootFile_to_use,
-                            OpRootFileFinalDir 
+                            OpRootFileFinalDir,
+                            server 
                         )
 
 
@@ -596,8 +600,10 @@ if __name__ == '__main__':
                     
                     if run_mode == 'condor':
                         cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
-                        print("Now:  %s " % cmd1)
+                        
                         if not dryRun:
+                            if printLevel >= 5:
+                                print("Now:  %s " % cmd1)
                             os.system(cmd1)
                     else:
                         pass
@@ -664,16 +670,6 @@ if __name__ == '__main__':
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
-
-        '''
-        cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
-        for opFileName in OpRootFilesAbsPath_Target:
-            cmd_hadd += " %s" % (opFileName)
-        
-        cmd_hadd_stdout = executeBashCommand(cmd_hadd)
-        fJobSubLog.write('\n\n%s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
-        fJobSubLog.write('\n\n%s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
-        '''
 
         nFilesPerBatchForHadd              = 100
         nBatchesForHadd                    = int(len(OpRootFilesAbsPath_Target) / nFilesPerBatchForHadd) + 1 if len(OpRootFilesAbsPath_Target) != nFilesPerBatchForHadd else 1

@@ -75,7 +75,7 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
@@ -126,7 +126,8 @@ class ObjectSelection:
         self.FatJetMSoftDropThshLow  = 90
         self.FatJetMSoftDropThshHigh = 200
 
-        self.FatJetParticleNetMD_Xbb_Thsh = 0.8
+        self.FatJetParticleNetMD_Xbb_Thsh   = 0.8
+        self.FatJetDeepTagMD_bbvsLight_Thsh = 0.98
         
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
@@ -280,6 +281,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         boolean_axis          = hist.Bin("Boolean",                r"Boolean",                     2,    -0.5,     1.5)
         pdgId_axis            = hist.Bin("PdgId",                  r"PdgId",                     101,    -0.5,   100.5)
         alphaS_axis           = hist.Bin("alphaS",                 r"alphaS",                    101,    0.01,     0.2)
+        PU_axis               = hist.Bin("PU",                     r"PU",                         99,     0.0,    99.0)
         
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
@@ -303,6 +305,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hGenLHE_Nglu_all',                          {sXaxis: nObject50_axis,         sXaxisLabel: r"LHE Nglu [GeV]"}),
             ('hGenLHE_NpNLO_all',                         {sXaxis: nObject200_axis,        sXaxisLabel: r"LHE NpNLO [GeV]"}),
             ('hGenLHE_NpLO_all',                          {sXaxis: nObject200_axis,        sXaxisLabel: r"LHE NpLO [GeV]"}),
+
+            ('hPileup_nTrueInt',                          {sXaxis: PU_axis,                sXaxisLabel: r"Pile up"}),
+            ('hPileup_nPU',                               {sXaxis: PU_axis,                sXaxisLabel: r"Pile up"}),
             
             ('nSelFatJet',                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
             ('hLeadingFatJetPt',                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
@@ -628,10 +633,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if printLevel >= 20:
             print(f"nEvents: {len(events)}")
-        if printLevel >= 0:
+        if printLevel >= 1:
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
-            print(f"\n events.HLT.fields: {events.HLT.fields}")
+            #print(f"\n events.HLT.fields: {events.HLT.fields}")
             #printVariable('\n events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', events.HLT.AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4)
             #print(f"\n events.L1.fields: {events.L1.fields}")
             # printVariable('\n events.L1.SingleJet180', events.L1.SingleJet180)
@@ -645,6 +650,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #printVariable('events.run', events.run)
             #print(f"{events.luminosityBlock.fields = }")
             #printVariable('events.luminosityBlock', events.luminosityBlock)
+            print(f"\n events.Pileup.fields: {events.Pileup.fields}")
+            print(f"\n events.Pileup.nTrueInt: {events.Pileup.nTrueInt}")
+            print(f"\n events.Pileup.nPU: {events.Pileup.nPU}")
+
+            print(f"\n events.FatJet.fields: {events.FatJet.fields}")
+            print(f"\n events.FatJet.pt: {events.FatJet.pt}")
+            print(f"\n events.FatJet.deepTagMD_bbvsLight: {events.FatJet.deepTagMD_bbvsLight}")
+            print(f"\n events.FatJet.particleNetMD_Xbb: {events.FatJet.particleNetMD_Xbb}")
+            print(f"\n events.FatJet.btagDeepB: {events.FatJet.btagDeepB}")
              
         if nEventsToAnalyze != -1:
             print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")            
@@ -1115,7 +1129,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetEta",
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
-                "leadingFatJetParticleNetMD_Xbb",
+                "leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
                 "L1_SingleJet180",
                 HLT_AK8PFJet330_name
             ]),
@@ -1190,7 +1204,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetParticleNetMD_Xbb",
                 leadingFatJet.particleNetMD_Xbb > self.objectSelector.FatJetParticleNetMD_Xbb_Thsh
             )
-            
+
+        if "leadingFatJetDeepTagMD_bbvsLight" in sel_names_all["SR"]:
+            selection.add(
+                "leadingFatJetDeepTagMD_bbvsLight",
+                leadingFatJet.deepTagMD_bbvsLight > self.objectSelector.FatJetDeepTagMD_bbvsLight_Thsh
+            )
+
             
         if "L1_SingleJet180" in sel_names_all["SR"]:
             selection.add(
@@ -1758,6 +1778,23 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 systematic=syst,
                 weight=evtWeight[sel_SR]
             )
+
+
+            if self.datasetInfo[dataset]['isMC']:
+                # PU 
+                output['hPileup_nTrueInt'].fill(
+                    dataset=dataset,
+                    PU=(events.Pileup.nTrueInt),
+                    systematic=syst,
+                    weight=evtWeight
+                )            
+                output['hPileup_nPU'].fill(
+                    dataset=dataset,
+                    PU=(events.Pileup.nPU),
+                    systematic=syst,
+                    weight=evtWeight
+                )            
+
 
             
             
@@ -3473,6 +3510,7 @@ if __name__ == '__main__':
     isMC                = config["isMC"]
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
+    server              = config["server"]
     if isMC:
         luminosity          = Luminosities_forGGFMode[era][0]  # Luminosities_Inclusive[era][0]
         sample_crossSection = config["crossSection"]
@@ -3526,12 +3564,15 @@ if __name__ == '__main__':
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
         sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))   
+        cp_command = 'eos cp' if server in ['lxplus'] else 'xrdcp'
         sInputFiles[iFile] = getNanoAODFile(
             fileName = sInputFile, 
             useLocalFileIfExists = True, 
             downloadFile = True, 
             fileNameLocal = './inputFiles/%s' %(os.path.basename(sInputFile)), 
-            nTriesToDownload = 3)
+            nTriesToDownload = 3,
+            cp_command = cp_command
+            )
         
     print(f"\nActual  sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
@@ -3599,7 +3640,14 @@ if __name__ == '__main__':
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        sDir1 = 'evt/%s' % (sample_category)
+        sample_category_toUse = sample_category
+        '''
+        if isMC and \
+            MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+            "QCD" in sample_category:
+            sample_category_toUse = "QCD"
+        '''
+        sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
         with uproot.recreate(sOutputFile) as fOut:

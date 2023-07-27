@@ -119,8 +119,27 @@ def update_crosssection(sample_category, sample_dataset, sample_crossSection):
     
     return sample_crossSection_corr
 '''    
+
+def getTH1BinContent(histo, xValue):
+    # histo: uprootTH1D.to_hist()
+    xBin = None
+    for iBin in range(len(histo.axes[0])):
+        if xValue >= histo.axes[0][iBin][0] and xValue < histo.axes[0][iBin][1]:
+            xBin = iBin
+            break
+
+    #print(f"htoaa_CommonTools.py::getTH1BinContent():: {histo = },   {xBin = },    {histo[xBin] = },   {histo[xBin].value = }")
+    return histo[xBin]
+
     
-def getNanoAODFile(fileName, useLocalFileIfExists = True, downloadFile = True, fileNameLocal = './inputFiles/fLocal.root', nTriesToDownload = 3):
+def getNanoAODFile(
+        fileName, 
+        useLocalFileIfExists = True, 
+        downloadFile = True, 
+        fileNameLocal = './inputFiles/fLocal.root', 
+        nTriesToDownload = 3, 
+        cp_command = 'eos cp' # 'eos cp' for lxplus, 'xrdcp' elsewhere
+        ):
     # MC:
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
     # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
