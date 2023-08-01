@@ -25,6 +25,8 @@ from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
 )
 print(f"htoaa_CommonTools:: here8 {datetime.now() = }"); sys.stdout.flush()
+#from numba import jit
+print(f"htoaa_CommonTools:: here9 {datetime.now() = }"); sys.stdout.flush()
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
     lumiScale = 1
@@ -32,34 +34,6 @@ def calculate_lumiScale(luminosity, crossSection, sumEvents):
     pb_to_fb_conversionFactor = 1000
     
     if sumEvents != 0: lumiScale = luminosity * crossSection * pb_to_fb_conversionFactor / sumEvents
-    return lumiScale
-
-
-def getLumiScaleForPhSpOverlapRewgtMode(
-        hLumiScale ,
-        sample_category ,
-        sample_HT_value ,
-        mask_PhSp_dict ):
-    lumiScale = None
-    
-    if 'QCD' in sample_category:
-        xBin = None
-        for iBin in range(len(hLumiScale.axes[0])):
-            if sample_HT_value >= hLumiScale.axes[0][iBin][0] and sample_HT_value < hLumiScale.axes[0][iBin][1]:
-                xBin = iBin
-                break
-
-        nEvents = len(list(mask_PhSp_dict.values())[0])
-        lumiScale = np.ones(nEvents)
-        for PhSpName, mask_PhSp in mask_PhSp_dict.items():
-            lumiScale_value = hLumiScale[xBin, PhSpName]
-            lumiScale = np.where(mask_PhSp, np.ones(nEvents) * lumiScale_value, lumiScale)
-            #print(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = }, {sample_HT_value = }, {xBin = }, {PhSpName = }, {lumiScale_value = }, ')
-                            
-    else:
-        logging.error(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = } not implemented')
-        exit(0)
-
     return lumiScale
 
 
@@ -321,31 +295,6 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
     return False
     
 
-def GetDictFromJsonFile(filePath):
-    # Lines starting with '#' are not read out, and also content between '/* .... */' are not read.
-    # Content between " '''   ....  ''' " are not read
-    # Source: https://stackoverflow.com/questions/29959191/how-to-parse-json-file-with-c-style-comments
-    
-    contents = ""
-    fh = open(filePath)
-    for line in fh:
-        #cleanedLine = line.split("//", 1)[0]
-        cleanedLine = line.split("#", 1)[0]
-        if len(cleanedLine) > 0 and line.endswith("\n") and "\n" not in cleanedLine:
-            cleanedLine += "\n"
-        contents += cleanedLine
-    fh.close
-    
-    #while "/*" in contents:
-    #    preComment, postComment = contents.split("/*", 1)ß
-    #    contents = preComment + postComment.split("*/", 1)[1]
-    while "'''" in contents:
-        preComment, postComment = contents.split("'''", 1)
-        contents = preComment + postComment.split("'''", 1)[1]
-
-    dictionary =  json.loads( contents )
-    return dictionary
-
 
 def selectRunLuminosityBlock_ApprochEventBase(golden_json_path, runNumber_list, luminosityBlock_list):
     print(f" selectRunLuminosityBlock "); sys.stdout.flush();
@@ -384,6 +333,54 @@ def selectRunLuminosityBlock(dataLSSelGoldenJSON, runNumber_list, luminosityBloc
     return mask_run_ls
 
 
+def getLumiScaleForPhSpOverlapRewgtMode(
+        hLumiScale ,
+        sample_category ,
+        sample_HT_value ,
+        mask_PhSp_dict ):
+    lumiScale = None
+    
+    if 'QCD' in sample_category:
+        xBin = None
+        for iBin in range(len(hLumiScale.axes[0])):
+            if sample_HT_value >= hLumiScale.axes[0][iBin][0] and sample_HT_value < hLumiScale.axes[0][iBin][1]:
+                xBin = iBin
+                break
+
+        nEvents = len(list(mask_PhSp_dict.values())[0])
+        lumiScale = np.ones(nEvents)
+        for PhSpName, mask_PhSp in mask_PhSp_dict.items():
+            lumiScale_value = hLumiScale[xBin, PhSpName]
+            lumiScale = np.where(mask_PhSp, np.ones(nEvents) * lumiScale_value, lumiScale)
+            #print(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = }, {sample_HT_value = }, {xBin = }, {PhSpName = }, {lumiScale_value = }, ')
+                            
+    else:
+        logging.error(f'htoaa_CommonTools::getLumiScaleForPhSpOverlapRewgtMode():: {sample_category = } not implemented')
+        exit(0)
+
+    return lumiScale
+
+
+def getPURewgts(PU_list, hPURewgt):
+    # hPURewgt: Hist() object
+
+    wgt_PU = np.ones(len(PU_list))
+    for iBin in range(len(hPURewgt.values())):
+        xBin_edge_low = hPURewgt.axes[0][iBin][0]
+        xBin_edge_up  = hPURewgt.axes[0][iBin][1]
+        xBin_value    = hPURewgt.values()[iBin]
+
+        wgt_PU = ak.where(
+            np.logical_and( np.greater_equal(PU_list, xBin_edge_low), np.less(PU_list, xBin_edge_up) ),
+            np.full(len(PU_list), xBin_value),
+            wgt_PU
+        )
+
+    #print(f"PU_list ({len(PU_list)}): {PU_list}")
+    #print(f"wgt_PU ({len(wgt_PU)}): {wgt_PU}")
+    return wgt_PU
+
+
 def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
     wgt_HT = None
     
@@ -411,29 +408,6 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
         exit(0)
 
     return wgt_HT
-
-
-def executeBashCommand(sCmd1):
-    cmd1 = None
-    if isinstance(sCmd1, str):
-        cmd1 = shlex.split(sCmd1)
-    elif isinstance(sCmd1, list):
-        cmd1 = sCmd1
-    #print(f"executeBashCommand():: {sCmd1 = } \t {cmd1 = }")
-
-    result = subprocess.run(
-        cmd1,
-        capture_output=True,
-        text = True
-    )
-    print(f"{sCmd1}: ")
-    print("result.stdout: %s" % (result.stdout))
-    if result.stderr:
-        #print(f"{result.stderr = }")
-        print("result.stderr: %s" % (result.stderr))
-        
-    return result.stdout
-    
     
     
 def DfColLabel_convert_bytes_to_string(df):
@@ -508,3 +482,60 @@ def cut_ObjectEta(objects_Eta, EtaThrsh, nObjects):
             condition = False
             break
     return condition
+
+
+## General python functions ----------------------------------------------------------------------------------
+
+def GetDictFromJsonFile(filePath):
+    # Lines starting with '#' are not read out, and also content between '/* .... */' are not read.
+    # Content between " '''   ....  ''' " are not read
+    # Source: https://stackoverflow.com/questions/29959191/how-to-parse-json-file-with-c-style-comments
+    
+    contents = ""
+    fh = open(filePath)
+    for line in fh:
+        #cleanedLine = line.split("//", 1)[0]
+        cleanedLine = line.split("#", 1)[0]
+        if len(cleanedLine) > 0 and line.endswith("\n") and "\n" not in cleanedLine:
+            cleanedLine += "\n"
+        contents += cleanedLine
+    fh.close
+    
+    #while "/*" in contents:
+    #    preComment, postComment = contents.split("/*", 1)ß
+    #    contents = preComment + postComment.split("*/", 1)[1]
+    while "'''" in contents:
+        preComment, postComment = contents.split("'''", 1)
+        contents = preComment + postComment.split("'''", 1)[1]
+
+    dictionary =  json.loads( contents )
+    return dictionary
+
+
+def executeBashCommand(sCmd1):
+    cmd1 = None
+    if isinstance(sCmd1, str):
+        cmd1 = shlex.split(sCmd1)
+    elif isinstance(sCmd1, list):
+        cmd1 = sCmd1
+    #print(f"executeBashCommand():: {sCmd1 = } \t {cmd1 = }")
+
+    result = subprocess.run(
+        cmd1,
+        capture_output=True,
+        text = True
+    )
+    print(f"{sCmd1}: ")
+    print("result.stdout: %s" % (result.stdout))
+    if result.stderr:
+        #print(f"{result.stderr = }")
+        print("result.stderr: %s" % (result.stderr))
+        
+    return result.stdout
+
+
+def akArray_isin(testArray, referenceArray):
+    '''
+    Compare each element of testArray (along axis=1) with referenceArray (along axis=1), and return boolean array (with shape of testArray) 
+    '''
+    return ak.from_iter( [ np.isin(testArray[idx_], referenceArray[idx_]) for idx_ in range(len(testArray)) ] )

@@ -60,6 +60,14 @@ sFileLumiScalesPhSpOverlapRewgt = {
 }
 
 Corrections = {
+
+    "PURewgt": {
+        Era_2018: {
+            "inputFile":     "data/correction/mc/PURewgt/PURewgts_2018.root",
+            "histogramName": "MC_PURewgt"
+        }
+
+    },
         
     "HTRewgt" : { # ./data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root
         "QCD_bGen": {
@@ -98,6 +106,7 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
 
 
 ### Miscellaneous
+MASS_bQuark = 4.18
 kLHE_HT_Max = 99999.0
 
 
