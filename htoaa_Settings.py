@@ -105,9 +105,14 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
 }
 
 
-### Miscellaneous
+### Miscellaneous constants
 MASS_bQuark = 4.18
 kLHE_HT_Max = 99999.0
+
+
+
+### Miscellaneous variables
+HistogramNameExtensions_QCD = ['_0bCat', '_1bCat', '_2bCat', '_3bCat', '_4bCat', '_5bAndMoreCat'] 
 
 
 GENPART_STATUSFLAGS = [

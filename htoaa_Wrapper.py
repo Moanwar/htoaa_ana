@@ -88,7 +88,10 @@ def writeCondorExecFile(
             f.write("\nsource %s/.bashrc \n" % (UserHomePath))
             f.write("which conda \n")
             f.write("time conda env list \n")
-            f.write("conda activate ana_htoaa \n")
+            myCondaEnv = 'myCondaEnv'
+            if UserName.lower() == 'ssawant':
+                myCondaEnv = 'ana_htoaa'
+            f.write("conda activate %s \n" % (myCondaEnv))
             #f.write("time conda env list \n")
 
             #f.write("time conda list \n")
