@@ -77,7 +77,7 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
@@ -1140,7 +1140,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 #printVariable('\n events.GenPart[mask_genBQuarks_hardSctred].pdgId', events.GenPart[mask_genBQuarks_hardSctred].pdgId); sys.stdout.flush()
                 #printVariable('\n events.GenPart[mask_genBHadrons_status2].pdgId', events.GenPart[mask_genBHadrons_status2].pdgId); sys.stdout.flush()
-                #printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags  & (2**13)', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags & (2**13)); sys.stdout.flush()
 
                 #printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
                 printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]', ak.zip([
@@ -1189,6 +1193,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 
 
                 #printVariable('\n ', ); sys.stdout.flush()
+
+
+            if printLevel >= 13:
+                printVariable('\n ', ); sys.stdout.flush()
 
 
                 

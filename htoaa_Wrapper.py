@@ -63,6 +63,7 @@ def writeCondorExecFile(
         sConfig_to_use,
         sOpFile_to_use,
         EosDestinationDir_to_use,
+        inpurFiles_to_use,
         server
 ):
     if not os.path.isfile(condor_exec_file):    
@@ -125,7 +126,10 @@ def writeCondorExecFile(
             else:
                 cp_commandToUse = 'cp'
             f.write("time %s %s %s   \n" % (cp_commandToUse, sOpFile_to_use, EosDestinationDir_to_use) )
-            f.write("rm -rf ./inputFiles \n")
+            #f.write("rm -rf ./inputFiles \n")
+            for sInputFile in inpurFiles_to_use:
+                sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
+                f.write("rm -rf %s \n" % (sFileLocal))
             #f.write(" \n")
 
         os.system("chmod a+x %s" % condor_exec_file)
@@ -163,7 +167,7 @@ def writeCondorSumitFile(
         (6, 'nextweek'),
     ])
     #iJobFlavour = 2 # 2, 'longlunch' 2 hours
-    iJobFlavour = 1 # 1, 'microcentury' 
+    iJobFlavour = 2 # 1, 'microcentury' 
     if increaseJobFlavour: iJobFlavour += 1
     
     
@@ -563,6 +567,7 @@ if __name__ == '__main__':
                             sConfig_to_use,
                             sOpRootFile_to_use,
                             OpRootFileFinalDir,
+                            config["inputFiles"],
                             server 
                         )
 

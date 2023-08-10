@@ -39,7 +39,7 @@ Run:
 python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
 ```
 It runs jobs in HT Condor, and produces final output hadd root file.
-Set path of the output hadd root file in 'samplesList_update.py' and run
+Set path of the output hadd root file in 'sFIn_analysis_stage1_dict' variable in 'samplesList_update.py' and run
 ```
 python3 samplesList_update.py -era <era>
 ```
