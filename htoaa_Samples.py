@@ -8,7 +8,7 @@ kQCDIncl      = "QCD_Incl"
 kZJets        = "ZJets"
 kWJets        = "WJets"
 
-QCDInclMode = 0 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight" (recommended)
+QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight" (recommended)
 
 Samples2018 = OD([
 
@@ -65,11 +65,21 @@ Samples2018 = OD([
         "QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
      ]),
 
-    ("TT_powheg", [
+ #   ("TT_powheg", [
+ #       "TTToHadronic_TuneCP5_13TeV-powheg-pythia8",
+ #       "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8",
+ #       "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
+ #   ]),
+    ("TTToHadronic_powheg", [
         "TTToHadronic_TuneCP5_13TeV-powheg-pythia8",
+    ]),
+    ("TTToSemiLeptonic_powheg", [
         "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8",
+    ]),
+    ("TTTo2L2Nu_powheg", [
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
     ]),
+
 
     ("TTJets_NLO", [
         "TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8"

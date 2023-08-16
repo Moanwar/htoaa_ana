@@ -8,6 +8,7 @@ import logging
 import json
 print(f"htoaa_CommonTools:: here2 {datetime.now() = }"); sys.stdout.flush()
 import numpy as np
+import math
 import awkward as ak
 print(f"htoaa_CommonTools:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
@@ -333,6 +334,58 @@ def selectRunLuminosityBlock(dataLSSelGoldenJSON, runNumber_list, luminosityBloc
     return mask_run_ls
 
 
+def selectMETFilters(flags_list, era, isMC):
+    sFLagDataOrMC = "MC" if isMC else "Data"
+
+    mask_METFilters = np.full(len(flags_list), True, dtype=bool)
+
+    if "goodVertices" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.goodVertices
+    
+    if "globalSuperTightHalo2016Filter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.globalSuperTightHalo2016Filter
+    
+    if "HBHENoiseFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.HBHENoiseFilter
+    
+    if "HBHENoiseIsoFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.HBHENoiseIsoFilter
+    
+    if "EcalDeadCellTriggerPrimitiveFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.EcalDeadCellTriggerPrimitiveFilter
+    
+    if "BadPFMuonFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.BadPFMuonFilter
+    
+    if "BadPFMuonDzFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.BadPFMuonDzFilter
+    
+    if "hfNoisyHitsFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.hfNoisyHitsFilter
+    
+    if "eeBadScFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.eeBadScFilter
+    
+    if "ecalBadCalibFilter" in MET_Filters[era][sFLagDataOrMC]:
+        mask_METFilters = mask_METFilters & flags_list.ecalBadCalibFilter
+
+    return mask_METFilters
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def getLumiScaleForPhSpOverlapRewgtMode(
         hLumiScale ,
         sample_category ,
@@ -359,6 +412,94 @@ def getLumiScaleForPhSpOverlapRewgtMode(
         exit(0)
 
     return lumiScale
+
+
+
+def getTopPtRewgt(eventsGenPart, isPythiaTuneCP5):
+    '''
+    Top pT reweights calculated using NNLO calculation and POWHEG TuneCP5 sample. Additional corrections for POWHEG TuneCUETP samples.
+    Top pT reweights = sqrt( SF(top pT, TuneCP5) * SF(top pT, TuneCUETP) * SF(anti-top pT, TuneCP5) * SF(anti-top pT, TuneCUETP) )
+    Ref: https://indico.cern.ch/event/904971/contributions/3857701/attachments/2036949/3410728/TopPt_20.05.12.pdf#page=12
+    '''
+    #printVariable('eventsGenPart.pt', eventsGenPart.pt)
+    #print(f"{isPythiaTuneCP5 = }")
+
+    list_pT_top_antiTop = []
+    list_pT_top_antiTop.append( ak.firsts( eventsGenPart[(eventsGenPart.pdgId ==       PDGID_TopQuark )].pt ) ) # Convert events.pt: [[1.1], [1.09], ...] -> ak.firsts() -> [1.1, 1.09, ..]
+    list_pT_top_antiTop.append( ak.firsts( eventsGenPart[(eventsGenPart.pdgId == (-1 * PDGID_TopQuark))].pt ) )
+
+    fitRangeMin         = Corrections["TopPtRewgt"]["TuneCP5"]["FitRange"][0]
+    fitRangeMax         = Corrections["TopPtRewgt"]["TuneCP5"]["FitRange"][1]   
+    sFitFunctionFormat  = Corrections["TopPtRewgt"]["TuneCP5"]["FitFunctionFormat"]
+    sFitFunction        = Corrections["TopPtRewgt"]["TuneCP5"]["FitFunction"] 
+    if sFitFunctionFormat == "exp( {a} + ({b} * x) + ({c} * x * x) + ({d}/(x + {e})) )":
+        fitResult_        = parse(sFitFunctionFormat, sFitFunction) # https://pypi.org/project/parse/
+        pTuneCP5_a = float(fitResult_['a'])
+        pTuneCP5_b = float(fitResult_['b'])
+        pTuneCP5_c = float(fitResult_['c'])
+        pTuneCP5_d = float(fitResult_['d'])
+        pTuneCP5_e = float(fitResult_['e'])
+        #print(f"sFitFunction: {sFitFunction}: a {pTuneCP5_a}, b {pTuneCP5_b}, c {pTuneCP5_c}, d {pTuneCP5_d}, e {pTuneCP5_e} ")
+    else:
+        logging.critical(f'htoaa_CommonTools::getTopPtRewgt():: The current TopPtReweigting function is not implemented.. Fix it..')
+        exit(0)
+
+    if not isPythiaTuneCP5:
+        if not math.isclose(Corrections["TopPtRewgt"]["TuneCUETP"]["FitRange"][0], fitRangeMin, rel_tol=1e-5):
+            logging.critical(f'htoaa_CommonTools::getTopPtRewgt():: {Corrections["TopPtRewgt"]["TuneCP5"]["FitRange"][0] = } is not equal to {Corrections["TopPtRewgt"]["TuneCUETP"]["FitRange"][0]}. Code is not able to handle it... Fix it..')
+            exit(0)
+        if not math.isclose(Corrections["TopPtRewgt"]["TuneCUETP"]["FitRange"][1], fitRangeMax, rel_tol=1e-5):
+            logging.critical(f'htoaa_CommonTools::getTopPtRewgt():: {Corrections["TopPtRewgt"]["TuneCP5"]["FitRange"][1] = } is not equal to {Corrections["TopPtRewgt"]["TuneCUETP"]["FitRange"][1]}. Code is not able to handle it... Fix it..')
+            exit(0)    
+        sFitFunctionFormat    = Corrections["TopPtRewgt"]["TuneCUETP"]["FitFunctionFormat"]
+        sFitFunction          = Corrections["TopPtRewgt"]["TuneCUETP"]["FitFunction"]
+        if sFitFunctionFormat == "{a} + ({b} * TanH({c} + ({d} * x) )":
+            fitResult_        = parse(sFitFunctionFormat, sFitFunction) # https://pypi.org/project/parse/
+            pTuneCUETP_a = float(fitResult_['a'])
+            pTuneCUETP_b = float(fitResult_['b'])
+            pTuneCUETP_c = float(fitResult_['c'])
+            pTuneCUETP_d = float(fitResult_['d'])
+            #print(f"sFitFunction: {sFitFunction}: a {pTuneCUETP_a}, b {pTuneCUETP_b}, c {pTuneCUETP_c}, d {pTuneCUETP_d} ")
+        else:
+            logging.critical(f'htoaa_CommonTools::getTopPtRewgt():: The current TopPtReweigting function is not implemented.. Fix it..')
+            exit(0)
+
+
+
+    #wgt_TopPtRewgt =  np.ones(len(eventsGenPart))
+    wgt_TopPtRewgt =  np.full(len(eventsGenPart), 1.0)
+    pTMax_list = np.full(len(eventsGenPart), fitRangeMax )
+    #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
+    for pT_list in list_pT_top_antiTop: # loop over top pT and antitop pT
+        #printVariable('pT_list ', pT_list)
+        #printVariable('ak.firsts(pT_list) ', ak.firsts(pT_list))
+
+        if Corrections["TopPtRewgt"]["TuneCP5"]["FitFunctionFormat"] == "exp( {a} + ({b} * x) + ({c} * x * x) + ({d}/(x + {e})) )":
+            wgt_withinFitRange  = np.exp( pTuneCP5_a + (pTuneCP5_b * pT_list   ) + (pTuneCP5_c * pT_list    * pT_list   ) + (pTuneCP5_d / (pT_list    + pTuneCP5_e)) )
+            wgt_outsideFitRange = np.exp( pTuneCP5_a + (pTuneCP5_b * pTMax_list) + (pTuneCP5_c * pTMax_list * pTMax_list) + (pTuneCP5_d / (pTMax_list + pTuneCP5_e)) )
+            
+            wgt_TopPtRewgt = wgt_TopPtRewgt * ak.where(
+                np.less_equal(pT_list, fitRangeMax),
+                wgt_withinFitRange,
+                wgt_outsideFitRange
+            ) 
+        #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
+
+        if not isPythiaTuneCP5:
+            if Corrections["TopPtRewgt"]["TuneCUETP"]["FitFunctionFormat"] == "{a} + ({b} * TanH({c} + ({d} * x) )":
+                wgt_withinFitRange  = pTuneCUETP_a + (pTuneCUETP_b * np.tanh( pTuneCUETP_c + (pTuneCUETP_d * pT_list   ) ))
+                wgt_outsideFitRange = pTuneCUETP_a + (pTuneCUETP_b * np.tanh( pTuneCUETP_c + (pTuneCUETP_d * pTMax_list) ))
+
+                wgt_TopPtRewgt = wgt_TopPtRewgt * ak.where(
+                    np.less_equal(pT_list, fitRangeMax),
+                    wgt_withinFitRange,
+                    wgt_outsideFitRange
+                )
+        #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
+
+    wgt_TopPtRewgt = np.sqrt(wgt_TopPtRewgt)
+    #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
+    return wgt_TopPtRewgt
 
 
 def getPURewgts(PU_list, hPURewgt):
@@ -410,6 +551,11 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
     return wgt_HT
     
     
+def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
+    # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags
+    return ( GenPart_StatusFlags_list & (2 ** int(statusFlag_toSelect)) ) > 0  
+
+
 def DfColLabel_convert_bytes_to_string(df):
     cols_rename = {}
     for col in df.columns:
@@ -532,6 +678,24 @@ def executeBashCommand(sCmd1):
         print("result.stderr: %s" % (result.stderr))
         
     return result.stdout
+
+
+def printVariable(sName, var):
+    printInDetail=True
+    #if nEventsToAnalyze == -1: printInDetail = False
+    if str(type(var)) in ['numpy.ndarray', "<class 'numpy.ndarray'>", "<class 'numpy.ma.core.MaskedArray'>"]: printInDetail = False # as gave error
+    #print(f"printInDetail: {printInDetail} {sName} ({type(var)}) ({len(var)}): {var}")
+    if not printInDetail:
+        #print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+        try:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var.tolist()}")
+        except:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+    else:
+        try:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")
+        except:
+            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
 
 
 def akArray_isin(testArray, referenceArray):

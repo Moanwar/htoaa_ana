@@ -44,6 +44,47 @@ sFilesGoldenJSON = {
     Era_2018: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt',    
 }
 
+# List of recommended MET filters. https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+MET_Filters = {} 
+MET_Filters[Era_2016] = {
+    "Data": [
+        "goodVertices",                       # primary vertex filter ("Flag_goodVertices")
+        "globalSuperTightHalo2016Filter",     # beam halo filter ("Flag_globalSuperTightHalo2016Filter")
+        "HBHENoiseFilter",                    # HBHE noise filter ("Flag_HBHENoiseFilter")
+        "HBHENoiseIsoFilter",                 # HBHEiso noise filter ("Flag_HBHENoiseIsoFilter")
+        "EcalDeadCellTriggerPrimitiveFilter", # ECAL TP filter ("EcalDeadCellTriggerPrimitiveFilter")
+        "BadPFMuonFilter",                    # Bad PF Muon Filter ("Flag_BadPFMuonFilter")
+        "BadPFMuonDzFilter",                  # Bad PF Muon Dz Filter ("Flag_BadPFMuonDzFilter")
+        "eeBadScFilter",                      # ee badSC noise filter ("Flag_eeBadScFilter")
+        "hfNoisyHitsFilter",                  # HF noisy hits filter ("Flag_hfNoisyHitsFilter")
+    ]
+}
+MET_Filters[Era_2016]["MC"]  = MET_Filters[Era_2016]["Data"] 
+
+MET_Filters[Era_2018] = {
+    "Data": [
+        "goodVertices",                       # primary vertex filter ("Flag_goodVertices")
+        "globalSuperTightHalo2016Filter",     # beam halo filter ("Flag_globalSuperTightHalo2016Filter")
+        "HBHENoiseFilter",                    # HBHE noise filter ("Flag_HBHENoiseFilter")
+        "HBHENoiseIsoFilter",                 # HBHEiso noise filter ("Flag_HBHENoiseIsoFilter")
+        "EcalDeadCellTriggerPrimitiveFilter", # ECAL TP filter ("Flag_EcalDeadCellTriggerPrimitiveFilter")
+        "BadPFMuonFilter",                    # Bad PF Muon Filter ("Flag_BadPFMuonFilter")
+        "BadPFMuonDzFilter",                  # Bad PF Muon Dz Filter ("Flag_BadPFMuonDzFilter")
+        "hfNoisyHitsFilter",                  # HF noisy hits filter ("Flag_hfNoisyHitsFilter")
+        "eeBadScFilter",                      # ee badSC noise filter ("Flag_eeBadScFilter")
+        "ecalBadCalibFilter",                 # ECAL bad calibration filter update ("Flag_ecalBadCalibFilter")
+    ],
+}
+MET_Filters[Era_2018]["MC"]  = MET_Filters[Era_2018]["Data"]
+MET_Filters[Era_2017]        = MET_Filters[Era_2018]
+# -----------------------------------------------------------------------------------
+
+
+class JetIDs(enum.IntEnum):
+    tightIDFailingLeptonVeto = 2
+    tightIDPassingLeptonVeto = 6
+
+
 kMCSamplesStitch_PhSpOverlapRemove = 'MCSamplesStitch_PhSpOverlapRemove'
 kMCSamplesStitch_PhSpOverlapRewgt  = 'MCSamplesStitch_PhSpOverlapRewgt'
 
@@ -85,6 +126,19 @@ Corrections = {
         }
     }, 
 
+    "TopPtRewgt": { # Top pT reweights for ttbat sample. https://indico.cern.ch/event/904971/contributions/3857701/attachments/2036949/3410728/TopPt_20.05.12.pdf#page=12
+        "TuneCP5": {
+            "FitFunctionFormat": "exp( {a} + ({b} * x) + ({c} * x * x) + ({d}/(x + {e})) )",
+            "FitFunction": "exp( -2.02274e-01 + (1.09734e-04 * x) + (-1.30088e-07 * x * x) + (5.83494e+01/(x + 1.96252e+02)) )",
+            "FitRange": [0, 3000],
+        },
+        "TuneCUETP": {
+            "FitFunctionFormat": "{a} + ({b} * TanH({c} + ({d} * x) )",
+            "FitFunction": "1.04554e+00 + (5.19012e-02 * TanH(-1.72927e+00 + (2.57113e-03 * x) )",
+            "FitRange": [0, 3000],
+        }
+    },
+
 }
 
 DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365. Calculated for 2018 HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 trigger 
@@ -106,7 +160,6 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
 
 
 ### Miscellaneous constants
-MASS_bQuark = 4.18
 kLHE_HT_Max = 99999.0
 
 
@@ -115,7 +168,14 @@ kLHE_HT_Max = 99999.0
 HistogramNameExtensions_QCD = ['_0bCat', '_1bCat', '_2bCat', '_3bCat', '_4bCat', '_5bAndMoreCat'] 
 
 
-GENPART_STATUSFLAGS = [
+
+### GEN-level variables 
+PDGID_BottomQuark = 5
+PDGID_TopQuark    = 6
+
+MASS_BottomQuark = 4.18
+
+GENPART_STATUSFLAGS_LIST = [
     "isPrompt",
     "isDecayedLeptonHadron",
     "isTauDecayProduct",
@@ -133,6 +193,22 @@ GENPART_STATUSFLAGS = [
     "isLastCopyBeforeFSR",
 ]
 
+class GENPART_STATUSFLAGS(enum.IntEnum):
+    isPrompt                           =  0
+    isDecayedLeptonHadron              =  1
+    isTauDecayProduct                  =  2
+    isPromptTauDecayProduct            =  3
+    isDirectTauDecayProduct            =  4
+    isDirectPromptTauDecayProduct      =  5
+    isDirectHadronDecayProduct         =  6
+    isHardProcess                      =  7
+    fromHardProcess                    =  8
+    isHardProcessTauDecayProduct       =  9
+    isDirectHardProcessTauDecayProduct = 10
+    fromHardProcessBeforeFSR           = 11
+    isFirstCopy                        = 12
+    isLastCopy                         = 13
+    isLastCopyBeforeFSR                = 14
 
 
 config_Template = OD([

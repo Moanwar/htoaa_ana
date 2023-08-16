@@ -167,7 +167,7 @@ def writeCondorSumitFile(
         (6, 'nextweek'),
     ])
     #iJobFlavour = 2 # 2, 'longlunch' 2 hours
-    iJobFlavour = 2 # 1, 'microcentury' 
+    iJobFlavour = 1 # 1, 'microcentury' 
     if increaseJobFlavour: iJobFlavour += 1
     
     
@@ -306,7 +306,8 @@ if __name__ == '__main__':
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
                 "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
-                "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu" 
+                "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu",
+                "TTJets",  # TTJets LO, NLO Madgraph samples 
         ] )
     ## ------------------------------------------------------------------------------------------
 
@@ -434,7 +435,7 @@ if __name__ == '__main__':
                         #print(f" {sCondorError_to_use = }: {isCondorErrorExist = } ")
                     
                     # JobStatus
-                    jobStatus = -1
+                    jobStatus = JobStatus.NotSubmitted # -1
                     #jobStatusForJobSubmission = [0, 3, 4, 5]
                     jobStatusForJobSubmission = [
                         JobStatus.NotSubmitted, #0
@@ -642,7 +643,7 @@ if __name__ == '__main__':
                 
             fJobSubLog.write('%s\n\n\n' % ('-'*10))
         
-
+        
         jobStatus_list = [ (jobStatus.value, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
         print('\n\n\n%s \t iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
         print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()

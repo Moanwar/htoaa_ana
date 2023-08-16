@@ -59,7 +59,10 @@ from htoaa_CommonTools import (
     selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
-    getPURewgts, getHTReweight
+    selectMETFilters,
+    selGenPartsWithStatusFlag,
+    getTopPtRewgt, getPURewgts, getHTReweight,
+    printVariable,
 )
 print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Samples import (
@@ -77,8 +80,8 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = -1 # 1000 # 100000 # -1
+nEventToReadInBatch = 10 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = 10 # -1 # 1000 # 100000 # -1
 #pd.set_option('display.max_columns', None)
 
 #print("".format())
@@ -525,6 +528,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         for sHExt in self.histosExtensions:
             histos.update(OD([
 
+                ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+                ('hCutFlowWeighted'+sHExt,                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+
                 ('hPV_npvs_SR'+sHExt,                               {sXaxis: PU_axis,                sXaxisLabel: r"No. of primary vertices - signal region"}),
                 ('hPV_npvsGood_SR'+sHExt,                           {sXaxis: PU_axis,                sXaxisLabel: r"No. of good primary vertices - signal region"}),
 
@@ -593,7 +599,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ]))
         
 
-        for statusFlag_ in GENPART_STATUSFLAGS:
+        for statusFlag_ in GENPART_STATUSFLAGS_LIST:
             histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
         
 
@@ -672,10 +678,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
     def process(self, events):
         dataset = events.metadata["dataset"] # dataset label
+        print(f"process():: {self.datasetInfo['sample_category'] = }, {dataset = }")
 
         if printLevel >= 20:
             print(f"nEvents: {len(events)}")
-        if printLevel >= 1:
+        if printLevel >= 0:
             print(f"\n events.fields ({type(events.fields)}): {events.fields}")
             #print(f"\n events.GenPart.fields: {events.GenPart.fields}")
             #print(f"\n events.HLT.fields: {events.HLT.fields}")
@@ -695,9 +702,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.Pileup.fields: {events.Pileup.fields}")
             #print(f"\n events.Pileup.nTrueInt: {events.Pileup.nTrueInt}")
             #print(f"\n events.Pileup.nPU: {events.Pileup.nPU}")
-            print(f"\n events.PV.fields: {events.PV.fields}")
-            print(f"\n events.PV.npvs: {events.PV.npvs}")
-            print(f"\n events.PV.npvsGood: {events.PV.npvsGood}")
+            #print(f"\n events.PV.fields: {events.PV.fields}")
+            #print(f"\n events.PV.npvs: {events.PV.npvs}")
+            #print(f"\n events.PV.npvsGood: {events.PV.npvsGood}")
+            print(f"\n {events.Flag.fields = } ")
+            print(f"{events.Flag.goodVertices = }, \n{events.Flag.globalSuperTightHalo2016Filter = }, \n{events.Flag.HBHENoiseFilter = }, \n{events.Flag.HBHENoiseIsoFilter = }, \n{events.Flag.EcalDeadCellTriggerPrimitiveFilter = }, \n{events.Flag.BadPFMuonFilter = }, \n{events.Flag.BadPFMuonDzFilter = },")
+            print(f"{events.Flag.hfNoisyHitsFilter = }, \n{events.Flag.eeBadScFilter = }, \n{events.Flag.ecalBadCalibFilter = }, ")
 
             #print(f"\n events.FatJet.fields: {events.FatJet.fields}")
             #print(f"\n events.FatJet.pt: {events.FatJet.pt}")
@@ -706,30 +716,35 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n events.FatJet.btagDeepB: {events.FatJet.btagDeepB}")
              
         if nEventsToAnalyze != -1:
-            print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}")            
+            #print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}") 
+            printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()           
 
         if not self.datasetInfo[dataset]['isMC']:
             print(f" {np.unique(events.run, return_counts=True) = } ")  
 
         #print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
 
-        self.datasetInfo[dataset]['isSignal'     ]  = False
-        self.datasetInfo[dataset]['isQCD'        ]  = False
-        self.datasetInfo[dataset]['isQCDIncl'    ]  = False
-        self.datasetInfo[dataset]['isQCD_bEnrich']  = False
-        self.datasetInfo[dataset]['isQCD_bGen'   ]  = False
+        self.datasetInfo[dataset]['isSignal'       ]  = False
+        self.datasetInfo[dataset]['isQCD'          ]  = False
+        self.datasetInfo[dataset]['isQCDIncl'      ]  = False
+        self.datasetInfo[dataset]['isQCD_bEnrich'  ]  = False
+        self.datasetInfo[dataset]['isQCD_bGen'     ]  = False
+        self.datasetInfo[dataset]['isTTbar'        ]  = False
+        self.datasetInfo[dataset]['isPythiaTuneCP5']  = False
         
         if self.datasetInfo[dataset]['isMC']:
-            self.datasetInfo[dataset]['isSignal']      = True if "HToAATo4B"   in dataset else False
-            self.datasetInfo[dataset]['isQCDIncl']     = True if kQCDIncl      in dataset else False
-            self.datasetInfo[dataset]['isQCD_bEnrich'] = True if kQCD_bEnrich  in dataset else False
-            self.datasetInfo[dataset]['isQCD_bGen']    = True if kQCD_bGen     in dataset else False
-            self.datasetInfo[dataset]['isQCD']         = (self.datasetInfo[dataset]['isQCDIncl']     or \
-                                                          self.datasetInfo[dataset]['isQCD_bEnrich'] or \
-                                                          self.datasetInfo[dataset]['isQCD_bGen'])
+            self.datasetInfo[dataset]['isSignal']         = True if "HToAATo4B"   in dataset else False
+            self.datasetInfo[dataset]['isQCDIncl']        = True if kQCDIncl      in dataset else False
+            self.datasetInfo[dataset]['isQCD_bEnrich']    = True if kQCD_bEnrich  in dataset else False
+            self.datasetInfo[dataset]['isQCD_bGen']       = True if kQCD_bGen     in dataset else False
+            self.datasetInfo[dataset]['isQCD']            = (self.datasetInfo[dataset]['isQCDIncl']     or \
+                                                             self.datasetInfo[dataset]['isQCD_bEnrich'] or \
+                                                             self.datasetInfo[dataset]['isQCD_bGen'])
             sample_HT_Min, sample_HT_Max = getSampleHTRange( self.datasetInfo[dataset]["datasetNameFull"] )
-            self.datasetInfo[dataset]['sample_HT_Min'] = sample_HT_Min
-            self.datasetInfo[dataset]['sample_HT_Max'] = sample_HT_Max
+            self.datasetInfo[dataset]['sample_HT_Min']    = sample_HT_Min
+            self.datasetInfo[dataset]['sample_HT_Max']    = sample_HT_Max
+            self.datasetInfo[dataset]['isTTbar']          = True if dataset.startswith('TTTo') else False
+            self.datasetInfo[dataset]['isPythiaTuneCP5']  = True if 'TuneCP5' in self.datasetInfo[dataset]["datasetNameFull"] else False
 
             if self.datasetInfo[dataset]['isQCD_bGen']:
                 # 'Corrections' variable defined in htoaa_Settings.py
@@ -825,7 +840,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "pt"  : events.GenPart[genBBar_pairs['b']][:, 0].pt,
                     "eta" : events.GenPart[genBBar_pairs['b']][:, 0].eta,
                     "phi" : events.GenPart[genBBar_pairs['b']][:, 0].phi,
-                    "mass": np.full(nEvents_11, MASS_bQuark),
+                    "mass": np.full(nEvents_11, MASS_BottomQuark),
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
@@ -837,7 +852,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "pt"  : events.GenPart[genBBar_pairs['bbar']][:, 0].pt,
                     "eta" : events.GenPart[genBBar_pairs['bbar']][:, 0].eta,
                     "phi" : events.GenPart[genBBar_pairs['bbar']][:, 0].phi,
-                    "mass": np.full(nEvents_11, MASS_bQuark),
+                    "mass": np.full(nEvents_11, MASS_BottomQuark),
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
@@ -849,7 +864,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "pt"  : events.GenPart[genBBar_pairs['b']][:, 1].pt,
                     "eta" : events.GenPart[genBBar_pairs['b']][:, 1].eta,
                     "phi" : events.GenPart[genBBar_pairs['b']][:, 1].phi,
-                    "mass": np.full(nEvents_11, MASS_bQuark),
+                    "mass": np.full(nEvents_11, MASS_BottomQuark),
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
@@ -861,7 +876,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "pt"  : events.GenPart[genBBar_pairs['bbar']][:, 1].pt,
                     "eta" : events.GenPart[genBBar_pairs['bbar']][:, 1].eta,
                     "phi" : events.GenPart[genBBar_pairs['bbar']][:, 1].phi,
-                    "mass": np.full(nEvents_11, MASS_bQuark),
+                    "mass": np.full(nEvents_11, MASS_BottomQuark),
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
@@ -892,7 +907,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             
             
             genBQuarks = events.GenPart[(
-                (abs(events.GenPart.pdgId) == 5)
+                (abs(events.GenPart.pdgId) == PDGID_BottomQuark )
             )]
             genBQuarks_pT = ak.sort(genBQuarks.pt, axis=-1, ascending=False)
             genBQuarks_first = ak.firsts(genBQuarks)
@@ -966,7 +981,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # Check if events has b-quark outgoing from hard subprocess -----------------------------------------------
             mask_genBQuarks_hardSctred = (
-                (abs(events.GenPart.pdgId) == 5) &
+                (abs(events.GenPart.pdgId) == PDGID_BottomQuark ) &
                 (events.GenPart.status == 23)
             )
             mask_genBQuarks_hardSctred_eventwise = ak.any(mask_genBQuarks_hardSctred, axis=1)
@@ -1097,7 +1112,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 print(f" {ak.sum(   (mask_QCD_bEnrich_PhSp | mask_QCD_bGen_PhSp | mask_QCD_Incl_Remnant_PhSp) ) = } ") 
                 print(f" {ak.sum( ~ (mask_QCD_bEnrich_PhSp | mask_QCD_bGen_PhSp | mask_QCD_Incl_Remnant_PhSp) ) = } ")
 
-
+            '''
             #  genBQuarks collection to match to reco AK8 jet at the later stage ----------------------
             mask_genBQuarksHardSctred_genBHadronsStatus2 = mask_genBQuarks_hardSctred | mask_genBHadrons_status2
             
@@ -1108,7 +1123,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "phi" : events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].phi,
                     "mass": ak.where(
                         abs(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId) == 5,
-                        MASS_bQuark,
+                        MASS_BottomQuark,
                         events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].mass
                     )
                 },
@@ -1134,17 +1149,104 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     vGenBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2['b2']]
                 )
 
+                mask_genBQuarks = (
+                    (abs(events.GenPart.pdgId) == 5) 
+                )
+                #printVariable('\n events.GenPart[mask_genBQuarks] \n', events.GenPart[mask_genBQuarks]); sys.stdout.flush()
+                printVariable('\n\n events.GenPart[mask_genBQuarks].pdgId \n', events.GenPart[mask_genBQuarks].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarks].status \n', events.GenPart[mask_genBQuarks].status); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isPrompt) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isPrompt)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.fromHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.fromHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isFirstCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isFirstCopy)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+
+                #printVariable('\n\n events.GenPart[mask_genBQuarks_hardSctred] \n', events.GenPart[mask_genBQuarks_hardSctred]); sys.stdout.flush()
+                printVariable('\n\n events.GenPart[mask_genBQuarks_hardSctred].pdgId \n', events.GenPart[mask_genBQuarks_hardSctred].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarks_hardSctred].status \n', events.GenPart[mask_genBQuarks_hardSctred].status); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isPrompt) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isPrompt)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.fromHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.fromHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isFirstCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isFirstCopy)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarks_hardSctred].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+
+
+                #printVariable('\n\n events.GenPart[mask_genBHadrons] \n', events.GenPart[mask_genBHadrons]); sys.stdout.flush()
+                printVariable('\n\n events.GenPart[mask_genBHadrons].pdgId \n', events.GenPart[mask_genBHadrons].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBHadrons].status \n', events.GenPart[mask_genBHadrons].status); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isPrompt) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isPrompt)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.fromHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.fromHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isFirstCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isFirstCopy)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+
+                #printVariable('\n\n events.GenPart[mask_genBHadrons_status2] \n', events.GenPart[mask_genBHadrons_status2]); sys.stdout.flush()
+                printVariable('\n\n events.GenPart[mask_genBHadrons_status2].pdgId \n', events.GenPart[mask_genBHadrons_status2].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBHadrons_status2].status \n', events.GenPart[mask_genBHadrons_status2].status); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isPrompt) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isPrompt)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.fromHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.fromHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isFirstCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isFirstCopy)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBHadrons_status2].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+
+
+                #printVariable('\n\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2] \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
+                printVariable('\n\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isPrompt) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isPrompt)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.fromHardProcess) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.fromHardProcess)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isFirstCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isFirstCopy)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+
+                printVariable('\n\n mask_distinct_genBQuarksHardSctred_genBHadronsStatus2 \n', mask_distinct_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
+
+
+
+            if printLevel >= 13:
+                dr_paris_genBQuarksHardSctred_genBHadronsStatus2 = vGenBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2['b1']].delta_r(
+                    vGenBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2['b2']]
+                )
+
                 #printVariable('\n mask_genBQuarks_hardSctred', mask_genBQuarks_hardSctred); sys.stdout.flush()
                 #printVariable('\n mask_genBHadrons_status2', mask_genBHadrons_status2); sys.stdout.flush()
                 #printVariable('\n mask_genBQuarksHardSctred_genBHadronsStatus2', mask_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
 
                 #printVariable('\n events.GenPart[mask_genBQuarks_hardSctred].pdgId', events.GenPart[mask_genBQuarks_hardSctred].pdgId); sys.stdout.flush()
                 #printVariable('\n events.GenPart[mask_genBHadrons_status2].pdgId', events.GenPart[mask_genBHadrons_status2].pdgId); sys.stdout.flush()
-                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId); sys.stdout.flush()
-                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status); sys.stdout.flush()
-                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags); sys.stdout.flush()
-                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13); sys.stdout.flush()
-                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags  & (2**13)', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags & (2**13)); sys.stdout.flush()
+                printVariable('\n\n\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].pdgId); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].status); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags \n', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags); sys.stdout.flush()
+                #printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags >> 13); sys.stdout.flush()
+                #printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags  & (2**13)', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags & (2**13)); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy) \n', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
+                printVariable('\n mask_distinct_genBQuarksHardSctred_genBHadronsStatus2s \n', mask_distinct_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
 
                 #printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]', events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
                 printVariable('\n events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2]', ak.zip([
@@ -1159,50 +1261,83 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2', vGenBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
 
                 printVariable('\n dr_paris_genBQuarksHardSctred_genBHadronsStatus2', dr_paris_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
-                '''
-                printVariable('\n idx_pairs_genBQuarksHardSctred_genBHadronsStatus2', idx_pairs_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
-                printVariable('\n mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2', mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
-                printVariable('\n idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2])', idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
-                printVariable('\n idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2])[b1]', idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_distinctPairs_genBQuarksHardSctred_genBHadronsStatus2]['b1']); sys.stdout.flush()
-                '''
 
                 
                 printVariable('\n mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2', mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
                 printVariable('\n idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]', idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
                 printVariable('\n idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2][b2]', idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]['b2']); sys.stdout.flush()
-                '''
-                printVariable('\n mask_genBQuarksHardSctred_genBHadronsStatus2', mask_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
-                printVariable('\n mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2][b2]]', 
-                              mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]['b2']]); sys.stdout.flush()
-
-                printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2[ mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2][b2]] ]', 
-                              vGenBQuarksHardSctred_genBHadronsStatus2[ mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]['b2']] ]); sys.stdout.flush()
-
-                mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]['b2']] = False
-
-                printVariable('\n After mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2][b2]]', 
-                              mask_genBQuarksHardSctred_genBHadronsStatus2[idx_pairs_genBQuarksHardSctred_genBHadronsStatus2[mask_nearbyPairs_genBQuarksHardSctred_genBHadronsStatus2]['b2']]); sys.stdout.flush()
-                '''
-
 
 
                 #printVariable('\n ak.local_index(vGenBQuarksHardSctred_genBHadronsStatus2)', ak.local_index(vGenBQuarksHardSctred_genBHadronsStatus2)); sys.stdout.flush()
                 #printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2[idx_]', vGenBQuarksHardSctred_genBHadronsStatus2[idx_]); sys.stdout.flush()
                 printVariable('\n mask_distinct_genBQuarksHardSctred_genBHadronsStatus2', mask_distinct_genBQuarksHardSctred_genBHadronsStatus2); sys.stdout.flush()
+                printVariable('\n selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy)', 
+                              selGenPartsWithStatusFlag(events.GenPart[mask_genBQuarksHardSctred_genBHadronsStatus2].statusFlags, GENPART_STATUSFLAGS.isLastCopy)); sys.stdout.flush()
                 printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2[mask_distinct_genBQuarksHardSctred_genBHadronsStatus2]', vGenBQuarksHardSctred_genBHadronsStatus2[mask_distinct_genBQuarksHardSctred_genBHadronsStatus2]); sys.stdout.flush()
                 
 
                 #printVariable('\n ', ); sys.stdout.flush()
+            '''
+        # --------------------------------------------------------------------------------------------------
 
-
+        # MC ttbar ----------------------------------------------
+        mask_1 = None
+        if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isTTbar'] :
+            mask_genTopQuark = (
+                (abs(events.GenPart.pdgId) == PDGID_TopQuark ) & 
+                (events.GenPart.hasFlags("isLastCopy"))
+            )   
             if printLevel >= 13:
-                printVariable('\n ', ); sys.stdout.flush()
-
-
-                
-            # --------------------------------------------------------------------------------------------------
-
+                printVariable('\n mask_genTopQuark \n', mask_genTopQuark); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genTopQuark] \n', events.GenPart[mask_genTopQuark]); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genTopQuark] (pdgId, status) \n', 
+                              ak.zip([
+                                events.GenPart[mask_genTopQuark].pdgId,
+                                events.GenPart[mask_genTopQuark].status
+                              ])
+                              ); sys.stdout.flush()
+                printVariable('\n events.GenPart[mask_genTopQuark] (pt, eta, phi) \n', 
+                              ak.zip([
+                                events.GenPart[mask_genTopQuark].pt,
+                                events.GenPart[mask_genTopQuark].eta,
+                                events.GenPart[mask_genTopQuark].phi,
+                              ])
+                              ); sys.stdout.flush()
+                print(f"{GENPART_STATUSFLAGS._member_map_ = }"); sys.stdout.flush()
+                for GENPART_STATUSFLAG_name, GENPART_STATUSFLAG_number in GENPART_STATUSFLAGS._member_map_.items():
+                    print(f"{GENPART_STATUSFLAG_name = }, {GENPART_STATUSFLAG_number = }"); sys.stdout.flush()
+                    printVariable('\n events.GenPart[mask_genTopQuark].statusFlags %s \n'%GENPART_STATUSFLAG_name, 
+                                  selGenPartsWithStatusFlag(events.GenPart[mask_genTopQuark].statusFlags, GENPART_STATUSFLAG_number)); sys.stdout.flush()
+                    printVariable('events.GenPart[mask_genTopQuark].statusFlags %s << \n'%GENPART_STATUSFLAG_name, 
+                                  events.GenPart[mask_genTopQuark].hasFlags([GENPART_STATUSFLAG_name]), ); sys.stdout.flush()
                     
+
+                #printVariable('\n events.GenPart[mask_genTopQuark]', events.GenPart[mask_genTopQuark].); sys.stdout.flush()
+                #printVariable('\n events.GenPart[mask_genTopQuark]', events.GenPart[mask_genTopQuark]); sys.stdout.flush()
+
+            if printLevel >= 3:
+                wgt_TopPt = getTopPtRewgt(
+                    eventsGenPart = events.GenPart[mask_genTopQuark],
+                    isPythiaTuneCP5 = self.datasetInfo[dataset]['isPythiaTuneCP5']
+                    )
+                printVariable('\n wgt_TopPt', wgt_TopPt)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         # Reco-level -----------------------------------------------------------------------------------
         # FatJet selection
         #selFatJet = self.objectSelector.selectFatJets(events)
@@ -1257,10 +1392,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # match leadingFat jet to genB in QCD
         n_leadingFatJat_matched_genB = np.full(len(events), 0)
         if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
-            mask_leadingFatJat_matched_genB = leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel) < 0.8
-            n_leadingFatJat_matched_genB = ak.sum(mask_leadingFatJat_matched_genB, axis=1)
+            #mask_leadingFatJat_matched_genB = leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel) < 0.8
+            #n_leadingFatJat_matched_genB = ak.sum(mask_leadingFatJat_matched_genB, axis=1)
+            n_leadingFatJat_matched_genB = leadingFatJet.nBHadrons
             
-            if printLevel >= 3:
+            if printLevel >= 13:
                 printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2_sel', vGenBQuarksHardSctred_genBHadronsStatus2_sel); sys.stdout.flush()
                 #printVariable('\n leadingFatJet', leadingFatJet); sys.stdout.flush()
                 #printVariable('\n leadingFatJet_asSingletons', leadingFatJet_asSingletons); sys.stdout.flush()
@@ -1276,7 +1412,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('\n vGenBQuarksHardSctred_genBHadronsStatus2_sel.delta_r(leadingFatJet_asSingletons)', vGenBQuarksHardSctred_genBHadronsStatus2_sel.delta_r(leadingFatJet_asSingletons)); sys.stdout.flush()
                 printVariable('\n mask_leadingFatJat_matched_genB', mask_leadingFatJat_matched_genB); sys.stdout.flush()
                 printVariable('\n leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel[mask_leadingFatJat_matched_genB])', leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel[mask_leadingFatJat_matched_genB])); sys.stdout.flush()
-                printVariable('\n n_leadingFatJat_matched_genB', n_leadingFatJat_matched_genB); sys.stdout.flush()
+                printVariable('\n n_leadingFatJat_matched_genB ^*^', n_leadingFatJat_matched_genB); sys.stdout.flush()
                 
                 #printVariable('\n ', ); sys.stdout.flush()
         
@@ -1290,6 +1426,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             printVariable("\n ak.singletons(leadingFatJet.btagDeepB)", ak.singletons(leadingFatJet.btagDeepB))
             printVariable("\n leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB]", leadingFatJet.btagDeepB > bTagWPs[self.objectSelector.era][self.objectSelector.tagger_btagDeepB][self.objectSelector.wp_btagDeepB])
 
+        if printLevel >= 3:
+            printVariable('\n n_leadingFatJat_matched_genB ^*^', n_leadingFatJat_matched_genB); sys.stdout.flush()
+            printVariable('\n\n leadingFatJet.nBHadrons \n', leadingFatJet.nBHadrons); sys.stdout.flush()
+            printVariable('\n\n events.FatJet.nBHadrons \n', events.FatJet.nBHadrons); sys.stdout.flush()
+
+
         #if printLevel >= 2:
         #    print(f" : {}")
             
@@ -1299,12 +1441,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         
-        # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table
+        # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         sel_names_all = OD([
             ("SR",                    [
                 "nPV",
+                "METFilters",
                 "leadingFatJetPt",
                 "leadingFatJetEta",
+                "JetID",
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
                 "leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
@@ -1344,7 +1488,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # nPVGood >= 1
             selection.add("nPV", events.PV.npvsGood >= 1)
 
-        
+        #mask_METFilters = selectMETFilters(events.Flag, self.datasetInfo["era"], self.datasetInfo[dataset]['isMC'])
+        #printVariable('\n mask_METFilters', mask_METFilters)
+        selection.add(
+            "METFilters", 
+            selectMETFilters(events.Flag, self.datasetInfo["era"], self.datasetInfo[dataset]['isMC'])
+        )
 
         if "leadingFatJetPt" in sel_names_all["SR"]:
             # >=1 FatJet
@@ -1360,6 +1509,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetEta",
                 abs(leadingFatJet.eta) < self.objectSelector.FatJetEtaThsh
             )
+
+        printVariable('\n leadingFatJet.pt', leadingFatJet.pt)
+
+        mask_jetID = leadingFatJet.jetId == int(JetIDs.tightIDPassingLeptonVeto)
+        printVariable('\n leadingFatJet.jetId', leadingFatJet.jetId)
+        print(f"JetIDs.tightIDPassingLeptonVeto ({type(JetIDs.tightIDPassingLeptonVeto)}): {JetIDs.tightIDPassingLeptonVeto},   {int(JetIDs.tightIDPassingLeptonVeto) = }")
+        printVariable('\n mask_jetID', mask_jetID)
+        selection.add(
+            "JetID", 
+            mask_jetID
+        )
 
 
         if "leadingFatJetBtagDeepB" in sel_names_all["SR"]:
@@ -1662,6 +1822,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 hPURewgt = self.hPURewgt
             )
 
+            # MC top pT reweigts for ttbar sample ---------
+            if self.datasetInfo[dataset]['isTTbar']:
+                wgt_TopPt = getTopPtRewgt(
+                    eventsGenPart = events.GenPart[mask_genTopQuark],
+                    isPythiaTuneCP5 = self.datasetInfo[dataset]['isPythiaTuneCP5']
+                )   
+
 
 
 
@@ -1683,6 +1850,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "PUWeight",
                 weight = wgt_PU
             )
+            if self.datasetInfo[dataset]['isTTbar']:
+                #printVariable('\n wgt_TopPt', wgt_TopPt ); sys.stdout.flush()
+                #printVariable('\n wgt_PU', wgt_PU ); sys.stdout.flush()
+                #printVariable('\n ak.is_none(wgt_TopPt)', ak.is_none(wgt_TopPt) )
+                #print(f"{len(events) = }, {len(wgt_TopPt) = }, {ak.min(wgt_TopPt) = }, {ak.max(wgt_TopPt) = }, {ak.sum(ak.is_none(wgt_TopPt)) = }"); sys.stdout.flush()
+                #print(f"{len(events) = }, {len(wgt_PU) = }, {ak.min(wgt_PU) = }, {ak.max(wgt_PU) = }, {ak.sum(ak.is_none(wgt_PU)) = }"); sys.stdout.flush()
+                #print(f"{wgt_TopPt.shape = }, {wgt_PU.shape = }"); sys.stdout.flush()
+                weights.add(
+                    "TopPtReWeight",
+                    weight = wgt_TopPt
+                )            
 
             '''
             weights.add(
@@ -1803,22 +1981,23 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ### General or GEN-level histograms ========================================================================================
 
-            # all events
-            iBin = 0
-            output['hCutFlow'].fill(
-                dataset=dataset,
-                CutFlow=(ones_list * iBin),
-                systematic=syst
-            )
-            output['hCutFlowWeighted'].fill(
-                dataset=dataset,
-                CutFlow=(ones_list * iBin),
-                systematic=syst,
-                weight=evtWeight
-            )
 
             # QCD MC ----------------------------------------------
             if self.datasetInfo[dataset]['isMC'] and self.datasetInfo[dataset]['isQCD'] :
+                # all events
+                iBin = 0
+                output['hCutFlow'].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list * iBin),
+                    systematic=syst
+                )
+                output['hCutFlowWeighted'].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list * iBin),
+                    systematic=syst,
+                    weight=evtWeight
+                )
+                
                 # genBHadrons_status2 events
                 iBin = 1
                 output['hCutFlow'].fill(
@@ -3209,6 +3388,33 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #print(f"{sHExt = }, {len(sel_SR) = }, {ak.sum(sel_SR, axis=0) = }, {ak.sum(mask_HExt, axis=0) = }, {ak.sum(sel_SR_forHExt, axis=0) = }"); sys.stdout.flush();
                 #print(f"{ak.sum(ak.is_none(sel_SR), axis=0) =  }, {ak.sum(ak.is_none(mask_HExt), axis=0) =  }, {ak.sum(ak.is_none(sel_SR_forHExt), axis=0) =  }, "); sys.stdout.flush();
 
+                # all events
+                iBin = 0
+                output['hCutFlow'].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list * iBin),
+                    systematic=syst
+                )
+                output['hCutFlowWeighted'].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list * iBin),
+                    systematic=syst,
+                    weight=evtWeight
+                )
+
+                # events passing SR
+                iBin = 4
+                output['hCutFlow'+sHExt].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list[sel_SR_forHExt] * iBin),
+                    systematic=syst
+                )
+                output['hCutFlowWeighted'+sHExt].fill(
+                    dataset=dataset,
+                    CutFlow=(ones_list[sel_SR_forHExt] * iBin),
+                    systematic=syst,
+                    weight=evtWeight[sel_SR_forHExt]
+                )
 
                 output['hPV_npvs_SR'+sHExt].fill(
                     dataset=dataset,
