@@ -288,9 +288,18 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
         stdout, stderr = process.communicate()
         print(f"  {iTry = } {stdout = }, {stderr = }");  sys.stdout.flush()
         stderr_lower = stderr.lower()
+        fileSize = 0
+        if os.path.exists(sFileNameLocal):
+            try:
+                fileSize = os.path.getsize(sFileNameLocal) / (1024 * 1024) # file size in MB
+                print(f"sFileNameLocal: {sFileNameLocal} ({fileSize} MB) ")
+            except  FileNotFoundError:
+                print(f"sFileNameLocal: {sFileNameLocal} file not found.")
+            except OSError: 
+                print(f"sFileNameLocal: {sFileNameLocal} OS error occurred.")
         #if 'FATAL' not in stderr and 'ERROR' not in stderr : # download was successful
         if ('fatal' not in stderr_lower and 'error' not in stderr_lower) or \
-            (os.path.exists(sFileNameLocal)) : # download was successful
+            (os.path.exists(sFileNameLocal) and fileSize > 0.5) : # download was successful
             return True
 
     return False
