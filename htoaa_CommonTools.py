@@ -113,7 +113,7 @@ def getNanoAODFile(
         downloadFile = True, 
         fileNameLocal = './inputFiles/fLocal.root', 
         nTriesToDownload = 3, 
-        cp_command = 'eos cp' # 'eos cp' for lxplus, 'xrdcp' elsewhere
+        server = 'lxplus'
         ):
     # MC:
     # DAS file: "/store/mc/RunIISummer20UL18NanoAODv9/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/260000/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
@@ -125,12 +125,13 @@ def getNanoAODFile(
     if downloadFile  and  os.path.exists(fileNameLocal):
         # local copy of the i/p file exists
         print(f"{fileNameLocal = } exists")
-        return fileNameLocal
+        return fileNameLocal, True
 
     fileName_toUse = fileName
+    cp_command = 'eos cp' if server in ['lxplus'] else 'xrdcp'
     print(f"htoaa_CommonTools::getNanoAODFile() here1 {datetime.now() = }"); sys.stdout.flush()
 
-    if useLocalFileIfExists and fileName.startswith("/store/"):
+    if useLocalFileIfExists and fileName.startswith("/store/") and server in ['lxplus']: # 'eos cp' works on lxplus
         # check if NanoAOD exists in /eos area
         fileNameTemplate_DAS = "/store/{IsMC}/{SampleProductionCampaign}/{SampleName}/{DatasetTier}/{GT}/{SampleDir}/{SampleFileName}"
         fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
@@ -163,11 +164,12 @@ def getNanoAODFile(
         print(f"{fileNameLocal = }: {os.path.exists(fileNameLocal) = } ")            
         print(f"List directory {os.path.dirname(fileNameLocal) = }:  {os.listdir(os.path.dirname(fileNameLocal)) = }")
         if os.path.exists(fileNameLocal):
-            return fileNameLocal
+            return fileNameLocal, True
 
     print(f"htoaa_CommonTools::getNanoAODFile() here4 {datetime.now() = }"); sys.stdout.flush()
     if fileName_toUse.startswith("/store/"):
         # Copy of the NanoAOD file is not on /eos
+        isReadingSuccessful = False
         for redirector in xrootd_redirectorNames:
             fileName_toUse_i = redirector + fileName_toUse
             print(f"getNanoAODFile():: Checking {fileName_toUse_i}"); sys.stdout.flush()
@@ -178,6 +180,7 @@ def getNanoAODFile(
                     print(f"{fileNameLocal = } xrdcp successfully")
                     fileName_toUse = fileNameLocal
                     print(f"htoaa_CommonTools::getNanoAODFile() here6 {datetime.now() = }"); sys.stdout.flush()
+                    isReadingSuccessful = True
                     break
                 
             else:
@@ -196,10 +199,11 @@ def getNanoAODFile(
                     if nEntries > 0:
                         print(f"{fileName_toUse_i}: {nEntries}"); sys.stdout.flush()
                         fileName_toUse = fileName_toUse_i
+                        isReadingSuccessful = True
                         break
             print(f"htoaa_CommonTools::getNanoAODFile() here7 {datetime.now() = }"); sys.stdout.flush()
         print(f"htoaa_CommonTools::getNanoAODFile() here8 {datetime.now() = }"); sys.stdout.flush()
-        return fileName_toUse
+        return fileName_toUse, True
 
 
 
@@ -298,8 +302,10 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
             except OSError: 
                 print(f"sFileNameLocal: {sFileNameLocal} OS error occurred.")
         #if 'FATAL' not in stderr and 'ERROR' not in stderr : # download was successful
-        if ('fatal' not in stderr_lower and 'error' not in stderr_lower) or \
-            (os.path.exists(sFileNameLocal) and fileSize > 0.5) : # download was successful
+#        if ('fatal' not in stderr_lower and 'error' not in stderr_lower) or \
+#            (os.path.exists(sFileNameLocal) and fileSize > NanoAODFileSize_Min) : # download was successful
+        if ('fatal' not in stderr_lower and 'error' not in stderr_lower):
+            print(f"xrdcpFile():: successful")
             return True
 
     return False
@@ -712,3 +718,11 @@ def akArray_isin(testArray, referenceArray):
     Compare each element of testArray (along axis=1) with referenceArray (along axis=1), and return boolean array (with shape of testArray) 
     '''
     return ak.from_iter( [ np.isin(testArray[idx_], referenceArray[idx_]) for idx_ in range(len(testArray)) ] )
+
+
+def insertInListBeforeThisElement(list1, sConditionToAdd, addBeforeThisCondition):
+    for idx_ in range(len(list1)):
+        if list1[idx_] == addBeforeThisCondition:
+            list1.insert(idx_, sConditionToAdd)
+            break
+    return list1

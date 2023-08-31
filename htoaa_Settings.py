@@ -155,17 +155,21 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         'DDBvLV2': { # not provided for UL samples
             'M': 0.8, # taken from Si's code
         },
+        'ParticleNetMD_bbvsQCD': { # BTV-22-001
+            'L': 0.9172
+        }
     },
 }
 
 
 ### Miscellaneous constants
 kLHE_HT_Max = 99999.0
+NanoAODFileSize_Min = 0.5 # in MB
 
 
 
 ### Miscellaneous variables
-HistogramNameExtensions_QCD = ['_0bCat', '_1bCat', '_2bCat', '_3bCat', '_4bCat', '_5bAndMoreCat'] 
+HistogramNameExtensions_QCD = ['0bCat', '1bCat', '2bCat', '3bCat', '4bCat', '5bAndMoreCat'] 
 
 
 
