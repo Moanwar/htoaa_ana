@@ -697,7 +697,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     
                     ('hLeadingFatJetNBHadrons'+sHExt,                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNBHadrons"}),
                     ('hLeadingFatJetNCHadrons'+sHExt,                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNCHadrons"}),            
-                    ('hLeadingFatJetNConstituents'+sHExt,               {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNConstituents"}),
+                    ('hLeadingFatJetNConstituents'+sHExt,               {sXaxis: nObject50_axis,  sXaxisLabel: r"LeadingFatJetNConstituents"}),
                     
                     ('hLeadingFatJetParticleNetMD_QCD'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_QCD"}),
                     ('hLeadingFatJetParticleNetMD_Xbb'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_Xbb"}),
@@ -4537,7 +4537,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     
                     output['hLeadingFatJetNConstituents'+sHExt].fill(
                         dataset=dataset,
-                        nObject=(leadingFatJet.nConstituents[sel_SR_forHExt]),
+                        nObject50=(leadingFatJet.nConstituents[sel_SR_forHExt]),
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     )
