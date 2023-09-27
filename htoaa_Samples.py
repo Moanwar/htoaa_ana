@@ -12,12 +12,18 @@ QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QC
 
 Samples2018 = OD([
 
-    (kData, [
-        "JetHT_Run2018A",
-        "JetHT_Run2018B",
-        "JetHT_Run2018C",
-        "JetHT_Run2018D"
-    ]),
+    #(kData, [
+    #    "JetHT_Run2018A",
+    #    "JetHT_Run2018B",
+    #    "JetHT_Run2018C",
+    #    "JetHT_Run2018D"
+    #]),
+
+    ("JetHT_Run2018A", ["JetHT_Run2018A"]),
+    ("JetHT_Run2018B", ["JetHT_Run2018B"]),
+    ("JetHT_Run2018C", ["JetHT_Run2018C"]),
+    ("JetHT_Run2018D", ["JetHT_Run2018D"]),
+
     
     (kQCD_bEnrich,[
         "QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",

@@ -15,6 +15,12 @@ xrootd_redirectorNames = [
 ]
 sampleFormat = "nanoAOD" 
 
+### Miscellaneous constants
+kPt_Max     = 99999.0
+kLHE_HT_Max = 99999.0
+NanoAODFileSize_Min = 0.5 # in MB
+#------------------------------------
+
 Era_2016 = '2016'
 Era_2017 = '2017'
 Era_2018 = '2018'
@@ -35,6 +41,14 @@ Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
     Era_2018: [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
+}
+Luminosities_forGGFMode_perEra = {
+    Era_2018: {
+        'A':  8.736,
+        'B':  7.067,
+        'C':  6.895,
+        'D': 31.839
+    } 
 }
 
 
@@ -100,6 +114,30 @@ sFileLumiScalesPhSpOverlapRewgt = {
     }
 }
 
+HEM1516Issue2018_AffectedRunRange = [319077, 325175]
+DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365. Calculated for 2018 HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 trigger 
+
+bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
+    Era_2018: {
+        'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
+            'L': 0.1208,
+            'M': 0.4506,
+        },
+        'DDBvL': { # not provided for UL samples
+            'M': 0.8, # taken from Si's code
+        },
+        'DDBvLV2': { # not provided for UL samples
+            'M': 0.8, # taken from Si's code
+        },
+        'ParticleNetMD_XbbvsQCD': { # BTV-22-001 
+            # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
+            # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
+            'L': 0.9172
+        }
+    },
+}
+
+
 Corrections = {
 
     "PURewgt": {
@@ -138,33 +176,22 @@ Corrections = {
             "FitRange": [0, 3000],
         }
     },
-
-}
-
-DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365. Calculated for 2018 HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 trigger 
-
-bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
-    Era_2018: {
-        'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
-            'L': 0.1208,
-            'M': 0.4506,
+    
+    'ParticleNetMD_XbbvsQCD': { # Data-to-MC SFs for ParticleNetMD_XbbvsQCD:  BTV-22-001 
+        # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
+        # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
+        Era_2018: {
+            'L': {
+                'pT_binEdges': [ 0,      450,      500,       600,    kPt_Max ],
+                'SFs':         [      1,     0.921,     1.006,     1.001      ],
+            },
         },
-        'DDBvL': { # not provided for UL samples
-            'M': 0.8, # taken from Si's code
-        },
-        'DDBvLV2': { # not provided for UL samples
-            'M': 0.8, # taken from Si's code
-        },
-        'ParticleNetMD_bbvsQCD': { # BTV-22-001
-            'L': 0.9172
-        }
+
     },
+
 }
 
 
-### Miscellaneous constants
-kLHE_HT_Max = 99999.0
-NanoAODFileSize_Min = 0.5 # in MB
 
 
 

@@ -166,8 +166,8 @@ def writeCondorSumitFile(
         (5, 'testmatch'),
         (6, 'nextweek'),
     ])
-    #iJobFlavour = 2 # 2, 'longlunch' 2 hours
-    iJobFlavour = 1 # 1, 'microcentury' 
+    iJobFlavour = 2 # 2, 'longlunch' 2 hours
+    #iJobFlavour = 1 # 1, 'microcentury' 
     if increaseJobFlavour: iJobFlavour += 1
     
     
@@ -346,6 +346,12 @@ if __name__ == '__main__':
         
         for sample_category, samples in samplesList.items():
             #print("sample_category {}, samples {}".format(sample_category, samples))
+            sample_isMC = True
+            for sampleSubString_toCheck in [kData, 'Run2016','Run2017', 'Run2018']:
+                if sampleSubString_toCheck in sample_category:
+                    sample_isMC = False
+                    break
+
             for sample in samples:
                 if len(selSamplesToRun_list) > 0:
                     skipThisSample = True
@@ -378,9 +384,9 @@ if __name__ == '__main__':
                     if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
                     else:              files.append( iEntry )
                 sample_dataset     = sampleInfo["dataset"]
-                sample_cossSection = sampleInfo["cross_section"] if (sample_category != kData) else None
+                sample_cossSection = sampleInfo["cross_section"] if sample_isMC else None
                 sample_nEvents     = sampleInfo["nEvents"]
-                sample_sumEvents   = sampleInfo["sumEvents"] if (sample_category != kData) else None
+                sample_sumEvents   = sampleInfo["sumEvents"] if sample_isMC else None
 
                 if printLevel >= 6:
                     print("\nsample: {}".format(sample))
@@ -539,9 +545,9 @@ if __name__ == '__main__':
                         config["inputFiles"] = list( files_splitted[iJob] )
                         config["outputFile"] = sOpRootFile_to_use 
                         config["sampleCategory"] = sample_category
-                        config["isMC"] = (sample_category != kData)
+                        config["isMC"] = sample_isMC 
                         config["nEvents"] = sample_nEvents
-                        if (sample_category != kData):
+                        if sample_isMC:
                             config["crossSection"] = sample_cossSection
                             config["sumEvents"] = sample_sumEvents
                             
