@@ -306,6 +306,14 @@ list_datasetAndXs_2018 = OD([
     ("/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}), # run 319337 to 320065
     ("/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}), # run 320500 to 325175
 
+    ## SingleMuon
+    # dasgoclient --query="dataset=/SingleMuon/*2018*UL*MiniAODv2_NanoAODv9_GT36*/NANOAOD"
+    # XS (cross-section) does not matter for data sample    
+    ("/SingleMuon/Run2018A-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),    
+    ("/SingleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    ("/SingleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    ("/SingleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD", {sXS: -1}),
+    
     
     #("", {sXS: }),    
 ])
