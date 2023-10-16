@@ -33,7 +33,7 @@ import awkward as ak
 import uproot
 #from dask.distributed import Client
 from particle import Particle # For PDG particle listing https://github.com/scikit-hep/particle
-
+import logging
 
 
 from htoaa_Settings import *
@@ -51,10 +51,10 @@ from htoaa_Samples import (
 # use GOldenJSON
 
  
-printLevel = 0
+printLevel = 0      
 nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
-
+flushStdout = False
 
 sWeighted = "Wtd: "
 
@@ -101,7 +101,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hCutFlowWeighted',                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
             
             
-        ])        
+        ])       
 
         self._accumulator = processor.dict_accumulator({
             'cutflow': processor.defaultdict_accumulator(int)
@@ -149,6 +149,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.datasetInfo[dataset]['isSignal'] = False
         self.datasetInfo[dataset]['isQCD'] = False
 
+
         if printLevel >= 20:
             print(f"nEvents: {len(events)}")
         if printLevel >= 20:
@@ -165,6 +166,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 output += self.process_shift(events, _syst)
         else:
             output = self.process_shift(events, None)
+
 
         return output
 
@@ -226,7 +228,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             
             
-        
         ###################
         # FILL HISTOGRAMS
         ###################
@@ -328,6 +329,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen[sel_negGenWgt]
                 )
        
+
         return output
 
 
@@ -369,6 +371,7 @@ if __name__ == '__main__':
     isMC                = config["isMC"]
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
+    server              = config["server"]
     '''
     # lumiScale is not applied for countSumEventsInSample.py
     if isMC:
@@ -396,13 +399,51 @@ if __name__ == '__main__':
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
         sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))   
-        sInputFiles[iFile] = getNanoAODFile(
+        #cp_command = 'eos cp' if server in ['lxplus'] else 'xrdcp'
+        sInputFile, isReadingSuccessful = getNanoAODFile(
             fileName = sInputFile, 
             useLocalFileIfExists = True, 
             downloadFile = True, 
             fileNameLocal = './inputFiles/%s' %(os.path.basename(sInputFile)), 
-            nTriesToDownload = 3)
+            nTriesToDownload = 3,
+            server = server
+            )
+        if not isReadingSuccessful:
+            logging.critical('countSumEventsInSample:: getNanoAODFile() for input file %s failed. **** CRITICAL ERROR ****. \nAborting...' % (sInputFile)); sys.stdout.flush();
+            exit(0)
         
+        # Check if input file exists or not
+        fileSize = 0
+        if os.path.exists(sInputFile):
+            try:
+                fileSize = os.path.getsize(sInputFile) / (1024 * 1024) # file size in MB
+                #print(f"sInputFile: {sInputFile} ({fileSize} MB) ")
+            except  FileNotFoundError:
+                print(f"sInputFile: {sInputFile} file not found.")
+            except OSError: 
+                print(f"sInputFile: {sInputFile} OS error occurred.")
+        print(f"countSumEventsInSample:: {sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");     
+
+        if fileSize > NanoAODFileSize_Min:     
+            sInputFiles[iFile] = sInputFile
+        else:
+            logging.critical('countSumEventsInSample:: Input file %s file size below threshold (%g MB). **** CRITICAL ERROR ****. \nAborting...' % (sInputFile, NanoAODFileSize_Min) ); sys.stdout.flush();
+            exit(0)
+    
+        
+    print(f"\nActual  sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
+    for sInputFile in sInputFiles:
+        fileSize = 0
+        if os.path.exists(sInputFile):
+            try:
+                fileSize = os.path.getsize(sInputFile) / (1024 * 1024) # file size in MB
+                #print(f"sInputFile: {sInputFile} ({fileSize} MB) ")
+            except  FileNotFoundError:
+                print(f"sInputFile: {sInputFile} file not found.")
+            except OSError: 
+                print(f"sInputFile: {sInputFile} OS error occurred.")
+        print(f"\t{sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");  
+    sys.stdout.flush()
 
 
     startTime = time.time()
@@ -417,7 +458,7 @@ if __name__ == '__main__':
     chunksize = nEventToReadInBatch
     maxchunks = None if nEventsToAnalyze == -1 else int(nEventsToAnalyze/nEventToReadInBatch)
     nWorkers  = 4 if nEventsToAnalyze == -1 else 1
-    print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}")
+    print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}", flush=flushStdout)
     run = processor.Runner(
         #executor=executor,
         executor=processor.FuturesExecutor(workers=nWorkers),
@@ -426,6 +467,7 @@ if __name__ == '__main__':
         chunksize=chunksize,  #3 ** 20,  ## Governs the number of times LeptonJetProcessor "process" is called
         maxchunks=maxchunks
     )
+ 
 
     output, metrics = run(
         fileset={sample_category: sInputFiles},
@@ -439,7 +481,7 @@ if __name__ == '__main__':
         )
     )
 
-    print(f"metrics: {metrics}")
+    print(f"metrics: {metrics}", flush=flushStdout)
 
 
     if 'cutflow' in output.keys():

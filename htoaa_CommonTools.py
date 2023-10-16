@@ -12,8 +12,10 @@ import math
 import awkward as ak
 print(f"htoaa_CommonTools:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
-import uproot3 as uproot
+#import uproot3 as uproot
+import uproot as uproot
 print(f"htoaa_CommonTools:: here4 {datetime.now() = }"); sys.stdout.flush()
+from coffea import hist
 #import ROOT as R
 print(f"htoaa_CommonTools:: here5 {datetime.now() = }"); sys.stdout.flush()
 from parse import *
@@ -155,8 +157,12 @@ def getNanoAODFile(
         fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
         print(f"Checking for eos file: {fileName_EOS = }") 
         print(f"htoaa_CommonTools::getNanoAODFile() here2 {datetime.now() = }"); sys.stdout.flush()
-
         print(f"{fileName_EOS = }: {os.path.exists(fileName_EOS) = } ")
+
+        if (not downloadFile) and (os.path.exists(fileName_EOS)):
+            print(f"htoaa_CommonTools::getNanoAODFile() here2.1 {datetime.now() = }: Reading directly {fileName_EOS = }"); sys.stdout.flush()
+            return fileName_EOS, True
+
         # os.path.exists() for files on /eos are always return False. So try 'eos cp' to check if the file on eos exists or not
         if  xrdcpFile(fileName_EOS, fileNameLocal, nTry = 3, cp_command = 'eos cp'):
             print(f"Forced xrdcp for {fileName_EOS = } successful.")
@@ -695,6 +701,42 @@ def executeBashCommand(sCmd1):
     return result.stdout
 
 
+def fillHist(
+        h = hist.Hist('tmp'),
+        dataset = '',
+        syst = None, 
+        xValue = None,
+        yValue = None,
+        zValue = None,        
+        wgt = None
+):
+    nBasicAxes = 2
+    print(f"htoaa_CommonTools::fillHist():: h ({type(h)}): {h}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes ({type(h.axes)}): {h.axes}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes[0] ({type(h.axes[0])}): {h.axes[0]}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: {h.axes = },  h.axes[nBasicAxes] ({type(h.axes[nBasicAxes])}): {h.axes[nBasicAxes]}")
+    
+    
+    if 1==1: return
+    '''
+    if len(h.axes) == (nBasicAxes+1):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes] = xValue,            
+            weight = wgt
+        )
+    elif len(h.axes) == (nBasicAxes+2):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes  ] = xValue,
+            h.axes[nBasicAxes+1] = yValue,
+            weight = wgt
+        )
+    '''
+
+
 def printVariable(sName, var):
     printInDetail=True
     #if nEventsToAnalyze == -1: printInDetail = False
@@ -711,6 +753,15 @@ def printVariable(sName, var):
             print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")
         except:
             print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+
+
+def printVariablePtEtaPhi(sName, var):
+    var_PtEtaPhi = ak.zip([
+        var.pt,
+        var.eta,
+        var.phi
+    ])
+    printVariable('%s PtEtaPhi' % sName, var_PtEtaPhi)
 
 
 def akArray_isin(testArray, referenceArray):

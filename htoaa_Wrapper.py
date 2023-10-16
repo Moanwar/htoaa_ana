@@ -233,7 +233,7 @@ if __name__ == '__main__':
     print("htoaa_Wrapper:: main: {}".format(sys.argv)); sys.stdout.flush()
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
-    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py"], required=True)
+    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py", "htoaa_triggerStudy_GGFMode.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
@@ -305,11 +305,30 @@ if __name__ == '__main__':
     if sAnalysis in ["htoaa_Analysis_GGFMode.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
+                "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+                "TTJets_Incl_NLO", "TTJets_Incl_LO", "TTJets_HT_LO", "TTJets_Lep_LO", 
+                'WJetsToLNu_Incl_NLO', 'WJetsToLNu_Incl_LO', 'W1JetsToLNu_LO', 'W2JetsToLNu_LO', 'W3JetsToLNu_LO', 'W4JetsToLNu_LO',
                 "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
-                "WJetsToLNu", "W1JetsToLNu", "W2JetsToLNu", "W3JetsToLNu", "W4JetsToLNu",
-                "TTJets",  # TTJets LO, NLO Madgraph samples 
         ] )
+
+    #  Settings for GGF H->aa->4b trigger study
+    if sAnalysis in ["htoaa_triggerStudy_GGFMode.py"]:
+        # exclude irrelevant samples from running
+        selSamplesToExclude_list.extend( [
+                "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",  
+                "TTJets_Incl_NLO", "TTJets_Incl_LO", "TTJets_HT_LO", "TTJets_Lep_LO", 
+                'WJetsToLNu_Incl_NLO', 'WJetsToLNu_Incl_LO', 'W1JetsToLNu_LO', 'W2JetsToLNu_LO', 'W3JetsToLNu_LO', 'W4JetsToLNu_LO', 
+                "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
+        ] )        
     ## ------------------------------------------------------------------------------------------
+
+    #  Settings for countSumEventsInSample.py
+    if sAnalysis in ["countSumEventsInSample.py"]:
+        # Change samplesList to run on all samples from samplesInfo
+        samplesList = OD()
+        for sampleName in samplesInfo.keys():
+            samplesList[sampleName] = [ sampleName ]
+        print(f"\n\n\n\nChanged samplesList to run on all samples from {sFileSamplesInfo[era]} ({len(samplesList)}): {samplesList}")
 
 
     print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
@@ -431,7 +450,7 @@ if __name__ == '__main__':
                     isCondorErrorExist      = os.path.isfile(sCondorError_to_use)
 
                     if printLevel >= 3:
-                        print(f"sOpRootFile_to_use: {sOpRootFile_to_use} ")
+                        print(f"sOpRootFile_to_use: {sOpRootFile_to_use}, {JobLogsDir = }, {os.getcwd() = } ")
                         #print(f" {sConfig_to_use = }: {isConfigExist = } ")
                         #print(f" {sOpRootFileFinal_to_use = }: {isOpRootFileExist = } ")
                         #print(f" {sCondorExec_to_use = }: {isCondorExecExist = } ")

@@ -32,8 +32,7 @@ Add commandline option '-updateCrossSections' to update cross-section value in t
 
 
 ### Calculate sumEvents
-Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\
-In htoaa_Samples.py, set 'QCDInclMode = 0'.\ 
+Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\ 
 Run:
 ```
 python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
@@ -42,6 +41,7 @@ It runs jobs in HT Condor, and produces final output hadd root file.
 Set path of the output hadd root file in 'sFIn_analysis_stage1_dict' variable in 'samplesList_update.py' and run
 ```
 python3 samplesList_update.py -era <era>
+cp Samples_2018UL_updated.json Samples_2018UL.json
 ```
 This updates samples' full detail list with sumEvents. Now samples' full detail list (Samples_2018UL.csv) is ready for the further analysis. Now on the previous analysis steps need not to run again.
 

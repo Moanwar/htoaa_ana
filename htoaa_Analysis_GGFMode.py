@@ -45,7 +45,7 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.lookup_tools.dense_lookup import dense_lookup
 #from coffea.lumi_tools import LumiMask
 #import hist
-from coffea import hist
+from coffea import hist # /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa/lib/python3.10/site-packages/coffea/hist/hist_tools.py
 import awkward as ak
 #import uproot
 #from dask.distributed import Client
@@ -102,23 +102,6 @@ def get_GenPartDaughters(awkArray, index_GenPart):
     
     return False
 
-# -----------------------------------------------------------------------------------
-def printVariable(sName, var):
-    printInDetail=True
-    #if nEventsToAnalyze == -1: printInDetail = False
-    if str(type(var)) in ['numpy.ndarray', "<class 'numpy.ndarray'>", "<class 'numpy.ma.core.MaskedArray'>"]: printInDetail = False # as gave error
-    #print(f"printInDetail: {printInDetail} {sName} ({type(var)}) ({len(var)}): {var}")
-    if not printInDetail:
-        #print(f"{sName} ({type(var)}) ({len(var)}): {var}")
-        try:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var.tolist()}")
-        except:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
-    else:
-        try:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")
-        except:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
 
 # -----------------------------------------------------------------------------------
 class ObjectSelection:
@@ -248,7 +231,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
          
         global runMode_SignalGenChecks;       runMode_SignalGenChecks  = False; # True
         global runMode_QCDGenValidation;      runMode_QCDGenValidation = False; # True
-        global runMode_GenLHEPlots;           runMode_GenLHEPlots      = False
+        global runMode_GenLHEPlots;           runMode_GenLHEPlots      = True
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
         
 
@@ -340,7 +323,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             
 
         # selection region addition each SR conditions successively
-        for iCondition in range(self.sel_names_all["SR"].index(HLT_AK8PFJet330_name), len(self.sel_names_all["SR"]) - 1):
+        #for iCondition in range(self.sel_names_all["SR"].index(HLT_AK8PFJet330_name), len(self.sel_names_all["SR"]) - 1):
+        for iCondition in range(self.sel_names_all["SR"].index("leadingFatJetPt"), len(self.sel_names_all["SR"]) - 1):
             conditionName = self.sel_names_all["SR"][iCondition]
             self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["SR"][0 : (iCondition+1)]
         print(f"self.sel_names_all: {json.dumps(self.sel_names_all, indent=4)}")
@@ -818,7 +802,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 ]))
 
-                    ### 2-D distribution --------------------------------------------------------------------------------------------------------
+                ### 2-D distribution --------------------------------------------------------------------------------------------------------
                 histos.update(OD([
                     ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
@@ -2953,6 +2937,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 hPURewgt = self.hPURewgt
             )
 
+            # MC QCD_bGen HT reweight ---------------------
+            wgt_HT = None
+            if self.datasetInfo['isQCD_bGen']:
+                wgt_HT = getHTReweight(
+                    HT_list            = events.LHE.HT,
+                    sFitFunctionFormat = self.datasetInfo['HTRewgt']["fitFunctionFormat"],
+                    sFitFunction       = self.datasetInfo['HTRewgt']["fitFunction"],
+                    sFitFunctionRange  = self.datasetInfo['HTRewgt']["fitFunctionHTRange"]
+                )            
+
             # MC top pT reweigts for ttbar sample ---------
             if self.datasetInfo['isTTbar']:
                 wgt_TopPt = getTopPtRewgt(
@@ -3000,6 +2994,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "PUWeight",
                 weight = wgt_PU
             )
+            if self.datasetInfo['isQCD_bGen']:
+                weights.add(
+                    "HTRewgt",
+                    weight = wgt_HT
+                )            
             if self.datasetInfo['isTTbar']:
                 weights.add(
                     "TopPtReWeight",
@@ -3032,6 +3031,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "PUWeight",
                 weight = wgt_PU
             )
+            if self.datasetInfo['isQCD_bGen']:
+                weights_woHEM1516Fix.add(
+                    "HTRewgt",
+                    weight = wgt_HT
+                )  
             if self.datasetInfo['isTTbar']:
                 weights_woHEM1516Fix.add(
                     "TopPtReWeight",
@@ -3054,8 +3058,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight=np.copysign(np.ones(len(events)), events.genWeight)
             )
-            
-            
+            if self.datasetInfo['isQCD_bGen']:
+                weights_gen.add(
+                    "HTRewgt",
+                    weight = wgt_HT
+                )
+
             if printLevel >= 10:
                 print(f"\nevents.genWeight ({events.genWeight.fields}) ({len(events.genWeight)}): {events.genWeight.to_list()}")
                 genWgt1 = np.copysign(np.ones(len(events)), events.genWeight)
@@ -3086,26 +3094,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-            if self.datasetInfo['isQCD_bGen']:
-                wgt_HT = getHTReweight(
-                    HT_list            = events.LHE.HT,
-                    sFitFunctionFormat = self.datasetInfo['HTRewgt']["fitFunctionFormat"],
-                    sFitFunction       = self.datasetInfo['HTRewgt']["fitFunction"],
-                    sFitFunctionRange  = self.datasetInfo['HTRewgt']["fitFunctionHTRange"]
-                )
-                weights.add(
-                    "HTRewgt",
-                    weight=wgt_HT
-                )
 
-                weights_gen.add(
-                    "HTRewgt",
-                    weight=wgt_HT
-                )
-               
-                if printLevel >= 30:
-                    printVariable("\n events.LHE.HT", events.LHE.HT)
-                    printVariable("wgt_HT", wgt_HT)
 
 
 
@@ -7184,7 +7173,7 @@ if __name__ == '__main__':
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
     if isMC:
-        luminosity          = Luminosities_forGGFMode[era][0]  # Luminosities_Inclusive[era][0]
+        luminosity          = Luminosities_forGGFMode[era]['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'][0]  # Luminosities_Inclusive[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents

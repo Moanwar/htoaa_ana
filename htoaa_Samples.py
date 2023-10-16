@@ -19,10 +19,17 @@ Samples2018 = OD([
     #    "JetHT_Run2018D"
     #]),
 
+    ## JetHT data
     ("JetHT_Run2018A", ["JetHT_Run2018A"]),
     ("JetHT_Run2018B", ["JetHT_Run2018B"]),
     ("JetHT_Run2018C", ["JetHT_Run2018C"]),
     ("JetHT_Run2018D", ["JetHT_Run2018D"]),
+
+    ## SingleMuon data
+    ("SingleMuon_Run2018A", ["SingleMuon_Run2018A"]),
+    ("SingleMuon_Run2018B", ["SingleMuon_Run2018B"]),
+    ("SingleMuon_Run2018C", ["SingleMuon_Run2018C"]),
+    ("SingleMuon_Run2018D", ["SingleMuon_Run2018D"]),
 
     
     (kQCD_bEnrich,[
@@ -87,26 +94,35 @@ Samples2018 = OD([
     ]),
 
 
-    ("TTJets_NLO", [
+    ("TTJets_Incl_NLO", [
         "TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8"
     ]),
 
-    ("TTJets_Incl", [
+    ("TTJets_Incl_LO", [
         "TTJets_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
-    ("TTJets_HT", [
+    ("TTJets_HT_LO", [
         "TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8",
         "TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8",
         "TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
 
-    ("TTJets_Lep", [
+    ("TTJets_Lep_LO", [
         "TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8",
         "TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8",
         "TTJets_DiLept_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),    
+
+    ("SingleTop", [
+        "ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+        "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+        "ST_s-channel_4f_hadronicDecays_TuneCP5_13TeV-amcatnlo-pythia8",
+        "ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),
 
     ("ZJetsToQQ_HT", [
         "ZJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8",
@@ -114,6 +130,39 @@ Samples2018 = OD([
         "ZJetsToQQ_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8",
         "ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
+
+    #("DYJets_Incl_NLO", [
+    #    "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    #    "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    #]),
+    ("DYJets_M-10to50_Incl_NLO", [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    ]),
+    ("DYJets_M-50_Incl_NLO", [
+        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    ]),
+
+    #("DYJets_Incl_LO", [
+    #    "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8",
+    #    "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8",
+    #]),
+    ("DYJets_M-10to50_Incl_LO", [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8",
+    ]),
+    ("DYJets_M-50_Incl_LO", [
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8",
+    ]),
+
+    ("DYJets_HT_LO", [
+        "DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+    ]),        
     
     ("WJetsToQQ_HT", [
         "WJetsToQQ_HT-200to400_TuneCP5_13TeV-madgraphMLM-pythia8",
@@ -122,12 +171,15 @@ Samples2018 = OD([
         "WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
 
-    ('WJetsToLNu_Incl', [
+    ('WJetsToLNu_Incl_NLO', [
+        "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    ]),
+
+    ('WJetsToLNu_Incl_LO', [
         "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
-    ('WJetsToLNu_HT', [
-        #"WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
+    ('WJetsToLNu_HT_LO', [
         "WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",
@@ -136,25 +188,21 @@ Samples2018 = OD([
         "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8",
-        #"W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
-        #"W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
-        #"W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
-        #"W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
  
-    ('W1JetsToLNu', [
+    ('W1JetsToLNu_LO', [
         "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),   
  
-    ('W2JetsToLNu', [
+    ('W2JetsToLNu_LO', [
         "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),   
  
-    ('W3JetsToLNu', [
+    ('W3JetsToLNu_LO', [
         "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),   
  
-    ('W4JetsToLNu', [
+    ('W4JetsToLNu_LO', [
         "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
