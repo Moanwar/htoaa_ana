@@ -304,4 +304,5 @@ dependencies:
   - hyperopt
   - coffea
   - particle
+  - parse
 prefix: /afs/cern.ch/work/s/ssawant/private/softwares/anaconda3/envs/ana_htoaa
