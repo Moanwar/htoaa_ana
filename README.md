@@ -93,9 +93,9 @@ brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/nor
 ```
 python3 htoaa_Analysis_GGFMode.py <config>.json
 ```
-Histograms stored in the output root file has the following naming convention:
+Histograms stored in the output root file have the following naming convention:
 ```
-evt/<sampleCategory config.json>/<histogram name>_<systematics>
+evt/<sampleCategory from <config>.json>/<histogram name>_<systematics>
 ```
 
 'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_GGFMode.py in parallel HT Condor jobs.
@@ -111,7 +111,7 @@ Append '-server tifr' to the previous command to run on TIFR server.
 
 **htoaa_CommonTools.py**: Common functions used to run the analysis
 
-**htoaa_Samples.py**: List of data and MC samples to run for the analysis. This list is stored information in python-dictionary format. Keys of the dictionary represent 'sample category' and values of the dictionary list sample dataset physics name. 
+**htoaa_Samples.py**: List of data and MC samples to run for the analysis. This list is stored information in python-dictionary format. Keys of the dictionary represent the 'sample category' and values of the dictionary list sample dataset physics name. 
 
 **Samples_2018UL.csv**: Dictionary of all data and MC samples with NanoAOD files, cross-section etc listed for each sample.
 
