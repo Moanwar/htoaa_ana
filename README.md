@@ -89,19 +89,19 @@ brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/nor
 
 
 ### Running analysis
-'htoaa_Analysis_GGFMode.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
+'htoaa_Analysis_Example.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
 ```
-python3 htoaa_Analysis_GGFMode.py <config>.json
+python3 htoaa_Analysis_Example.py <config>.json
 ```
 Histograms stored in the output root file have the following naming convention:
 ```
 evt/<sampleCategory from <config>.json>/<histogram name>_<systematics>
 ```
 
-'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_GGFMode.py in parallel HT Condor jobs.
+'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_Example.py in parallel HT Condor jobs.
 Command to run htoaa analysis macro on data and MC samples:
 ```
-python3 htoaa_Wrapper.py -analyze htoaa_Analysis_GGFMode.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
+python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
 ```
 Append '-server tifr' to the previous command to run on TIFR server.
 
