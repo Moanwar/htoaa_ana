@@ -93,6 +93,10 @@ brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/nor
 ```
 python3 htoaa_Analysis_GGFMode.py <config>.json
 ```
+Histograms stored in the output root file has the following naming convention:
+```
+evt/<sampleCategory config.json>/<histogram name>_<systematics>
+```
 
 'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_GGFMode.py in parallel HT Condor jobs.
 Command to run htoaa analysis macro on data and MC samples:
