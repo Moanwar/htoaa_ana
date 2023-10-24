@@ -19,20 +19,20 @@ voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989
 ```
 
 ## Analysis steps
-Analysis is iterative process, and different corrections are needed to take into account. The different corrections considered so far are listed below with details on obtaining those correction. If you want to run the analysis for the first iteration or intermediate corrections are already calculated then you can jump to 'Running analysis' sub-section.
+Analysis is an iterative process, and different corrections are needed to take into account. The different corrections considered so far are listed below with details on obtaining those corrections. If you want to run the analysis for the first iteration or intermediate corrections are already calculated then you can jump to 'Running analysis' sub-section.
 
 ### Prepare samples' list with all details (Samples_2018UL.csv)
 Add/update dataset name and cross-sections for all samples in 'samplesList_prepare.py'.\
 To run:
 ```
-python3 samplesList_prepare.py -era <era>\
+python3 samplesList_prepare.py -era <era>
 cp Samples_2018UL_v0.json Samples_2018UL.json
 ```
-Add commandline option '-updateCrossSections' to update cross-section value in the existing sample list.
+Add command line option '-updateCrossSections' to update the cross-section value in the existing sample list.
 
 
 ### Calculate sumEvents
-Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\ 
+Calculate sumEvents as the number of events with positive generator weight minus the number of events with negative weight.\ 
 Run:
 ```
 python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
@@ -103,7 +103,8 @@ Command to run htoaa analysis macro on data and MC samples:
 ```
 python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
 ```
-Append '-server tifr' to the previous command to run on TIFR server.
+Append '-server tifr' to the previous command to run on TIFR server. \
+Append '-ntuples SkimmedNanoAOD -nFilesPerJob 1' to run on the new skimmed NanoAOD files.
 
 
 ### Data and MC stack plots
