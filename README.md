@@ -111,7 +111,7 @@ Append '-server tifr' to the previous command to run on TIFR server.
 
 **htoaa_CommonTools.py**: Common functions used to run the analysis
 
-**htoaa_Samples.py**: List of data and MC samples to run for the analysis.
+**htoaa_Samples.py**: List of data and MC samples to run for the analysis. This list is stored information in python-dictionary format. Keys of the dictionary represent 'sample category' and values of the dictionary list sample dataset physics name. 
 
 **Samples_2018UL.csv**: Dictionary of all data and MC samples with NanoAOD files, cross-section etc listed for each sample.
 
