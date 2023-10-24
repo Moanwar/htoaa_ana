@@ -106,6 +106,11 @@ python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode
 Append '-server tifr' to the previous command to run on TIFR server.
 
 
+### Data and MC stack plots
+Run 'scripts/PlotHistos1D_DataVsMC.ipynb' (in jupyter-notebook) to make Data-vs-MC comparison stack plots. A list of histograms for the stack plots are set in 'scripts/HistogramListForPlottingDataVsMC_Analysis_Example.py' file, which get imported inside 'scripts/PlotHistos1D_DataVsMC.ipynb' file.
+
+
+
 ## Description of files
 **htoaa_Settings.py**: File listing main analysis options.
 
