@@ -158,13 +158,13 @@ def writeCondorSumitFile(
     '''
 
     jobFlavours = OD([
-        (0, 'espresso'),
-        (1, 'microcentury'),
-        (2, 'longlunch'),
-        (3, 'workday'),
-        (4, 'tomorrow'),
-        (5, 'testmatch'),
-        (6, 'nextweek'),
+        (0, 'espresso'),     # 20 minutes
+        (1, 'microcentury'), # 1 hour
+        (2, 'longlunch'),    # 2 hours
+        (3, 'workday'),      # 8 hours
+        (4, 'tomorrow'),     # 1 day
+        (5, 'testmatch'),    # 3 days
+        (6, 'nextweek'),     # 1 week
     ])
     iJobFlavour = 2 # 2, 'longlunch' 2 hours
     #iJobFlavour = 1 # 1, 'microcentury' 
@@ -233,12 +233,13 @@ if __name__ == '__main__':
     print("htoaa_Wrapper:: main: {}".format(sys.argv)); sys.stdout.flush()
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
-    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py", "htoaa_triggerStudy_GGFMode.py"], required=True)
+    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py", "htoaa_triggerStudy_GGFMode.py", "htoaa_Analysis_Example.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
+    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "SkimmedNanoAOD"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=5)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
@@ -253,6 +254,7 @@ if __name__ == '__main__':
     sAnalysis               = args.analyze
     era                     = args.era
     run_mode                = args.run_mode
+    sNTuples                = args.ntuples
     nFilesPerJob            = args.nFilesPerJob
     selSamplesToRun         = args.samples
     selSamplesToExclude     = args.excludeSamples
@@ -309,6 +311,18 @@ if __name__ == '__main__':
                 "TTJets_Incl_NLO", "TTJets_Incl_LO", "TTJets_HT_LO", "TTJets_Lep_LO", 
                 'WJetsToLNu_Incl_NLO', 'WJetsToLNu_Incl_LO', 'W1JetsToLNu_LO', 'W2JetsToLNu_LO', 'W3JetsToLNu_LO', 'W4JetsToLNu_LO',
                 "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
+                "SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8",
+                
         ] )
 
     #  Settings for GGF H->aa->4b trigger study
@@ -393,15 +407,17 @@ if __name__ == '__main__':
                 if not os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )
                 os.chdir( JobLogsDir )
                     
-                print(f"sample_category: {sample_category}, sample: {sample}")
+                print(f"sample_category: {sample_category}, sample: {sample}", flush=True)
 
                 sampleInfo = samplesInfo[sample] # Samples_Era.json                
-                fileList = sampleInfo[sampleFormat]
+                fileList   = sampleInfo["skimmedNanoAOD"] if sNTuples == "SkimmedNanoAOD" else sampleInfo[sampleFormat] 
                 files = []
                 for iEntry in fileList:
                     # file name with wildcard charecter *
                     if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
                     else:              files.append( iEntry )
+                if len(files) == 0: continue # no inputfile
+                
                 sample_dataset     = sampleInfo["dataset"]
                 sample_cossSection = sampleInfo["cross_section"] if sample_isMC else None
                 sample_nEvents     = sampleInfo["nEvents"]

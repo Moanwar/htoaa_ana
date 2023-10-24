@@ -1,0 +1,18 @@
+{
+    "nEventsToAnalyze": 1000,
+    "era": "2018",
+    "dataset": [
+        "/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    ],
+    "inputFiles": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/r1/PNet_v1.root"
+    ],
+    "outputFile": "analyze_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8_0_0.root",
+    "sampleCategory": "SUSY_GluGluH_01J_HToAATo4B_M-20_HPtAbv150",
+    "isMC": true,
+    "crossSection": 2.77077,
+    "nEvents": 452529,
+    "sumEvents": 452529.0,
+    "downloadIpFiles": false,
+    "server": "lxplus"
+}

@@ -20,6 +20,7 @@ import json
 from collections import OrderedDict as OD
 from copy import deepcopy
 import argparse
+import glob
 
 from htoaa_Settings import *
 
@@ -292,30 +293,30 @@ list_datasetAndXs_2018 = OD([
 
     ## ttH HToAATo4B_M-* and HToAATo4B_Pt150_M-*
     # dasgoclient --query="dataset=/SUSY*TTH*HToAATo4B*M*/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v*/NANOAODSIM"
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071  }),
 
-    # SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8	Filter efficiency (event-level)= (2850) / (10000) = 2.850e-01 +- 4.514e-03	Matching efficiency = 1.0 +/- 0.0 Cross-section = 0.0297 pb * 0.285 
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
-    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.0297 * 0.285   }),
+    # SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8	Filter efficiency (event-level)= (2850) / (10000) = 2.850e-01 +- 4.514e-03	Matching efficiency = 1.0 +/- 0.0 Cross-section = 0.5071 pb * 0.285 
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-15_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-25_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-35_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-45_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-50_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
+    ("/SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM", {sXS: 0.5071 * 0.285   }),
     
     
     
@@ -359,6 +360,8 @@ sNanoAOD                   = "nanoAOD"
 sCross_section             = "cross_section"
 sNEvents                   = "nEvents"
 sSumEvents                 = "sumEvents"
+sSkimmedNanoAOD_nFiles      = "skimmedNanoAOD_nFiles"
+sSkimmedNanoAOD             = "skimmedNanoAOD"
 sampleDetail_dict_template = OD([
     (sCross_section,  -1.),
     (sNEvents,         0),
@@ -367,6 +370,8 @@ sampleDetail_dict_template = OD([
     (sDataset,        []),
     (sNanoAOD_nFiles,  0),
     (sNanoAOD,        []),
+    (sSkimmedNanoAOD_nFiles,  0),
+    (sSkimmedNanoAOD,        []),    
 ])
 
 def getDatasetFiles(dataset):
@@ -408,12 +413,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
     parser.add_argument('-era',                 dest='era', type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-updateCrossSections', action='store_true', default=False, help='update cross-sections only')
+    parser.add_argument('-addSkimmedNanoAOD',   action='store_true', default=False, help='add skimmed NanoAOD files to the existing sample list')
     args=parser.parse_args()
 
     era                 = args.era
     updateCrossSections = args.updateCrossSections
+    addSkimmedNanoAOD   = args.addSkimmedNanoAOD
     print(f"era: {era}")
     print(f"{updateCrossSections = }")
+    print(f"{addSkimmedNanoAOD = }")
 
 
     list_datasetAndXs = None
@@ -428,31 +436,80 @@ if __name__ == '__main__':
     samples_details = None
     if not updateCrossSections:
         samples_details = OD()
-    else:
+        
+    if updateCrossSections or addSkimmedNanoAOD:
         # update cross sections
         with open(sFileSamplesInfo[era]) as fSamplesInfo:
             samples_details = json.load(fSamplesInfo)
-
         print(f"samples_details.keys(): {samples_details.keys()}")
+    else:
+        samples_details = OD()
 
-        
+    if not updateCrossSections:
+        # Reset sSkimmedNanoAOD etc
+        # Should not reset when running with updateCrossSections
+        for sampleName_ in samples_details:
+            samples_details[sampleName_][sSkimmedNanoAOD_nFiles] = 0
+            samples_details[sampleName_][sSkimmedNanoAOD] = []
+
+    # Now calculate..
     for datasetName, datasetDetails in list_datasetAndXs.items():
         datasetName_parts            = datasetName.split('/')
         sampleName                   = datasetName_parts[1]
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
         #print(f"{datasetName = },  {isMC = }")
 
-        if updateCrossSections and isMC and sampleName in samples_details:
-            samples_details[sampleName][sCross_section] = datasetDetails[sXS]
-            continue
-
-        if updateCrossSections and not isMC:
-            continue
-        
         if not isMC:
             # for data sample
             sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
             sampleName = '%s_%s' % (sampleName, sampleName_part2)  # JetHT_Run2018A
+
+        if updateCrossSections:
+            if isMC:
+                if sampleName in samples_details:
+                    samples_details[sampleName][sCross_section] = datasetDetails[sXS]
+                else:
+                    print(f"Running updateCrossSections mode, but {sampleName} is not in samples_details \t **** ERROR **** \nTerminating...")
+                    exit(0)
+            
+            continue
+
+
+        # Add path to skimmed NanoAOD samples
+        sDatasetExt = ''
+        for sTmp1_ in (datasetName_parts[2]).split('_'): # RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1_ext1-v2
+            for sTmp2_ in sTmp1_.split('-'):
+                if 'ext' in sTmp2_:
+                    sDatasetExt = '_%s' % sTmp2_ # '_ext1'
+        sSampleNameDir_used = '%s%s' % (datasetName_parts[1], sDatasetExt)
+
+        sSampleTagDir_used = datasetName_parts[2]
+        sSampleTagDir_used = sSampleTagDir_used.replace('_NanoAODv9', '')
+        if datasetName_parts[1] == 'SingleMuon':
+            sSampleTagDir_used = sSampleTagDir_used.replace('v1', 'v*') # SingleMuon had DatasetTag v2/3 in MiniAOD and v1 in NanoAOD. So use wildcard charester *
+
+        sDataType = 'MC' if isMC else 'Data'
+        sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs[era][sDataType] 
+        # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root           
+        # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root
+        sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLENAME', sSampleNameDir_used)
+        sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLETAG',  sSampleTagDir_used)
+
+        sSkimmedNanoAODs = []
+        if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) )
+        else:                                 sSkimmedNanoAODs.append( sPathSkimmedNanoAODs_toUse )
+        print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
+        
+        if sSkimmedNanoAOD_nFiles not in samples_details[sampleName]:
+            samples_details[sampleName][sSkimmedNanoAOD_nFiles]  = len(sSkimmedNanoAODs)
+            samples_details[sampleName][sSkimmedNanoAOD]         = sSkimmedNanoAODs
+        else:
+            samples_details[sampleName][sSkimmedNanoAOD_nFiles] += len(sSkimmedNanoAODs)
+            samples_details[sampleName][sSkimmedNanoAOD].extend(   sSkimmedNanoAODs )
+
+        if addSkimmedNanoAOD:
+            continue
+        
 
         if sampleName not in samples_details:
             samples_details[sampleName] = deepcopy(sampleDetail_dict_template)

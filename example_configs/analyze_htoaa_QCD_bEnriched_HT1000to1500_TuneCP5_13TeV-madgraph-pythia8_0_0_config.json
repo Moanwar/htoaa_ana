@@ -1,0 +1,27 @@
+{
+    "nEventsToAnalyze": -1,
+    "era": "2018",
+    "dataset": [
+        "/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM"
+    ],
+    "inputFiles": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/r1/PNet_v1_0_1_frac0p9868.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/r1/PNet_v1_2_3_frac0p9868.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/r1/PNet_v1_4_5_frac0p9868.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/r1/PNet_v1_6_7_frac0p9868.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/r1/PNet_v1_8_9_frac0p9868.root"
+    ],
+    "outputFile": "analyze_htoaa_QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8_0_0.root",
+    "sampleCategory": "QCD_bEnrich",
+    "isMC": true,
+    "crossSection": 48.08,
+    "nEvents": 1330829,
+    "sumEvents": 1330829.0,
+    "downloadIpFiles": false,
+    "server": "lxplus",
+    "MCSamplesStitchOption": "PhSpOverlapRewgt",
+    "MCSamplesStitchInputs": {
+        "inputFile": "data/lumiScale/2018.root",
+        "histogramName": "$SAMPLECATEGORY/$SAMPLECATEGORY_LumiScale_PhSpOverlapRewghted"
+    }
+}

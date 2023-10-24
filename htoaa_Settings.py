@@ -31,6 +31,14 @@ sFileSamplesInfo = {
     Era_2018: "Samples_2018UL.json"
 }
 
+# /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD*/r1/PNet_*.root
+sPathSkimmedNanoAODs = {
+    Era_2018: {
+        'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root',
+        'MC': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root' 
+    }
+}
+
 Luminosities_Inclusive = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
@@ -144,6 +152,10 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
             # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
             'L': 0.9172
+        },
+        'ParticleNetMD_Hto4b_Htoaa4bOverQCD': {
+            # https://docs.google.com/presentation/d/1MrkWIGjMBa5UHzMYsQEuXwsnirjDhlxTjm4yeyGRN2Q/edit?usp=sharing
+            'WP-60': 0.9785
         }
     },
 }

@@ -131,30 +131,38 @@ def getNanoAODFile(
 
     fileName_toUse = fileName
     cp_command = 'eos cp' if server in ['lxplus'] else 'xrdcp'
-    print(f"htoaa_CommonTools::getNanoAODFile() here1 {datetime.now() = }"); sys.stdout.flush()
+    print(f"htoaa_CommonTools::getNanoAODFile() here1 {datetime.now() = } {fileName = }"); sys.stdout.flush()
 
-    if useLocalFileIfExists and fileName.startswith("/store/") and server in ['lxplus']: # 'eos cp' works on lxplus
-        # check if NanoAOD exists in /eos area
-        fileNameTemplate_DAS = "/store/{IsMC}/{SampleProductionCampaign}/{SampleName}/{DatasetTier}/{GT}/{SampleDir}/{SampleFileName}"
-        fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
 
-        r_ = parse(fileNameTemplate_DAS, fileName)
-        IsMC                       = 'MC' if r_['IsMC'].lower() == 'mc' else 'data'
-        SampleProductionCampaign   = r_['SampleProductionCampaign'] if r_['IsMC'].lower() == 'mc' else '%s-%s' % (r_['SampleProductionCampaign'], r_['GT'])
-        SampleName                 = r_['SampleName']
-        DatasetTier                = r_['DatasetTier']
-        GT                         = r_['GT']
-        SampleDir                  = r_['SampleDir']
-        SampleFileName             = r_['SampleFileName'] 
-        Era                        = None
-        if   'UL16' in SampleProductionCampaign or 'UL2016' in SampleProductionCampaign:
-            Era = '2016'
-        elif 'UL17' in SampleProductionCampaign or 'UL2017' in SampleProductionCampaign:
-            Era = '2017'
-        elif 'UL18' in SampleProductionCampaign or 'UL2018' in SampleProductionCampaign:
-            Era = '2018'
+    if useLocalFileIfExists and server in ['lxplus']: # 'eos cp' works on lxplus
+        fileName_EOS = None
+
+        # check if Central NanoAOD exists in /eos area
+        if fileName.startswith("/store/"):
+            fileNameTemplate_DAS = "/store/{IsMC}/{SampleProductionCampaign}/{SampleName}/{DatasetTier}/{GT}/{SampleDir}/{SampleFileName}"
+            fileNameTemplate_EOS = "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9/2BBE7B3F-C5A7-0D48-A384-FAD06B127FD8.root"
+
+            r_ = parse(fileNameTemplate_DAS, fileName)
+            IsMC                       = 'MC' if r_['IsMC'].lower() == 'mc' else 'data'
+            SampleProductionCampaign   = r_['SampleProductionCampaign'] if r_['IsMC'].lower() == 'mc' else '%s-%s' % (r_['SampleProductionCampaign'], r_['GT'])
+            SampleName                 = r_['SampleName']
+            DatasetTier                = r_['DatasetTier']
+            GT                         = r_['GT']
+            SampleDir                  = r_['SampleDir']
+            SampleFileName             = r_['SampleFileName'] 
+            Era                        = None
+            if   'UL16' in SampleProductionCampaign or 'UL2016' in SampleProductionCampaign:
+                Era = '2016'
+            elif 'UL17' in SampleProductionCampaign or 'UL2017' in SampleProductionCampaign:
+                Era = '2017'
+            elif 'UL18' in SampleProductionCampaign or 'UL2018' in SampleProductionCampaign:
+                Era = '2018'       
+            fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
+
         
-        fileName_EOS = f"/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/{Era}/{IsMC}/{SampleName}/{SampleProductionCampaign}/{SampleFileName}"
+        if fileName.startswith("/eos/"): # File is stored on /eos/ area on lxplus
+            fileName_EOS = fileName
+
         print(f"Checking for eos file: {fileName_EOS = }") 
         print(f"htoaa_CommonTools::getNanoAODFile() here2 {datetime.now() = }"); sys.stdout.flush()
         print(f"{fileName_EOS = }: {os.path.exists(fileName_EOS) = } ")

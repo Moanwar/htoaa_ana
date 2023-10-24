@@ -82,9 +82,9 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-nEventToReadInBatch = 1*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze =  -1 # 1000 # 100000 # -1
-flushStdout = False
+nEventToReadInBatch = 0.5*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = -1 # 1000 # 100000 # -1
+flushStdout = True
 #pd.set_option('display.max_columns', None)  
 
 #print("".format())
@@ -111,6 +111,7 @@ class ObjectSelection:
         self.tagger_btagDeepB = 'DeepCSV'
         self.wp_btagDeepB = 'M'
         self.wp_ParticleNetMD_XbbvsQCD = 'L'
+        self.wp_ParticleNetMD_Hto4b_Htoaa4bOverQCD = 'WP-60'
 
         self.FatJetPtThsh  = 400 #170
         self.FatJetEtaThsh = 2.4
@@ -122,7 +123,8 @@ class ObjectSelection:
         self.FatJetParticleNetMD_Xbb_Thsh       = 0.8
         self.FatJetParticleNetMD_XbbvsQCD_Thsh   = bTagWPs[self.era]['ParticleNetMD_XbbvsQCD'][self.wp_ParticleNetMD_XbbvsQCD]
         self.FatJetDeepTagMD_bbvsLight_Thsh     = 0.98
-
+        self.FatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_Thsh   = bTagWPs[self.era]['ParticleNetMD_Hto4b_Htoaa4bOverQCD'][self.wp_ParticleNetMD_Hto4b_Htoaa4bOverQCD]
+        
         self.nSV_matched_leadingFatJet_Thsh = 3
 
         self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
@@ -222,6 +224,107 @@ class ObjectSelection:
 
 
 
+'''
+ OBJ: TBranch	nFatJet	slimmedJetsAK8, i.e. ak8 fat jets for boosted analysis : 0 at: 0x2733fa0
+ OBJ: TBranch	FatJet_CHS_mass	CHS mass : 0 at: 0x2734550
+ OBJ: TBranch	FatJet_CHS_mpruned	CHS pruned mass : 0 at: 0x2734ae0
+ OBJ: TBranch	FatJet_CHS_msoftdrop	CHS soft drop mass : 0 at: 0x27350d0
+ OBJ: TBranch	FatJet_CHS_pt	CHS pt : 0 at: 0x2735710
+ OBJ: TBranch	FatJet_CHS_tau1	CHS Nsubjettiness (1 axis) : 0 at: 0x2735ce0
+ OBJ: TBranch	FatJet_CHS_tau2	CHS Nsubjettiness (2 axis) : 0 at: 0x2736320
+ OBJ: TBranch	FatJet_CHS_tau3	CHS Nsubjettiness (3 axis) : 0 at: 0x2736960
+ OBJ: TBranch	FatJet_CHS_tau4	CHS Nsubjettiness (4 axis) : 0 at: 0x2736fa0
+ OBJ: TBranch	FatJet_area	jet catchment area, for JECs : 0 at: 0x27375e0
+ OBJ: TBranch	FatJet_btagCSVV2	 pfCombinedInclusiveSecondaryVertexV2 b-tag discriminator (aka CSVV2) : 0 at: 0x2737be0
+ OBJ: TBranch	FatJet_btagDDBvLV2	DeepDoubleX V2(mass-decorrelated) discriminator for H(Z)->bb vs QCD : 0 at: 0x2738270
+ OBJ: TBranch	FatJet_btagDDCvBV2	DeepDoubleX V2 (mass-decorrelated) discriminator for H(Z)->cc vs H(Z)->bb : 0 at: 0x2738900
+ OBJ: TBranch	FatJet_btagDDCvLV2	DeepDoubleX V2 (mass-decorrelated) discriminator for H(Z)->cc vs QCD : 0 at: 0x2738f90
+ OBJ: TBranch	FatJet_btagDeepB	DeepCSV b+bb tag discriminator : 0 at: 0x2739620
+ OBJ: TBranch	FatJet_btagHbb	Higgs to BB tagger discriminator : 0 at: 0x2739c80
+ OBJ: TBranch	FatJet_chEmEF	charged Electromagnetic Energy Fraction : 0 at: 0x273a290
+ OBJ: TBranch	FatJet_chHEF	charged Hadron Energy Fraction : 0 at: 0x273a8a0
+ OBJ: TBranch	FatJet_deepTagMD_H4qvsQCD	Mass-decorrelated DeepBoostedJet tagger H->4q vs QCD discriminator : 0 at: 0x273aea0
+ OBJ: TBranch	FatJet_deepTagMD_HbbvsQCD	Mass-decorrelated DeepBoostedJet tagger H->bb vs QCD discriminator : 0 at: 0x273b540
+ OBJ: TBranch	FatJet_deepTagMD_TvsQCD	Mass-decorrelated DeepBoostedJet tagger top vs QCD discriminator : 0 at: 0x273bbe0
+ OBJ: TBranch	FatJet_deepTagMD_WvsQCD	Mass-decorrelated DeepBoostedJet tagger W vs QCD discriminator : 0 at: 0x273c280
+ OBJ: TBranch	FatJet_deepTagMD_ZHbbvsQCD	Mass-decorrelated DeepBoostedJet tagger Z/H->bb vs QCD discriminator : 0 at: 0x273c910
+ OBJ: TBranch	FatJet_deepTagMD_ZHccvsQCD	Mass-decorrelated DeepBoostedJet tagger Z/H->cc vs QCD discriminator : 0 at: 0x273cfb0
+ OBJ: TBranch	FatJet_deepTagMD_ZbbvsQCD	Mass-decorrelated DeepBoostedJet tagger Z->bb vs QCD discriminator : 0 at: 0x273d650
+ OBJ: TBranch	FatJet_deepTagMD_ZvsQCD	Mass-decorrelated DeepBoostedJet tagger Z vs QCD discriminator : 0 at: 0x273dcf0
+ OBJ: TBranch	FatJet_deepTagMD_bbvsLight	Mass-decorrelated DeepBoostedJet tagger Z/H/gluon->bb vs light flavour discriminator : 0 at: 0x273e380
+ OBJ: TBranch	FatJet_deepTagMD_ccvsLight	Mass-decorrelated DeepBoostedJet tagger Z/H/gluon->cc vs light flavour discriminator : 0 at: 0x273ea30
+ OBJ: TBranch	FatJet_deepTag_H	DeepBoostedJet tagger H(bb,cc,4q) sum : 0 at: 0x273f0e0
+ OBJ: TBranch	FatJet_deepTag_QCD	DeepBoostedJet tagger QCD(bb,cc,b,c,others) sum : 0 at: 0x273f750
+ OBJ: TBranch	FatJet_deepTag_QCDothers	DeepBoostedJet tagger QCDothers value : 0 at: 0x273fdc0
+ OBJ: TBranch	FatJet_deepTag_TvsQCD	DeepBoostedJet tagger top vs QCD discriminator : 0 at: 0x2740440
+ OBJ: TBranch	FatJet_deepTag_WvsQCD	DeepBoostedJet tagger W vs QCD discriminator : 0 at: 0x2740ab0
+ OBJ: TBranch	FatJet_deepTag_ZvsQCD	DeepBoostedJet tagger Z vs QCD discriminator : 0 at: 0x2741120
+ OBJ: TBranch	FatJet_eta	eta : 0 at: 0x2741790
+ OBJ: TBranch	FatJet_mass	mass : 0 at: 0x2741d60
+ OBJ: TBranch	FatJet_msoftdrop	Corrected soft drop mass with PUPPI : 0 at: 0x2742330
+ OBJ: TBranch	FatJet_msoftdrop_uncorr	Uncorrected soft drop mass with PUPPI : 0 at: 0x27429a0
+ OBJ: TBranch	FatJet_muEF	muon Energy Fraction : 0 at: 0x2743020
+ OBJ: TBranch	FatJet_n2b1	N2 with beta=1 : 0 at: 0x2743620
+ OBJ: TBranch	FatJet_n2b2	N2 with beta=2 : 0 at: 0x2743bf0
+ OBJ: TBranch	FatJet_n3b1	N3 with beta=1 : 0 at: 0x27441c0
+ OBJ: TBranch	FatJet_n3b2	N3 with beta=2 : 0 at: 0x2744790
+ OBJ: TBranch	FatJet_neEmEF	neutral Electromagnetic Energy Fraction : 0 at: 0x2744d60
+ OBJ: TBranch	FatJet_neHEF	neutral Hadron Energy Fraction : 0 at: 0x2745370
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_Haa01b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2745970
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_Haa2b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2746020
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_Haa3b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x27466d0
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_Haa4b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2746d80
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_QCD0b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2747430
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_QCD1b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2747ae0
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_QCD2b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2748190
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_QCD3b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2748840
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_QCD4b	Mass-decorrelated multiclass ParticleNet tagger for H->aa->bbbb : 0 at: 0x2748ef0
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_binaryLF_Haa4b	Mass-decorrelated binary ParticleNet tagger for H->aa->bbbb vs. QCD (<=2 b) : 0 at: 0x27495a0
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_binaryLF_QCDlf	Mass-decorrelated binary ParticleNet tagger for H->aa->bbbb vs. QCD (<= 2b) : 0 at: 0x2749c70
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_binary_Haa4b	Mass-decorrelated binary ParticleNet tagger for H->aa->bbbb vs. QCD : 0 at: 0x274a340
+ OBJ: TBranch	FatJet_particleNetMD_Hto4b_binary_QCD	Mass-decorrelated binary ParticleNet tagger for H->aa->bbbb vs. QCD : 0 at: 0x274aa10
+ OBJ: TBranch	FatJet_particleNetMD_QCD	Mass-decorrelated ParticleNet tagger raw QCD score : 0 at: 0x274b0d0
+ OBJ: TBranch	FatJet_particleNetMD_Xbb	Mass-decorrelated ParticleNet tagger raw X->bb score. For X->bb vs QCD tagging, use Xbb/(Xbb+QCD) : 0 at: 0x274b760
+ OBJ: TBranch	FatJet_particleNetMD_Xcc	Mass-decorrelated ParticleNet tagger raw X->cc score. For X->cc vs QCD tagging, use Xcc/(Xcc+QCD) : 0 at: 0x274be20
+ OBJ: TBranch	FatJet_particleNetMD_Xqq	Mass-decorrelated ParticleNet tagger raw X->qq (uds) score. For X->qq vs QCD tagging, use Xqq/(Xqq+QCD). For W vs QCD tagging, use (Xcc+Xqq)/(Xcc+Xqq+QCD) : 0 at: 0x274c4e0
+ OBJ: TBranch	FatJet_particleNet_H4qvsQCD	ParticleNet tagger H(->VV->qqqq) vs QCD discriminator : 0 at: 0x274cbd0
+ OBJ: TBranch	FatJet_particleNet_HbbvsQCD	ParticleNet tagger H(->bb) vs QCD discriminator : 0 at: 0x274d260
+ OBJ: TBranch	FatJet_particleNet_HccvsQCD	ParticleNet tagger H(->cc) vs QCD discriminator : 0 at: 0x274d8e0
+ OBJ: TBranch	FatJet_particleNet_QCD	ParticleNet tagger QCD(bb,cc,b,c,others) sum : 0 at: 0x274df60
+ OBJ: TBranch	FatJet_particleNet_TvsQCD	ParticleNet tagger top vs QCD discriminator : 0 at: 0x274e5d0
+ OBJ: TBranch	FatJet_particleNet_WvsQCD	ParticleNet tagger W vs QCD discriminator : 0 at: 0x274ec50
+ OBJ: TBranch	FatJet_particleNet_ZvsQCD	ParticleNet tagger Z vs QCD discriminator : 0 at: 0x274f2d0
+ OBJ: TBranch	FatJet_particleNet_mass	ParticleNet mass regression : 0 at: 0x274f950
+ OBJ: TBranch	FatJet_particleNet_massA_Hto4b_v0	ParticleNet a boson mass regression for H->aa->bbbb (mass regr, mode 3 [original]) : 0 at: 0x274ffc0
+ OBJ: TBranch	FatJet_particleNet_massA_Hto4b_v1	ParticleNet a boson mass regression for H->aa->bbbb (mass regr, mode 3 [final]) : 0 at: 0x2750690
+ OBJ: TBranch	FatJet_particleNet_massA_Hto4b_v2	ParticleNet a boson mass regression for H->aa->bbbb (mass regr, mode 0) : 0 at: 0x2750d50
+ OBJ: TBranch	FatJet_particleNet_massA_Hto4b_v3	ParticleNet a boson mass regression for H->aa->bbbb (logMass regr, mode 0) : 0 at: 0x2751410
+ OBJ: TBranch	FatJet_particleNet_massA_Hto4b_v4	ParticleNet a boson mass regression for H->aa->bbbb (mass ratio regr, mode 3) : 0 at: 0x2751ad0
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v0	ParticleNet Higgs mass regression for H->aa->bbbb (mass regr, mode 3 [2nd try]) : 0 at: 0x2752190
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v00	ParticleNet Higgs mass regression for H->aa->bbbb (mass regr, mode 3 [original]) : 0 at: 0x2752850
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v1	ParticleNet Higgs mass regression for H->aa->bbbb (mass regr, mode 3 [final]) : 0 at: 0x2752f20
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v2	ParticleNet Higgs mass regression for H->aa->bbbb (mass regr, mode 0) : 0 at: 0x27535e0
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v3	ParticleNet Higgs mass regression for H->aa->bbbb (logMass regr, mode 0) : 0 at: 0x2753ca0
+ OBJ: TBranch	FatJet_particleNet_massH_Hto4b_v4	ParticleNet Higgs mass regression for H->aa->bbbb (mass ratio regr, mode 3) : 0 at: 0x2754360
+ OBJ: TBranch	FatJet_phi	phi : 0 at: 0x215e6a0
+ OBJ: TBranch	FatJet_pt	pt : 0 at: 0x215ec70
+ OBJ: TBranch	FatJet_rawFactor	1 - Factor to get back to raw pT : 0 at: 0x215f240
+ OBJ: TBranch	FatJet_tau1	Nsubjettiness (1 axis) : 0 at: 0x215f8b0
+ OBJ: TBranch	FatJet_tau2	Nsubjettiness (2 axis) : 0 at: 0x215feb0
+ OBJ: TBranch	FatJet_tau3	Nsubjettiness (3 axis) : 0 at: 0x21604b0
+ OBJ: TBranch	FatJet_tau4	Nsubjettiness (4 axis) : 0 at: 0x2160ab0
+ OBJ: TBranch	FatJet_lsf3	Lepton Subjet Fraction (3 subjets) : 0 at: 0x21610b0
+ OBJ: TBranch	FatJet_chMultiplicity	(Puppi-weighted) Number of charged particles in the jet : 0 at: 0x21616c0
+ OBJ: TBranch	FatJet_charge	jet charge (integer) : 0 at: 0x2161d40
+ OBJ: TBranch	FatJet_jetId	Jet ID flags bit1 is loose (always false in 2017 since it does not exist), bit2 is tight, bit3 is tightLepVeto : 0 at: 0x2162340
+ OBJ: TBranch	FatJet_neMultiplicity	(Puppi-weighted) Number of neutral particles in the jet : 0 at: 0x2162990
+ OBJ: TBranch	FatJet_subJetIdx1	index of first subjet : 0 at: 0x2163010
+ OBJ: TBranch	FatJet_subJetIdx2	index of second subjet : 0 at: 0x2163670
+ OBJ: TBranch	FatJet_electronIdx3SJ	index of electron matched to jet : 0 at: 0x2163cd0
+ OBJ: TBranch	FatJet_muonIdx3SJ	index of muon matched to jet : 0 at: 0x27605b0
+ OBJ: TBranch	FatJet_nConstituents	Number of particles in the jet : 0 at: 0x2760c10
+
+'''
 
     
     
@@ -233,6 +336,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_QCDGenValidation;      runMode_QCDGenValidation = False; # True
         global runMode_GenLHEPlots;           runMode_GenLHEPlots      = True
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
+        global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False
         
 
         ak.behavior.update(nanoaod.behavior)
@@ -296,10 +400,38 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
                 #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
-                "leadingFatJetParticleNetMD_XbbvsQCD",
-                "leadingFatJet_nSV"
+                #"leadingFatJetParticleNetMD_XbbvsQCD",
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
+                #"leadingFatJet_nSV"
             ]),
         ])
+
+        if runMode_OptimizePNetTaggerCut:
+            # Optimize ParticleNet tagger tagger cut by monitoring S/B
+            self.sel_names_all = OD([
+                ("SR",                    [
+                    "nPV",
+                    "METFilters",
+                    "leadingFatJetPt",
+                    "leadingFatJetEta",
+                    "JetID",
+                    #"L1_SingleJet180",
+                    #HLT_AK8PFJet330_name,
+                    #"leadingFatJetBtagDeepB",
+                    "leadingFatJetMSoftDrop",
+                    #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
+                    #"leadingFatJetParticleNetMD_XbbvsQCD",
+                    #"leadingFatJet_nSV"
+                ]),
+            ])
+            self.objectSelector.FatJetPtThsh = 170
+
+
+
+
+
+
+
         if not self.datasetInfo['isMC']: 
             self.sel_names_all["SR"].insert(0, "run:ls")
 
@@ -423,6 +555,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
         mlScore_axis1         = hist.Bin("MLScore1",               r"ML score",                  100,    -1.1,     1.1)
+        mlScore_axis1k        = hist.Bin("MLScore1k",              r"ML score",                 1100,     0.0,     1.1)
         jetN2_axis            = hist.Bin("N2",                     r"N2b1",                      100,       0,       3)
         jetN3_axis            = hist.Bin("N3",                     r"N3b1",                      100,       0,       5)
         jetTau_axis           = hist.Bin("TauN",                   r"TauN",                      100,       0,       1)
@@ -762,6 +895,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetNBHadrons'+sHExt,                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNBHadrons"}),
                     ('hLeadingFatJetNCHadrons'+sHExt,                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNCHadrons"}),            
                     ('hLeadingFatJetNConstituents'+sHExt,               {sXaxis: nObject50_axis,  sXaxisLabel: r"LeadingFatJetNConstituents"}),
+                    ('hLeadingFatJetNBHadronsFromHToAA'+sHExt,                   {sXaxis: nObject_axis,    sXaxisLabel: r"LeadingFatJetNBHadronsFromHToAA"}),
                     
                     ('hLeadingFatJetParticleNetMD_QCD'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_QCD"}),
                     ('hLeadingFatJetParticleNetMD_Xbb'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_Xbb"}),
@@ -778,6 +912,57 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetParticleNet_QCD'+sHExt,             {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNet_QCD"}),
                     
                     ('hLeadingFatJetParticleNet_mass'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_mass"}),
+
+                    # ParticleNetMD HToAATo4B
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa01b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa01b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa2b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa2b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa3b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa3b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa4b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD0b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD0b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD1b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD1b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD2b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD2b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD3b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD3b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binaryLF_Haa4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binaryLF_Haa4b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binaryLF_QCDlf'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binaryLF_QCDlf"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_Haa4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binary_Haa4b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_QCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa34b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa34b"}),
+                    
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_Haa4b_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binary_Haa4b_avg"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Haa4b_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Haa4b_avg"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD01234b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD01234b"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_QCD_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binary_QCD_avg"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_QCD_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_QCD_avg"}),
+                    
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Htoaa4bOverQCD"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Htoaa34bOverQCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Htoaa34bOverQCD"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binaryLF_Htoaa4bOverQCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binaryLF_Htoaa4bOverQCD"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binary_Htoaa4bOverQCD"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_binary_Htoaa4bOverQCD_avg"}),
+                    ('hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_avg'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b_Htoaa4bOverQCD_avg"}),
+                    
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_v0'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massA_Hto4b_v0"}),
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_v1'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massA_Hto4b_v1"}),
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_v2'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massA_Hto4b_v2"}),
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_v3'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massA_Hto4b_v3"}),
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_v4'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massA_Hto4b_v4"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v0'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v0"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v00'+sHExt,           {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v00"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v1'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v1"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v2'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v2"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v3'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v3"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_v4'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v4"}),
+
+                    #(''+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    
+                    #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),                    
+                    #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+                    #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
+
+
 
 
                     ## SubJet corresponding to leadingFatJet
@@ -1658,7 +1843,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic_axis,
                     )
                 })
-                
+
+            
+        print(f"HToAATo4bProcessor::__init__():: END", flush=flushStdout)
 
         
 
@@ -1751,7 +1938,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             #printVariable('\n events.SV.p4', events.SV.p4)
 
-            #print(f"{events.FatJet.fields = } ")
+            print(f"{events.FatJet.fields = } ")
             #print(f"{events.SV.fields = } ")
             #print(f"{events.FatJetSVs_sVIdx = } ")
 
@@ -1772,19 +1959,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}") 
             printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()           
 
-        if not self.datasetInfo['isMC']:
-            print(f" {np.unique(events.run, return_counts=True) = } "); sys.stdout.flush()  
-
-        #print(f"htoaa_Analysis_GGFMode.py::process():: {self.datasetInfo = }"); sys.stdout.flush()
-
-
-               
-            
+        #if not self.datasetInfo['isMC']:
+        if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
             systematics_shift = [None]
             for _syst in systematics_shift:
                 output += self.process_shift(events, _syst)
         else:
+            print(f" {np.unique(events.run, return_counts=True) = } "); sys.stdout.flush()
             output = self.process_shift(events, None)
 
 
@@ -1814,6 +1996,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # Gen-level selection ---------------------------------------------------------------------
         genHiggs = None
         genHT    = None
+        genB_fromHToAA = None
         if self.datasetInfo['isMC'] and self.datasetInfo['isSignal']: 
             genHiggs  = self.objectSelector.selectGenHiggs(events)        
             genHT     = self.objectSelector.GenHT(events)
@@ -1844,6 +2027,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 (events.GenPart[ events.GenPart[genBBar_pairs_all['b'   ]].genPartIdxMother ].pdgId == 36) &
                 (events.GenPart[ events.GenPart[genBBar_pairs_all['bbar']].genPartIdxMother ].pdgId == 36) 
             )]
+            genB_fromHToAA     = events.GenPart[ ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1) ]
 
             # LorentVector of GenB quarks from HToAATo4b
             nEvents_11 = ak.num(events.GenPart[genBBar_pairs['b']][:, 0].pt, axis=0)
@@ -1900,7 +2084,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )            
 
             dr_GenH_GenB = ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1)
-            max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)      
+            max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)    
+
+            if printLevel >= 10:
+                printVariable("\n genBBar_pairs['b']", genBBar_pairs['b'])  
+                printVariable("\n [genBBar_pairs['bbar']", genBBar_pairs['bbar'])
+                printVariable("\n events.GenPart[genBBar_pairs['b']]", events.GenPart[genBBar_pairs['b']])
+                printVariable("\n events.GenPart[genBBar_pairs['bbar']]", events.GenPart[genBBar_pairs['bbar']])
+                printVariable("\n ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)", ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1))
+                printVariable("\n events.GenPart[ ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)]", events.GenPart[ ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)] )
+                printVariable("\n genB_fromHToAA", genB_fromHToAA)
             
                 
         # QCD MC ----------------------------------------------
@@ -2458,10 +2651,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         ## match leadingFat jet to genB 
         n_leadingFatJat_matched_genB = np.full(len(events), 0)
+        n_leadingFatJat_matched_genB_HToAATo4B = np.full(len(events), 0)
         if self.datasetInfo['isMC'] :
             #mask_leadingFatJat_matched_genB = leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel) < 0.8
             #n_leadingFatJat_matched_genB = ak.sum(mask_leadingFatJat_matched_genB, axis=1)
             n_leadingFatJat_matched_genB = leadingFatJet.nBHadrons
+
+
+            if self.datasetInfo['isSignal']:
+                n_leadingFatJat_matched_genB_HToAATo4B = ak.sum(leadingFatJet.delta_r( genB_fromHToAA ) < 0.8, axis=1)
+                if printLevel >= 10:
+                    printVariable("\n leadingFatJet.delta_r( genB_fromHToAA )", leadingFatJet.delta_r( genB_fromHToAA ))
+                    printVariable("\n leadingFatJet.delta_r( genB_fromHToAA ) < 0.8)", leadingFatJet.delta_r( genB_fromHToAA ) < 0.8)
+                    printVariable("\n ak.sum(leadingFatJet.delta_r( genB_fromHToAA ) < 0.8, axis=1)", ak.sum(leadingFatJet.delta_r( genB_fromHToAA ) < 0.8, axis=1))
+
+
+
         
         ## sel leptons
         muonsTight     = self.objectSelector.selectMuons(events.Muon)
@@ -2491,42 +2696,107 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                       ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0) ); sys.stdout.flush()
 
         printVariable('\n leadingFatJet.jetId', leadingFatJet.jetId); sys.stdout.flush()
+        
         '''
 
+        if 'particleNetMD_Hto4b_Haa4b' in events.FatJet.fields:
+            leadingFatJet_PNetMD_Hto4b_QCD01234b_sum = (
+                leadingFatJet.particleNetMD_Hto4b_QCD0b + 
+                leadingFatJet.particleNetMD_Hto4b_QCD1b + 
+                leadingFatJet.particleNetMD_Hto4b_QCD2b + 
+                leadingFatJet.particleNetMD_Hto4b_QCD3b + 
+                leadingFatJet.particleNetMD_Hto4b_QCD4b )
+            leadingFatJet_PNetMD_Hto4b_QCD_avg = (
+                leadingFatJet_PNetMD_Hto4b_QCD01234b_sum         + 
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf + 
+                leadingFatJet.particleNetMD_Hto4b_binary_QCD       ) / 3
+            leadingFatJet_PNetMD_Hto4b_binary_QCD_avg = (
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf + 
+                leadingFatJet.particleNetMD_Hto4b_binary_QCD       ) / 2
 
-        if printLevel >= 3:
-            printVariable('\n events.Muon (pT, eta)', ak.zip([events.Muon.pt, events.Muon.eta])); sys.stdout.flush()
-            printVariable('\n events.Muon.mvaId', events.Muon.mvaId); sys.stdout.flush()
-            printVariable('\n events.Muon.miniIsoId', events.Muon.miniIsoId); sys.stdout.flush()
-            printVariable('\n events.Muon.miniPFRelIso_all', events.Muon.miniPFRelIso_all); sys.stdout.flush()
-            printVariable('\n events.Muon.mvaTTH', events.Muon.mvaTTH); sys.stdout.flush()
+            leadingFatJet_PNetMD_Hto4b_Haa34b_sum = (
+                leadingFatJet.particleNetMD_Hto4b_Haa4b          + 
+                leadingFatJet.particleNetMD_Hto4b_Haa3b          ) 
+            leadingFatJet_PNetMD_Hto4b_Haa4b_avg = (
+                leadingFatJet_PNetMD_Hto4b_Haa34b_sum            + 
+                leadingFatJet.particleNetMD_Hto4b_binary_Haa4b   + 
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b   ) / 3
+            leadingFatJet_PNetMD_Hto4b_binary_Haa4b_avg = ( 
+                leadingFatJet.particleNetMD_Hto4b_binary_Haa4b   + 
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b   ) / 2
 
-            printVariable('\n\n events.Electron (pT, eta)', ak.zip([events.Electron.pt, events.Electron.eta])); sys.stdout.flush()
-            printVariable('\n events.Electron.mvaFall17V2Iso_WP80', events.Electron.mvaFall17V2Iso_WP80); sys.stdout.flush()
-            printVariable('\n events.Electron.mvaFall17V2Iso_WP90', events.Electron.mvaFall17V2Iso_WP90); sys.stdout.flush()
+            leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD = (
+                leadingFatJet.particleNetMD_Hto4b_Haa4b / 
+                (leadingFatJet.particleNetMD_Hto4b_Haa4b + leadingFatJet_PNetMD_Hto4b_QCD01234b_sum)
+            )
 
-            printVariable('\n\n\n muonsTight', muonsTight); sys.stdout.flush()
-            printVariable('\n electronsTight', electronsTight); sys.stdout.flush()
-            printVariable('\n leptonsTight', leptonsTight ); sys.stdout.flush()
 
-            printVariable('\n\n muonsTight.pt', muonsTight.pt); sys.stdout.flush()
-            printVariable('\n electronsTight.pt', electronsTight.pt); sys.stdout.flush()
-            printVariable('\n leptonsTight.pt', leptonsTight.pt ); sys.stdout.flush()
 
-            printVariable('\n mask_muon_matched_leadingFatJet', mask_muon_matched_leadingFatJet); sys.stdout.flush()
-            printVariable('\n muons_matched_leadingFatJet', muons_matched_leadingFatJet); sys.stdout.flush()
-            printVariable('\n nMuons_matched_leadingFatJet', nMuons_matched_leadingFatJet); sys.stdout.flush()
+
+
+        if printLevel >= 10 and 'particleNetMD_Hto4b_Haa4b' in events.FatJet.fields:
+
+            print(f"{self.objectSelector.FatJetPtThsh = }")
+            printVariable('\n n_leadingFatJat_matched_genB', n_leadingFatJat_matched_genB)
+            printVariable('\n n_leadingFatJat_matched_genB_HToAATo4B', n_leadingFatJat_matched_genB_HToAATo4B)
+            printVariable("\nleadingFatJet.particleNetMD_Hto4b_HaaNb", ak.zip([
+                leadingFatJet.particleNetMD_Hto4b_Haa01b,
+                leadingFatJet.particleNetMD_Hto4b_Haa2b,
+                leadingFatJet.particleNetMD_Hto4b_Haa3b,
+                leadingFatJet.particleNetMD_Hto4b_Haa4b,
+            ]))
+            printVariable("\nleadingFatJet.particleNetMD_Hto4b_QCDNb", ak.zip([
+                leadingFatJet.particleNetMD_Hto4b_QCD0b,
+                leadingFatJet.particleNetMD_Hto4b_QCD1b,
+                leadingFatJet.particleNetMD_Hto4b_QCD2b,
+                leadingFatJet.particleNetMD_Hto4b_QCD3b,
+                leadingFatJet.particleNetMD_Hto4b_QCD4b,
+            ]))
+            printVariable("\nleadingFatJet.particleNetMD_Hto4b_binaryXto4b", ak.zip([
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b,
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf,
+                leadingFatJet.particleNetMD_Hto4b_binary_Haa4b,
+                leadingFatJet.particleNetMD_Hto4b_binary_QCD,
+            ]))   
+            printVariable("\nleadingFatJet.particleNetMD_Hto4b_Xto4b_average", ak.zip([
+                leadingFatJet.particleNetMD_Hto4b_Haa4b,
+                leadingFatJet.particleNetMD_Hto4b_Haa4b + leadingFatJet.particleNetMD_Hto4b_Haa3b,
+                (leadingFatJet.particleNetMD_Hto4b_binary_Haa4b + leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b) / 2,
+                leadingFatJet_PNetMD_Hto4b_Haa4b_avg,
+            ])) 
             
-            printVariable('\n mask_electron_matched_leadingFatJet', mask_electron_matched_leadingFatJet); sys.stdout.flush()
-            printVariable('\n electrons_matched_leadingFatJet', electrons_matched_leadingFatJet); sys.stdout.flush()
-            printVariable('\n nElectrons_matched_leadingFatJet', nElectrons_matched_leadingFatJet); sys.stdout.flush()
+            printVariable("\n leadingFatJet.particleNetMD_Hto4b_QCD_average", ak.zip([
+                leadingFatJet_PNetMD_Hto4b_QCD01234b_sum,
+                leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf,
+                leadingFatJet.particleNetMD_Hto4b_binary_QCD,
+                leadingFatJet_PNetMD_Hto4b_QCD_avg
+            ]))  
+            
+            printVariable("\n Ratios ", ak.zip([
+                leadingFatJet.particleNetMD_Hto4b_Haa4b / (leadingFatJet.particleNetMD_Hto4b_Haa4b + leadingFatJet_PNetMD_Hto4b_QCD01234b_sum), 
+                (leadingFatJet.particleNetMD_Hto4b_Haa4b + leadingFatJet.particleNetMD_Hto4b_Haa3b) / (leadingFatJet.particleNetMD_Hto4b_Haa4b + leadingFatJet.particleNetMD_Hto4b_Haa3b + leadingFatJet_PNetMD_Hto4b_QCD01234b_sum),
+                (leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b) / (leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b + leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf),
+                (leadingFatJet.particleNetMD_Hto4b_binary_Haa4b) / (leadingFatJet.particleNetMD_Hto4b_binary_Haa4b + leadingFatJet.particleNetMD_Hto4b_binary_QCD),
+                (leadingFatJet_PNetMD_Hto4b_Haa4b_avg) / (leadingFatJet_PNetMD_Hto4b_Haa4b_avg + leadingFatJet_PNetMD_Hto4b_QCD_avg),
+            ]))        
 
-            printVariable('\n nLeptons_matched_leadingFatJet_conc', nLeptons_matched_leadingFatJet_conc); sys.stdout.flush()
-            printVariable('\n nLeptons_matched_leadingFatJet', nLeptons_matched_leadingFatJet); sys.stdout.flush()
 
+            '''
+            printVariable("", ak.zip([
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
+                leadingFatJet.,
 
-
-
+            ]))    
+            '''                     
 
 
         #if printLevel >= 2:
@@ -2633,6 +2903,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             selection.add(
                 "leadingFatJetDeepTagMD_bbvsLight",
                 leadingFatJet.deepTagMD_bbvsLight > self.objectSelector.FatJetDeepTagMD_bbvsLight_Thsh
+            )
+
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD" in self.sel_names_all["SR"]:
+            selection.add(
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
+                leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD > self.objectSelector.FatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_Thsh
             )
 
 
@@ -4533,7 +4809,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     #print(f"{sHExt = }, {len(sel_SR) = }, {ak.sum(sel_SR, axis=0) = }, {ak.sum(mask_HExt, axis=0) = }, {ak.sum(sel_SR_forHExt, axis=0) = }"); sys.stdout.flush();
                     #print(f"{ak.sum(ak.is_none(sel_SR), axis=0) =  }, {ak.sum(ak.is_none(mask_HExt), axis=0) =  }, {ak.sum(ak.is_none(sel_SR_forHExt), axis=0) =  }, "); sys.stdout.flush();
 
-
+                    sel_SR_forHExt_woGenMatch = sel_SR_forHExt
+                    #if runMode_OptimizePNetTaggerCut and self.datasetInfo['isSignal']:
+                    if self.datasetInfo['isSignal']:
+                        sel_SR_forHExt = sel_SR_forHExt & (n_leadingFatJat_matched_genB_HToAATo4B >= 4)
 
 
 
@@ -5069,7 +5348,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             nObject=(leadingFatJet.nCHadrons[sel_SR_forHExt]),
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
-                        )            
+                        )     
+                        if self.datasetInfo['isSignal']:
+                            output['hLeadingFatJetNBHadronsFromHToAA'+sHExt].fill(
+                                dataset=dataset,
+                                nObject=(n_leadingFatJat_matched_genB_HToAATo4B[sel_SR_forHExt_woGenMatch]),
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt_woGenMatch]
+                            )                               
                         
                     
                     output['hLeadingFatJetParticleNetMD_QCD'+sHExt].fill(
@@ -5147,6 +5433,230 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     )
+
+                    ## PNetMD Hto4b
+                    if 'particleNetMD_Hto4b_Haa4b' in events.FatJet.fields:
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa01b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_Haa01b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa2b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_Haa2b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa3b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_Haa3b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa4b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_Haa4b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD0b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_QCD0b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD1b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_QCD1b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD2b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_QCD2b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD3b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_QCD3b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD4b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_QCD4b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binaryLF_Haa4b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binaryLF_QCDlf'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_Haa4b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binary_Haa4b[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_QCD'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binary_QCD[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa34b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_Haa34b_sum[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_Haa4b_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_binary_Haa4b_avg[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Haa4b_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_Haa4b_avg[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD01234b'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_QCD01234b_sum[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_QCD_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_binary_QCD_avg[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_QCD_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_QCD_avg[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD'+sHExt].fill(
+                            dataset=dataset,
+                            #MLScore1k=(leadingFatJet.particleNetMD_Hto4b_Haa4b[sel_SR_forHExt] / (leadingFatJet.particleNetMD_Hto4b_Haa4b[sel_SR_forHExt] + leadingFatJet_PNetMD_Hto4b_QCD01234b_sum[sel_SR_forHExt])),
+                            MLScore1k=leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD[sel_SR_forHExt],
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Htoaa34bOverQCD'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_Haa34b_sum[sel_SR_forHExt] / (leadingFatJet_PNetMD_Hto4b_Haa34b_sum[sel_SR_forHExt] + leadingFatJet_PNetMD_Hto4b_QCD01234b_sum[sel_SR_forHExt])),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binaryLF_Htoaa4bOverQCD'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b[sel_SR_forHExt] / (leadingFatJet.particleNetMD_Hto4b_binaryLF_Haa4b[sel_SR_forHExt] + leadingFatJet.particleNetMD_Hto4b_binaryLF_QCDlf[sel_SR_forHExt])),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet.particleNetMD_Hto4b_binary_Haa4b[sel_SR_forHExt] / (leadingFatJet.particleNetMD_Hto4b_binary_Haa4b[sel_SR_forHExt] + leadingFatJet.particleNetMD_Hto4b_binary_QCD[sel_SR_forHExt])),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_binary_Haa4b_avg[sel_SR_forHExt] / (leadingFatJet_PNetMD_Hto4b_binary_Haa4b_avg[sel_SR_forHExt] + leadingFatJet_PNetMD_Hto4b_binary_QCD_avg[sel_SR_forHExt])),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_avg'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore1k=(leadingFatJet_PNetMD_Hto4b_Haa4b_avg[sel_SR_forHExt] / (leadingFatJet_PNetMD_Hto4b_Haa4b_avg[sel_SR_forHExt] + leadingFatJet_PNetMD_Hto4b_QCD_avg[sel_SR_forHExt])),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+
+                        output['hLeadingFatJetParticleNet_massA_Hto4b_v0'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massA_Hto4b_v0[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massA_Hto4b_v1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massA_Hto4b_v1[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massA_Hto4b_v2'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massA_Hto4b_v2[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massA_Hto4b_v3'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massA_Hto4b_v3[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massA_Hto4b_v4'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massA_Hto4b_v4[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v0'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v0[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v00'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v00[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v1[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v2'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v2[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v3'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v3[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_v4'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.particleNet_massH_Hto4b_v4[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
 
 
 
@@ -7224,13 +7734,13 @@ if __name__ == '__main__':
 
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
-        sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))   
-        #cp_command = 'eos cp' if server in ['lxplus'] else 'xrdcp'
+        sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))  
+        print(f"  {sInputFile = },  {sFileLocal = }", flush=flushStdout)
         sInputFile, isReadingSuccessful = getNanoAODFile(
             fileName = sInputFile, 
             useLocalFileIfExists = True, 
-            downloadFile = True, 
-            fileNameLocal = './inputFiles/%s' %(os.path.basename(sInputFile)), 
+            downloadFile = downloadIpFiles, 
+            fileNameLocal = sFileLocal, 
             nTriesToDownload = 3,
             server = server
             )
@@ -7284,7 +7794,7 @@ if __name__ == '__main__':
         sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
         if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
             sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
-    print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }")
+    print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()
     tracemalloc.start()
@@ -7295,7 +7805,7 @@ if __name__ == '__main__':
     chunksize = nEventToReadInBatch
     maxchunks = None if nEventsToAnalyze == -1 else int(nEventsToAnalyze/nEventToReadInBatch)
     nWorkers  = 4 if nEventsToAnalyze == -1 else 1
-    print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}")
+    print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}", flush=flushStdout)
     run = processor.Runner(
         #executor=executor,
         executor=processor.FuturesExecutor(workers=nWorkers),

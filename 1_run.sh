@@ -1,3 +1,0 @@
-#!/bin/bash
-
-time python3 htoaa_Analysis_wCoffea.py /home/siddhesh/Work/CMS/htoaa/analysis/tmp6/config_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8_0_0.json 2>&1 | tee cout_htoaa_Analysis_wCoffea_config_htoaa_SUSY_GluGluH_01J_HToAATo4B_Pt150_M-20_TuneCP5_13TeV_madgraph_pythia8_0_0.txt
