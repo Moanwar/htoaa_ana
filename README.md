@@ -108,7 +108,7 @@ Append '-ntuples SkimmedNanoAOD -nFilesPerJob 1' to run on the new skimmed NanoA
 
 
 ### Data and MC stack plots
-Run 'scripts/PlotHistos1D_DataVsMC.ipynb' (in jupyter-notebook) to make Data-vs-MC comparison stack plots. A list of histograms for the stack plots are set in 'scripts/HistogramListForPlottingDataVsMC_Analysis_Example.py' file, which get imported inside 'scripts/PlotHistos1D_DataVsMC.ipynb' file.
+Run 'scripts/PlotHistos1D_DataVsMC.ipynb' (scripts/PlotHistos1D_DataVsMC.py if not using notebook compatible editor) to make Data-vs-MC comparison stack plots. A list of histograms for the stack plots are set in 'scripts/HistogramListForPlottingDataVsMC_Analysis_Example.py' file, which get imported inside 'scripts/PlotHistos1D_DataVsMC.ipynb' file.
 
 
 
