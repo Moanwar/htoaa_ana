@@ -72,7 +72,7 @@ frameinfo = getframeinfo(currentframe())
 
  
 printLevel = 0
-nEventToReadInBatch =  0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch = 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = False
 #pd.set_option('display.max_columns', None)  
@@ -376,12 +376,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     #('nSelFatJet'+sHExt,                                {sXaxis: nObject_axis,    sXaxisLabel: 'No. of selected FatJets'}),
                     ('hdR_leadingMuon_leadingFatJet'+sHExt,             {sXaxis: deltaR_axis,     sXaxisLabel: r"$delta$ r(leading muon, leading FatJet) "}),
                     ('hLeadingFatJetPt'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
-                    ('hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp4'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, msoftdropGt60_btagHbbGtnp4)$ [GeV]"}),
+                    ('hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp1'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, msoftdropGt60_btagHbbGtnp1)$ [GeV]"}),
                     ('hLeadingFatJetEta'+sHExt,                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
                     ('hLeadingFatJetPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
                     ('hLeadingFatJetMass'+sHExt,                        {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet) [GeV]"}),
                     ('hLeadingFatJetMSoftDrop'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop} (leading FatJet) [GeV]"}),
-                    ('hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp4'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop} (leading FatJet, pTGt400_btagHbbGtnp4) [GeV]"}),
+                    ('hLeadingFatJetMSoftDropUncorr'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop uncorr} (leading FatJet) [GeV]"}),
+                    ('hLeadingFatJetMassCHS'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{CHS} (leading FatJet) [GeV]"}),
+                    ('hLeadingFatJetMPrunedCHS'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{pruned CHS} (leading FatJet) [GeV]"}),
+                    ('hLeadingFatJetMSoftDropCHS'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop CHS} (leading FatJet) [GeV]"}),
+                    ('hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop} (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    ('hLeadingFatJetMass_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    ('hLeadingFatJetMSoftDropUncorr_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop uncorr} (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    ('hLeadingFatJetMassCHS_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{CHS} (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    ('hLeadingFatJetMPrunedCHS_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{prnued CHS} (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    ('hLeadingFatJetMSoftDropCHS_pTGt400_btagHbbGtnp1'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop CHS} (leading FatJet, pTGt400_btagHbbGtnp1) [GeV]"}),
+                    
                     ('hLeadingFatJetId'+sHExt,                          {sXaxis: nObject_axis,    sXaxisLabel: r"jet Id (leading FatJet)"}),
                     ('hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD)"}),
                     ('hLeadingFatJetBtagCSVV2'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJet BtagCSVV2"}),
@@ -389,6 +399,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetBtagDeepB'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJet BtagDeepB"}),
                     ('hLeadingFatJetBtagHbb'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJet BtagHbb"}),
                     ('hLeadingFatJetBtagHbb_pTGt400_msoftdropGt60'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJet BtagHbb pTGt400_msoftdropGt60"}),
+                    ('hLeadingFatJetParticleNetMD_XbbOverQCD_pTGt400_msoftdropGt60'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJet PNetMD_XbbOverQCD pTGt400_msoftdropGt60"}),
                     
                 ]))
 
@@ -400,9 +411,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetPt_vs_Eta'+sHExt,             
                      {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]",
                       sYaxis: eta_axis,        sYaxisLabel: r"\eta (leading FatJet)"}),                    
-                    ('hLeadingFatJetPt_vs_Eta_msoftdropGt60_btagHbbGtnp4'+sHExt,             
-                     {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, msoftdropGt60_btagHbbGtnp4)$ [GeV]",
-                      sYaxis: eta_axis,        sYaxisLabel: r"\eta (leading FatJet, msoftdropGt60_btagHbbGtnp4)"}),                    
+                    ('hLeadingFatJetPt_vs_Eta_msoftdropGt60_btagHbbGtnp1'+sHExt,             
+                     {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, msoftdropGt60_btagHbbGtnp1)$ [GeV]",
+                      sYaxis: eta_axis,        sYaxisLabel: r"\eta (leading FatJet, msoftdropGt60_btagHbbGtnp1)"}),                    
                     ('hLeadingFatJetPt_vs_Phi'+sHExt,             
                      {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]",
                       sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),                    
@@ -412,12 +423,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetPt_vs_MSoftDrop'+sHExt,             
                      {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]",
                       sYaxis: mass_axis,       sYaxisLabel: r"m_{soft drop} (leading FatJet) [GeV]"}),                    
-                    ('hLeadingFatJetPt_vs_MSoftDrop_btagHbbGtnp4'+sHExt,             
-                     {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, btagHbbGtnp4)$ [GeV]",
-                      sYaxis: mass_axis,       sYaxisLabel: r"m_{soft drop} (leading FatJet, btagHbbGtnp4) [GeV]"}),                    
+                    ('hLeadingFatJetPt_vs_MSoftDrop_btagHbbGtnp1'+sHExt,             
+                     {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, btagHbbGtnp1)$ [GeV]",
+                      sYaxis: mass_axis,       sYaxisLabel: r"m_{soft drop} (leading FatJet, btagHbbGtnp1) [GeV]"}),                    
                     ('hLeadingFatJetPt_vs_ParticleNetMD_XbbOverQCD'+sHExt,             
                      {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]",
                       sYaxis: mlScore_axis,    sYaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD)"}),      
+                    ('hLeadingFatJetPt_vs_ParticleNetMD_XbbOverQCD_msoftdropGt60'+sHExt,             
+                     {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet, msoftdropGt60)$ [GeV]",
+                      sYaxis: mlScore_axis,    sYaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD), msoftdropGt60"}),                           
                     ('hLeadingFatJetPt_vs_BtagHbb'+sHExt,             
                      {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]",
                       sYaxis: mlScore_axis,    sYaxisLabel: r"LeadingFatJet BtagHbb"}),  
@@ -486,18 +500,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if nEventsToAnalyze != -1:
             printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()           
 
-        if not self.datasetInfo['isMC']:
-            print(f" {np.unique(events.run, return_counts=True) = } "); sys.stdout.flush()  
-
-
-
-               
-            
+        if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
             systematics_shift = [None]
             for _syst in systematics_shift:
                 output += self.process_shift(events, _syst)
         else:
+            print(f" {np.unique(events.run, return_counts=True) = } "); sys.stdout.flush()
             output = self.process_shift(events, None)
 
 
@@ -1153,18 +1162,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_tmp_]
                     )   
-                    output['hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp4'+sHExt].fill(
+                    output['hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp1'+sHExt].fill(
                         dataset=dataset,
                         Pt=(leadingFatJet.pt[( 
                             sel_tmp_ & 
-                            (leadingFatJet.msoftdrop > 60) & 
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) & 
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]),
                         systematic=syst,
                         weight=evtWeight[( 
                             sel_tmp_ & 
-                            (leadingFatJet.msoftdrop > 60) & 
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) & 
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]
                     )
                     output['hLeadingFatJetEta'+sHExt].fill(
@@ -1191,20 +1200,118 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_tmp_]
                     )
-                    output['hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp4'+sHExt].fill(
+                    if 'msoftdrop_uncorr' in events.FatJet.fields:
+                        output['hLeadingFatJetMSoftDropUncorr'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.msoftdrop_uncorr[sel_tmp_]),
+                            systematic=syst,
+                            weight=evtWeight[sel_tmp_]
+                        )  
+                        output['hLeadingFatJetMassCHS'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_mass[sel_tmp_]),
+                            systematic=syst,
+                            weight=evtWeight[sel_tmp_]
+                        )  
+                        output['hLeadingFatJetMPrunedCHS'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_mpruned[sel_tmp_]),
+                            systematic=syst,
+                            weight=evtWeight[sel_tmp_]
+                        )  
+                        output['hLeadingFatJetMSoftDropCHS'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_msoftdrop[sel_tmp_]),
+                            systematic=syst,
+                            weight=evtWeight[sel_tmp_]
+                        )                      
+                    output['hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp1'+sHExt].fill(
                         dataset=dataset,
                         Mass=(leadingFatJet.msoftdrop[(
                             sel_tmp_ &
-                            (leadingFatJet.pt > 400) &
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ &
-                            (leadingFatJet.pt > 400) &
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]
                     )
+                    output['hLeadingFatJetMass_pTGt400_btagHbbGtnp1'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet.mass[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                            )]),
+                        systematic=syst,
+                        weight=evtWeight[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                            )]
+                    )
+                    if 'msoftdrop_uncorr' in events.FatJet.fields:
+                        output['hLeadingFatJetMSoftDropUncorr_pTGt400_btagHbbGtnp1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.msoftdrop_uncorr[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]),
+                            systematic=syst,
+                            weight=evtWeight[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]
+                        )
+                        output['hLeadingFatJetMassCHS_pTGt400_btagHbbGtnp1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_mass[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]),
+                            systematic=syst,
+                            weight=evtWeight[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]
+                        )
+                        output['hLeadingFatJetMPrunedCHS_pTGt400_btagHbbGtnp1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_mpruned[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]),
+                            systematic=syst,
+                            weight=evtWeight[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]
+                        )
+                        output['hLeadingFatJetMSoftDropCHS_pTGt400_btagHbbGtnp1'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=(leadingFatJet.CHS_msoftdrop[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]),
+                            systematic=syst,
+                            weight=evtWeight[(
+                                sel_tmp_ &
+                                ak.fill_none(leadingFatJet.pt > 400, False) &
+                                ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
+                                )]
+                        )
+                    
+
 
                     output['hLeadingFatJetId'+sHExt].fill(
                         dataset=dataset,
@@ -1246,17 +1353,31 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         dataset=dataset,
                         MLScore=(leadingFatJet.btagHbb[(
                             sel_tmp_ &
-                            (leadingFatJet.pt > 400) &
-                            (leadingFatJet.msoftdrop > 60) 
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) 
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ &
-                            (leadingFatJet.pt > 400) &
-                            (leadingFatJet.msoftdrop > 60) 
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) 
                             )]
                     )
-                    
+                    output['hLeadingFatJetParticleNetMD_XbbOverQCD_pTGt400_msoftdropGt60'+sHExt].fill(
+                        dataset=dataset,
+                        MLScore=(leadingFatJetParticleNetMD_XbbvsQCD[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) 
+                            )]),
+                        systematic=syst,
+                        weight=evtWeight[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.pt > 400, False) &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) 
+                            )]
+                    )
+
                     output['hLeadingFatJetEta_vs_Phi'+sHExt].fill(
                         dataset=dataset,
                         Eta=(leadingFatJet.eta[sel_tmp_]),
@@ -1271,23 +1392,23 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_tmp_]
                     )
-                    output['hLeadingFatJetPt_vs_Eta_msoftdropGt60_btagHbbGtnp4'+sHExt].fill(
+                    output['hLeadingFatJetPt_vs_Eta_msoftdropGt60_btagHbbGtnp1'+sHExt].fill(
                         dataset=dataset,
                         Pt=(leadingFatJet.pt[(
                             sel_tmp_ & 
-                            (leadingFatJet.msoftdrop > 60) & 
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) & 
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]),
                         Eta=(leadingFatJet.eta[(
                             sel_tmp_ & 
-                            (leadingFatJet.msoftdrop > 60) & 
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) & 
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ & 
-                            (leadingFatJet.msoftdrop > 60) & 
-                            (leadingFatJet.btagHbb > -0.4) 
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False) & 
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False) 
                             )]
                     )                    
                     output['hLeadingFatJetPt_vs_Phi'+sHExt].fill(
@@ -1311,20 +1432,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_tmp_]
                     )
-                    output['hLeadingFatJetPt_vs_MSoftDrop_btagHbbGtnp4'+sHExt].fill(
+                    output['hLeadingFatJetPt_vs_MSoftDrop_btagHbbGtnp1'+sHExt].fill(
                         dataset=dataset,
                         Pt=(leadingFatJet.pt[(
                             sel_tmp_ &
-                            (leadingFatJet.btagHbb > -0.4)
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False)
                             )]),
                         Mass=(leadingFatJet.msoftdrop[(
                             sel_tmp_ &
-                            (leadingFatJet.btagHbb > -0.4)
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False)
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ &
-                            (leadingFatJet.btagHbb > -0.4)
+                            ak.fill_none(leadingFatJet.btagHbb > -0.1, False)
                             )]
                     )                                        
                     output['hLeadingFatJetPt_vs_ParticleNetMD_XbbOverQCD'+sHExt].fill(
@@ -1333,6 +1454,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         MLScore=(leadingFatJetParticleNetMD_XbbvsQCD[sel_tmp_]),
                         systematic=syst,
                         weight=evtWeight[sel_tmp_]
+                    )
+                    output['hLeadingFatJetPt_vs_ParticleNetMD_XbbOverQCD_msoftdropGt60'+sHExt].fill(
+                        dataset=dataset,
+                        Pt=(leadingFatJet.pt[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
+                            )]),
+                        MLScore=(leadingFatJetParticleNetMD_XbbvsQCD[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
+                            )]),
+                        systematic=syst,
+                        weight=evtWeight[(
+                            sel_tmp_ &
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
+                            )]
                     )
                     output['hLeadingFatJetPt_vs_BtagHbb'+sHExt].fill(
                         dataset=dataset,
@@ -1345,32 +1482,32 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         dataset=dataset,
                         Pt=(leadingFatJet.pt[(
                             sel_tmp_ &
-                            (leadingFatJet.msoftdrop > 60)
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
                             )]),
                         MLScore=(leadingFatJet.btagHbb[(
                             sel_tmp_ &
-                            (leadingFatJet.msoftdrop > 60)
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ &
-                            (leadingFatJet.msoftdrop > 60)
+                            ak.fill_none(leadingFatJet.msoftdrop > 60, False)
                             )]
                     )
                     output['hLeadingFatJetMSoftDrop_vs_BtagHbb_PtGt400'+sHExt].fill(
                         dataset=dataset,
                         Mass=(leadingFatJet.msoftdrop[(
                             sel_tmp_ & 
-                            (leadingFatJet.pt > 400)
+                            ak.fill_none(leadingFatJet.pt > 400, False)
                             )]),
                         MLScore=(leadingFatJet.btagHbb[(
                             sel_tmp_ & 
-                            (leadingFatJet.pt > 400)
+                            ak.fill_none(leadingFatJet.pt > 400, False)
                             )]),
                         systematic=syst,
                         weight=evtWeight[(
                             sel_tmp_ & 
-                            (leadingFatJet.pt > 400)
+                            ak.fill_none(leadingFatJet.pt > 400, False)
                             )]
                     )
                     
