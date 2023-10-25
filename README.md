@@ -19,20 +19,20 @@ voms-proxy-init --rfc --voms cms -valid 192:00 --out ~/x509up_u108989
 ```
 
 ## Analysis steps
-Analysis is iterative process, and different corrections are needed to take into account. The different corrections considered so far are listed below with details on obtaining those correction. If you want to run the analysis for the first iteration or intermediate corrections are already calculated then you can jump to 'Running analysis' sub-section.
+Analysis is an iterative process, and different corrections are needed to take into account. The different corrections considered so far are listed below with details on obtaining those corrections. If you want to run the analysis for the first iteration or intermediate corrections are already calculated then you can jump to 'Running analysis' sub-section.
 
 ### Prepare samples' list with all details (Samples_2018UL.csv)
 Add/update dataset name and cross-sections for all samples in 'samplesList_prepare.py'.\
 To run:
 ```
-python3 samplesList_prepare.py -era <era>\
+python3 samplesList_prepare.py -era <era>
 cp Samples_2018UL_v0.json Samples_2018UL.json
 ```
-Add commandline option '-updateCrossSections' to update cross-section value in the existing sample list.
+Add command line option '-updateCrossSections' to update the cross-section value in the existing sample list.
 
 
 ### Calculate sumEvents
-Calculate sumEvents as number of events with positive generator weight minus number of events with negative weight.\ 
+Calculate sumEvents as the number of events with positive generator weight minus the number of events with negative weight.\ 
 Run:
 ```
 python3 htoaa_Wrapper.py -analyze countSumEventsInSample.py -era <era> -v <version name> 
@@ -89,21 +89,27 @@ brilcalc lumi -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/nor
 
 
 ### Running analysis
-'htoaa_Analysis_GGFMode.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
+'htoaa_Analysis_Example.py' is a central analysis macro to run the GGF htoaa analysis. It takes input and output file name and other settings in input through config.json file. Command to run on individual config.json file:
 ```
-python3 htoaa_Analysis_GGFMode.py <config>.json
+python3 htoaa_Analysis_Example.py <config>.json
 ```
-Histograms stored in the output root file has the following naming convention:
+Histograms stored in the output root file have the following naming convention:
 ```
-evt/<sampleCategory config.json>/<histogram name>_<systematics>
+evt/<sampleCategory from <config>.json>/<histogram name>_<systematics>
 ```
 
-'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_GGFMode.py in parallel HT Condor jobs.
+'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_Example.py in parallel HT Condor jobs.
 Command to run htoaa analysis macro on data and MC samples:
 ```
-python3 htoaa_Wrapper.py -analyze htoaa_Analysis_GGFMode.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
+python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
 ```
-Append '-server tifr' to the previous command to run on TIFR server.
+Append '-server tifr' to the previous command to run on TIFR server. \
+Append '-ntuples SkimmedNanoAOD -nFilesPerJob 1' to run on the new skimmed NanoAOD files.
+
+
+### Data and MC stack plots
+Run 'scripts/PlotHistos1D_DataVsMC.ipynb' (in jupyter-notebook) to make Data-vs-MC comparison stack plots. A list of histograms for the stack plots are set in 'scripts/HistogramListForPlottingDataVsMC_Analysis_Example.py' file, which get imported inside 'scripts/PlotHistos1D_DataVsMC.ipynb' file.
+
 
 
 ## Description of files
@@ -111,7 +117,7 @@ Append '-server tifr' to the previous command to run on TIFR server.
 
 **htoaa_CommonTools.py**: Common functions used to run the analysis
 
-**htoaa_Samples.py**: List of data and MC samples to run for the analysis. This list is stored information in python-dictionary format. Keys of the dictionary represent 'sample category' and values of the dictionary list sample dataset physics name. 
+**htoaa_Samples.py**: List of data and MC samples to run for the analysis. This list is stored information in python-dictionary format. Keys of the dictionary represent the 'sample category' and values of the dictionary list sample dataset physics name. 
 
 **Samples_2018UL.csv**: Dictionary of all data and MC samples with NanoAOD files, cross-section etc listed for each sample.
 
