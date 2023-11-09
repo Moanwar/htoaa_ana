@@ -239,7 +239,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
-    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "SkimmedNanoAOD"], required=False)
+    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "UnskimmedHToAATo4BNanoAOD", "SkimmedNanoAOD_Hto4b_0p8"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=5)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
@@ -331,8 +331,20 @@ if __name__ == '__main__':
         selSamplesToExclude_list.extend( [
                 "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",  
                 "TTJets_Incl_NLO", "TTJets_Incl_LO", "TTJets_HT_LO", "TTJets_Lep_LO", 
-                'WJetsToLNu_Incl_NLO', 'WJetsToLNu_Incl_LO', 'W1JetsToLNu_LO', 'W2JetsToLNu_LO', 'W3JetsToLNu_LO', 'W4JetsToLNu_LO', 
-                "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B", 
+                #"DYJets_M-10to50_Incl_NLO", "DYJets_M-50_Incl_NLO",
+                'WJetsToLNu_Incl_LO', 'W1JetsToLNu_LO', 'W2JetsToLNu_LO', 'W3JetsToLNu_LO', 'W4JetsToLNu_LO', 
+                "SUSY_VBFH_HToAATo4B", "SUSY_WH_WToAll_HToAATo4B", "SUSY_ZH_ZToAll_HToAATo4B", "SUSY_TTH_TTToAll_HToAATo4B",
+                "SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8",
+                "SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8",                 
         ] )        
     ## ------------------------------------------------------------------------------------------
 
@@ -389,14 +401,16 @@ if __name__ == '__main__':
                 if len(selSamplesToRun_list) > 0:
                     skipThisSample = True
                     for selSample in selSamplesToRun_list:
-                        if sample.startswith(selSample): skipThisSample = False
+                        if sample.startswith(selSample) or (selSample==sample_category): 
+                            skipThisSample = False
                     if skipThisSample:
                         continue
 
                 if len(selSamplesToExclude_list) > 0:
                     skipThisSample = False
                     for selSample in selSamplesToExclude_list:
-                        if sample.startswith(selSample): skipThisSample = True
+                        if sample.startswith(selSample) or (selSample==sample_category): 
+                            skipThisSample = True
                     if skipThisSample:
                         continue
                     
@@ -409,8 +423,12 @@ if __name__ == '__main__':
                     
                 print(f"sample_category: {sample_category}, sample: {sample}", flush=True)
 
-                sampleInfo = samplesInfo[sample] # Samples_Era.json                
-                fileList   = sampleInfo["skimmedNanoAOD"] if sNTuples == "SkimmedNanoAOD" else sampleInfo[sampleFormat] 
+                sampleInfo = samplesInfo[sample] # Samples_Era.json      
+                fileList   = None
+                if   sNTuples == "CentralNanoAOD":                 fileList = sampleInfo[sampleFormat]
+                elif sNTuples == "UnskimmedHToAATo4BNanoAOD":      fileList = sampleInfo["skimmedNanoAOD"]["unskimmed"]
+                elif sNTuples == "SkimmedNanoAOD_Hto4b_0p8":       fileList = sampleInfo["skimmedNanoAOD"]["skim_Hto4b_0p8"]
+
                 files = []
                 for iEntry in fileList:
                     # file name with wildcard charecter *

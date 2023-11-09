@@ -153,7 +153,7 @@ Samples2018 = OD([
         "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
-    ("DYJets_HT_LO", [
+    ("DYJets_M-50_HT_LO", [
         "DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
         "DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
         "DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",

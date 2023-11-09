@@ -18,7 +18,7 @@ sampleFormat = "nanoAOD"
 ### Miscellaneous constants
 kPt_Max     = 99999.0
 kLHE_HT_Max = 99999.0
-NanoAODFileSize_Min = 0.5 # in MB
+NanoAODFileSize_Min = 0.3 # in MB
 #------------------------------------
 
 Era_2016 = '2016'
@@ -31,11 +31,18 @@ sFileSamplesInfo = {
     Era_2018: "Samples_2018UL.json"
 }
 
+# Refer https://docs.google.com/spreadsheets/d/1xDLsr3ikLJxuMPNiSRs79YjTzbN64RetXL3A-tL6-hY/edit?usp=sharing
 # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD*/r1/PNet_*.root
 sPathSkimmedNanoAODs = {
     Era_2018: {
-        'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root',
-        'MC': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root' 
+        'unskimmed': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root' 
+        },
+        'skim_Hto4b_0p8': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root' 
+        },
     }
 }
 
@@ -50,6 +57,7 @@ Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2017: [41.48, 2.3],
     Era_2018: {
         'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
+        'HLT_IsoMu24': [59.82, 2.5], # ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu24_v.xlsx
         'HLT_IsoMu27': [59.83, 2.5], # ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu27_v.xlsx
     }, 
 }
@@ -61,8 +69,14 @@ Luminosities_forGGFMode_perEra = {
             'C':  6.895,
             'D': 31.839
         },
+        'HLT_IsoMu24': {
+            'A': 14.019,
+            'B':  7.067,
+            'C':  6.895,
+            'D': 31.839
+        }, 
         'HLT_IsoMu27': {
-            'A':  14.027,
+            'A': 14.027,
             'B':  7.067,
             'C':  6.895,
             'D': 31.839
@@ -155,7 +169,9 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         },
         'ParticleNetMD_Hto4b_Htoaa4bOverQCD': {
             # https://docs.google.com/presentation/d/1MrkWIGjMBa5UHzMYsQEuXwsnirjDhlxTjm4yeyGRN2Q/edit?usp=sharing
-            'WP-60': 0.9785
+            #'WP-60': 0.9785
+            'WP-80': 0.920,
+            'WP-40': 0.992,
         }
     },
 }

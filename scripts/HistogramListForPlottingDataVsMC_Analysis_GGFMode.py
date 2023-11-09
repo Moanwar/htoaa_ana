@@ -14,23 +14,29 @@ ExpData_dict = {
     #'Data C': ['JetHT_Run2018C'],
     #'Data D': ['JetHT_Run2018D']
 }
-#MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', 'WJetsToQQ_HT', 'ZJetsToQQ_HT']
-MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
+MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', 'WJetsToQQ_HT', 'ZJetsToQQ_HT']
+#MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
 MCSig_list = [
     'SUSY_GluGluH_01J_HToAATo4B_M-15_HPtAbv150', 
-    'SUSY_GluGluH_01J_HToAATo4B_M-20_HPtAbv150', 
+    #'SUSY_GluGluH_01J_HToAATo4B_M-20_HPtAbv150', 
     'SUSY_GluGluH_01J_HToAATo4B_M-25_HPtAbv150', 
-    'SUSY_GluGluH_01J_HToAATo4B_M-30_HPtAbv150', 
+    #'SUSY_GluGluH_01J_HToAATo4B_M-30_HPtAbv150', 
     'SUSY_GluGluH_01J_HToAATo4B_M-50_HPtAbv150', 
     ]
-sLableSig = ['HToAATo4B_M-15', 'HToAATo4B_M-20', 'HToAATo4B_M-25', 'HToAATo4B_M-30', 'HToAATo4B_M-50', ]
+sLableSig = [
+    'HToAATo4B_M-15', 
+    #'HToAATo4B_M-20', 
+    'HToAATo4B_M-25', 
+    #'HToAATo4B_M-30', 
+    'HToAATo4B_M-50',
+     ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
 selectionTags = ['SR'] # ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 
-scale_MCSig = 2 #50 #1000
+scale_MCSig = 50 #1000
 yRatioLimit = [0.4, 1.6]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
@@ -86,8 +92,8 @@ histograms_dict = OD([
     #("hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.5, 3.5] }),
     #("hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
 
-    ("hLeadingFatJetMass", {sXLabel: 'hLeadingFatJetMass', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
-    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5 }),
+    ("hLeadingFatJetMass", {sXLabel: 'hLeadingFatJetMass', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5}),
+    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
     ("hLeadingFatJetBtagDeepB", {sXLabel: 'hLeadingFatJetBtagDeepB', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetBtagDDBvLV2", {sXLabel: 'hLeadingFatJetBtagDDBvLV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetBtagDDCvBV2", {sXLabel: 'hLeadingFatJetBtagDDCvBV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
@@ -106,22 +112,24 @@ histograms_dict = OD([
     
     ("hLeadingFatJetDeepTag_QCD", {sXLabel: 'hLeadingFatJetDeepTag_QCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetDeepTag_QCDothers", {sXLabel: 'hLeadingFatJetDeepTag_QCDothers', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetN2b1", {sXLabel: 'hLeadingFatJetN2b1', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetN3b1", {sXLabel: 'hLeadingFatJetN3b1', sYLabel: 'Events', sXRange: [0, 5], sNRebinX: 2 }),
-    ("hLeadingFatJetTau1", {sXLabel: 'hLeadingFatJetTau1', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    
-    ("hLeadingFatJetTau2", {sXLabel: 'hLeadingFatJetTau2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetTau3", {sXLabel: 'hLeadingFatJetTau3', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetTau4", {sXLabel: 'hLeadingFatJetTau4', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetTau4by3", {sXLabel: 'hLeadingFatJetTau4by3', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    ("hLeadingFatJetTau3by2", {sXLabel: 'hLeadingFatJetTau3by2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
-    
+    ("hLeadingFatJetN2b1", {sXLabel: 'hLeadingFatJetN2b1', sYLabel: 'Events', sXRange: [0, 0.6], sNRebinX: 2 }),
+    ("hLeadingFatJetN3b1", {sXLabel: 'hLeadingFatJetN3b1', sYLabel: 'Events', sXRange: [0.5, 3.5], sNRebinX: 2 }),
+    ("hLeadingFatJetTau1", {sXLabel: 'hLeadingFatJetTau1', sYLabel: 'Events', sXRange: [0, 0.6], sNRebinX: 2 }),    
+    ("hLeadingFatJetTau2", {sXLabel: 'hLeadingFatJetTau2', sYLabel: 'Events', sXRange: [0, 0.5], sNRebinX: 2 }),
+    ("hLeadingFatJetTau3", {sXLabel: 'hLeadingFatJetTau3', sYLabel: 'Events', sXRange: [0, 0.3], sNRebinX: 2 }),
+    ("hLeadingFatJetTau4", {sXLabel: 'hLeadingFatJetTau4', sYLabel: 'Events', sXRange: [0, 0.4], sNRebinX: 2 }),
+    ("hLeadingFatJetTau4by3", {sXLabel: 'hLeadingFatJetTau4by3', sYLabel: 'Events', sXRange: [0.2, 1], sNRebinX: 2 }),
+    ("hLeadingFatJetTau3by2", {sXLabel: 'hLeadingFatJetTau3by2', sYLabel: 'Events', sXRange: [0.2, 1], sNRebinX: 2 }),    
     ("hLeadingFatJetTau2by1", {sXLabel: 'hLeadingFatJetTau2by1', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
+
     ("hLeadingFatJetNConstituents", {sXLabel: 'hLeadingFatJetNConstituents', sYLabel: 'Events'}),
+    ("hLeadingFatJetNBHadrons", {sXLabel: 'hLeadingFatJetNBHadrons', sYLabel: 'Events', sXRange: [-0.5, 10.5]}),
+    ("hLeadingFatJetNCHadrons", {sXLabel: 'hLeadingFatJetNCHadrons', sYLabel: 'Events', sXRange: [-0.5, 10.5]}),
+
     ("hLeadingFatJetParticleNetMD_QCD", {sXLabel: 'hLeadingFatJetParticleNetMD_QCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetParticleNetMD_Xbb", {sXLabel: 'hLeadingFatJetParticleNetMD_Xbb', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetParticleNetMD_Xcc", {sXLabel: 'hLeadingFatJetParticleNetMD_Xcc', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),       
-    ("hLeadingFatJetParticleNetMD_Xqq", {sXLabel: 'hLeadingFatJetParticleNetMD_Xqq', sYLabel: 'Events', sNRebinX: 2}),
+    ("hLeadingFatJetParticleNetMD_Xqq", {sXLabel: 'hLeadingFatJetParticleNetMD_Xqq', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2}),
 
     ("hLeadingFatJetParticleNetMD_XbbOverQCD", {sXLabel: 'hLeadingFatJetParticleNetMD_XbbOverQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }), 
     ("hLeadingFatJetParticleNetMD_XccOverQCD", {sXLabel: 'hLeadingFatJetParticleNetMD_XccOverQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }), 
@@ -132,17 +140,17 @@ histograms_dict = OD([
     ("hLeadingFatJetParticleNet_HccvsQCD", {sXLabel: 'hLeadingFatJetParticleNet_HccvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     ("hLeadingFatJetParticleNet_QCD", {sXLabel: 'hLeadingFatJetParticleNet_QCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     
-    ("hLeadingFatJetParticleNet_mass", {sXLabel: 'hLeadingFatJetParticleNet_mass', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5 }),
+    ("hLeadingFatJetParticleNet_mass", {sXLabel: 'hLeadingFatJetParticleNet_mass', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
 
-    ("hLeadingFatJet_nSubJets", {sXLabel: 'hLeadingFatJet_nSubJets', sYLabel: 'Events', sXRange: [-0.5, 10.5] }),
+    ("hLeadingFatJet_nSubJets", {sXLabel: 'hLeadingFatJet_nSubJets', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
     ("hLeadingFatJet_nSubJets_bTag_L", {sXLabel: 'hLeadingFatJet_nSubJets_bTag_L', sYLabel: 'Events', sXRange: [-0.5, 10.5] }),
     ("hLeadingFatJet_nSubJets_bTag_M", {sXLabel: 'hLeadingFatJet_nSubJets_bTag_M', sYLabel: 'Events', sXRange: [-0.5, 10.5] }),
     ("hLeadingFatJet_nSV", {sXLabel: 'hLeadingFatJet_nSV', sYLabel: 'Events', sXRange: [-0.5, 10.5] }),
 
     ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 1000], sNRebinX: 5 }),
-    ("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 5 }),
+    ("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [1000, 4000], sNRebinX: 5 }),
 
-    ("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events', sXRange: [-0.5, 10.5] }),
+    ("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
 
     #("", {sXLabel: '', sYLabel: 'Events'}),
 ])
@@ -162,7 +170,7 @@ histograms_dict = OD([
 '''
 
 
-nRebinXTmp_ = 10
+nRebinXTmp_ = 50
 histograms_dict.update( OD([
     ("hLeadingFatJetParticleNetMD_Hto4b_Haa01b", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Haa01b', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
     ("hLeadingFatJetParticleNetMD_Hto4b_Haa2b", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Haa2b', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
@@ -192,8 +200,24 @@ histograms_dict.update( OD([
     ("hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD_avg", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_binary_Htoaa4bOverQCD_avg', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
     ("hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_avg", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_avg', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
 
+    ("hLeadingFatJetParticleNet_massA_Hto4b_v0", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_v0', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 2}),
+    ("hLeadingFatJetParticleNet_massA_Hto4b_v1", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_v1', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 2}),
+    ("hLeadingFatJetParticleNet_massA_Hto4b_v2", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_v2', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 2}),
+    ("hLeadingFatJetParticleNet_massA_Hto4b_v3", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_v3', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 2}),
+    ("hLeadingFatJetParticleNet_massA_Hto4b_v4", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_v4', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 2}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v0", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v0', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v00", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v00', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v1", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v1', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v2", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v2', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v3", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v3', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
+    ("hLeadingFatJetParticleNet_massH_Hto4b_v4", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_v4', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
+    
+    
 ]) )
 
 #histograms_dict  = OD([
 #    ("hLeadingFatJetParticleNetMD_Hto4b_Haa4b", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Haa4b', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),    
+#    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
+#    ("hLeadingFatJetPt", {sXLabel: 'hLeadingFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+#    ("hLeadingFatJetNBHadrons", {sXLabel: 'hLeadingFatJetNBHadrons', sYLabel: 'Events', sXRange: [-0.5, 10.5]}),
 #])

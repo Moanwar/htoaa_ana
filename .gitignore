@@ -8,5 +8,6 @@ plots/
 dataVsMCDist_tmp/
 pickles/
 .conda/
+corrections/*.root
 *~
 .__*
