@@ -101,10 +101,14 @@ evt/<sampleCategory from <config>.json>/<histogram name>_<systematics>
 'htoaa_Wrapper.py' prepares the config.json files for differnt data/MC samples and run with htoaa_Analysis_Example.py in parallel HT Condor jobs.
 Command to run htoaa analysis macro on data and MC samples:
 ```
-python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode condor -v <version name>  -xrdcpIpAftNResub 0
+python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era <era> -run_mode condor -v <version name>  
 ```
 Append '-server tifr' to the previous command to run on TIFR server. \
 Append '-ntuples SkimmedNanoAOD -nFilesPerJob 1' to run on the new skimmed NanoAOD files.
+For e.g.
+```
+python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era 2018 -run_mode condor -v MyFirstJobs -samples QCD,SUSY_GluGluH_01J_HToAATo4B -ntuples CentralNanoAOD -nFilesPerJob 5 
+```
 
 
 ### Data and MC stack plots
