@@ -541,9 +541,16 @@ def getPURewgts(PU_list, hPURewgt):
     return wgt_PU
 
 
-def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list):
-    wgt_HiggsPt = (3.9 - (0.4 * np.log2(GenHiggsPt_list)))
-    wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.1) )
+def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+    # Used in Brook's analysis
+    #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
+    #wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(pT), 0.1) )
+
+    # https://indico.cern.ch/event/1348321/#19-siddhesh-sawant
+    # min(max(1.45849 + -0.00400668*x + 4.02577e-06*pow(x, 2) + -1.38804e-09*pow(x, 3), 0.09), 1.02)
+    wgt_HiggsPt = 1.45849 - 0.00400668*GenHiggsPt_list + 4.02577e-06*GenHiggsPt_list**2 - 1.38804e-09*GenHiggsPt_list**3 
+    wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.09) )
+    wgt_HiggsPt = np.minimum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 1.02) )
     return wgt_HiggsPt
 
 
@@ -989,6 +996,59 @@ def rebinTH2(h1_, nRebinX, nRebinY):
         h1_ = h1Rebin_
 
     return h1_
+
+
+def variableRebinTH1(h1_, xNewEdges):
+    #print(f"rebinTH1():: histogram type {type(h1_) = },  {isinstance(h1_, hist.Hist) = }  ")
+    if not (isinstance(h1_, hist.Hist) or  isinstance(h1_, coffea_hist.Hist)):
+        print(f"rebinTH1():: histogram type {type(h1_)} not implemented... so could not rebin histogram ")
+        return h1_
+    
+    if len(h1_.axes) != 1:
+        print(f"rebinTH1:: histogram is not 1D")
+        return h1_
+
+    if not ( isinstance(xNewEdges, list)  or isinstance(xNewEdges, (np.ndarray, np.generic)) ):
+        print(f"xNewEdges ({type(xNewEdges)}) needs to be list type")
+        return h1_
+
+
+    
+    xOldEdges = h1_.axes[0].edges
+    # bin numbers along the Xold axis that correspond to bin-edges of Xnew axis
+    xOldIdx_pointing_xNewEdges = np.digitize(xNewEdges, xOldEdges) - 1 # xOldBinNumber (starting from 0) corresponds to xNewBinEdges
+    print(f"h1_ x-axis ({type(xOldEdges)}) ({len(xOldEdges)}): {xOldEdges}")
+    print(f"new x_axis ({type(xNewEdges)}) ({len(xNewEdges)}): {xNewEdges}")
+    print(f"xOldIdx_pointing_xNewEdges ({type(xOldIdx_pointing_xNewEdges)}) ({len(xOldIdx_pointing_xNewEdges)}): {xOldIdx_pointing_xNewEdges}")
+
+    h1Rebin_ = hist.Hist(hist.axis.Variable(xNewEdges, name=h1_.axes[0].name, label=h1_.axes[0].label), storage=hist.storage.Double())
+
+    print(f"h1Rebin_.axes[0].centers ({type(h1Rebin_.axes[0].centers)}) ({len(h1Rebin_.axes[0].centers)}) ({h1Rebin_.axes[0].centers.shape[0]}) {h1Rebin_.axes[0].centers}")    
+    print(f"h1_.values() ({h1_.values().shape[0]}): {h1_.values()}")
+    for iBinXnew in range(h1Rebin_.axes[0].centers.shape[0]):
+        firstBinInRangeXold        = xOldIdx_pointing_xNewEdges[iBinXnew    ]
+        lasttBinInRangeXold_plus_1 = xOldIdx_pointing_xNewEdges[iBinXnew + 1]
+        nEvents_iBinXnew = h1_.values()[firstBinInRangeXold : lasttBinInRangeXold_plus_1].sum()
+        dX = (xNewEdges[iBinXnew+1] - xNewEdges[iBinXnew])
+        print(f"iBinXnew: {iBinXnew}, ({xNewEdges[iBinXnew]}, {xNewEdges[iBinXnew+1]}) binXold: ({firstBinInRangeXold}, {lasttBinInRangeXold_plus_1}), ({xOldEdges[firstBinInRangeXold]}, {xOldEdges[lasttBinInRangeXold_plus_1]})", )
+        print(f"{h1_.values()[firstBinInRangeXold : lasttBinInRangeXold_plus_1] = }, {nEvents_iBinXnew = }, {nEvents_iBinXnew/dX = } ")
+
+    #print(f"h1Rebin_: {h1Rebin_}")
+    print(f"h1Rebin_.axes[0].centers ({type(h1Rebin_.axes[0].centers)}) ({len(h1Rebin_.axes[0].centers)}) ({h1Rebin_.axes[0].centers.shape[0]}) {h1Rebin_.axes[0].centers}")
+    print(f"h1Rebin_.values() ({type(h1Rebin_.values())}) ({len(h1Rebin_.values())}): {h1Rebin_.values()}")
+    print(f"{h1Rebin_.variances() = }")
+
+
+
+
+
+
+    return h1_
+
+def calculateAverageOfArrays(array_list):
+    a = np.vstack(array_list) # same as np.concatenate(array_list, axis=0)
+    #avg_ = np.sum(a, axis=0) / len(array_list)
+    return np.sum(a, axis=0) / len(array_list)
 
 
 def printVariable(sName, var):

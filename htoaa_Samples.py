@@ -206,6 +206,13 @@ Samples2018 = OD([
         "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
+    ('GluGluHToBB_Incl', [
+        "GluGluHToBB_M-125_TuneCP5_MINLO_NNLOPS_13TeV-powheg-pythia8",
+    ]),
+
+    ('GluGluHToBB_Pt-200ToInf', [
+        "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
+    ]),
 
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_Incl",      ["SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"      ]),
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_HPtAbv150", ["SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8"]),

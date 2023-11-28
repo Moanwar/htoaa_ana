@@ -57,8 +57,10 @@ Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2017: [41.48, 2.3],
     Era_2018: {
         'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
-        'HLT_IsoMu24': [59.82, 2.5], # ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu24_v.xlsx
-        'HLT_IsoMu27': [59.83, 2.5], # ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu27_v.xlsx
+        'Trg_Combo_AK4AK8Jet_HT':                             [59.83, 2.5], # See ./data/luminosity/2018/Luminosity_HLTPaths.xlsx
+        'HLT_IsoMu24':                                        [59.82, 2.5], # See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu24_v.xlsx
+        'HLT_IsoMu27':                                        [59.83, 2.5], # See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu27_v.xlsx
+        'Trg_Combo_Mu':                                       [59.83, 2.5], # See ./data/luminosity/2018/Luminosity_HLTPaths.xlsx
     }, 
 }
 Luminosities_forGGFMode_perEra = {
@@ -68,6 +70,12 @@ Luminosities_forGGFMode_perEra = {
             'B':  7.067,
             'C':  6.895,
             'D': 31.839
+        },
+        'Trg_Combo_AK4AK8Jet_HT': {
+            'A': 14.027,
+            'B':  7.067,
+            'C':  6.895,
+            'D': 31.839,
         },
         'HLT_IsoMu24': {
             'A': 14.019,
@@ -81,6 +89,29 @@ Luminosities_forGGFMode_perEra = {
             'C':  6.895,
             'D': 31.839
         },  
+        'Trg_Combo_Mu': {
+            'A': 14.027,
+            'B':  7.067,
+            'C':  6.895,
+            'D': 31.839
+        }, 
+    }
+}
+Triggers_perEra = {
+    Era_2018: {
+        'Trg_Combo_AK4AK8Jet_HT': {
+            'HLT_PFJet500':                                       ['L1_SingleJet180'], 
+            'HLT_PFHT1050':                                       ['L1_HTT360er'],
+            'HLT_AK8PFHT800_TrimMass50':                          ['L1_HTT360er'],
+            'HLT_AK8PFJet500':                                    ['L1_SingleJet180'],
+            'HLT_AK8PFJet400_TrimMass30':                         ['L1_SingleJet180'],
+            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': ['L1_SingleJet180'],
+        },
+        'Trg_Combo_Mu': {
+            'HLT_IsoMu24': ['L1_SingleMu22'],
+            'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],
+            'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'],
+        }
     }
 }
 
@@ -168,9 +199,10 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             'L': 0.9172
         },
         'ParticleNetMD_Hto4b_Htoaa4bOverQCD': {
-            # https://docs.google.com/presentation/d/1MrkWIGjMBa5UHzMYsQEuXwsnirjDhlxTjm4yeyGRN2Q/edit?usp=sharing
-            #'WP-60': 0.9785
+            # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
             'WP-80': 0.920,
+            #'WP-60': 0.978,
+            'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
             'WP-40': 0.992,
         }
     },

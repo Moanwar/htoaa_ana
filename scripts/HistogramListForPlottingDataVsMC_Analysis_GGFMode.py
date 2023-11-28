@@ -32,7 +32,7 @@ sLableSig = [
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
-selectionTags = ['SR'] # ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
+selectionTags = ['sel_leadingFatJetMSoftDrop'] # ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 
@@ -215,9 +215,11 @@ histograms_dict.update( OD([
     
 ]) )
 
-#histograms_dict  = OD([
+histograms_dict  = OD([
 #    ("hLeadingFatJetParticleNetMD_Hto4b_Haa4b", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Haa4b', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),    
 #    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
 #    ("hLeadingFatJetPt", {sXLabel: 'hLeadingFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
 #    ("hLeadingFatJetNBHadrons", {sXLabel: 'hLeadingFatJetNBHadrons', sYLabel: 'Events', sXRange: [-0.5, 10.5]}),
-#])
+    ("hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    
+])
