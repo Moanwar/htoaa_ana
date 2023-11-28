@@ -109,6 +109,7 @@ For e.g.
 ```
 python3 htoaa_Wrapper.py -analyze htoaa_Analysis_Example.py -era 2018 -run_mode condor -v MyFirstJobs -samples QCD,SUSY_GluGluH_01J_HToAATo4B -ntuples CentralNanoAOD -nFilesPerJob 5 
 ```
+Add -dryRun argument if you want to just want to generate <config>.json, but don't want to run jobs.
 
 
 ### Data and MC stack plots
