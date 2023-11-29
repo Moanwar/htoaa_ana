@@ -466,6 +466,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 addBeforeThisCondition = "leadingFatJetMSoftDrop"
             )
 
+
+
         self.sel_names_all["SRWP40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP40"
         ]
@@ -489,6 +491,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt80"
         ]
         '''
+
+        for sSelName_ in ["SRWP40", "SRWP60", "SRWP80"]:
+            for sMassAWindowName in massPseudoscalarA_windows_dict:
+                sSelWindowName_ = "%s_%s" % (sSelName_, sMassAWindowName)
+                
+                self.sel_names_all[sSelWindowName_] = self.sel_names_all[sSelName_] + [
+                    "leadingFatJetParticleNet_massA_Hto4b_avg_%s" % (sMassAWindowName)
+                ]
+
         
 
         self.sel_conditions_all_list = set()
@@ -1012,6 +1023,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetParticleNet_massH_Hto4b_v3'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v3"}),
                     ('hLeadingFatJetParticleNet_massH_Hto4b_v4'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v4"}),
 
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123'+sHExt,     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg_v0123"}),
+                    
                     #(''+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
                     
                     #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),                    
@@ -2705,6 +2718,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ak.full_like(leadingFatJet.particleNetMD_Hto4b_Haa4b, 0) #leadingFatJet.particleNetMD_Hto4b_Haa4b
             )
 
+            # hLeadingFatJetParticleNet_massA_Hto4b_avg_v013
+            leadingFatJet_PNet_massA_Hto4b_avg = calculateAverageOfArrays([
+                leadingFatJet.particleNet_massA_Hto4b_v0,
+                leadingFatJet.particleNet_massA_Hto4b_v1,
+                leadingFatJet.particleNet_massA_Hto4b_v3
+            ])
             
 
         # SubJet corresponding to leading FatJet 
@@ -2893,13 +2912,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
 
-
-
-
-
-
-
-
         if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40",
@@ -2925,8 +2937,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']
             )
 
+        # mA windows
+        for sMassAWindowName, massAWindow in massPseudoscalarA_windows_dict.items():
+            sSelName_tmp_ = "leadingFatJetParticleNet_massA_Hto4b_avg_%s" % (sMassAWindowName)
+            if sSelName_tmp_ not in self.sel_conditions_all_list: continue
 
-
+            selection.add(
+                sSelName_tmp_,
+                ((leadingFatJet_PNet_massA_Hto4b_avg > massAWindow[0]) & 
+                 (leadingFatJet_PNet_massA_Hto4b_avg < massAWindow[1] ))
+            )
 
 
 
@@ -5765,7 +5785,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
-
+                        # Scale particleNet_massH_Hto4b_v0 by 1.01 to get better response
+                        # https://indico.cern.ch/event/1343334/contributions/5655252/attachments/2745224/4781382/2023_11_02_HToAATo4B_Higgs_mass_studies.pdf#page=15
+                        output['hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123'+sHExt].fill(
+                            dataset=dataset,
+                            Mass=calculateAverageOfArrays([
+                                leadingFatJet.particleNet_massH_Hto4b_v0[sel_SR_forHExt] * 1.01,
+                                leadingFatJet.particleNet_massH_Hto4b_v1[sel_SR_forHExt],
+                                leadingFatJet.particleNet_massH_Hto4b_v2[sel_SR_forHExt],
+                                leadingFatJet.particleNet_massH_Hto4b_v3[sel_SR_forHExt], 
+                                ]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
 
                     ## SubJet corresponding to leadingFatJet
                     output['hLeadingFatJet_nSubJets'+sHExt].fill(

@@ -92,6 +92,8 @@ def writeCondorExecFile(
             myCondaEnv = 'myCondaEnv'
             if UserName.lower() == 'ssawant':
                 myCondaEnv = 'ana_htoaa'
+            elif UserName.lower() == 'csutanta':
+                myCondaEnv = 'ana_SS'
             f.write("conda activate %s \n" % (myCondaEnv))
             #f.write("time conda env list \n")
 

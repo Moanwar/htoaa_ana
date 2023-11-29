@@ -262,7 +262,11 @@ Corrections = {
 
 }
 
-
+massPseudoscalarA_windows_dict = OD([
+    ('mA15Window', [14.2, 15.6]),
+    ('mA30Window', [28.0, 32.0]),
+    ('mA55Window', [50.0, 58.0]),
+])
 
 
 
