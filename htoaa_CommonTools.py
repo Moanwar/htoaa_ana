@@ -1050,6 +1050,50 @@ def calculateAverageOfArrays(array_list):
     #avg_ = np.sum(a, axis=0) / len(array_list)
     return np.sum(a, axis=0) / len(array_list)
 
+def calculateMaxOfTwoArrays(array_a, array_b):
+    a_new = ak.where(
+        (array_a > array_b),
+        array_a,
+        array_b
+    )
+    return a_new
+
+def calculateMaxOfArrays(array_list):
+    a_max = array_list[0]
+    for i in range(1, len(array_list)):
+        a_max = calculateMaxOfTwoArrays(a_max, array_list[i])
+    return a_max
+
+def calculateMinOfTwoArrays(array_a, array_b):
+    a_new = ak.where(
+        (array_a < array_b),
+        array_a,
+        array_b
+    )
+    return a_new
+
+def calculateMinOfArrays(array_list):
+    a_min = array_list[0]
+    for i in range(1, len(array_list)):
+        a_min = calculateMinOfTwoArrays(a_min, array_list[i])
+    return a_min
+
+def array_PutLowerBound(array_list, k):
+    a_new = ak.where(
+        (array_list > k),
+        array_list,
+        ak.full_like(array_list, k)
+    )
+    return a_new
+
+def array_PutUpperBound(array_list, k):
+    a_new = ak.where(
+        (array_list < k),
+        array_list,
+        ak.full_like(array_list, k)
+    )
+    return a_new
+
 
 def printVariable(sName, var):
     printInDetail=True

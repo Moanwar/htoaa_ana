@@ -206,13 +206,74 @@ Samples2018 = OD([
         "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",
     ]),
 
+
+    ('ZZ', [
+        "ZZ_TuneCP5_13TeV-pythia8",
+    ]),
+    ('WZ', [
+        "WZ_TuneCP5_13TeV-pythia8",
+    ]),
+    ('WW', [
+        "WW_TuneCP5_13TeV-pythia8",
+    ]),
+    ('ZZZ', [
+        "ZZZ_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),
+    ('WZZ', [
+        "WZZ_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),
+    ('WWZ', [
+        "WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),
+    ('WWW', [
+        "WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),        
+
+
     ('GluGluHToBB_Incl', [
         "GluGluHToBB_M-125_TuneCP5_MINLO_NNLOPS_13TeV-powheg-pythia8",
     ]),
-
     ('GluGluHToBB_Pt-200ToInf', [
         "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
     ]),
+    ('VBFHToBB_powheg', [
+        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+    ]),
+    ('VBFHToBB_herwig', [
+        "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
+    ]),
+    ('VBFHToBB_dipoleRecoilOn', [
+        "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
+    ]),
+    ('VBFWH_HToBB_WToLNu_dipoleRecoilOn', [
+        "VBFWH_HToBB_WToLNu_M-125_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8",
+    ]),
+
+    ('WH_HToBB_WToQQ', [
+        "WplusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "WminusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
+    ]),
+    ('WH_HToBB_WToLNu', [
+        "WplusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "WminusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
+    ]),
+    ('ZH_HToBB', [
+        "ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8"
+    ]),
+    ('ggZH_HToBB', [
+        "ggZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ggZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ggZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8",
+        "ggZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+    ]),
+    ('ttHToNonbb', [
+        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
+        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
+    ]),
+    
 
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_Incl",      ["SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"      ]),
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_HPtAbv150", ["SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8"]),

@@ -267,6 +267,10 @@ massPseudoscalarA_windows_dict = OD([
     ('mA30Window', [28.0, 32.0]),
     ('mA55Window', [50.0, 58.0]),
 ])
+massHiggs_windows_dict = {
+    'MsoftdropHiggsWindow': [110, 140],
+    'PNet_massH_Hto4b_HiggsWindow': [110, 140],
+}
 
 
 
