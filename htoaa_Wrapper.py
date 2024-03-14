@@ -235,7 +235,7 @@ if __name__ == '__main__':
     print("htoaa_Wrapper:: main: {}".format(sys.argv)); sys.stdout.flush()
     
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
-    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py", "htoaa_triggerStudy_GGFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_Example.py"], required=True)
+    parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=["htoaa_Analysis_GGFMode.py", "countSumEventsInSample.py", "htoaa_triggerStudy_GGFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ZH_4b2nu.py", "htoaa_Analysis_Example.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
@@ -350,7 +350,7 @@ if __name__ == '__main__':
                 "SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8",                 
         ] )  
 
-    if sAnalysis in ["htoaa_Analysis_VHHadronicMode.py"]:
+    if sAnalysis in ["htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ZH_4b2nu.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
                 "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 

@@ -131,7 +131,7 @@ class ObjectSelection:
 
         self.nSV_matched_leadingFatJet_Thsh = 3
 
-        self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.94
+        self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.98 # 0.94
 
         self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
         self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
