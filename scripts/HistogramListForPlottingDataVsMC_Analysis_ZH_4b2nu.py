@@ -44,12 +44,12 @@ sLableSig = [
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
-selectionTags = ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
+selectionTags = ['SRWP60'] # ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
 
-scale_MCSig = 100 #50 #1000
+scale_MCSig = 2 #50 #1000
 yRatioLimit = [0.4, 1.6]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
@@ -266,11 +266,12 @@ histograms_dict  = OD([
 
 nRebinXTmp_ = 4
 histograms_dict  = OD([
-    ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 4 }),
-    ("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 4 }),
+    ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
+    ("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 8 }),
     ("hdPhi_MET_leadingFatJet", {sXLabel: 'hdPhi_MET_leadingFatJet', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 20 }),
-    ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 4 }),
-    ("hPuppiMET_sumEt", {sXLabel: 'hPuppiMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 4 }),
+    ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
+    ("hPuppiMET_sumEt", {sXLabel: 'hPuppiMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 6 }),
     ("hdPhi_PuppiMET_leadingFatJet", {sXLabel: 'hdPhi_PuppiMET_leadingFatJet', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 20 }),
+    ("hnLeptonsTight", {sXLabel: 'hnLeptonsTight', sYLabel: 'Events',  }),
     
 ])

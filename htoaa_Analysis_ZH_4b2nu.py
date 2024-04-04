@@ -76,7 +76,7 @@ print(f"htoaa_Analysis_ZH_4b2nu:: here13 {datetime.now() = }"); sys.stdout.flush
 
  
 printLevel = 0
-nEventToReadInBatch =  2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = False
 #pd.set_option('display.max_columns', None)  
@@ -126,8 +126,11 @@ class ObjectSelection:
 
         self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.98 # 0.94
 
-        self.METPt_MinThsh = 100
+        self.METPt_MinThsh = 300
         self.METPt_MaxThsh = 999999.0
+
+        self.DPhi_FJHto4b_MET_MinThsh = 1.57
+        self.NLeptonsTight_MaxThsh    = 0
 
         self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
         self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
@@ -170,18 +173,23 @@ class ObjectSelection:
 
     def selectMuons(self, eventsObj):
         maskSelMuons = (
+            (eventsObj.pt > 10) &
+            (abs(eventsObj.eta) < 2.4) & 
             (eventsObj.mvaId >= self.MuonMVAId) &
-            (eventsObj.miniIsoId >= self.MuonMiniIsoId)
+            (eventsObj.miniIsoId >= self.MuonMiniIsoId) & 
+            (eventsObj.mvaTTH > 0.5)
         )
         return eventsObj[maskSelMuons]
     
 
     def selectElectrons(self, eventsObj):
         maskSelElectrons = (
-            (eventsObj[self.ElectronMVAId] > 0)
+            (eventsObj.pt > 10) &
+            (abs(eventsObj.eta) < 2.3) & 
+            (eventsObj[self.ElectronMVAId] > 0) &
+            (eventsObj.mvaTTH > 0.3)
         )
         return eventsObj[maskSelElectrons]
-
 
 
     def selectGenHiggs(self, events):
@@ -405,7 +413,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "JetID",          
                 #"L1_SingleJet180",
                 #HLT_AK8PFJet330_name,
-                #sTrgSelection,
+                sTrgSelection,
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
                 #"leadingFatJetZHbb_Xbb_avg",
@@ -415,7 +423,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #"leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
                 #"leadingFatJet_nSV"
                 #
-                "METPt"
+                "METPt",
+                "dPhiLeadingFJHto4bAndMet",
+                "nLeptonsTight",
             ]),
         ])
 
@@ -482,6 +492,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.sel_names_all["SBWP80to40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40"
         ]
+        self.sel_names_all["SBWP80to60"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60"
+        ]
         '''
         self.sel_names_all["SBWPlt40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40"
@@ -494,7 +507,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ]
         '''
 
-        for sSelName_ in ["SRWP40", "SRWP60", "SRWP80"]:
+        #for sSelName_ in ["SRWP40", "SRWP60", "SRWP80"]:
+        for sSelName_ in []:
             # massA windows
             for sMassAWindowName in massPseudoscalarA_windows_dict:
                 sSelWindowName_ = "%s_%s" % (sSelName_, sMassAWindowName)
@@ -640,6 +654,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
         mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
         mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,     70)
+        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                2*70,       0,     70)
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
@@ -1078,6 +1093,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                     ## nLeptons_matched_leadingFatJet
                     ('hLeadingFatJet_nLeptons'+sHExt,                   {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of iso-leptons within leadingFatJet "}),
+                    
+                    ('hnLeptonsTight'+sHExt,                            {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of tight leptons "}),
 
 
                     
@@ -1088,7 +1105,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 histos.update(OD([
                     ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
-                      sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),                    
+                      sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),           
+
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
+
+                    ('hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),
+
+                    ('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
+
                 ]))
 
 
@@ -2842,9 +2872,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         muonsTight     = self.objectSelector.selectMuons(events.Muon)
         electronsTight = self.objectSelector.selectElectrons(events.Electron)
         leptonsTight   = ak.concatenate([muonsTight, electronsTight], axis=1)
+        nLeptonsTight  = ak.fill_none(ak.count(leptonsTight.pt, axis=1), 0)
         nLeptons_matched_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0)
-
-
+        
 
 
 
@@ -2976,6 +3006,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                   (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-40']) )
             )
 
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60" in self.sel_conditions_all_list:
+            selection.add(
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60",
+                ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']) &
+                  (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-60']) )
+            )
+
         if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40",
@@ -3037,7 +3074,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                  (events.MET.pt < self.objectSelector.METPt_MaxThsh) )
             )
 
+        if "dPhiLeadingFJHto4bAndMet" in self.sel_conditions_all_list:
+            selection.add(
+                "dPhiLeadingFJHto4bAndMet",
+                ( abs(events.MET.delta_phi(leadingFatJet)) > self.objectSelector.DPhi_FJHto4b_MET_MinThsh )
+            )
             
+        if "nLeptonsTight" in self.sel_conditions_all_list:
+            selection.add(
+                "nLeptonsTight",
+                ( nLeptonsTight <= self.objectSelector.NLeptonsTight_MaxThsh )
+            )
 
 
 
@@ -5975,6 +6022,37 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         weight=evtWeight[sel_SR_forHExt]
                     )
 
+                    output['hnLeptonsTight'+sHExt].fill(
+                        dataset=dataset,
+                        nObject10=(nLeptonsTight[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )
+
+
+                    ### 2-D distribution ----------------------------------------------------------
+
+                    output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet_PNet_massH_Hto4b_avg[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )                    
+                    output['hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet.mass[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    ) 
+                    output['hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet.msoftdrop[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    ) 
 
                     
                     

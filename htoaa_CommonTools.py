@@ -771,8 +771,12 @@ def rebinTH1(h1_, nRebins):
         h1Rebin_ = h1_[::5j]
     elif nRebins == 6:
         h1Rebin_ = h1_[::6j]
+    elif nRebins == 8:
+        h1Rebin_ = h1_[::8j]
     elif nRebins == 10:
         h1Rebin_ = h1_[::10j]
+    elif nRebins == 12:
+        h1Rebin_ = h1_[::12j]        
     elif nRebins == 20:
         h1Rebin_ = h1_[::20j]
     elif nRebins == 40:
