@@ -6,6 +6,7 @@ __pycache__/
 cout*.txt
 plots/
 dataVsMCDist_tmp/
+*.root
 pickles/
 .conda/
 corrections/*.root
