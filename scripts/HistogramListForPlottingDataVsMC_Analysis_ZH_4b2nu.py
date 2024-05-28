@@ -17,9 +17,12 @@ ExpData_dict = {
 MCBkg_list = [
     'QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  
     'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', "SingleTop", 
-    'ZJetsToQQ_HT', "DYJets_M-50_Incl_NLO", 
+    'ZJetsToQQ_HT', "ZJetsToNuNuQ_HT", "DYJets_M-50_Incl_NLO", 
     'WJetsToQQ_HT', 'WJetsToLNu_HT_LO',
     'ZZ','WZ','WW', 'ZZZ','WZZ','WWZ','WWW',
+    'WH_HToBB_WToLNu',
+    'ZH_HToBB',
+    'ttH'
 ]
 #MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
 MCSig_list = [
@@ -44,7 +47,7 @@ sLableSig = [
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
-selectionTags = ['SRWP60'] # ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
+selectionTags = ['Presel'] #['SRWP60'] # ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
@@ -266,12 +269,66 @@ histograms_dict  = OD([
 
 nRebinXTmp_ = 4
 histograms_dict  = OD([
+    ("hLeadingFatJetPt", {sXLabel: 'hLeadingFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    ("hLeadingFatJetEta", {sXLabel: 'hLeadingFatJetEta', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
+    ("hLeadingFatJetPhi", {sXLabel: 'hLeadingFatJetPhi', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
+
     ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
     ("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 8 }),
     ("hdPhi_MET_leadingFatJet", {sXLabel: 'hdPhi_MET_leadingFatJet', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 20 }),
     ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
     ("hPuppiMET_sumEt", {sXLabel: 'hPuppiMET_sumEt', sYLabel: 'Events', sXRange: [0, 4000], sNRebinX: 6 }),
     ("hdPhi_PuppiMET_leadingFatJet", {sXLabel: 'hdPhi_PuppiMET_leadingFatJet', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 20 }),
-    ("hnLeptonsTight", {sXLabel: 'hnLeptonsTight', sYLabel: 'Events',  }),
+    ("hPuppiMET_sumEt_minus_FJHto4bPt", {sXLabel: 'PuppiMET_sumEt - pT(AK8 H->4b jet) [GeV]', sYLabel: 'Events', sXRange: [0, 1000], sNRebinX: 20 }),
     
+    ("hnLeptonsTight", {sXLabel: 'hnLeptonsTight', sYLabel: 'Events',  }),
+
+    ("hnAK4Jets_NonoverlapLeadingFatJet", {sXLabel: 'No. of AK4 jets nonoverlapping H->4b fat jet', sYLabel: 'Events',  }),
+    ("hPtLeadingAK4Jets_NonoverlapLeadingFatJet", {sXLabel: 'pT(Leading AK4 jets nonoverlapping H->4b fat jet) [GeV]', sYLabel: 'Events', sNRebinX: 4  }),
+    ("hnAK4Jets_bTag_NonoverlapLeadingFatJet", {sXLabel: 'No. of b-tag AK4 jets nonoverlapping H->4b fat jet', sYLabel: 'Events',  }),
+    #("hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet", {sXLabel: 'pT(Leading b-tag AK4 jets nonoverlapping H->4b fat jet) [GeV]', sYLabel: 'Events', sNRebinX: 4  }),  
+
+    ("hnAK4JetsCentral_NonoverlapLeadingFatJet", {sXLabel: 'No. of central AK4 jets nonoverlapping H->4b fat jet', sYLabel: 'Events',  }),
+    ("hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet", {sXLabel: 'pT(Leading central AK4 jets nonoverlapping H->4b fat jet) [GeV]', sYLabel: 'Events', sNRebinX: 4  }),
+    ("hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet", {sXLabel: 'No. of b-tag central AK4 jets nonoverlapping H->4b fat jet', sYLabel: 'Events',  }),
+    #("hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet", {sXLabel: 'pT(Leading b-tag central AK4 jets nonoverlapping H->4b fat jet) [GeV]', sYLabel: 'Events', sNRebinX: 4  }),  
+
 ])
+
+
+histograms_dict  = OD([
+    #("hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet", {sXLabel: 'pT(Leading b-tag AK4 jets nonoverlapping H->4b fat jet) [GeV]', sYLabel: 'Events', sNRebinX: 4  }),  
+
+    ("hLeadingFatJetPt", {sXLabel: 'hLeadingFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    ("hLeadingFatJetEta", {sXLabel: 'hLeadingFatJetEta', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
+    ("hLeadingFatJetPhi", {sXLabel: 'hLeadingFatJetPhi', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
+
+    ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
+    ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 800], sNRebinX: 6 }),
+
+    ("hLeadingFatJetPt_DataPreHEM1516Issue", {sXLabel: 'hLeadingFatJetPt_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hLeadingFatJetEta_DataPreHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_DataPreHEM1516Issue', sYLabel: 'Events', sXRange: [-3, 3], sNRebinX: 4  }),  
+    ("hLeadingFatJetPhi_DataPreHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hLeadingFatJetPt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPt_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hLeadingFatJetEta_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3, 3], sNRebinX: 4  }),  
+    ("hLeadingFatJetPhi_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    
+    ("hLeadingFatJetEta_HEM1516IssuePhiCut", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut', sYLabel: 'Events', sXRange: [-3, 3], sNRebinX: 4  }),  
+    ("hLeadingFatJetPhi_HEM1516IssueEtaCut", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut', sYLabel: 'Events', sNRebinX: 4  }), 
+    ("hLeadingFatJetEta_HEM1516IssuePhiCut_DataPreHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut_DataPreHEM1516Issue', sYLabel: 'Events', sXRange: [-3, 3], sNRebinX: 4  }),  
+    ("hLeadingFatJetPhi_HEM1516IssueEtaCut_DataPreHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }), 
+    ("hLeadingFatJetEta_HEM1516IssuePhiCut_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3, 3], sNRebinX: 4  }),  
+    ("hLeadingFatJetPhi_HEM1516IssueEtaCut_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }), 
+     
+    
+    ("hMETPt_DataPreHEM1516Issue", {sXLabel: 'hMETPt_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    #("hMETEta_DataPreHEM1516Issue", {sXLabel: 'hMETEta_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hMETPhi_DataPreHEM1516Issue", {sXLabel: 'hMETPhi_DataPreHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hMETPt_DataWithHEM1516Issue", {sXLabel: 'hMETPt_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    #("hMETEta_DataWithHEM1516Issue", {sXLabel: 'hMETEta_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    ("hMETPhi_DataWithHEM1516Issue", {sXLabel: 'hMETPhi_DataWithHEM1516Issue', sYLabel: 'Events', sNRebinX: 4  }),  
+    
+
+])
+
+

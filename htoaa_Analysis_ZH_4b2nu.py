@@ -54,7 +54,7 @@ from htoaa_CommonTools import (
     selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
-    selectMETFilters,
+    selectMETFilters, selectAK4Jets,
     selGenPartsWithStatusFlag,
     getHiggsPtRewgtForGGToHToAATo4B, getTopPtRewgt, getPURewgts, getHTReweight,
     calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
@@ -107,7 +107,7 @@ class ObjectSelection:
         self.wp_ParticleNetMD_XbbvsQCD = 'L'
         self.wp_ParticleNetMD_Hto4b_Htoaa4bOverQCD = 'WP-40' # 'WP-40' 'WP-80' #'WP-60'
 
-        self.FatJetPtThsh  = 400 # 400, 170
+        self.FatJetPtThsh  = 250 # 400 # 400, 170
         self.FatJetEtaThsh = 2.4
         self.FatJetJetID   = int(JetIDs.tightIDPassingLeptonVeto)
 
@@ -126,15 +126,18 @@ class ObjectSelection:
 
         self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.98 # 0.94
 
-        self.METPt_MinThsh = 300
+        self.METPt_MinThsh = 250 # 300
         self.METPt_MaxThsh = 999999.0
 
         self.DPhi_FJHto4b_MET_MinThsh = 1.57
         self.NLeptonsTight_MaxThsh    = 0
+        self.NAK4JetsCentral_MaxThsh  = 0
 
         self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
         self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
         self.ElectronMVAId = 'mvaFall17V2Iso_WP80' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
+
+        self.Ak4JetDeepJetB_Thsh = bTagWPs[self.era]['AK4DeepJet']['M']
 
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
@@ -348,7 +351,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_GenLHEPlots;           runMode_GenLHEPlots      = False
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
         global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False
-        global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = False
+        global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = True # False
         
 
         ak.behavior.update(nanoaod.behavior)
@@ -401,7 +404,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global HLT_AK8PFJet330_name
         HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
+        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT_MET' # 'Trg_Combo_AK4AK8Jet_HT'
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -426,6 +429,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "METPt",
                 "dPhiLeadingFJHto4bAndMet",
                 "nLeptonsTight",
+                "nAK4JetsCentral"
             ]),
         ])
 
@@ -642,6 +646,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         nObject50_axis        = hist.Bin("nObject50",              r"No. of object",              51,    -0.5,    50.5)
         nObject200_axis       = hist.Bin("nObject200",             r"No. of object",             201,    -0.5,   200.5)
         pt4TeV_axis           = hist.Bin("Pt4TeV",                 r"$p_{T}$ [GeV]",             200,       0,    4000)
+        pt2TeV_axis           = hist.Bin("Pt2TeV",                 r"$p_{T}$ [GeV]",             220,    -200,    2000)
         pt_axis               = hist.Bin("Pt",                     r"$p_{T}$ [GeV]",             200,       0,    1000)
         ptLow_axis            = hist.Bin("PtLow",                  r"$p_{T}$ [GeV]",             400,       0,     200)
         ptUltraLow_axis       = hist.Bin("PtUltraLow",             r"$p_{T}$ [GeV]",             200,       0,     0.1)
@@ -1089,6 +1094,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hPuppiMET_pT'+sHExt,                              {sXaxis: pt_axis,         sXaxisLabel: r"PuppiMET pT [GeV]"}),
                     ('hPuppiMET_sumEt'+sHExt,                           {sXaxis: pt4TeV_axis,     sXaxisLabel: r"PuppiMET sumEt [GeV]"}),
                     ('hdPhi_PuppiMET_leadingFatJet'+sHExt,              {sXaxis: deltaPhi_axis,   sXaxisLabel: r"deltaPhi(PuppiMET, leadingFatJet)"}),
+                    ('hPuppiMET_sumEt_minus_FJHto4bPt'+sHExt,           {sXaxis: pt2TeV_axis,     sXaxisLabel: r"PuppiMET sumEt - pT(AK8 jet H->4b) [GeV]"}),
+                    ('hMETPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
+                    ('hPuppiMETPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
+                    
+                        
                     
 
                     ## nLeptons_matched_leadingFatJet
@@ -1097,7 +1107,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hnLeptonsTight'+sHExt,                            {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of tight leptons "}),
 
 
-                    
+                    ## AK4 jets
+                    ('hnAK4Jets_NonoverlapLeadingFatJet'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of AK4 jets non-overlap FatJet H->4b "}),
+                    ('hPtLeadingAK4Jets_NonoverlapLeadingFatJet'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading AK4 jets non-overlap FatJet H->4b) [GeV]"}),
+                    ('hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag AK4 jets non-overlap FatJet H->4b "}),
+                    ('hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag AK4 jets non-overlap FatJet H->4b) [GeV]"}),
+
+                    ('hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of central AK4 jets non-overlap FatJet H->4b "}),
+                    ('hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
+                    ('hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag central AK4 jets non-overlap FatJet H->4b "}),
+                    ('hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
+
                     
                 ]))
 
@@ -1124,6 +1144,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 if runMode_2018HEM1516IssueValidation:
                     histos.update(OD([
+
                         ('hLeadingFatJetPt_DataPreHEM1516Issue'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
                         ('hLeadingFatJetEta_DataPreHEM1516Issue'+sHExt,                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
                         ('hLeadingFatJetPhi_DataPreHEM1516Issue'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
@@ -1161,6 +1182,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt,    {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
                         ('hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt,      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
                         ('hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt,      {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
+
+                        # MET
+                        ('hMETPt_DataPreHEM1516Issue'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
+                        ('hMETEta_DataPreHEM1516Issue'+sHExt,                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
+                        ('hMETPhi_DataPreHEM1516Issue'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
+                        ('hMETPt_DataWithHEM1516Issue'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
+                        ('hMETEta_DataWithHEM1516Issue'+sHExt,                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)"}),
+                        ('hMETPhi_DataWithHEM1516Issue'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
+
+                        # AK4 jet
+                        
+
                     ]))
 
 
@@ -2821,7 +2854,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         # mask satisfying HEM1516 issues conditions
         scaleAK4ToAK8 = 0.4
-        mask_HEM1516Issue = ak.fill_none((
+        mask_HEM1516Issue_FatJet = ak.fill_none((
             (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
             (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
         ), False)
@@ -2831,10 +2864,34 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_HEM1516Issue_Phi = ak.fill_none((
             (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
         ), False)
+        # Discussion in Boosted H->aa->4b channel: https://mattermost.web.cern.ch/cms-exp/pl/iucci5aegjdzdqrqyhz18fn3ba
+        mask_HEM1516Issue_JetMet = ak.fill_none(( 
+            ak.any((
+                (events.Jet.eta > (-3.2 )) & (events.Jet.eta < (-1.3 )) & 
+                (events.Jet.phi > (-1.57)) & (events.Jet.phi < (-0.87)) & 
+                (abs(events.Jet.phi - events.MET.phi) < 0.3)            & 
+                ((events.Jet.chEmEF + events.Jet.neEmEF) * events.Jet.pt > 10)
+            ), axis=-1)
+        ), False)
+        mask_HEM1516Issue = mask_HEM1516Issue_FatJet | mask_HEM1516Issue_JetMet
         isRunAffectedBy2018HEM1516Issue = (
             (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
             (events.run <= HEM1516Issue2018_AffectedRunRange[1])
         )
+
+        if printLevel >= 100:
+            printVariable('\n events.Jet.pt', events.Jet.pt)
+            printVariable('\n events.Jet.chEmEF', events.Jet.chEmEF)
+            printVariable('\n events.Jet.neEmEF', events.Jet.neEmEF)
+            printVariable('\n mask_HEM1516Issue_FatJet', mask_HEM1516Issue_FatJet)
+            printVariable('\n mask_HEM1516Issue_JetMet', mask_HEM1516Issue_JetMet)
+            printVariable('\n mask_HEM1516Issue', mask_HEM1516Issue)
+            printVariable('\n (abs(events.Jet.phi - events.MET.phi) < 0.3)', (abs(events.Jet.phi - events.MET.phi) < 0.3))
+            #printVariable('\n ', )
+            #printVariable('\n ', )
+            
+            
+            
 
         ## SVs matched with leadingFatJet
         mask_SV_matched_leadingFatJet           = leadingFatJet.delta_r(events.SV.p4) < 0.8
@@ -2876,7 +2933,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         nLeptons_matched_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0)
         
 
+        ## sel AK4 jets
+        ak4Jets = selectAK4Jets(Jets=events.Jet, era=self.datasetInfo["era"], pT_Thsh=30)
+        mask_ak4Jets_nonoverlaping_leadingFatJet           = ak4Jets.delta_r(leadingFatJet) > 0.8
+        ak4Jets_nonoverlaping_leadingFatJet                = ak4Jets[ mask_ak4Jets_nonoverlaping_leadingFatJet ]
+        nAk4Jets_nonoverlaping_leadingFatJet               = ak.fill_none(ak.count(ak4Jets_nonoverlaping_leadingFatJet.pt, axis=1), 0)
 
+        ak4JetsCentral_nonoverlaping_leadingFatJet         = ak4Jets_nonoverlaping_leadingFatJet[abs(ak4Jets_nonoverlaping_leadingFatJet.eta) < 2.4]
+        nAk4JetsCentral_nonoverlaping_leadingFatJet        = ak.fill_none(ak.count(ak4JetsCentral_nonoverlaping_leadingFatJet.pt, axis=1), 0)
+
+        mask_ak4Jets_bTag_nonoverlaping_leadingFatJet      = ak4Jets_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh
+        ak4Jets_bTag_nonoverlaping_leadingFatJet           = ak4Jets_nonoverlaping_leadingFatJet[mask_ak4Jets_bTag_nonoverlaping_leadingFatJet]
+        nAk4Jets_bTag_nonoverlaping_leadingFatJet          = ak.fill_none(ak.count(ak4Jets_bTag_nonoverlaping_leadingFatJet.pt, axis=1), 0)
+
+        ak4JetsCentral_bTag_nonoverlaping_leadingFatJet    = ak4Jets_bTag_nonoverlaping_leadingFatJet[abs(ak4Jets_bTag_nonoverlaping_leadingFatJet.eta) < 2.4]
+        nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet   = ak.fill_none(ak.count(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet.pt, axis=1), 0)
 
         
 
@@ -3086,6 +3157,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ( nLeptonsTight <= self.objectSelector.NLeptonsTight_MaxThsh )
             )
 
+
+        if "nAK4JetsCentral" in self.sel_conditions_all_list:
+            selection.add(
+                "nAK4JetsCentral",
+                ( nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAK4JetsCentral_MaxThsh )
+            )
 
 
 
@@ -5076,6 +5153,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             systematic=syst,
                             weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
+                        output['hMETPt_DataPreHEM1516Issue'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(events.MET.pt[ sel_tmp_ ]),
+                            systematic=syst,
+                            weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
+                        )
+                        output['hMETPhi_DataPreHEM1516Issue'+sHExt].fill(
+                            dataset=dataset,
+                            Phi=(events.MET.phi[ sel_tmp_ ]),
+                            systematic=syst,
+                            weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
+                        )
+
                         # inclusive, DataWithHEM1516Issue
                         sel_tmp_ = sel_SR_forHExt & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPt_DataWithHEM1516Issue'+sHExt].fill(
@@ -5096,6 +5186,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             systematic=syst,
                             weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
+                        output['hMETPt_DataWithHEM1516Issue'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(events.MET.pt[ sel_tmp_ ]),
+                            systematic=syst,
+                            weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ]
+                        )
+                        output['hMETPhi_DataWithHEM1516Issue'+sHExt].fill(
+                            dataset=dataset,
+                            Phi=(events.MET.phi[ sel_tmp_ ]),
+                            systematic=syst,
+                            weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ] 
+                        )                        
 
                         # HEM1516Issue region
                         sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
@@ -6012,7 +6114,27 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         deltaPhi=(abs(events.PuppiMET.delta_phi(leadingFatJet))[sel_SR_forHExt]),
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
-                    )                                   
+                    )  
+                    output['hPuppiMET_sumEt_minus_FJHto4bPt'+sHExt].fill(
+                        dataset=dataset,
+                        Pt2TeV=(events.PuppiMET.sumEt - leadingFatJet.pt)[sel_SR_forHExt],
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )      
+                    output['hMETPhi'+sHExt].fill(
+                        dataset=dataset,
+                        Phi=(events.MET.phi[ sel_SR_forHExt ]),
+                        systematic=syst,
+                        weight=evtWeight[ sel_SR_forHExt ]
+                    ) 
+                    output['hPuppiMETPhi'+sHExt].fill(
+                        dataset=dataset,
+                        Phi=(events.PuppiMET.phi[ sel_SR_forHExt ]),
+                        systematic=syst,
+                        weight=evtWeight[ sel_SR_forHExt ]
+                    ) 
+                                                     
+                                                     
 
                     ## nLeptons 
                     output['hLeadingFatJet_nLeptons'+sHExt].fill(
@@ -6028,6 +6150,87 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     )
+
+                    ## AK4 jets
+                    output['hnAK4Jets_NonoverlapLeadingFatJet'+sHExt].fill(
+                        dataset=dataset,
+                        nObject10=(nAk4Jets_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )    
+                    if ak.count(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
+                        output['hPtLeadingAK4Jets_NonoverlapLeadingFatJet'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt))
+                                ]),
+                            systematic=syst,
+                            weight=evtWeight[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt))
+                                ]
+                        )
+                    output['hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
+                        dataset=dataset,
+                        nObject10=(nAk4Jets_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )    
+                    if ak.count(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
+                        output['hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
+                                ]),
+                            systematic=syst,
+                            weight=evtWeight[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
+                                ]
+                        )
+
+                    output['hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt].fill(
+                        dataset=dataset,
+                        nObject10=(nAk4JetsCentral_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )    
+                    if ak.count(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
+                        output['hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt))
+                                ]),
+                            systematic=syst,
+                            weight=evtWeight[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt))
+                                ]
+                        )
+                    output['hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
+                        dataset=dataset,
+                        nObject10=(nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )    
+                    if ak.count(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
+                        output['hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt))
+                                ]),
+                            systematic=syst,
+                            weight=evtWeight[
+                                sel_SR_forHExt & 
+                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt))
+                                ]
+                        )
+
+
 
 
                     ### 2-D distribution ----------------------------------------------------------
@@ -6915,7 +7118,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             MLScore=(leadingFatJetParticleNetMD_XqqvsQCD[sel_SR_forHExt]),
                             nObject10=(nSV_matched_leadingFatJet[sel_SR_forHExt]),
                             systematic=syst,
-                            weight=evtWeight[sel_SR_forHExt]
+                            weight=evtWeight[sel_SR_forHExt] 
                         )
                         output['hLeadingFatJetParticleNetMD_XqqOverQCD_vs_LeadingFatJet_mass_SV_MaxdxySig'+sHExt].fill(
                             dataset=dataset,

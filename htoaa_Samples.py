@@ -131,6 +131,16 @@ Samples2018 = OD([
         "ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
 
+    ("ZJetsToNuNuQ_HT", [
+        "ZJetsToNuNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "ZJetsToNuNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8",        
+    ]),
+
     #("DYJets_Incl_NLO", [
     #    "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
     #    "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
@@ -269,11 +279,11 @@ Samples2018 = OD([
         "ggZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8",
         "ggZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
     ]),
-    ('ttHToNonbb', [
+    ('ttH', [
         "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
         "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
     ]),
-    
+
 
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_Incl",      ["SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"      ]),
     ("SUSY_GluGluH_01J_HToAATo4B_M-12_HPtAbv150", ["SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
