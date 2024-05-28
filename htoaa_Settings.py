@@ -297,6 +297,7 @@ massHiggs_windows_dict = {
 
 
 ### Miscellaneous variables
+SplitQCDInGENCats = False
 HistogramNameExtensions_QCD = ['0bCat', '1bCat', '2bCat', '3bCat', '4bCat', '5bAndMoreCat'] 
 
 

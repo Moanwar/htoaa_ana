@@ -131,7 +131,7 @@ Samples2018 = OD([
         "ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
 
-    ("ZJetsToNuNuQ_HT", [
+    ("ZJetsToNuNu_HT", [
         "ZJetsToNuNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "ZJetsToNuNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",
         "ZJetsToNuNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8",

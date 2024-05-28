@@ -616,7 +616,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             
             ## MC QCD
             if self.datasetInfo['isQCD'] and \
-                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
+                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+                SplitQCDInGENCats:
                 # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
                 self.histosExtensions = HistogramNameExtensions_QCD 
 
@@ -8464,6 +8465,7 @@ if __name__ == '__main__':
         
         if isMC and \
             MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+            SplitQCDInGENCats and \
             "QCD" in sample_category:
             sample_category_toUse = "QCD"
         
@@ -8477,6 +8479,7 @@ if __name__ == '__main__':
                 sHExt_toUse = ''
                 if isMC and \
                     MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
+                    SplitQCDInGENCats and \
                     "QCD" in sample_category:                    
                     for sHExt in HistogramNameExtensions_QCD:
                         if sHExt in key:
