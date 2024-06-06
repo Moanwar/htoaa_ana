@@ -131,7 +131,7 @@ class ObjectSelection:
 
         self.DPhi_FJHto4b_MET_MinThsh = 1.57
         self.NLeptonsTight_MaxThsh    = 0
-        self.NAK4JetsCentral_MaxThsh  = 0
+        self.NAK4JetsBtagCentral_MaxThsh  = 0
 
         self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
         self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
@@ -429,7 +429,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "METPt",
                 "dPhiLeadingFJHto4bAndMet",
                 "nLeptonsTight",
-                "nAK4JetsCentral"
+                "nAK4JetsBtagCentral"
             ]),
         ])
 
@@ -3159,10 +3159,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
 
-        if "nAK4JetsCentral" in self.sel_conditions_all_list:
+        if "nAK4JetsBtagCentral" in self.sel_conditions_all_list:
             selection.add(
                 "nAK4JetsCentral",
-                ( nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAK4JetsCentral_MaxThsh )
+                ( nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAK4JetsBtagCentral_MaxThsh )
             )
 
 

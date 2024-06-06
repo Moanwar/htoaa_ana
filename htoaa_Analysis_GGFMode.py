@@ -135,6 +135,8 @@ class ObjectSelection:
         self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
         self.ElectronMVAId = 'mvaFall17V2Iso_WP80' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
 
+        self.NLeptonsTight_MaxThsh    = 0
+
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
         
@@ -416,6 +418,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #"leadingFatJetParticleNetMD_XbbvsQCD",
                 #"leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
                 #"leadingFatJet_nSV"
+                "nLeptonsTight",
             ]),
         ])
 
@@ -484,6 +487,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ]
         self.sel_names_all["SBWP80to40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40"
+        ]
+        self.sel_names_all["SBWP80to60"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60"
         ]
         '''
         self.sel_names_all["SBWPlt40"] = self.sel_names_all["Presel"] + [
@@ -2849,6 +2855,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         muonsTight     = self.objectSelector.selectMuons(events.Muon)
         electronsTight = self.objectSelector.selectElectrons(events.Electron)
         leptonsTight   = ak.concatenate([muonsTight, electronsTight], axis=1)
+        nLeptonsTight  = ak.fill_none(ak.count(leptonsTight.pt, axis=1), 0)
         nLeptons_matched_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0)
 
 
@@ -2983,6 +2990,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                   (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-40']) )
             )
 
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60" in self.sel_conditions_all_list:
+            selection.add(
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60",
+                ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']) &
+                  (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-60']) )
+            )
+
         if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40",
@@ -3038,6 +3052,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
             
+        if "nLeptonsTight" in self.sel_conditions_all_list:
+            selection.add(
+                "nLeptonsTight",
+                ( nLeptonsTight <= self.objectSelector.NLeptonsTight_MaxThsh )
+            )
 
 
 

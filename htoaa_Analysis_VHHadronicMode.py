@@ -412,7 +412,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingNonHto4bFatJetJetID",                 
                 #"L1_SingleJet180",
                 #HLT_AK8PFJet330_name,
-                #sTrgSelection,
+                sTrgSelection,
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
                 #"leadingFatJetZHbb_Xbb_avg",
@@ -491,6 +491,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ]
         self.sel_names_all["SBWP80to40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40"
+        ]
+        self.sel_names_all["SBWP80to60"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60"
         ]
         '''
         self.sel_names_all["SBWPlt40"] = self.sel_names_all["Presel"] + [
@@ -651,6 +654,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
         mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
         mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,     70)
+        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                2*70,       0,     70)
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
@@ -1122,7 +1126,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
                       sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),                    
-                ]))
+    
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
+
+                    ('hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),
+
+                    ('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
+                     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
+                      sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),                                                           
+            ]))
 
 
                 if runMode_2018HEM1516IssueValidation:
@@ -3082,6 +3098,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40",
                 ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']) &
                   (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-40']) )
+            )
+
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60" in self.sel_conditions_all_list:
+            selection.add(
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to60",
+                ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']) &
+                  (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-60']) )
             )
 
         if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40" in self.sel_conditions_all_list:
@@ -6212,6 +6235,29 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     )
                     
                     
+                    ### 2-D distribution ----------------------------------------------------------
+
+                    output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet_PNet_massH_Hto4b_avg[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    )                    
+                    output['hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet.mass[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    ) 
+                    output['hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt].fill(
+                        dataset=dataset,
+                        Mass=(leadingFatJet.msoftdrop[sel_SR_forHExt]),
+                        Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
+                        systematic=syst,
+                        weight=evtWeight[sel_SR_forHExt]
+                    ) 
                     
                     
                     

@@ -14,15 +14,28 @@ ExpData_dict = {
     #'Data C': ['JetHT_Run2018C'],
     #'Data D': ['JetHT_Run2018D']
 }
+#MCBkg_list = [
+#    'QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  
+#    'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', "SingleTop", 
+#    'ZJetsToQQ_HT', "ZJetsToNuNuQ_HT", "DYJets_M-50_Incl_NLO", 
+#    'WJetsToQQ_HT', 'WJetsToLNu_HT_LO',
+#    'ZZ','WZ','WW', 'ZZZ','WZZ','WWZ','WWW',
+#    'WH_HToBB_WToLNu',
+#    'ZH_HToBB',
+#    'ttH'
+#]
 MCBkg_list = [
-    'QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  
-    'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', "SingleTop", 
-    'ZJetsToQQ_HT', "ZJetsToNuNuQ_HT", "DYJets_M-50_Incl_NLO", 
-    'WJetsToQQ_HT', 'WJetsToLNu_HT_LO',
-    'ZZ','WZ','WW', 'ZZZ','WZZ','WWZ','WWW',
-    'WH_HToBB_WToLNu',
-    'ZH_HToBB',
-    'ttH'
+    "QCD_bEnr", "QCD_BGen", "QCD_Incl", 
+    "TT0l", "TT1l", "TT2l", 
+    "STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl", "STop_tW_12l", "STbar_tW_12l", 
+    "ttZ", "ttW", "tZq", 
+    "Zqq", "Zvv", "Zll", "Wqq", "Wlv", 
+    "ZZ", "WZ", "WW", #"ZZZ", "WZZ", "WWZ", "WWW", 
+    #"ggH", #"VBFH", "VBFH_dipoleRecoilOn", "VBFWH_dipoleRecoilOn", 
+    #"WHbbqq", "WHbblv", 
+    #"ZH", #"ggZH", 
+    #"ttH", #"", "", "", 
+    #"", "", "", "", "", "",     
 ]
 #MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
 MCSig_list = [
@@ -33,7 +46,8 @@ MCSig_list = [
     #'SUSY_GluGluH_01J_HToAATo4B_M-50_HPtAbv150', 
     #'SUSY_GluGluH_01J_HToAATo4B_M-55_HPtAbv150', 
     #'SUSY_WH_WToAll_HToAATo4B_M-20_HPtAbv150',
-    'SUSY_ZH_ZToAll_HToAATo4B_M-20_HPtAbv150'
+    #'SUSY_ZH_ZToAll_HToAATo4B_M-20_HPtAbv150'
+    'ZHtoaato4b_mA_20'
     ]
 sLableSig = [
     #'HToAATo4B_M-15', 
@@ -43,7 +57,7 @@ sLableSig = [
     #'HToAATo4B_M-50',
     #'HToAATo4B_M-55',
     #'WH_HToAATo4B_M-20',
-    'ZH_HToAATo4B_M-20'
+    'ZHtoaato4b_mA_20'
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
