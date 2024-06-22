@@ -8,7 +8,8 @@ sNRebinX = 'nRebinX';  sNRebinY = 'nRebinY';
 sXRebinning = 'xRebinning'; sYRebinning = 'yRebinning'; 
 
 ExpData_dict = {
-    'Data ABCD': ['JetHT_Run2018A', 'JetHT_Run2018B', 'JetHT_Run2018C', 'JetHT_Run2018D'],
+    #'Data ABCD': ['JetHT_Run2018A', 'JetHT_Run2018B', 'JetHT_Run2018C', 'JetHT_Run2018D'],
+    'Data ABCD': ['MET_Run2018A', 'MET_Run2018B', 'MET_Run2018C', 'MET_Run2018D'],
     #'Data A': ['JetHT_Run2018A'],
     #'Data B': ['JetHT_Run2018B'],
     #'Data C': ['JetHT_Run2018C'],
@@ -61,10 +62,10 @@ sLableSig = [
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
-selectionTags = ['Presel'] #['SRWP60'] # ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
+selectionTags = ['SRWP80'] #['Presel'] #['SRWP60'] # ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
-HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
+HLT_toUse = 'Trg_Combo_MET' # 'Trg_Combo_AK4AK8Jet_HT'
 
 scale_MCSig = 2 #50 #1000
 yRatioLimit = [0.4, 1.6]

@@ -59,6 +59,7 @@ Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
         'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
         'Trg_Combo_AK4AK8Jet_HT':                             [59.83, 2.5], # See ./data/luminosity/2018/Luminosity_HLTPaths.xlsx
         'Trg_Combo_AK4AK8Jet_HT_MET':                         [59.83, 2.5], # Copied from Trg_Combo_AK4AK8Jet_HT. Needs to be checked.
+        'Trg_Combo_MET':                                      [59.83, 2.5], # https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
         'HLT_IsoMu24':                                        [59.82, 2.5], # See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu24_v.xlsx
         'HLT_IsoMu27':                                        [59.83, 2.5], # See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu27_v.xlsx
         'Trg_Combo_Mu':                                       [59.83, 2.5], # See ./data/luminosity/2018/Luminosity_HLTPaths.xlsx
@@ -79,6 +80,12 @@ Luminosities_forGGFMode_perEra = {
             'D': 31.839,
         },
         'Trg_Combo_AK4AK8Jet_HT_MET': { # Copied from Trg_Combo_AK4AK8Jet_HT. Needs to be checked.
+            'A': 14.027,
+            'B':  7.067,
+            'C':  6.895,
+            'D': 31.839,
+        },
+        'Trg_Combo_MET': { 
             'A': 14.027,
             'B':  7.067,
             'C':  6.895,
@@ -124,6 +131,15 @@ Triggers_perEra = {
             'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':              ['L1_ETMHF100', 'L1_ETM150'],
             'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er'],
         },
+        'Trg_Combo_MET': {
+            'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
+            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
+            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+            'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+            'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+        },
+        
         'Trg_Combo_Mu': {
             'HLT_IsoMu24': ['L1_SingleMu22'],
             'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],

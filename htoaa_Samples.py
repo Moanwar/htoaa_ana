@@ -25,6 +25,12 @@ Samples2018 = OD([
     ("JetHT_Run2018C", ["JetHT_Run2018C"]),
     ("JetHT_Run2018D", ["JetHT_Run2018D"]),
 
+    ## MET data
+    ("MET_Run2018A", ["MET_Run2018A"]),
+    ("MET_Run2018B", ["MET_Run2018B"]),
+    ("MET_Run2018C", ["MET_Run2018C"]),
+    ("MET_Run2018D", ["MET_Run2018D"]),
+
     ## SingleMuon data
     ("SingleMuon_Run2018A", ["SingleMuon_Run2018A"]),
     ("SingleMuon_Run2018B", ["SingleMuon_Run2018B"]),

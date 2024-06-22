@@ -306,25 +306,27 @@ if __name__ == '__main__':
     #samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
     #  Settings for GGF H->aa->4b analysis
-    if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py"]:
+    if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-                "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-                
+            "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
         ] )
 
     #  Settings for GGF H->aa->4b trigger study
     if sAnalysis in ["htoaa_triggerStudy_GGFMode.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-                "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
-                "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
+            "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
+            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
+            "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
         ] )  
 
-    if sAnalysis in ["htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ZH_4b2nu.py"]:
+    if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-                "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+            "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
+            "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
 
                 
         ] )

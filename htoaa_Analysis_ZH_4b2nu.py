@@ -107,7 +107,7 @@ class ObjectSelection:
         self.wp_ParticleNetMD_XbbvsQCD = 'L'
         self.wp_ParticleNetMD_Hto4b_Htoaa4bOverQCD = 'WP-40' # 'WP-40' 'WP-80' #'WP-60'
 
-        self.FatJetPtThsh  = 250 # 400 # 400, 170
+        self.FatJetPtThsh  = 200 # 250 # 400 # 400, 170
         self.FatJetEtaThsh = 2.4
         self.FatJetJetID   = int(JetIDs.tightIDPassingLeptonVeto)
 
@@ -126,7 +126,7 @@ class ObjectSelection:
 
         self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.98 # 0.94
 
-        self.METPt_MinThsh = 250 # 300
+        self.METPt_MinThsh = 200 # 250 # 300
         self.METPt_MaxThsh = 999999.0
 
         self.DPhi_FJHto4b_MET_MinThsh = 1.57
@@ -404,7 +404,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global HLT_AK8PFJet330_name
         HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT_MET' # 'Trg_Combo_AK4AK8Jet_HT'
+        sTrgSelection = 'Trg_Combo_MET' # 'Trg_Combo_AK4AK8Jet_HT_MET' # 'Trg_Combo_AK4AK8Jet_HT'
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -3161,7 +3161,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if "nAK4JetsBtagCentral" in self.sel_conditions_all_list:
             selection.add(
-                "nAK4JetsCentral",
+                "nAK4JetsBtagCentral",
                 ( nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAK4JetsBtagCentral_MaxThsh )
             )
 
