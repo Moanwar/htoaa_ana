@@ -14,15 +14,14 @@ import hist as hist
 #import ROOT as R
 from parse import *
 import logging
-import correctionlib
-from coffea import util
-from coffea.jetmet_tools import CorrectedJetsFactory, JECStack
-from coffea.lookup_tools import extractor
-
+import correctionlib 
 from htoaa_Settings import * 
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
 )
+from coffea import util
+from coffea.jetmet_tools import CorrectedJetsFactory, JECStack
+from coffea.lookup_tools import extractor
 #from numba import jit
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
@@ -395,79 +394,6 @@ def selectMETFilters(flags_list, era, isMC):
     return mask_METFilters
     
 
-def selectAK4Jets(Jets, era, pT_Thsh=0):
-    # Not sure what to refer?
-    #   1) https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
-    #   2) https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Jets
-
-    '''
-    # 1) https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
-    if '2018' in era or '2017' in era:
-        # AK4CHS jets
-        maskJetsSelected_HB = (
-            (abs(Jets.eta)      <= 2.6) & 
-            (Jets.neHEF         < 0.90) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
-            (Jets.neEmEF        < 0.90) & # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
-            (Jets.nConstituents > 1)    & # Number of Constituents: Jet_nConstituents	UChar_t	Number of particles in the jet
-            (Jets.muEF          < 0.80) & # Muon Fraction: Jet_muEF	Float_t	muon Energy Fraction
-            (Jets.chHEF         > 0)    & # Charged Hadron Fraction: Jet_chHEF	Float_t	charged Hadron Energy Fraction
-            #(                     )    & # Charged Multiplicity > 0 ??
-            (Jets.chEmEF        < 0.80)   # Charged EM Fraction: Jet_chEmEF	Float_t	charged Electromagnetic Energy Fraction
-        )
-        maskJetsSelected_HE1 = (
-            (abs(Jets.eta)      > 2.6)  & (abs(Jets.eta)      <= 2.7) & 
-            (Jets.neHEF         < 0.90) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
-            (Jets.neEmEF        < 0.99) & # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
-            (Jets.muEF          < 0.80) & # Muon Fraction: Jet_muEF	Float_t	muon Energy Fraction
-            #() & # Charged Multiplicity > 0 ??
-            (Jets.chEmEF        < 0.80)   # Charged EM Fraction: Jet_chEmEF	Float_t	charged Electromagnetic Energy Fraction
-        )
-        maskJetsSelected_HE2 = (
-            (abs(Jets.eta)      > 2.7)  & (abs(Jets.eta)      <= 3.0) & 
-            (Jets.neEmEF        > 0.01) & (Jets.neEmEF        < 0.99)   # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
-            #() & # Number of Neutral Particles: 
-        )
-        maskJetsSelected_HF = (
-            (abs(Jets.eta)      > 3.0)  & (abs(Jets.eta)      <= 5.0) & 
-            (Jets.neHEF         < 0.20) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
-            (Jets.neEmEF        < 0.90)   # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
-            #() & # Number of Neutral Particles: 
-        )
-        maskJetsSelected = ( maskJetsSelected_HB | maskJetsSelected_HE1 | maskJetsSelected_HE2 | maskJetsSelected_HF )
-    '''
-
-    # 2) https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Jets
-    maskJetsSelected = (
-        (Jets.jetId >= 6) & 
-        ( (Jets.pt > 50) | (Jets.puId >= 4 ) )
-    )
-
-    return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
-        
-
-def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
-    # MuonMVAId    : (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
-    # MuonMiniIsoId: (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
-    maskSelMuons = (
-        (eventsObj.pt > pT_Thsh) &
-        (abs(eventsObj.eta) < 2.4) & 
-        (eventsObj.mvaId >= MVAId) &
-        (eventsObj.miniIsoId >= MiniIsoId) & 
-        (eventsObj.mvaTTH > MVATTHThsh)
-    )
-    return eventsObj[maskSelMuons]
-    
-
-def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WP80', MVATTHThsh=0.3):
-    # ElectronMVAId: 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
-    maskSelElectrons = (
-        (eventsObj.pt > pT_Thsh) &
-        (abs(eventsObj.eta) < 2.3) & 
-        (eventsObj[MVAId] > 0) &
-        (eventsObj.mvaTTH > MVATTHThsh)
-    )
-    return eventsObj[maskSelElectrons]
-
 
 def getLumiScaleForPhSpOverlapRewgtMode(
         hLumiScale ,
@@ -584,87 +510,6 @@ def getTopPtRewgt(eventsGenPart, isPythiaTuneCP5):
     #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
     return wgt_TopPtRewgt
 
-
-def getPURewgts(PU_list, hPURewgt):
-    # hPURewgt: Hist() object
-
-    wgt_PU = np.ones(len(PU_list))
-    for iBin in range(len(hPURewgt.values())):
-        xBin_edge_low = hPURewgt.axes[0][iBin][0]
-        xBin_edge_up  = hPURewgt.axes[0][iBin][1]
-        xBin_value    = hPURewgt.values()[iBin]
-
-        wgt_PU = ak.where(
-            np.logical_and( np.greater_equal(PU_list, xBin_edge_low), np.less(PU_list, xBin_edge_up) ),
-            np.full(len(PU_list), xBin_value),
-            wgt_PU
-        )
-
-    #print(f"PU_list ({len(PU_list)}): {PU_list}")
-    #print(f"wgt_PU ({len(wgt_PU)}): {wgt_PU}")
-    return wgt_PU
-
-
-def getPURewgts_variation(events, year):
-    ## json files from: https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
-    fname = "data/correction/mc/PURewgt/{0}_UL/puWeights.json.gz".format(year)
-    hname = {
-        "2016APV": "Collisions16_UltraLegacy_goldenJSON",
-        "2016"   : "Collisions16_UltraLegacy_goldenJSON",
-        "2017"   : "Collisions17_UltraLegacy_goldenJSON",
-        "2018"   : "Collisions18_UltraLegacy_goldenJSON"
-    }
-    evaluator = correctionlib.CorrectionSet.from_file(fname)
-
-    puUp = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "up")
-    puDown = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "down")
-    puNom = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "nominal")
-
-    return [puNom, puUp, puDown]
-
-
-def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
-    # Used in Brook's analysis
-    #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
-    #wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(pT), 0.1) )
-
-    # https://indico.cern.ch/event/1348321/#19-siddhesh-sawant
-    # min(max(1.45849 + -0.00400668*x + 4.02577e-06*pow(x, 2) + -1.38804e-09*pow(x, 3), 0.09), 1.02)
-    wgt_HiggsPt = 1.45849 - 0.00400668*GenHiggsPt_list + 4.02577e-06*GenHiggsPt_list**2 - 1.38804e-09*GenHiggsPt_list**3 
-    wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.09) )
-    wgt_HiggsPt = np.minimum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 1.02) )
-    return wgt_HiggsPt
-
-
-def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
-    wgt_HT = None
-    
-    # 'Corrections' variable defined in htoaa_Settings
-    if sFitFunctionFormat == "{p0} + ({p1} * (x - {HTBinMin}))":
-        fitResult_        = parse(sFitFunctionFormat, sFitFunction) # https://pypi.org/project/parse/
-        fitParam_p0       = float(fitResult_['p0'])
-        fitParam_p1       = float(fitResult_['p1'])
-        fitConst_HTBinMin = float(fitResult_['HTBinMin'])
-
-        # for e.g. HT500to700
-        fitResult_  = parse("HT{FitRangeMin}to{FitRangeMax}", sFitFunctionRange)
-        fitRangeMin = float(fitResult_['FitRangeMin'])
-        fitRangeMax = float(fitResult_['FitRangeMax'])
-
-        wgt_HT_cal = fitParam_p0 + (fitParam_p1 * (HT_list - fitConst_HTBinMin))
-        wgt_HT = np.where(
-            np.logical_and( np.greater_equal(HT_list, fitRangeMin), np.less(HT_list, fitRangeMax) ),
-            wgt_HT_cal,
-            np.ones(len(HT_list))
-        )
-
-    else:
-        print(f'htoaa_CommonTools.py::getHTReweight():: {Corrections["HTRewgt"]["QCD_bGen"]["FitFunctionFormat"] = } is not implemented \t\t **** ERROR **** \n')
-        exit(0)
-
-    return wgt_HT
-    
-
 def get_JMR_JMS(Jet, year, shift_syst=""):
     # jet mass https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsDP23044
 
@@ -703,6 +548,22 @@ def get_JMR_JMS(Jet, year, shift_syst=""):
     #((smearing * max(jmrValues[year][i] - 1, 0)) + 1) for i in range(3)
     #)
 
+def getPURewgts_variation(events, year):
+    ## json files from: https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
+    fname = "data/correction/mc/PURewgt/{0}_UL/puWeights.json.gz".format(year)
+    hname = {
+        "2016APV": "Collisions16_UltraLegacy_goldenJSON",
+        "2016"   : "Collisions16_UltraLegacy_goldenJSON",
+        "2017"   : "Collisions17_UltraLegacy_goldenJSON",
+        "2018"   : "Collisions18_UltraLegacy_goldenJSON"
+    }
+    evaluator = correctionlib.CorrectionSet.from_file(fname)
+
+    puUp = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "up")
+    puDown = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "down")
+    puNom = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "nominal")
+
+    return [puNom, puUp, puDown]
 
 def add_ps_weight(events,ps_weights,dataset):
     """
@@ -729,7 +590,25 @@ def add_ps_weight(events,ps_weights,dataset):
         print("PS weight vector has length ", len(ps_weights[0]))
 
     return [nom, up_isr, down_isr, up_fsr, down_fsr]
+     
+def getPURewgts(PU_list, hPURewgt):
+    # hPURewgt: Hist() object
 
+    wgt_PU = np.ones(len(PU_list))
+    for iBin in range(len(hPURewgt.values())):
+        xBin_edge_low = hPURewgt.axes[0][iBin][0]
+        xBin_edge_up  = hPURewgt.axes[0][iBin][1]
+        xBin_value    = hPURewgt.values()[iBin]
+
+        wgt_PU = ak.where(
+            np.logical_and( np.greater_equal(PU_list, xBin_edge_low), np.less(PU_list, xBin_edge_up) ),
+            np.full(len(PU_list), xBin_value),
+            wgt_PU
+        )
+
+    #print(f"PU_list ({len(PU_list)}): {PU_list}")
+    #print(f"wgt_PU ({len(wgt_PU)}): {wgt_PU}")
+    return wgt_PU
 
 def add_pdf_as_weight(events, pdf_weights,dataset):
 
@@ -776,7 +655,6 @@ def add_pdf_as_weight(events, pdf_weights,dataset):
 
     return [nom, up_pdf, down_pdf]#, up_aS, down_aS, up_pdfas, down_pdfas, up_pdfas, down_pdfas]
 
-
 def add_HiggsEW_kFactors(genHiggs, dataset):
 
     hew_kfactors = correctionlib.CorrectionSet.from_file("data/EWHiggsCorrection/EWHiggsCorrections.json")
@@ -807,8 +685,7 @@ def add_HiggsEW_kFactors(genHiggs, dataset):
         return "ttH_EW", ewknom
     else :
         return None
-
-
+    
 def get_JER_and_JES(events, FatJets, year, shift_syst=""):
     #UL2018 -> (19UL18_V5 , 19UL18_JRV2) / UL17 -> (19UL17_V5, 19UL17_JRV2) / UL2016APV -> (19UL16APV_V7, 20UL16APV_JRV3) / UL2016 -> (19UL16_V7, 20UL16_JRV3)  
     #UL17 https://cms-talk.web.cern.ch/t/ak8-jets-jec-for-summer19ul17-mc/23154/8
@@ -855,11 +732,10 @@ def get_JER_and_JES(events, FatJets, year, shift_syst=""):
 
     return FatJets
 
-
-def get_jetTriggerSF(events, year, selection):
+def add_jetTriggerSF(events, year, selection):
 
     leadingjet = ak.firsts(events.FatJet)
-    jet_triggerSF = correctionlib.CorrectionSet.from_file("data/correction/mc/TrgEffSF/fatjet_triggerSF.json") # correctionlib.CorrectionSet.from_file("data/trigger/fatjet_triggerSF.json")
+    jet_triggerSF = correctionlib.CorrectionSet.from_file("data/trigger/fatjet_triggerSF.json")
 
     def mask(w):
         return np.where(selection.all('JetID'), w, 1.)
@@ -876,7 +752,47 @@ def get_jetTriggerSF(events, year, selection):
 
     return [nom_trg, up_trg, down_trg]
 
+def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+    # Used in Brook's analysis
+    #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
+    #wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(pT), 0.1) )
 
+    # https://indico.cern.ch/event/1348321/#19-siddhesh-sawant
+    # min(max(1.45849 + -0.00400668*x + 4.02577e-06*pow(x, 2) + -1.38804e-09*pow(x, 3), 0.09), 1.02)
+    wgt_HiggsPt = 1.45849 - 0.00400668*GenHiggsPt_list + 4.02577e-06*GenHiggsPt_list**2 - 1.38804e-09*GenHiggsPt_list**3 
+    wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.09) )
+    wgt_HiggsPt = np.minimum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 1.02) )
+    return wgt_HiggsPt
+
+
+def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
+    wgt_HT = None
+    
+    # 'Corrections' variable defined in htoaa_Settings
+    if sFitFunctionFormat == "{p0} + ({p1} * (x - {HTBinMin}))":
+        fitResult_        = parse(sFitFunctionFormat, sFitFunction) # https://pypi.org/project/parse/
+        fitParam_p0       = float(fitResult_['p0'])
+        fitParam_p1       = float(fitResult_['p1'])
+        fitConst_HTBinMin = float(fitResult_['HTBinMin'])
+
+        # for e.g. HT500to700
+        fitResult_  = parse("HT{FitRangeMin}to{FitRangeMax}", sFitFunctionRange)
+        fitRangeMin = float(fitResult_['FitRangeMin'])
+        fitRangeMax = float(fitResult_['FitRangeMax'])
+
+        wgt_HT_cal = fitParam_p0 + (fitParam_p1 * (HT_list - fitConst_HTBinMin))
+        wgt_HT = np.where(
+            np.logical_and( np.greater_equal(HT_list, fitRangeMin), np.less(HT_list, fitRangeMax) ),
+            wgt_HT_cal,
+            np.ones(len(HT_list))
+        )
+
+    else:
+        print(f'htoaa_CommonTools.py::getHTReweight():: {Corrections["HTRewgt"]["QCD_bGen"]["FitFunctionFormat"] = } is not implemented \t\t **** ERROR **** \n')
+        exit(0)
+
+    return wgt_HT
+    
     
 def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
     # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags
@@ -1007,7 +923,7 @@ def executeBashCommand(sCmd1):
     return result.stdout
 
 
-def fillCoffeaHist(
+def fillHist(
         h = coffea_hist.Hist('tmp'),
         dataset = '',
         syst = None, 
@@ -1016,19 +932,31 @@ def fillCoffeaHist(
         zValue = None,        
         wgt = None
 ):
-    mask_ = ~ ak.is_none(xValue, axis=0) # do not fill 'None'
-    kwargs = {
-        'dataset': dataset,
-        'systematic': syst,
-        'weight': wgt[mask_],
-        h.dense_axes()[0].name : xValue[mask_]
-    } 
-    if yValue:
-        kwargs[h.dense_axes()[1].name] = yValue[mask_]
-    if zValue:
-        kwargs[h.dense_axes()[2].name] = zValue[mask_]
-    h.fill( **kwargs )
-
+    nBasicAxes = 2
+    print(f"htoaa_CommonTools::fillHist():: h ({type(h)}): {h}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes ({type(h.axes)}): {h.axes}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes[0] ({type(h.axes[0])}): {h.axes[0]}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: {h.axes = },  h.axes[nBasicAxes] ({type(h.axes[nBasicAxes])}): {h.axes[nBasicAxes]}")
+    
+    
+    if 1==1: return
+    '''
+    if len(h.axes) == (nBasicAxes+1):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes] = xValue,            
+            weight = wgt
+        )
+    elif len(h.axes) == (nBasicAxes+2):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes  ] = xValue,
+            h.axes[nBasicAxes+1] = yValue,
+            weight = wgt
+        )
+    '''
 
 
 def rebinTH1(h1_, nRebins):
@@ -1054,12 +982,8 @@ def rebinTH1(h1_, nRebins):
         h1Rebin_ = h1_[::5j]
     elif nRebins == 6:
         h1Rebin_ = h1_[::6j]
-    elif nRebins == 8:
-        h1Rebin_ = h1_[::8j]
     elif nRebins == 10:
         h1Rebin_ = h1_[::10j]
-    elif nRebins == 12:
-        h1Rebin_ = h1_[::12j]        
     elif nRebins == 20:
         h1Rebin_ = h1_[::20j]
     elif nRebins == 40:
@@ -1333,26 +1257,9 @@ def variableRebinTH1(h1_, xNewEdges):
     return h1_
 
 def calculateAverageOfArrays(array_list):
-    #printVariable('\n ')
-    #print(f"{len(array_list)}")
-    #print(f"{type(array_list) = }")
-    sTmp_ = 'len(array_list): %d \n' %(len(array_list))
-    printNow_ = False
-    for a_ in array_list:
-        #print(f"{len(a_) = }: {ak.sum(ak.is_none(a_, axis=0), axis=0) = }")
-        sTmp_ += 'len(a_): %d,  ak.sum(ak.is_none(a_, axis=0), axis=0): %g \n' % (len(a_), ak.sum(ak.is_none(a_, axis=0), axis=0) )
-        if ak.sum(ak.is_none(a_, axis=0), axis=0)>0: printNow_ = True
-    array_list = ak.fill_none(array_list, 0, axis=-1)
-    for a_ in array_list:
-        #print(f"{len(a_) = }: {ak.sum(ak.is_none(a_, axis=0), axis=0) = }")
-        sTmp_ += 'len(a_): %d,  ak.sum(ak.is_none(a_, axis=0), axis=0): %g \t after update\n' % (len(a_), ak.sum(ak.is_none(a_, axis=0), axis=0) )
-        #if ak.sum(ak.is_none(a_, axis=0), axis=0)>0: printNow_ = True
-    if printNow_:
-        print(sTmp_)
-        #printVariable('\n array_list', array_list); sys.stdout.flush()
     a = np.vstack(array_list) # same as np.concatenate(array_list, axis=0)
     #avg_ = np.sum(a, axis=0) / len(array_list)
-    return np.sum(a, axis=0) / len(array_list) 
+    return np.sum(a, axis=0) / len(array_list)
 
 def calculateMaxOfTwoArrays(array_a, array_b):
     a_new = ak.where(
@@ -1363,8 +1270,6 @@ def calculateMaxOfTwoArrays(array_a, array_b):
     return a_new
 
 def calculateMaxOfArrays(array_list):
-
-
     a_max = array_list[0]
     for i in range(1, len(array_list)):
         a_max = calculateMaxOfTwoArrays(a_max, array_list[i])

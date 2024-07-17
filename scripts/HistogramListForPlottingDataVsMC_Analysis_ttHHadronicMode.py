@@ -18,9 +18,9 @@ ExpData_dict = {
 #    'QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  
 #    'TTToHadronic_powheg', 'TTToSemiLeptonic_powheg', 'TTTo2L2Nu_powheg', "SingleTop", 
 #    'ZJetsToQQ_HT', "DYJets_M-50_Incl_NLO", 
-#    'WJetsToQQ_HT', 'WJetsToLNu_HT_LO'
-#    ]
-#MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
+#    'WJetsToQQ_HT', 'WJetsToLNu_HT_LO',
+#    'ZZ','WZ','WW', 'ZZZ','WZZ','WWZ','WWW',
+#]
 MCBkg_list = [
     "QCD_bEnr", "QCD_BGen", "QCD_Incl", 
     "TT0l", "TT1l", "TT2l", 
@@ -34,6 +34,7 @@ MCBkg_list = [
     #"ttH", #"", "", "", 
     #"", "", "", "", "", "",     
 ]
+#MCBkg_list = ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  ]
 MCSig_list = [
     #'SUSY_GluGluH_01J_HToAATo4B_M-15_HPtAbv150', 
     #'SUSY_GluGluH_01J_HToAATo4B_M-20_HPtAbv150', 
@@ -41,11 +42,9 @@ MCSig_list = [
     #'SUSY_GluGluH_01J_HToAATo4B_M-30_HPtAbv150', 
     #'SUSY_GluGluH_01J_HToAATo4B_M-50_HPtAbv150', 
     #'SUSY_GluGluH_01J_HToAATo4B_M-55_HPtAbv150', 
-    #'ggHtoaato4b_mA_20'
-    'ggHtoaato4b_mA_15',
-    'ggHtoaato4b_mA_30',
-    'ggHtoaato4b_mA_55',
-    
+    #'SUSY_WH_WToAll_HToAATo4B_M-20_HPtAbv150',
+    #'SUSY_ZH_ZToAll_HToAATo4B_M-20_HPtAbv150'
+    'ttHtoaato4b_mA_20',
     ]
 sLableSig = [
     #'HToAATo4B_M-15', 
@@ -54,19 +53,18 @@ sLableSig = [
     #'HToAATo4B_M-30', 
     #'HToAATo4B_M-50',
     #'HToAATo4B_M-55',
-    #'ggHtoaato4b_mA_20'
-    'ggHtoaato4b_mA_15',
-    'ggHtoaato4b_mA_30',
-    'ggHtoaato4b_mA_55',
+    #'WH_HToAATo4B_M-20',
+    #'ZH_HToAATo4B_M-20'
+    'ttHtoaato4b_mA_20',
      ]
 systematics_list = ['central']
 systematics_forData = 'noweight'
-#selectionTags = ['SRWP40', 'SBWP80to40'] # ['SRWP40_mA30Window'] ['SRWP40'] ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
+#selectionTags = ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
 
-scale_MCSig = 5 #50 #1000
+scale_MCSig = 80 # 20 #50 #1000
 yRatioLimit = [0.4, 1.6]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
@@ -182,11 +180,7 @@ histograms_dict = OD([
 
     ("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
 
-    ("hLeadingFatJetParticleNet_massA_Hto4b_avg_v013", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_avg_v013', sYLabel: 'Events', sXRange: [0, 70], sNRebinX: 5}),    
-    ("hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
-
     #("", {sXLabel: '', sYLabel: 'Events'}),
-
 ])
 
 '''
@@ -203,7 +197,7 @@ histograms_dict = OD([
 ])
 '''
 
-'''
+
 nRebinXTmp_ = 50
 histograms_dict.update( OD([
     ("hLeadingFatJetParticleNetMD_Hto4b_Haa01b", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Haa01b', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
@@ -268,10 +262,60 @@ histograms_dict  = OD([
     
 ])
 
-#histograms_dict  = OD([
+nRebinXTmp_ = 4
+histograms_dict  = OD([
 #    ("hLeadingFatJetParticleNet_massA_Hto4b_avg_v013", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_avg_v013', sYLabel: 'Events', sXRange: [10, 65], sNRebinX: 20}),    
     #("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5, sYRange: yRange_tmp_ }),
 #    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
 #    ("hLeadingFatJetParticleNet_massA_Hto4b_avg_v013", {sXLabel: 'hLeadingFatJetParticleNet_massA_Hto4b_avg_v013', sYLabel: 'Events', sXRange: [0, 80], sNRebinX: 20}),   
-#])
-'''
+    ("hLeadingNonHto4bFatJetDeepTagMD_WvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_WvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTagMD_ZvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_ZvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTag_WvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTag_WvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTag_ZvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTag_ZvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetParticleNet_WvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetParticleNet_WvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetParticleNet_ZvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetParticleNet_ZvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hdPhi_LeadingFJ_LeadingNonHto4bFJ", {sXLabel: 'hdPhi_LeadingFJ_LeadingNonHto4bFJ', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: nRebinXTmp_ }),
+    
+
+])
+
+nRebinXTmp_ = 20
+histograms_dict  = OD([
+    ("hLeadingFatJetPt", {sXLabel: 'hLeadingFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    ("hLeadingFatJetEta", {sXLabel: 'hLeadingFatJetEta', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
+    ("hLeadingFatJetPhi", {sXLabel: 'hLeadingFatJetPhi', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
+    ("hLeadingFatJetMass", {sXLabel: 'hLeadingFatJetMass', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5}),
+    ("hLeadingFatJetMSoftDrop", {sXLabel: 'hLeadingFatJetMSoftDrop', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5 }),
+    
+    ("hLeadingNonHto4bFatJetPt", {sXLabel: 'hLeadingNonHto4bFatJetPt', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    ("hLeadingNonHto4bFatJetEta", {sXLabel: 'hLeadingNonHto4bFatJetEta', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
+    ("hLeadingNonHto4bFatJetPhi", {sXLabel: 'hLeadingNonHto4bFatJetPhi', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
+    ("hLeadingNonHto4bFatJetMass", {sXLabel: 'hLeadingNonHto4bFatJetMass', sYLabel: 'Events', sXRange: [0, 300], sNRebinX: 5}),
+    ("hLeadingNonHto4bFatJetMSoftDrop", {sXLabel: 'hLeadingNonHto4bFatJetMSoftDrop', sYLabel: 'Events', sXRange: [50, 200], sNRebinX: 5 }),
+
+    ("hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD', sYLabel: 'Events', sXRange: [0.9, 1], sNRebinX: nRebinXTmp_ }),
+    ("hdPhi_LeadingFJ_LeadingNonHto4bFJ", {sXLabel: 'hdPhi_LeadingFJ_LeadingNonHto4bFJ', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 10 }),
+    ("hLeadingNonHto4bFatJetPNet_WZvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetPNet_WZvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTagMD_TvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_TvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTag_TvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTag_TvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetDeepTagMD_HbbvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_HbbvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetPNet_TvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetPNet_TvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetPNet_XbbVsQCD", {sXLabel: 'hLeadingNonHto4bFatJetPNet_XbbVsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    
+    ("hnAK4Jets_NonoverlapLeadingFatJet", {sXLabel: 'hnAK4Jets_NonoverlapLeadingFatJet', sYLabel: 'Events',  }),
+    ("hnAK4Jets_bTag_NonoverlapLeadingFatJet", {sXLabel: 'hnAK4Jets_bTag_NonoverlapLeadingFatJet', sYLabel: 'Events',  }),
+    ("hnAK4JetsCentral_NonoverlapLeadingFatJet", {sXLabel: 'hnAK4JetsCentral_NonoverlapLeadingFatJet', sYLabel: 'Events',  }),
+    ("hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet", {sXLabel: 'hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet', sYLabel: 'Events',  }),
+    ("hnAK4Jets_NonoverlapSelFatJets", {sXLabel: 'hnAK4Jets_NonoverlapSelFatJets', sYLabel: 'Events',  }),
+    ("hnAK4Jets_bTag_NonoverlapSelFatJets", {sXLabel: 'hnAK4Jets_bTag_NonoverlapSelFatJets', sYLabel: 'Events',  }),
+    ("hnAK4JetsCentral_NonoverlapSelFatJets", {sXLabel: 'hnAK4JetsCentral_NonoverlapSelFatJets', sYLabel: 'Events',  }),
+    ("hnAK4JetsCentral_bTag_NonoverlapSelFatJets", {sXLabel: 'hnAK4JetsCentral_bTag_NonoverlapSelFatJets', sYLabel: 'Events',  }),
+    
+    ("hnLeptonsTight", {sXLabel: 'hnLeptonsTight', sYLabel: 'Events',  }),
+    ("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events',  }),
+    ("hnLeptons_nonoverlap_leadingFatJet", {sXLabel: 'hnLeptons_nonoverlap_leadingFatJet', sYLabel: 'Events',  }),
+    ("hnLeptons_nonoverlap_selFatJets", {sXLabel: 'hnLeptons_nonoverlap_selFatJets', sYLabel: 'Events',  }),
+    
+    
+
+])

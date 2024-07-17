@@ -14,10 +14,6 @@ import hist as hist
 #import ROOT as R
 from parse import *
 import logging
-import correctionlib
-from coffea import util
-from coffea.jetmet_tools import CorrectedJetsFactory, JECStack
-from coffea.lookup_tools import extractor
 
 from htoaa_Settings import * 
 from htoaa_Samples import (
@@ -396,12 +392,8 @@ def selectMETFilters(flags_list, era, isMC):
     
 
 def selectAK4Jets(Jets, era, pT_Thsh=0):
-    # Not sure what to refer?
-    #   1) https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
-    #   2) https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Jets
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
 
-    '''
-    # 1) https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
     if '2018' in era or '2017' in era:
         # AK4CHS jets
         maskJetsSelected_HB = (
@@ -434,39 +426,22 @@ def selectAK4Jets(Jets, era, pT_Thsh=0):
             #() & # Number of Neutral Particles: 
         )
         maskJetsSelected = ( maskJetsSelected_HB | maskJetsSelected_HE1 | maskJetsSelected_HE2 | maskJetsSelected_HF )
-    '''
-
-    # 2) https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Jets
-    maskJetsSelected = (
-        (Jets.jetId >= 6) & 
-        ( (Jets.pt > 50) | (Jets.puId >= 4 ) )
-    )
 
     return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
         
 
-def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
-    # MuonMVAId    : (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
-    # MuonMiniIsoId: (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
-    maskSelMuons = (
-        (eventsObj.pt > pT_Thsh) &
-        (abs(eventsObj.eta) < 2.4) & 
-        (eventsObj.mvaId >= MVAId) &
-        (eventsObj.miniIsoId >= MiniIsoId) & 
-        (eventsObj.mvaTTH > MVATTHThsh)
-    )
-    return eventsObj[maskSelMuons]
-    
 
-def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WP80', MVATTHThsh=0.3):
-    # ElectronMVAId: 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
-    maskSelElectrons = (
-        (eventsObj.pt > pT_Thsh) &
-        (abs(eventsObj.eta) < 2.3) & 
-        (eventsObj[MVAId] > 0) &
-        (eventsObj.mvaTTH > MVATTHThsh)
-    )
-    return eventsObj[maskSelElectrons]
+
+
+
+
+
+
+
+
+
+
+
 
 
 def getLumiScaleForPhSpOverlapRewgtMode(
@@ -605,24 +580,6 @@ def getPURewgts(PU_list, hPURewgt):
     return wgt_PU
 
 
-def getPURewgts_variation(events, year):
-    ## json files from: https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
-    fname = "data/correction/mc/PURewgt/{0}_UL/puWeights.json.gz".format(year)
-    hname = {
-        "2016APV": "Collisions16_UltraLegacy_goldenJSON",
-        "2016"   : "Collisions16_UltraLegacy_goldenJSON",
-        "2017"   : "Collisions17_UltraLegacy_goldenJSON",
-        "2018"   : "Collisions18_UltraLegacy_goldenJSON"
-    }
-    evaluator = correctionlib.CorrectionSet.from_file(fname)
-
-    puUp = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "up")
-    puDown = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "down")
-    puNom = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "nominal")
-
-    return [puNom, puUp, puDown]
-
-
 def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     # Used in Brook's analysis
     #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
@@ -664,219 +621,6 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
 
     return wgt_HT
     
-
-def get_JMR_JMS(Jet, year, shift_syst=""):
-    # jet mass https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsDP23044
-
-    substr_cset = correctionlib.CorrectionSet.from_file("data/jms/Substructure_jmssf.json")
-
-    jet_pt   = Jet.pt #np.array(ak.fill_none(Jet.pt, 0.))
-
-    jms_nom  = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"")
-    jms_up   = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"up")
-    jms_down = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"down")
-
-    mass = Jet.msoftdrop
-
-    corrected_mass_up   = mass * jms_up
-    corrected_mass_down = mass * jms_down
-    corrected_mass_nomi = mass * jms_nom
-
-    for index, value in enumerate(corrected_mass_up):
-        if value < corrected_mass_nomi[index] and value > 50 :
-            print("corrected_mass_up is less than corrected_mass_nomi = ", corrected_mass_nomi[index], " corrected_mass_up = ", corrected_mass_up[index])
-    for index, value in enumerate(corrected_mass_nomi):
-        if value < corrected_mass_down[index] and value > 50 :
-            print("corrected_mass_nomi is less than corrected_mass_down = ", corrected_mass_nomi[index], " corrected_mass_down = ", corrected_mass_down[index])
-
-    if shift_syst == "JMSUp":
-        corrected_mass = mass * jms_up
-    elif shift_syst == "JMSDown":
-        corrected_mass = mass * jms_down
-    else:
-        corrected_mass = mass * jms_nom
-    return corrected_mass
-
-#smearing = np.random.normal(mass[:,])
-# scale to JMR nom, down, up (minimum at 0)
-#jmr_central, jmr_down, jmr_up = (
-    #((smearing * max(jmrValues[year][i] - 1, 0)) + 1) for i in range(3)
-    #)
-
-
-def add_ps_weight(events,ps_weights,dataset):
-    """
-    Parton Shower Weights (FSR and ISR)
-    "Default" variation: https://twiki.cern.ch/twiki/bin/view/CMS/HowToPDF#Which_set_of_weights_to_use
-    i.e. scaling ISR up and down
-    """
-    nweights = len(events)
-    nom = np.ones(nweights)
-
-    up_isr = np.ones(nweights)
-    down_isr = np.ones(nweights)
-    up_fsr = np.ones(nweights)
-    down_fsr = np.ones(nweights)
-
-    if len(ps_weights[0]) == 4 and "HToAATo4B" in dataset:
-        up_isr = ps_weights[:, 0]  # ISR=2, FSR=1
-        down_isr = ps_weights[:, 2]  # ISR=0.5, FSR=1
-
-        up_fsr = ps_weights[:, 1]  # ISR=1, FSR=2
-        down_fsr = ps_weights[:, 3]  # ISR=1, FSR=0.5
-
-    elif len(ps_weights[0]) > 1:
-        print("PS weight vector has length ", len(ps_weights[0]))
-
-    return [nom, up_isr, down_isr, up_fsr, down_fsr]
-
-
-def add_pdf_as_weight(events, pdf_weights,dataset):
-
-
-    nom = np.ones(len(events))
-    up_pdfas   = up_aS   = up_pdf    = np.ones(len(events))
-    down_pdfas = down_aS = down_pdf  = np.ones(len(events))
-
-    docstring = pdf_weights.__doc__
-
-    # NNPDF31_nnlo_as_0118_nf_4_mc_hessian
-    # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_as_0118_nf_4_mc_hessian/NNPDF31_nnlo_as_0118_nf_4_mc_hessian.info
-    # if True: #LHA IDs "325500 - 325600" in docstring:
-    # Hessian PDF weights
-    # Eq. 21 of https://arxiv.org/pdf/1510.03865v1.pdf                                   
-    #print (" no. of PDF column  ",len(pdf_weights[0]))
-    if "HToAATo4B" in dataset:
-        arg = pdf_weights[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
-        summed = ak.sum(np.square(arg),axis=1)
-        #pdf_unc = np.sqrt( (1./99.) * summed )
-        pdf_unc = np.sqrt( summed )
-        up_pdf   = nom + pdf_unc
-        down_pdf = nom - pdf_unc
-
-    #anther pdf unc definition 
-    #pdfUnc = ak.std(events.LHEPdfWeight,axis=1)/ak.mean(events.LHEPdfWeight,axis=1) 
-    #pdfUnc = ak.fill_none(pdfUnc, 0.00)
-    #up_pdf = nom + pdfUnc
-    #down_pdf = nom - pdfUnc
-
-    # alpha_S weights
-    # Eq. 27 of same ref
-    #as_unc = 0.5*(pdf_weights[:,102] - pdf_weights[:,101])
-    #up_pdf   = nom + as_unc
-    #down_pdf = nom - as_unc
-    
-    
-    # PDF + alpha_S weights
-    # Eq. 28 of same ref
-    #pdfas_unc = np.sqrt( np.square(pdf_unc) + np.square(as_unc) )
-    #weights.add('PDFaS_weight', nom, pdfas_unc + nom) 
-    #up_pdfas   = nom + pdfas_unc
-    #down_pdfas = nom - pdfas_unc
-
-    return [nom, up_pdf, down_pdf]#, up_aS, down_aS, up_pdfas, down_pdfas, up_pdfas, down_pdfas]
-
-
-def add_HiggsEW_kFactors(genHiggs, dataset):
-
-    hew_kfactors = correctionlib.CorrectionSet.from_file("data/EWHiggsCorrection/EWHiggsCorrections.json")
-    def get_hpt():
-        boson = ak.firsts(genHiggs[
-            (genHiggs.pdgId == 25)
-            & genHiggs.hasFlags(["fromHardProcess", "isLastCopy"])
-        ])
-        return np.array(ak.fill_none(boson.pt, 0.))
-
-    if "VBF" in dataset:
-        hpt = get_hpt()
-        ewkcorr = hew_kfactors["VBF_EW"]
-        ewknom = ewkcorr.evaluate(hpt)
-        return  "VBF_EW", ewknom
-
-    elif "WH" in dataset or "ZH" in dataset:
-        hpt = get_hpt()
-        ewkcorr = hew_kfactors["VH_EW"]
-        ewknom = ewkcorr.evaluate(hpt)
-        return "VH_EW", ewknom
-    
-
-    elif "ttH" in dataset:
-        hpt = get_hpt()
-        ewkcorr = hew_kfactors["ttH_EW"]
-        ewknom = ewkcorr.evaluate(hpt)
-        return "ttH_EW", ewknom
-    else :
-        return None
-
-
-def get_JER_and_JES(events, FatJets, year, shift_syst=""):
-    #UL2018 -> (19UL18_V5 , 19UL18_JRV2) / UL17 -> (19UL17_V5, 19UL17_JRV2) / UL2016APV -> (19UL16APV_V7, 20UL16APV_JRV3) / UL2016 -> (19UL16_V7, 20UL16_JRV3)  
-    #UL17 https://cms-talk.web.cern.ch/t/ak8-jets-jec-for-summer19ul17-mc/23154/8
-    #https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECDataMC#Recommended_for_MC
-    #https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-    FatJets["pt_raw"], FatJets["mass_raw"] = (1 - FatJets.rawFactor) * FatJets.pt, (1 - FatJets.rawFactor) * FatJets.mass
-    FatJets['pt_gen'] = ak.values_astype(ak.fill_none(FatJets.matched_gen.pt, 0), np.float32)
-    FatJets['rho'] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, FatJets.pt)[0]
-    events_cache = events.caches[0]
-
-    Jetext = extractor()
-    Jetext.add_weight_sets([
-        f"* * data/JERS/{year}UL_V_MC_L1FastJet_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_L2Relative_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_Uncertainty_AK8PFPuppi.junc.txt",
-        f"* * data/JERS/{year}UL_JR_MC_PtResolution_AK8PFPuppi.jr.txt",
-        f"* * data/JERS/{year}UL_JR_MC_SF_AK8PFPuppi.jersf.txt",
-    ])
-    Jetext.finalize()
-    Jetevaluator = Jetext.make_evaluator()
-
-    jec_names = [f"{year}UL_V_MC_L1FastJet_AK8PFPuppi", f"{year}UL_V_MC_L2Relative_AK8PFPuppi",
-                 f"{year}UL_V_MC_Uncertainty_AK8PFPuppi", f"{year}UL_JR_MC_PtResolution_AK8PFPuppi",
-                 f"{year}UL_JR_MC_SF_AK8PFPuppi"]
-    jec_stack = JECStack({name: Jetevaluator[name] for name in jec_names})
-    
-    name_map = jec_stack.blank_name_map
-    name_map.update({"JetPt": "pt", "JetMass": "mass", "JetEta": "eta", "JetA": "area",
-                     "ptGenJet": "pt_gen", "ptRaw": "pt_raw", "massRaw": "mass_raw", "Rho": "rho"})
-    
-    corrected_jets = CorrectedJetsFactory(name_map, jec_stack).build(FatJets, lazy_cache=events.caches[0])
-    
-    if shift_syst == "JERUp":
-        FatJets = corrected_jets.JER.up
-    elif shift_syst == "JERDown":
-        FatJets = corrected_jets.JER.down
-    elif shift_syst == "JESUp":
-        FatJets = corrected_jets.JES_jes.up
-    elif shift_syst == "JESDown":
-        FatJets = corrected_jets.JES_jes.down
-    else:
-        # either nominal or some shift systematic unrelated to jets
-        FatJets = corrected_jets
-
-    return FatJets
-
-
-def get_jetTriggerSF(events, year, selection):
-
-    leadingjet = ak.firsts(events.FatJet)
-    jet_triggerSF = correctionlib.CorrectionSet.from_file("data/correction/mc/TrgEffSF/fatjet_triggerSF.json") # correctionlib.CorrectionSet.from_file("data/trigger/fatjet_triggerSF.json")
-
-    def mask(w):
-        return np.where(selection.all('JetID'), w, 1.)
-
-    # Same for 2016 and 2016APV
-    if '2016' in year:
-        year = '2016'
-
-    jet_pt   = np.array(ak.fill_none(leadingjet.pt, 0.))
-    jet_msd  = np.array(ak.fill_none(leadingjet.msoftdrop, 0.))  # note: uncorrected
-    nom_trg  = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("nominal", jet_pt, jet_msd))
-    up_trg   = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_up", jet_pt, jet_msd))
-    down_trg = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_dn", jet_pt, jet_msd))
-
-    return [nom_trg, up_trg, down_trg]
-
-
     
 def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
     # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags
@@ -1007,7 +751,7 @@ def executeBashCommand(sCmd1):
     return result.stdout
 
 
-def fillCoffeaHist(
+def fillHist(
         h = coffea_hist.Hist('tmp'),
         dataset = '',
         syst = None, 
@@ -1016,19 +760,31 @@ def fillCoffeaHist(
         zValue = None,        
         wgt = None
 ):
-    mask_ = ~ ak.is_none(xValue, axis=0) # do not fill 'None'
-    kwargs = {
-        'dataset': dataset,
-        'systematic': syst,
-        'weight': wgt[mask_],
-        h.dense_axes()[0].name : xValue[mask_]
-    } 
-    if yValue:
-        kwargs[h.dense_axes()[1].name] = yValue[mask_]
-    if zValue:
-        kwargs[h.dense_axes()[2].name] = zValue[mask_]
-    h.fill( **kwargs )
-
+    nBasicAxes = 2
+    print(f"htoaa_CommonTools::fillHist():: h ({type(h)}): {h}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes ({type(h.axes)}): {h.axes}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: h.axes[0] ({type(h.axes[0])}): {h.axes[0]}", flush=True)
+    print(f"htoaa_CommonTools::fillHist():: {h.axes = },  h.axes[nBasicAxes] ({type(h.axes[nBasicAxes])}): {h.axes[nBasicAxes]}")
+    
+    
+    if 1==1: return
+    '''
+    if len(h.axes) == (nBasicAxes+1):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes] = xValue,            
+            weight = wgt
+        )
+    elif len(h.axes) == (nBasicAxes+2):
+        h.fill(
+            dataset = dataset,
+            systematic = syst_,
+            h.axes[nBasicAxes  ] = xValue,
+            h.axes[nBasicAxes+1] = yValue,
+            weight = wgt
+        )
+    '''
 
 
 def rebinTH1(h1_, nRebins):
@@ -1333,26 +1089,9 @@ def variableRebinTH1(h1_, xNewEdges):
     return h1_
 
 def calculateAverageOfArrays(array_list):
-    #printVariable('\n ')
-    #print(f"{len(array_list)}")
-    #print(f"{type(array_list) = }")
-    sTmp_ = 'len(array_list): %d \n' %(len(array_list))
-    printNow_ = False
-    for a_ in array_list:
-        #print(f"{len(a_) = }: {ak.sum(ak.is_none(a_, axis=0), axis=0) = }")
-        sTmp_ += 'len(a_): %d,  ak.sum(ak.is_none(a_, axis=0), axis=0): %g \n' % (len(a_), ak.sum(ak.is_none(a_, axis=0), axis=0) )
-        if ak.sum(ak.is_none(a_, axis=0), axis=0)>0: printNow_ = True
-    array_list = ak.fill_none(array_list, 0, axis=-1)
-    for a_ in array_list:
-        #print(f"{len(a_) = }: {ak.sum(ak.is_none(a_, axis=0), axis=0) = }")
-        sTmp_ += 'len(a_): %d,  ak.sum(ak.is_none(a_, axis=0), axis=0): %g \t after update\n' % (len(a_), ak.sum(ak.is_none(a_, axis=0), axis=0) )
-        #if ak.sum(ak.is_none(a_, axis=0), axis=0)>0: printNow_ = True
-    if printNow_:
-        print(sTmp_)
-        #printVariable('\n array_list', array_list); sys.stdout.flush()
     a = np.vstack(array_list) # same as np.concatenate(array_list, axis=0)
     #avg_ = np.sum(a, axis=0) / len(array_list)
-    return np.sum(a, axis=0) / len(array_list) 
+    return np.sum(a, axis=0) / len(array_list)
 
 def calculateMaxOfTwoArrays(array_a, array_b):
     a_new = ak.where(
@@ -1363,8 +1102,6 @@ def calculateMaxOfTwoArrays(array_a, array_b):
     return a_new
 
 def calculateMaxOfArrays(array_list):
-
-
     a_max = array_list[0]
     for i in range(1, len(array_list)):
         a_max = calculateMaxOfTwoArrays(a_max, array_list[i])

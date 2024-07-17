@@ -4,7 +4,7 @@ import os
 import sys
 from datetime import datetime
 #import time
-print(f"htoaa_Analysis_VHHadronicMode:: here1 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here1 {datetime.now() = }"); sys.stdout.flush()
 import subprocess
 import json
 from urllib.request import urlopen
@@ -13,19 +13,19 @@ from collections import OrderedDict as OD
 import time
 import tracemalloc
 import math
-print(f"htoaa_Analysis_VHHadronicMode:: here2 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here2 {datetime.now() = }"); sys.stdout.flush()
 import numpy as np
 from copy import copy, deepcopy
-print(f"htoaa_Analysis_VHHadronicMode:: here3 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
 #import uproot3 as uproot
 import uproot as uproot
-print(f"htoaa_Analysis_VHHadronicMode:: here4 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here4 {datetime.now() = }"); sys.stdout.flush()
 #import parse
 from parse import *
-print(f"htoaa_Analysis_VHHadronicMode:: here4.1 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here4.1 {datetime.now() = }"); sys.stdout.flush()
 import logging
-print(f"htoaa_Analysis_VHHadronicMode:: here5 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here5 {datetime.now() = }"); sys.stdout.flush()
 
 # comment test3
 '''
@@ -35,7 +35,7 @@ References:
   * Coffea framework used for TTGamma analysis: https://github.com/nsmith-/TTGamma_LongExercise/blob/FullAnalysis/ttgamma/processor.py
 * Coffea installation: /home/siddhesh/anaconda3/envs/ana_htoaa/lib/python3.10/site-packages/coffea
 '''
-print(f"htoaa_Analysis_VHHadronicMode:: here6 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here6 {datetime.now() = }"); sys.stdout.flush()
 #import coffea.processor as processor
 from coffea import processor, util
 from coffea.nanoevents import schemas
@@ -49,34 +49,36 @@ from coffea import hist # /afs/cern.ch/work/s/ssawant/private/softwares/anaconda
 import awkward as ak
 #import uproot
 #from dask.distributed import Client
-print(f"htoaa_Analysis_VHHadronicMode:: here7 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here7 {datetime.now() = }"); sys.stdout.flush()
 from particle import Particle # For PDG particle listing https://github.com/scikit-hep/particle
-print(f"htoaa_Analysis_VHHadronicMode:: here8 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here8 {datetime.now() = }"); sys.stdout.flush()
 
 
 from htoaa_Settings import *
-print(f"htoaa_Analysis_VHHadronicMode:: here9 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here9 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_CommonTools import (
     GetDictFromJsonFile, akArray_isin,
     selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
-    selectMETFilters, selectAK4Jets, selectMuons, selectElectrons,
+    selectMETFilters,
     selGenPartsWithStatusFlag,
     getHiggsPtRewgtForGGToHToAATo4B, getTopPtRewgt, getPURewgts, getHTReweight,
-    calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
+    add_pdf_as_weight, add_HiggsEW_kFactors, get_JER_and_JES, get_JMR_JMS,
+    getPURewgts, getPURewgts_variation, add_ps_weight, add_jetTriggerSF,
+    calculateAverageOfArrays,
     printVariable, insertInListBeforeThisElement,
 )
-print(f"htoaa_Analysis_VHHadronicMode:: here10 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
-print(f"htoaa_Analysis_VHHadronicMode:: here11 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here11 {datetime.now() = }"); sys.stdout.flush()
 
 from inspect import currentframe, getframeinfo
-print(f"htoaa_Analysis_VHHadronicMode:: here12 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here12 {datetime.now() = }"); sys.stdout.flush()
 frameinfo = getframeinfo(currentframe())
-print(f"htoaa_Analysis_VHHadronicMode:: here13 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush()
 
 
 # use GOldenJSON
@@ -114,11 +116,11 @@ class ObjectSelection:
         self.wp_ParticleNetMD_XbbvsQCD = 'L'
         self.wp_ParticleNetMD_Hto4b_Htoaa4bOverQCD = 'WP-40' # 'WP-40' 'WP-80' #'WP-60'
 
-        self.FatJetPtThsh  = 250 # 170 # 400, 170
+        self.FatJetPtThsh  = 400 #170
         self.FatJetEtaThsh = 2.4
         self.FatJetJetID   = int(JetIDs.tightIDPassingLeptonVeto)
 
-        self.FatJetMSoftDropThshLow  = 50 # 20 # 90
+        self.FatJetMSoftDropThshLow  = 0 # 20 # 90
         self.FatJetMSoftDropThshHigh = 9999 #200
 
         self.FatJetParticleNetMD_Xbb_Thsh       = 0.8
@@ -131,20 +133,9 @@ class ObjectSelection:
 
         self.nSV_matched_leadingFatJet_Thsh = 3
 
-    
-        self.NonHto4bFatJetPNet_WZvsQCD_Thsh = 0.98 # 0.94
-
-        self.MuonPtThsh         = 10
-        self.MuonMVAId          =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
-        self.MuonMiniIsoId      =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
-        self.MuonMVATTHThsh     = 0.5
-        self.ElectronPtThsh     = 10
-        self.ElectronMVAId      = 'mvaFall17V2Iso_WP80' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
-        self.ElectronMVATTHThsh = 0.3
-
-        self.NLeptonsTight_MaxThsh    = 0
-                
-        self.Ak4JetDeepJetB_Thsh = bTagWPs[self.era]['AK4DeepJet']['M']
+        self.MuonMVAId     =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
+        self.MuonMiniIsoId =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
+        self.ElectronMVAId = 'mvaFall17V2Iso_WP80' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
 
         self.JetPtThshForHT = 30.0
         self.JetEtaThshForHT = 2.4
@@ -180,6 +171,20 @@ class ObjectSelection:
             print(f"selectFatJets()::maskSelFatJets {len(maskSelFatJets)}: {maskSelFatJets.to_list()}")
         return events.FatJet[maskSelFatJets]
 
+
+    def selectMuons(self, eventsObj):
+        maskSelMuons = (
+            (eventsObj.mvaId >= self.MuonMVAId) &
+            (eventsObj.miniIsoId >= self.MuonMiniIsoId)
+        )
+        return eventsObj[maskSelMuons]
+    
+
+    def selectElectrons(self, eventsObj):
+        maskSelElectrons = (
+            (eventsObj[self.ElectronMVAId] > 0)
+        )
+        return eventsObj[maskSelElectrons]
 
 
 
@@ -338,26 +343,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_QCDGenValidation;      runMode_QCDGenValidation = False; # True
         global runMode_GenLHEPlots;           runMode_GenLHEPlots      = False
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
-        global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False
+        global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False # False
         global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = False
-        global runMode_SignalGenCuts;         runMode_SignalGenCuts = True; # set False for final round. True for optimization studies.
-        
         
 
         ak.behavior.update(nanoaod.behavior)
 
         self.datasetInfo = datasetInfo
         self.objectSelector = ObjectSelection(era=self.datasetInfo["era"])
-        datasetName_part1 = self.datasetInfo['datasetNameFull'].split('/')[1]
-        print(f"{datasetName_part1 = }")
 
         # Identify and lable samples --------------------------------------------------
         self.datasetInfo['isSignal'       ]  = False
-        self.datasetInfo['isSignalGGH'    ]  = False
-        self.datasetInfo['isSignalVBFH'   ]  = False
-        self.datasetInfo['isSignalWH'     ]  = False
-        self.datasetInfo['isSignalVH'     ]  = False
-        self.datasetInfo['isSignalTTH'    ]  = False
         self.datasetInfo['isQCD'          ]  = False
         self.datasetInfo['isQCDIncl'      ]  = False
         self.datasetInfo['isQCD_bEnrich'  ]  = False
@@ -366,16 +362,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.datasetInfo['isHToBB'        ]  = False
         self.datasetInfo['isPythiaTuneCP5']  = False        
         if self.datasetInfo['isMC']:
-            self.datasetInfo['isSignalGGH']      = True if "SUSY_GluGluH_01J_HToAATo4B" in datasetName_part1 else False
-            self.datasetInfo['isSignalVBFH']     = True if "SUSY_VBFH_HToAATo4B"        in datasetName_part1 else False
-            self.datasetInfo['isSignalWH']       = True if "SUSY_WH_WToAll_HToAATo4B"   in datasetName_part1 else False
-            self.datasetInfo['isSignalVH']       = True if "SUSY_ZH_ZToAll_HToAATo4B"   in datasetName_part1 else False
-            self.datasetInfo['isSignalTTH']      = True if "SUSY_TTH_TTToAll_HToAATo4B" in datasetName_part1 else False
-            self.datasetInfo['isSignal']         = (self.datasetInfo['isSignalGGH']   or \
-                                                     self.datasetInfo['isSignalVBFH'] or \
-                                                     self.datasetInfo['isSignalWH']   or \
-                                                     self.datasetInfo['isSignalVH']   or \
-                                                     self.datasetInfo['isSignalTTH'] )
+            self.datasetInfo['isSignal']         = True if "SUSY_GluGluH_01J_HToAATo4B"   in self.datasetInfo['sample_category'] else False
             self.datasetInfo['isQCDIncl']        = True if kQCDIncl      in self.datasetInfo['sample_category'] else False
             self.datasetInfo['isQCD_bEnrich']    = True if kQCD_bEnrich  in self.datasetInfo['sample_category'] else False
             self.datasetInfo['isQCD_bGen']       = True if kQCD_bGen     in self.datasetInfo['sample_category'] else False
@@ -385,9 +372,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             sample_HT_Min, sample_HT_Max = getSampleHTRange( self.datasetInfo["datasetNameFull"] )
             self.datasetInfo['sample_HT_Min']    = sample_HT_Min
             self.datasetInfo['sample_HT_Max']    = sample_HT_Max
-            self.datasetInfo['isTTbar']          = True if datasetName_part1.startswith('TTTo') else False
-            self.datasetInfo['isHToBB']          = True if "HToBB"   in datasetName_part1 else False
-            self.datasetInfo['isPythiaTuneCP5']  = True if 'TuneCP5' in datasetName_part1 else False
+            self.datasetInfo['isTTbar']          = True if self.datasetInfo['sample_category'].startswith('TTTo') else False
+            self.datasetInfo['isHToBB']          = True if "HToBB"   in self.datasetInfo['sample_category'] else False
+            self.datasetInfo['isPythiaTuneCP5']  = True if 'TuneCP5' in self.datasetInfo["datasetNameFull"] else False
 
             if self.datasetInfo['isQCD_bGen']:
                 # 'Corrections' variable defined in htoaa_Settings.py
@@ -404,27 +391,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "fitFunction":        fitFunction_,
                     "fitFunctionHTRange": fitFunctionHTRange_,                    
                 }
-
-            print(f"{self.datasetInfo['isSignal'       ] = }")
-            print(f"{self.datasetInfo['isSignalGGH'    ] = }")
-            print(f"{self.datasetInfo['isSignalVBFH'   ] = }")
-            print(f"{self.datasetInfo['isSignalWH'     ] = }")
-            print(f"{self.datasetInfo['isSignalVH'     ] = }")
-            print(f"{self.datasetInfo['isSignalTTH'    ] = }")
-            print(f"{self.datasetInfo['isQCD'          ] = }")
-            print(f"{self.datasetInfo['isQCDIncl'      ] = }")
-            print(f"{self.datasetInfo['isQCD_bEnrich'  ] = }")
-            print(f"{self.datasetInfo['isQCD_bGen'     ] = }")
-            print(f"{self.datasetInfo['isTTbar'        ] = }")
-            print(f"{self.datasetInfo['isHToBB'        ] = }")
-            print(f"{self.datasetInfo['isPythiaTuneCP5'] = }")
             
 
         ## List of all analysis selection condition ---------------------------------------------
         global HLT_AK8PFJet330_name
         HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT' # 'Trg_Combo_AK4AK8Jet_HT'
+        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -434,24 +407,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetPt",
                 "leadingFatJetEta",
                 "JetID",
-                "leadingNonHto4bFatJetPt", # leadingNonHto4bFatJet leadingNonHto4bFatJet_asSingletons
-                "leadingNonHto4bFatJetEta",
-                "leadingNonHto4bFatJetJetID",    
                 #"L1_SingleJet180",
                 #HLT_AK8PFJet330_name,
                 sTrgSelection,
                 #"leadingFatJetBtagDeepB",
                 "leadingFatJetMSoftDrop",
-                "leadingNonHto4bFatMSoftDrop",             
                 #"leadingFatJetZHbb_Xbb_avg",
                 "leadingFatJetZHbb",
                 #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
                 #"leadingFatJetParticleNetMD_XbbvsQCD",
                 #"leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
                 #"leadingFatJet_nSV"
-                #
-                "PNetWZvsQCDLoose", 
-                "nLeptonsTight",
             ]),
         ])
 
@@ -467,21 +433,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "JetID",
                     #"L1_SingleJet180",
                     #HLT_AK8PFJet330_name,
+                    #sTrgSelection,
                     #"leadingFatJetBtagDeepB",
                     "leadingFatJetMSoftDrop",
-                    "leadingFatJetZHbb_plus_Xbb",
+                    #"leadingFatJetZHbb_Xbb_avg",
+                    "leadingFatJetZHbb",
                     #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
                     #"leadingFatJetParticleNetMD_XbbvsQCD",
+                    #"leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
                     #"leadingFatJet_nSV"
-                    "leadingNonHto4bFatJetPt", # leadingNonHto4bFatJet leadingNonHto4bFatJet_asSingletons
-                    "leadingNonHto4bFatJetEta",
-                    "leadingNonHto4bFatJetJetID",                    
                 ]),
             ])
             self.objectSelector.FatJetPtThsh = 170
-            self.objectSelector.FatJetMSoftDropThshLow  =  60 # 90
-            self.objectSelector.FatJetMSoftDropThshHigh = 160 # 140
-            self.objectSelector.FatJetZHbb_plus_Xbb_Thsh = 0.4
+            #self.objectSelector.FatJetMSoftDropThshLow  =  50 # 60 # 90
+            #self.objectSelector.FatJetMSoftDropThshHigh = 9999 # #160 # 140
+            #self.objectSelector.FatJetZHbb_plus_Xbb_Thsh = 0.4
 
 
 
@@ -521,15 +487,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.sel_names_all["SBWP80to40"] = self.sel_names_all["Presel"] + [
             "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP80to40"
         ]
-        self.sel_names_all["SBWP95to60"] = self.sel_names_all["Presel"] + [
-            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP95to60"
+        '''
+        self.sel_names_all["SBWPlt40"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40"
         ]
-        self.sel_names_all["SBWP99to80"] = self.sel_names_all["Presel"] + [
-            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP99to80"
+        self.sel_names_all["SBWPlt60"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt60"
         ]
+        self.sel_names_all["SBWPlt80"] = self.sel_names_all["Presel"] + [
+            "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt80"
+        ]
+        '''
 
-        #for sSelName_ in ["SRWP40", "SRWP60", "SRWP80"]:
-        for sSelName_ in []:
+        for sSelName_ in ["SRWP40", "SRWP60", "SRWP80"]:
             # massA windows
             for sMassAWindowName in massPseudoscalarA_windows_dict:
                 sSelWindowName_ = "%s_%s" % (sSelName_, sMassAWindowName)
@@ -551,8 +521,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         "leadingFatJetPNet_massH_Hto4b_%s" % (sMassHiggsWindowName)
                     ]
 
-
-
         
 
         self.sel_conditions_all_list = set()
@@ -562,7 +530,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         # selection region addition each SR conditions successively
         #for iCondition in range(self.sel_names_all["Presel"].index(HLT_AK8PFJet330_name), len(self.sel_names_all["Presel"]) - 1):
-        for iCondition in range(self.sel_names_all["Presel"].index("leadingFatJetMSoftDrop"), len(self.sel_names_all["Presel"]) - 1):
+        for iCondition in range(self.sel_names_all["Presel"].index("leadingFatJetPt"), len(self.sel_names_all["Presel"]) - 1):
             conditionName = self.sel_names_all["Presel"][iCondition]
             self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["Presel"][0 : (iCondition+1)]
         
@@ -587,7 +555,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 with open(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
                     dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
             if dataLSSelGoldenJSON == None:
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {sFilesGoldenJSON[self.datasetInfo["era"]] = } could not read.')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sFilesGoldenJSON[self.datasetInfo["era"]] = } could not read.')
                 exit(0) 
 
             # convert runNumber in str to int
@@ -599,7 +567,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # lumiScale --------------------------------------------------------------------------------------------------
             if sTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
                 exit(0) 
 
             self.datasetInfo["lumiScale"] = calculate_lumiScale(
@@ -633,8 +601,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             
             ## MC QCD
             if self.datasetInfo['isQCD'] and \
-                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                SplitQCDInGENCats:
+                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
                 # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
                 self.histosExtensions = HistogramNameExtensions_QCD 
 
@@ -674,9 +641,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         phi_axis              = hist.Bin("Phi",                    r"$\phi$",                    100,   -3.14,    3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
-        mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,     70)
-        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                2*70,       0,     70)
+        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 50,       0,     500)
+        mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",                 50,       0,     100)
+        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                 50,       0,     100)
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
@@ -687,7 +654,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         jetN3_axis            = hist.Bin("N3",                     r"N3b1",                      100,       0,       5)
         jetTau_axis           = hist.Bin("TauN",                   r"TauN",                      100,       0,       1)
         deltaR_axis           = hist.Bin("deltaR",                 r"$delta$ r ",                500,       0,       5)
-        deltaPhi_axis         = hist.Bin("deltaPhi",               r"$delta$ phi ",             1000,       0,       3.14) # <<<<<<<<<
         #HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
         HT_axis               = hist.Bin("HT",                     r"HT",                       4000,       0,    4000)
         PytPartStatus_axis    = hist.Bin("PytPartStatus",          r"PytPartStatus",             421,  -210.5,   210.5)
@@ -709,7 +675,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ('hPV_npvs_beforeSel',                        {sXaxis: PU_axis,                sXaxisLabel: r"No. of primary vertices - before selection"}),
             ('hPV_npvsGood_beforeSel',                    {sXaxis: PU_axis,                sXaxisLabel: r"No. of good primary vertices - before selection"}),            
         ])
-
+        '''
         if self.datasetInfo['isMC'] and runMode_GenLHEPlots: 
             histos.update(OD([
             ('hGenLHE_HT_all',                            {sXaxis: HT_axis,                sXaxisLabel: r"LHE HT [GeV]"}),
@@ -933,7 +899,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ]))
 
-        
+            '''
 
         # RECO-level histograms --------------------------------------------------------------------------------------------------------------
         if self.datasetInfo['isSignal']:
@@ -954,7 +920,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 sHExt = "_%s" % (sel_name)
                 if sHExt_0 != '':
                     sHExt += "_%s" % (sHExt_0)
-
+                    '''
                 histos.update(OD([
 
                     ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
@@ -1067,7 +1033,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v13'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v13"}),
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v23'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v23"}),
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v012'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v012"}),
-                    ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v013'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v013"}),
+                    ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v013'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v013"}), ## selected
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v023'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v023"}),
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v123'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v123"}),
                     ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v0123'+sHExt,            {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v0123"}),                                        
@@ -1079,7 +1045,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetParticleNet_massH_Hto4b_v3'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v3"}),
                     ('hLeadingFatJetParticleNet_massH_Hto4b_v4'+sHExt,            {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_v4"}),
 
-                    ('hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123'+sHExt,     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg_v0123"}),
+                    ('hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123'+sHExt,     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg_v0123"}), ## selected
                     
                     #(''+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
                     
@@ -1111,69 +1077,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                     ## nLeptons_matched_leadingFatJet
                     ('hLeadingFatJet_nLeptons'+sHExt,                   {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of iso-leptons within leadingFatJet "}),
-                    ('hnLeptonsTight'+sHExt,                            {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of tight leptons "}),
-                    ('hnLeptons_nonoverlap_leadingFatJet'+sHExt,        {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of tight leptons nonoverlaping leadingFatJet"}),
-                    ('hnLeptons_nonoverlap_selFatJets'+sHExt,        {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of tight leptons nonoverlaping selected FatJets"}),
-                    
 
-                    ## AK4 jets
-                    ('hnAK4Jets_NonoverlapLeadingFatJet'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4Jets_NonoverlapLeadingFatJet'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-                    ('hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-
-                    ('hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of central AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-                    ('hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag central AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-
-                    ('hnAK4Jets_NonoverlapSelFatJets'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4Jets_NonoverlapSelFatJets'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-                    ('hnAK4Jets_bTag_NonoverlapSelFatJets'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4Jets_bTag_NonoverlapSelFatJets'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-
-                    ('hnAK4JetsCentral_NonoverlapSelFatJets'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of central AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4JetsCentral_NonoverlapSelFatJets'+sHExt,             {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-                    ('hnAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt,                {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of bTag central AK4 jets non-overlap FatJet H->4b "}),
-                    ('hPtLeadingAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt,        {sXaxis: pt_axis,         sXaxisLabel: r"pT(Leading bTag central AK4 jets non-overlap FatJet H->4b) [GeV]"}),
-
-
-                    ## leadingNonHto4bFatJet 
-                    ('hLeadingNonHto4bFatJetPt'+sHExt,                    {sXaxis: pt_axis,           sXaxisLabel: r"$p_{T}(leading NonHto4bFatJet)$ [GeV]"}),
-                    ('hLeadingNonHto4bFatJetEta'+sHExt,                   {sXaxis: eta_axis,          sXaxisLabel: r"\eta (leading NonHto4bFatJet)"}),
-                    ('hLeadingNonHto4bFatJetPhi'+sHExt,                   {sXaxis: phi_axis,          sXaxisLabel: r"\phi (leading NonHto4bFatJet)"}),
-                    ('hLeadingNonHto4bFatJetMass'+sHExt,                  {sXaxis: mass_axis,         sXaxisLabel: r"m (leading NonHto4bFatJet) [GeV]"}),
-                    ('hLeadingNonHto4bFatJetMSoftDrop'+sHExt,             {sXaxis: mass_axis,         sXaxisLabel: r"m_{soft drop} (leading NonHto4bFatJet) [GeV]"}),
-                    ('hLeadingNonHto4bFatJetId'+sHExt,                    {sXaxis: nObject_axis,      sXaxisLabel: r"jet Id (leading NonHto4bFatJet)"}),                     
-                    ('hdPhi_LeadingFJ_LeadingNonHto4bFJ'+sHExt,           {sXaxis: deltaPhi_axis,     sXaxisLabel: r"hdPhi_LeadingFJ_LeadingNonHto4bFJ"}),
-                    ('hLeadingNonHto4bFatJetDeepTagMD_WvsQCD'+sHExt,      {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingFatJetDeepTagMD_WvsQCD"}),
-                    ('hLeadingNonHto4bFatJetDeepTagMD_ZvsQCD'+sHExt,      {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingFatJetDeepTagMD_ZvsQCD"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_WvsQCD'+sHExt,        {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingFatJetDeepTag_WvsQCD"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_ZvsQCD'+sHExt,        {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingFatJetDeepTag_ZvsQCD"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_VvsQCD_max'+sHExt,    {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_VvsQCD_max"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_W'+sHExt,             {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_W"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_Z'+sHExt,             {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_Z"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_V_max'+sHExt,         {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_V_max"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_WZvsQCD'+sHExt,       {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_WZvsQCD"}),
-                    ('hLeadingNonHto4bFatJetDeepTag_WZvsQCD2'+sHExt,      {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_DeepTag_WZvsQCD2"}),
-                    ('hLeadingNonHto4bFatJetParticleNet_WvsQCD'+sHExt,    {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJetParticleNet_WvsQCD"}),
-                    ('hLeadingNonHto4bFatJetParticleNet_ZvsQCD'+sHExt,    {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJetParticleNet_ZvsQCD"}),
-                    ('hLeadingNonHto4bFatJetPNet_VvsQCD_max'+sHExt,       {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_VvsQCD_max"}),
-                    ('hLeadingNonHto4bFatJetPNet_W'+sHExt,                {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_W"}),
-                    ('hLeadingNonHto4bFatJetPNet_Z'+sHExt,                {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_Z"}),
-                    ('hLeadingNonHto4bFatJetPNet_V_max'+sHExt,            {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_V_max"}),
-                    ('hLeadingNonHto4bFatJetPNet_WZvsQCD'+sHExt,          {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_WZvsQCD"}),
-                    ('hLeadingNonHto4bFatJetPNet_WZvsQCD2'+sHExt,         {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_WZvsQCD2"}),
-                    
-                    
                 ]))
 
+                    '''
                 ### 2-D distribution --------------------------------------------------------------------------------------------------------
                 histos.update(OD([
                     ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                      {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
-                      sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),                    
-    
+                      sYaxis: phi_axis,        sYaxisLabel: r"\phi (leading FatJet)"}),        
+
                     ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
                      {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
                       sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
@@ -1185,9 +1098,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
                      {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
                       sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),                                                           
-            ]))
+                ]))
 
-
+                '''
                 if runMode_2018HEM1516IssueValidation:
                     histos.update(OD([
                         ('hLeadingFatJetPt_DataPreHEM1516Issue'+sHExt,                          {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(leading FatJet)$ [GeV]"}),
@@ -2078,7 +1991,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         sYaxis: mlScore_axis2k,  sYaxisLabel: r"LeadingFatJetParticleNetMD ZHbb_plus_Xbb"}),
 
                     ]))
-            
+                '''         
             
         for statusFlag_ in GENPART_STATUSFLAGS_LIST:
             histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
@@ -2235,7 +2148,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #if not self.datasetInfo['isMC']:
         if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
-            systematics_shift = [None]
+            #systematics_shift = [None, "JESUp", "JESDown", "JERUp", "JERDown"]
+            systematics_shift = [None, "JESUp", "JESDown", "JERUp", "JERDown", "JMRUp", "JMRDown" ,"JMSUp", "JMSDown"]
+            #systematics_shift = [None]
             for _syst in systematics_shift:
                 output += self.process_shift(events, _syst)
         else:
@@ -2767,17 +2682,30 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ) 
             idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max = ak.argmax(FatJet_PNetMD_Hto4b_Htoaa4bOverQCD, axis=-1, keepdims=True)
             #leadingBtagFatJet = ak.firsts(events.FatJet[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max])    
-            leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max]) 
+            FatJets = events.FatJet
+            leadingFatJet = ak.firsts(FatJets[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max])
+            if self.datasetInfo['isMC']:
+                correctedJets = get_JER_and_JES(events, FatJets, self.datasetInfo["era"], shift_syst)
+                leadingFatJet = ak.firsts(correctedJets[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max])
+                leadingFatJet.msoftdrop = get_JMR_JMS(leadingFatJet, self.datasetInfo["era"], shift_syst)
+            #leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max]) 
+            
         else:
-  
+            FatJets = events.FatJet
+            leadingFatJet = ak.firsts(FatJets[idx_FatJet_ZHbb_plus_Xbb_max])
+            if self.datasetInfo['isMC']:
+                correctedJets = get_JER_and_JES(events, FatJets, self.datasetInfo["era"], shift_syst)
+                leadingFatJet = ak.firsts(correctedJets[idx_FatJet_PNetMD_Hto4b_Haa4bOverQCD_max])
+                leadingFatJet.msoftdrop = get_JMR_JMS(leadingFatJet, self.datasetInfo["era"], shift_syst)
+
             #idx_FatJet_PNetMD_XbbvsQCD_max = ak.argmax(FatJetParticleNetMD_XbbvsQCD, axis=-1, keepdims=True)
             #leadingBtagFatJet = ak.firsts(events.FatJet[idx_FatJet_PNetMD_XbbvsQCD_max]) 
             #leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_PNetMD_XbbvsQCD_max]) 
-            leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_ZHbb_plus_Xbb_max]) 
+            #leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_ZHbb_plus_Xbb_max]) 
 
 
-        if runMode_OptimizePNetTaggerCut:
-            leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_ZHbb_plus_Xbb_max])
+        #if runMode_OptimizePNetTaggerCut:
+        #    leadingFatJet = ak.firsts(events.FatJet[idx_FatJet_ZHbb_plus_Xbb_max])
 
         #leadingFatJet = ak.firsts(events.FatJet)        
         leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
@@ -2814,7 +2742,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         leadingFatJetZHbb = leadingFatJetDeepTagMD_ZHbbvsQCD * (1 - leadingFatJetDeepTagMD_ZHccvsQCD)
         leadingFatJetZHbb = leadingFatJetZHbb / (1 - (leadingFatJetDeepTagMD_ZHbbvsQCD * leadingFatJetDeepTagMD_ZHccvsQCD))
 
-        
+
 
         # PNetMD_Hto4b
         if 'particleNetMD_Hto4b_Haa4b' in events.FatJet.fields:
@@ -2933,125 +2861,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 idx_FatJet_matched_genB_HToAATo4B = ak.argmax(mask_FatJet_matched_genB_HToAATo4B, axis=-1) # index of FatJet within events that maches to 4 GEN B-quarks from HToAATo4B
                 
                        
-
-        ## non-HTo4B FatJet
-        nonHto4bFatJet = events.FatJet[(events.FatJet.delta_r(leadingFatJet) > 0.8)]
-        leadingNonHto4bFatJet = ak.firsts(nonHto4bFatJet)
-        leadingNonHto4bFatJet_asSingletons = ak.singletons(leadingNonHto4bFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
-        
-        # Calculate W, Z, (W+Z)vsQCD scores from WvsQCD, ZvsQCD and QCD scores
-        # Formulas from Andrew on Baylor slack: https://baylorhep.slack.com/archives/C013B0LRAEA/p1706815879028809
-        def cal_W_(WQ, Q):
-            return WQ * Q / (1 - WQ)
-        def cal_Z_(ZQ, Q):
-            return ZQ * Q / (1 - ZQ)
-        def cal_WZQ_1_(W, Z, Q):
-            return (W + Z) / (W + Z + Q)
-        def cal_WZQ_2_(WQ, ZQ):
-            return (WQ + ZQ + - (2 * WQ * ZQ)) / (1 - (WQ * ZQ))        
-        kSmallPositiveNumber = 0.000000001
-        leadingNonHto4bFatJet_PNet_WvsQCD        = array_PutLowerBound(leadingNonHto4bFatJet.particleNet_WvsQCD, kSmallPositiveNumber)
-        leadingNonHto4bFatJet_PNet_ZvsQCD        = array_PutLowerBound(leadingNonHto4bFatJet.particleNet_ZvsQCD, kSmallPositiveNumber)
-        leadingNonHto4bFatJet_PNet_QCD           = array_PutLowerBound(leadingNonHto4bFatJet.particleNet_QCD,    kSmallPositiveNumber)
-        leadingNonHto4bFatJet_PNet_W             = cal_W_(leadingNonHto4bFatJet_PNet_WvsQCD, leadingNonHto4bFatJet_PNet_QCD)
-        leadingNonHto4bFatJet_PNet_Z             = cal_Z_(leadingNonHto4bFatJet_PNet_ZvsQCD, leadingNonHto4bFatJet_PNet_QCD)
-        leadingNonHto4bFatJet_PNet_WZvsQCD       = cal_WZQ_1_(leadingNonHto4bFatJet_PNet_W, leadingNonHto4bFatJet_PNet_Z, leadingNonHto4bFatJet_PNet_QCD)
-        leadingNonHto4bFatJet_PNet_WZvsQCD2      = cal_WZQ_2_(leadingNonHto4bFatJet_PNet_WvsQCD, leadingNonHto4bFatJet_PNet_ZvsQCD) 
-        leadingNonHto4bFatJet_PNet_VvsQCD_max    = calculateMaxOfTwoArrays(leadingNonHto4bFatJet_PNet_WvsQCD, leadingNonHto4bFatJet_PNet_ZvsQCD)
-        leadingNonHto4bFatJet_PNet_V_max         = calculateMaxOfTwoArrays(leadingNonHto4bFatJet_PNet_W, leadingNonHto4bFatJet_PNet_Z)
-        #
-        leadingNonHto4bFatJet_DeepTag_WvsQCD     = array_PutLowerBound(leadingNonHto4bFatJet.deepTag_WvsQCD, kSmallPositiveNumber)
-        leadingNonHto4bFatJet_DeepTag_ZvsQCD     = array_PutLowerBound(leadingNonHto4bFatJet.deepTag_ZvsQCD, kSmallPositiveNumber)
-        leadingNonHto4bFatJet_DeepTag_QCD        = array_PutLowerBound(leadingNonHto4bFatJet.deepTag_QCD,    kSmallPositiveNumber)
-        leadingNonHto4bFatJet_DeepTag_W          = cal_W_(leadingNonHto4bFatJet_DeepTag_WvsQCD, leadingNonHto4bFatJet_DeepTag_QCD)
-        leadingNonHto4bFatJet_DeepTag_Z          = cal_Z_(leadingNonHto4bFatJet_DeepTag_ZvsQCD, leadingNonHto4bFatJet_DeepTag_QCD)
-        leadingNonHto4bFatJet_DeepTag_WZvsQCD    = cal_WZQ_1_(leadingNonHto4bFatJet_DeepTag_W, leadingNonHto4bFatJet_DeepTag_Z, leadingNonHto4bFatJet_DeepTag_QCD)
-        leadingNonHto4bFatJet_DeepTag_WZvsQCD2   = cal_WZQ_2_(leadingNonHto4bFatJet_DeepTag_WvsQCD, leadingNonHto4bFatJet_DeepTag_ZvsQCD)
-        leadingNonHto4bFatJet_DeepTag_VvsQCD_max = calculateMaxOfTwoArrays(leadingNonHto4bFatJet_DeepTag_WvsQCD, leadingNonHto4bFatJet_DeepTag_ZvsQCD)
-        leadingNonHto4bFatJet_DeepTag_V_max      = calculateMaxOfTwoArrays(leadingNonHto4bFatJet_DeepTag_W, leadingNonHto4bFatJet_DeepTag_Z)
-
-
-
-        if printLevel >= 100:
-            printVariable('\n events.FatJet.delta_r(leadingFatJet): ', events.FatJet.delta_r(leadingFatJet))
-            printVariable('\n events.FatJet.delta_r(leadingFatJet): ', events.FatJet.delta_r(leadingFatJet) > 0.8)
-            printVariable('\n events.FatJet.pt', events.FatJet.pt)
-            printVariable('\n leadingFatJet.pt', leadingFatJet.pt)
-            printVariable('\n nonHto4bFatJet.pt', nonHto4bFatJet.pt)
-            printVariable('\n leadingNonHto4bFatJet.pt', leadingNonHto4bFatJet.pt)
-            printVariable('\n leadingNonHto4bFatJet_asSingletons.pt', leadingNonHto4bFatJet_asSingletons.pt)
-            printVariable('\n leadingFatJet.delta_phi(leadingNonHto4bFatJet)', leadingFatJet.delta_phi(leadingNonHto4bFatJet))
-            printVariable('\n abs(leadingFatJet.delta_phi(leadingNonHto4bFatJet))', abs(leadingFatJet.delta_phi(leadingNonHto4bFatJet)))
-            printVariable('\n leadingNonHto4bFatJet.particleNet_WvsQCD', leadingNonHto4bFatJet.particleNet_WvsQCD)
-            printVariable('\n leadingNonHto4bFatJet.particleNet_ZvsQCD', leadingNonHto4bFatJet.particleNet_ZvsQCD)
-            printVariable('\n leadingNonHto4bFatJet.particleNet_QCD', leadingNonHto4bFatJet.particleNet_QCD)
-            printVariable('\n leadingNonHto4bFatJet_PNet_WvsQCD', leadingNonHto4bFatJet_PNet_WvsQCD)
-            printVariable('\n leadingNonHto4bFatJet_PNet_ZvsQCD', leadingNonHto4bFatJet_PNet_ZvsQCD)
-            printVariable('\n leadingNonHto4bFatJet_PNet_QCD', leadingNonHto4bFatJet_PNet_QCD)
-            printVariable('\n leadingNonHto4bFatJet_PNet_W', leadingNonHto4bFatJet_PNet_W)
-            printVariable('\n leadingNonHto4bFatJet_PNet_Z', leadingNonHto4bFatJet_PNet_Z)
-            printVariable('\n leadingNonHto4bFatJet_PNet_WZvsQCD', leadingNonHto4bFatJet_PNet_WZvsQCD)
-            printVariable('\n leadingNonHto4bFatJet_PNet_WZvsQCD2', leadingNonHto4bFatJet_PNet_WZvsQCD2)
-            printVariable('\n leadingNonHto4bFatJet_PNet_VvsQCD_max', leadingNonHto4bFatJet_PNet_VvsQCD_max)
-            printVariable('\n leadingNonHto4bFatJet_PNet_V_max', leadingNonHto4bFatJet_PNet_V_max)
-
         
         ## sel leptons
-        muonsTight     = selectMuons(
-            events.Muon, 
-            pT_Thsh    =self.objectSelector.MuonPtThsh, 
-            MVAId      =self.objectSelector.MuonMVAId, 
-            MiniIsoId  =self.objectSelector.MuonMiniIsoId, 
-            MVATTHThsh =self.objectSelector.MuonMVATTHThsh )
-        electronsTight = selectElectrons(
-            events.Electron, 
-            pT_Thsh    =self.objectSelector.ElectronPtThsh, 
-            MVAId      =self.objectSelector.ElectronMVAId, 
-            MVATTHThsh =self.objectSelector.ElectronMVATTHThsh )
+        muonsTight     = self.objectSelector.selectMuons(events.Muon)
+        electronsTight = self.objectSelector.selectElectrons(events.Electron)
         leptonsTight   = ak.concatenate([muonsTight, electronsTight], axis=1)
-        nLeptonsTight  = ak.fill_none(ak.count(leptonsTight.pt, axis=1), 0)
-        nLeptons_matched_leadingFatJet    = ak.fill_none(ak.sum(leadingFatJet.delta_r( leptonsTight ) < 0.8, axis=1), 0)
-        nLeptons_nonoverlap_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.delta_r( leptonsTight ) > 0.8, axis=1), 0)
-        nLeptons_nonoverlap_selFatJets = ak.fill_none(ak.sum(
-            ((leadingFatJet.delta_r( leptonsTight ) > 0.8) &
-             (leadingNonHto4bFatJet.delta_r( leptonsTight ) > 0.8)), 
-            axis=1), 0)
-                    
+        nLeptons_matched_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0)
+
+
+        ## non-HTo4B FatJet
         
-
-        ## sel AK4 jets
-        ak4Jets = selectAK4Jets(Jets=events.Jet, era=self.datasetInfo["era"], pT_Thsh=30)
-        mask_ak4Jets_nonoverlaping_leadingFatJet           = ak4Jets.delta_r(leadingFatJet) > 0.8
-        ak4Jets_nonoverlaping_leadingFatJet                = ak4Jets[ mask_ak4Jets_nonoverlaping_leadingFatJet ]
-        nAk4Jets_nonoverlaping_leadingFatJet               = ak.fill_none(ak.count(ak4Jets_nonoverlaping_leadingFatJet.pt, axis=1), 0)
-
-        ak4JetsCentral_nonoverlaping_leadingFatJet         = ak4Jets_nonoverlaping_leadingFatJet[abs(ak4Jets_nonoverlaping_leadingFatJet.eta) < 2.4]
-        nAk4JetsCentral_nonoverlaping_leadingFatJet        = ak.fill_none(ak.count(ak4JetsCentral_nonoverlaping_leadingFatJet.pt, axis=1), 0)
-
-        mask_ak4Jets_bTag_nonoverlaping_leadingFatJet      = ak4Jets_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh
-        ak4Jets_bTag_nonoverlaping_leadingFatJet           = ak4Jets_nonoverlaping_leadingFatJet[mask_ak4Jets_bTag_nonoverlaping_leadingFatJet]
-        nAk4Jets_bTag_nonoverlaping_leadingFatJet          = ak.fill_none(ak.count(ak4Jets_bTag_nonoverlaping_leadingFatJet.pt, axis=1), 0)
-
-        ak4JetsCentral_bTag_nonoverlaping_leadingFatJet    = ak4Jets_bTag_nonoverlaping_leadingFatJet[abs(ak4Jets_bTag_nonoverlaping_leadingFatJet.eta) < 2.4]
-        nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet   = ak.fill_none(ak.count(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet.pt, axis=1), 0)
-
-
-        mask_ak4Jets_nonoverlaping_selFatJets           = (ak4Jets.delta_r(leadingFatJet) > 0.8) & (ak4Jets.delta_r(leadingNonHto4bFatJet) > 0.8)
-        ak4Jets_nonoverlaping_selFatJets                = ak4Jets[ mask_ak4Jets_nonoverlaping_selFatJets ]
-        nAk4Jets_nonoverlaping_selFatJets               = ak.fill_none(ak.count(ak4Jets_nonoverlaping_selFatJets.pt, axis=1), 0)
-
-        ak4JetsCentral_nonoverlaping_selFatJets         = ak4Jets_nonoverlaping_selFatJets[abs(ak4Jets_nonoverlaping_selFatJets.eta) < 2.4]
-        nAk4JetsCentral_nonoverlaping_selFatJets        = ak.fill_none(ak.count(ak4JetsCentral_nonoverlaping_selFatJets.pt, axis=1), 0)
-
-        mask_ak4Jets_bTag_nonoverlaping_selFatJets      = ak4Jets_nonoverlaping_selFatJets.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh
-        ak4Jets_bTag_nonoverlaping_selFatJets           = ak4Jets_nonoverlaping_selFatJets[mask_ak4Jets_bTag_nonoverlaping_selFatJets]
-        nAk4Jets_bTag_nonoverlaping_selFatJets          = ak.fill_none(ak.count(ak4Jets_bTag_nonoverlaping_selFatJets.pt, axis=1), 0)
-
-        ak4JetsCentral_bTag_nonoverlaping_selFatJets    = ak4Jets_bTag_nonoverlaping_selFatJets[abs(ak4Jets_bTag_nonoverlaping_selFatJets.eta) < 2.4]
-        nAk4JetsCentral_bTag_nonoverlaping_selFatJets   = ak.fill_none(ak.count(ak4JetsCentral_bTag_nonoverlaping_selFatJets.pt, axis=1), 0)
-
-            
-
 
 
         #####################
@@ -3097,32 +2916,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetPt",
                 leadingFatJet.pt > self.objectSelector.FatJetPtThsh
             )
-        if "leadingNonHto4bFatJetPt" in self.sel_conditions_all_list:
-            selection.add(
-                "leadingNonHto4bFatJetPt",
-                leadingNonHto4bFatJet.pt > self.objectSelector.FatJetPtThsh
-            )
+
 
         if "leadingFatJetEta" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetEta",
                 abs(leadingFatJet.eta) < self.objectSelector.FatJetEtaThsh
             )
-        if "leadingNonHto4bFatJetEta" in self.sel_conditions_all_list:
-            selection.add(
-                "leadingNonHto4bFatJetEta",
-                abs(leadingNonHto4bFatJet.eta) < self.objectSelector.FatJetEtaThsh
-            )
 
         if "JetID"  in self.sel_conditions_all_list:
             selection.add(
                 "JetID", 
                 leadingFatJet.jetId == self.objectSelector.FatJetJetID
-            )
-        if "leadingNonHto4bFatJetJetID"  in self.sel_conditions_all_list:
-            selection.add(
-                "leadingNonHto4bFatJetJetID", 
-                leadingNonHto4bFatJet.jetId == self.objectSelector.FatJetJetID
             )
 
  
@@ -3131,12 +2936,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetMSoftDrop",
                 (leadingFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
                 (leadingFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
-            )
-        if "leadingNonHto4bFatMSoftDrop"  in self.sel_conditions_all_list:
-            selection.add(
-                "leadingNonHto4bFatMSoftDrop",
-                (leadingNonHto4bFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
-                (leadingNonHto4bFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
             )
 
         if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_conditions_all_list:
@@ -3201,18 +3000,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                   (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-40']) )
             )
 
-        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP95to60" in self.sel_conditions_all_list:
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40" in self.sel_conditions_all_list:
             selection.add(
-                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP95to60",
-                ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-95']) &
-                  (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-60']) )
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt40",
+                leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-40']
             )
 
-        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP99to80" in self.sel_conditions_all_list:
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt60" in self.sel_conditions_all_list:
             selection.add(
-                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP99to80",
-                ( (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD >  bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-99']) &
-                  (leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']) )
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt60",
+                leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-60']
+            )
+
+        if "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt80" in self.sel_conditions_all_list:
+            selection.add(
+                "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WPlt80",
+                leadingFatJet_PNetMD_Hto4b_Htoaa4bOverQCD <= bTagWPs[self.datasetInfo["era"]]['ParticleNetMD_Hto4b_Htoaa4bOverQCD']['WP-80']
             )
 
         # mA windows
@@ -3250,19 +3053,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                      (leadingFatJet_PNet_massH_Hto4b_avg < massHiggsWindow[1] ))
                 )
 
-        # leadingNonHto4bFatJet_PNet_WZvsQCD
-        if "PNetWZvsQCDLoose" in self.sel_conditions_all_list:
-            selection.add(
-                "PNetWZvsQCDLoose",
-                leadingNonHto4bFatJet_PNet_WZvsQCD > self.objectSelector.NonHto4bFatJetPNet_WZvsQCD_Thsh
-            )
 
-        # nLeptonsTight veto
-        if "nLeptonsTight" in self.sel_conditions_all_list:
-            selection.add(
-                "nLeptonsTight",
-                ( nLeptonsTight <= self.objectSelector.NLeptonsTight_MaxThsh )
-            )
+            
+
 
 
 
@@ -3277,7 +3070,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # Trigger selection
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
@@ -3449,6 +3242,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ones_list
                 )
 
+            else:
+                wgt_HEM1516Issue = np.ones(len(events))
+
             # MC PURewgt ----------------------------------
             wgt_PU = getPURewgts(
                 PU_list  = events.Pileup.nTrueInt,
@@ -3457,10 +3253,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # MC GGF HToAATo4B Higgs pT reweight
             wgt_HiggsPt = None
-            if self.datasetInfo['isSignalGGH']:
+            if self.datasetInfo['isSignal']:
                 wgt_HiggsPt = getHiggsPtRewgtForGGToHToAATo4B(
                     GenHiggsPt_list = ak.firsts(genHiggs.pt)
                 )
+            else:
+                wgt_HiggsPt = np.ones(len(events))
+                
+            psWeights=add_ps_weight(events,events.PSWeight, dataset)
 
             # MC QCD_bGen HT reweight ---------------------
             wgt_HT = None
@@ -3472,13 +3272,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     sFitFunctionRange  = self.datasetInfo['HTRewgt']["fitFunctionHTRange"]
                 )            
 
+            else:
+                wgt_HT = np.ones(len(events))
+                
             # MC top pT reweigts for ttbar sample ---------
             if self.datasetInfo['isTTbar']:
                 wgt_TopPt = getTopPtRewgt(
                     eventsGenPart = events.GenPart[mask_genTopQuark],
                     isPythiaTuneCP5 = self.datasetInfo['isPythiaTuneCP5']
                 )   
-
+            else:
+                wgt_TopPt = np.ones(len(events))
+                
             # MC ParticleNetMD_XbbvsQCD SFs      SFs_ParticleNetMD_XbbvsQCD
             if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
                 mask_ParticleNetMD_XbbvsQCD_SFRegion = (
@@ -3493,9 +3298,25 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ), 
                     1
                 )
+            else:
+                wgt_ParticleNetMD_XbbvsQCD = np.ones(len(events))
+            #pile up weight
+            puWeights = getPURewgts_variation(events,self.datasetInfo["era"])
+            # ps weight
+            psWeights=add_ps_weight(events,events.PSWeight, dataset)
+            #trigger variation
+            triggerSF = add_jetTriggerSF(events, self.datasetInfo["era"], selection)
+            # PDF weight
+            PDF_aS_weight = add_pdf_as_weight(events,events.LHEPdfWeight,dataset)
+            if ak.mean(ak.num(events.LHEScaleWeight)) == 9:
+                scaleWeightSelector = [0, 1, 3, 5, 7, 8]
+            elif ak.mean(ak.num(events.LHEScaleWeight)) == 8:
+                scaleWeightSelector = [0, 1, 3, 4, 6, 7]
+            else:
+                scaleWeightSelector = []
+            LHEScaleVariation = events.LHEScaleWeight[:, scaleWeightSelector]
 
-
-
+     
             weights.add(
                 "lumiWeight",
                 weight = lumiScale_toUse
@@ -3504,100 +3325,70 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
-                weights.add(
-                    "2018HEM1516IssueWeight",
-                    weight = wgt_HEM1516Issue
-                )
             weights.add(
-                "PUWeight",
-                weight = wgt_PU
+                "2018HEM1516IssueWeight",
+                weight = wgt_HEM1516Issue
             )
-            if self.datasetInfo['isSignalGGH']:
-                weights.add(
-                    "GGHPtRewgt",
-                    weight = wgt_HiggsPt
-                )
-            if self.datasetInfo['isQCD_bGen']:
-                weights.add(
-                    "HTRewgt",
-                    weight = wgt_HT
-                )            
-            if self.datasetInfo['isTTbar']:
-                weights.add(
-                    "TopPtReWeight",
-                    weight = wgt_TopPt
+            weights.add(
+                "GGHPtRewgt",
+                weight = wgt_HiggsPt
+            )
+            weights.add(
+                "HTRewgt",
+                weight = wgt_HT
+            )            
+            weights.add(
+                "TopPtReWeight",
+                weight = wgt_TopPt
                 )         
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
-                weights.add(
-                    "SF_ParticleNetMD_XbbvsQCD",
-                    weight = wgt_ParticleNetMD_XbbvsQCD
-                )
-            
-    
-            
- 
-            ## weights_woHEM1516Fix --------------------
-            weights_woHEM1516Fix.add(
-                "lumiWeight",
-                weight = lumiScale_toUse
+            weights.add(
+                "SF_ParticleNetMD_XbbvsQCD",
+                weight = wgt_ParticleNetMD_XbbvsQCD
             )
-            weights_woHEM1516Fix.add(
-                "genWeight",
-                weight = np.copysign(np.ones(len(events)), events.genWeight)
-            )
-            #if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
-            #    weights.add(
-            #        "2018HEM1516IssueWeight",
-            #        weight = wgt_HEM1516Issue
-            #    )
-            weights_woHEM1516Fix.add(
+            #pile up weight
+            weights.add(
                 "PUWeight",
-                weight = wgt_PU
+                weight     = puWeights[0],
+                weightUp   = puWeights[1],
+                weightDown = puWeights[2],
             )
-            if self.datasetInfo['isSignalGGH']:
-                weights_woHEM1516Fix.add(
-                    "GGHPtRewgt",
-                    weight = wgt_HiggsPt
-                )
-            if self.datasetInfo['isQCD_bGen']:
-                weights_woHEM1516Fix.add(
-                    "HTRewgt",
-                    weight = wgt_HT
-                )  
-            if self.datasetInfo['isTTbar']:
-                weights_woHEM1516Fix.add(
-                    "TopPtReWeight",
-                    weight = wgt_TopPt
-                )            
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
-                weights_woHEM1516Fix.add(
-                    "SF_ParticleNetMD_XbbvsQCD",
-                    weight = wgt_ParticleNetMD_XbbvsQCD
-                )
-
-
-
-            ## weights_gen -------------------------------
-            weights_gen.add(
-                "lumiWeight",
-                weight = lumiScale_toUse 
+            # ps weight
+            psWeights=add_ps_weight(events,events.PSWeight, dataset)
+            weights.add(
+                "ISR",
+                weight=psWeights[0],
+                weightUp=psWeights[1],
+                weightDown=psWeights[2],
             )
-            weights_gen.add(
-                "genWeight",
-                weight=np.copysign(np.ones(len(events)), events.genWeight)
+            weights.add(
+                "FSR",
+                weight=psWeights[0],
+                weightUp=psWeights[3],
+                weightDown=psWeights[4],
             )
-            if self.datasetInfo['isSignalGGH']:
-                weights_gen.add(
-                    "GGHPtRewgt",
-                    weight = wgt_HiggsPt
-                )
-            if self.datasetInfo['isQCD_bGen']:
-                weights_gen.add(
-                    "HTRewgt",
-                    weight = wgt_HT
-                )
+            #trigger eff
+            weights.add(
+                "trigger",
+                weight=triggerSF[0],
+                weightUp=triggerSF[1],
+                weightDown=triggerSF[2],
+            )
+            # PDF weight
+            weights.add(
+                "PDF",
+                weight=PDF_aS_weight[0],
+                weightUp=PDF_aS_weight[1],
+                weightDown=PDF_aS_weight[2],
+            )
+            if (self.datasetInfo['isSignal']):
+                for i in range(6):
+                    weights.add(
+			f"LHEScale{i}",
+                        weight=np.ones(len(events)),
+                        weightUp=LHEScaleVariation[:, i],
+                    )
 
+ 
             if printLevel >= 10:
                 print(f"\nevents.genWeight ({events.genWeight.fields}) ({len(events.genWeight)}): {events.genWeight.to_list()}")
                 genWgt1 = np.copysign(np.ones(len(events)), events.genWeight)
@@ -3640,8 +3431,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo['isMC']:
             if shift_syst is None:
                 systList = [
-                    "central"
+                    "central",
+                    "PUWeightUp",
+                    "PUWeightDown",
+                    "ISRUp",
+                    "ISRDown",
+                    "FSRUp",
+                    "FSRDown",
+                    "triggerUp",
+                    "triggerDown",
+                    "PDFUp",
+                    "PDFDown",
+
                 ]
+                if (self.datasetInfo['isSignal']): 
+                    systList += [f"LHEScale{i}Up" for i in range(6)]
             else:
                 systList = [shift_syst]
         else:
@@ -3667,7 +3471,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             weightSyst = syst
             
             # in the case of 'central', or the jet energy systematics, no weight systematic variation is used (weightSyst=None)
-            if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown"]:
+            #if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown"]:
+            if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown", "JMRUp", "JMRDown" ,"JMSUp", "JMSDown"]:
                 weightSyst = None
 
             
@@ -3677,13 +3482,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 evtWeight_woHEM1516Fix   = np.ones(len(events))
             else:
                 evtWeight                = weights.weight(weightSyst)
-                evtWeight_gen            = weights_gen.weight(weightSyst)
-                evtWeight_woHEM1516Fix   = weights_woHEM1516Fix.weight(weightSyst)
+                #evtWeight            = weights_gen.weight(weightSyst)
+                #evtWeight_woHEM1516Fix   = weights_woHEM1516Fix.weight(weightSyst)
 
 
 
             ### General or GEN-level histograms ========================================================================================
-
+            '''
             # PU
             output['hPV_npvs_beforeSel'].fill(
                 dataset=dataset,
@@ -3718,67 +3523,67 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     HT=(events.LHE.HT),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_HTIncoming_all'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HTIncoming),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Vpt_all'].fill(
                     dataset=dataset,
                     HT=(events.LHE.Vpt),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_AlphaS_all'].fill(
                     dataset=dataset,
                     alphaS=(events.LHE.AlphaS),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Njets_all'].fill(
                     dataset=dataset,
                     nObject50=(events.LHE.Njets),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Nb_all'].fill(
                     dataset=dataset,
                     nObject50=(events.LHE.Nb),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Nc_all'].fill(
                     dataset=dataset,
                     nObject50=(events.LHE.Nc),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Nuds_all'].fill(
                     dataset=dataset,
                     nObject50=(events.LHE.Nuds),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_Nglu_all'].fill(
                     dataset=dataset,
                     nObject50=(events.LHE.Nglu),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_NpNLO_all'].fill(
                     dataset=dataset,
                     nObject200=(events.LHE.NpNLO),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenLHE_NpLO_all'].fill(
                     dataset=dataset,
                     nObject200=(events.LHE.NpLO),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
 
 
@@ -3787,13 +3592,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     Pt2TeV=(ak.firsts(genHiggs.pt)),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hGenHiggsLog2Pt_all'].fill(
                     dataset=dataset,
                     Log2Pt2TeV=np.log2(ak.firsts(genHiggs.pt)),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )                
 
 
@@ -3804,19 +3609,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 output['hGenHiggsPt_sel'].fill(
                     dataset=dataset,
                     Pt=(ak.firsts(genHiggs.pt[sel_SR])),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_SR]
+                    weight=evtWeight[sel_SR]
                 )
                 output['hGenHiggsPt_sel_wGenCuts'].fill(
                     dataset=dataset,
                     Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 
@@ -3825,20 +3630,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     Mass=(ak.flatten(genHiggs.mass)),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                     
                 output['hMass_GenA_all_0'].fill(
                     dataset=dataset,
                     Mass=(genACollection[:, 0].mass),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 output['hMass_GenA_all_0'].fill(
                     dataset=dataset,
                     Mass=(genACollection[:, 1].mass),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
 
 
@@ -3846,53 +3651,52 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                     
                 output['hMass_GenA_all'].fill(
                     dataset=dataset,
                     Mass=(genACollection[:, 0].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 output['hMass_GenA_all'].fill(
                     dataset=dataset,
                     Mass=(genACollection[:, 1].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
-               
-                '''
+
                 output['hMass_GenA_all'].fill(
                     dataset=dataset,
                     Pt=(ak.flatten(genA_Second.mass)),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
-                '''
+
                 output['hMass_GenAApair_all'].fill(
                     dataset=dataset,
                     Mass=((genA_First + genA_Second).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 output['hMass_GenAToBBbarpair_all'].fill(
                     dataset=dataset,
                     Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 0][sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )                
                 output['hMass_GenAToBBbarpair_all'].fill(
                     dataset=dataset,
                     Mass=((events.GenPart[genBBar_pairs['b']] + events.GenPart[genBBar_pairs['bbar']]).mass[:, 1][sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 output['hMass_Gen4BFromHToAA_all'].fill(
                     dataset=dataset,
                     Mass=((events.GenPart[genBBar_pairs['b']][:, 0] + events.GenPart[genBBar_pairs['bbar']][:, 0] + events.GenPart[genBBar_pairs['b']][:, 1] + events.GenPart[genBBar_pairs['bbar']][:, 1]).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
 
@@ -3900,19 +3704,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     Mass=((LVGenB_0 + LVGenBbar_0).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )                
                 output['hMass_GenAToBBbarpair_all_1'].fill(
                     dataset=dataset,
                     Mass=((LVGenB_1 + LVGenBbar_1).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 output['hMass_Gen4BFromHToAA_all_1'].fill(
                     dataset=dataset,
                     Mass=((LVGenB_0 + LVGenBbar_0 + LVGenB_1 + LVGenBbar_1).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
 
@@ -3921,7 +3725,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(genACollection[:, 0].mass[sel_GenHToAATo4B]),
                     Mass1=(genACollection[:, 1].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 
                 output['hMass_GenA1ToBBbar_vs_GenA2ToBBbar_all'].fill(
@@ -3929,7 +3733,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=((LVGenB_0 + LVGenBbar_0).mass[sel_GenHToAATo4B]),
                     Mass1=((LVGenB_1 + LVGenBbar_1).mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hMass_GenH_vs_GenAHeavy_all'].fill(
@@ -3937,7 +3741,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
                     Mass1=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
                 
                 output['hMass_GenH_vs_GenALight_all'].fill(
@@ -3945,7 +3749,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
                     Mass1=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hMass_GenAHeavy_vs_GenALight_all'].fill(
@@ -3953,14 +3757,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
                     Mass1=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hDeltaR_GenH_GenB_max'].fill(
                     dataset=dataset,
                     deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hMassGenH_vs_maxDRGenHGenB_all'].fill(
@@ -3968,7 +3772,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
                     deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hMassGenAHeavy_vs_maxDRGenHGenB_all'].fill(
@@ -3976,7 +3780,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(genACollection[idxGenA_sortByMass][:, 0].mass[sel_GenHToAATo4B]),
                     deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
                 output['hMassGenALight_vs_maxDRGenHGenB_all'].fill(
@@ -3984,7 +3788,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Mass=(genACollection[idxGenA_sortByMass][:, 1].mass[sel_GenHToAATo4B]),
                     deltaR=(max_dr_GenH_GenB[sel_GenHToAATo4B]),
                     systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                    weight=evtWeight[sel_GenHToAATo4B]
                 )
 
 
@@ -4058,28 +3862,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     CutFlow50=(ones_list * iBin),
                     systematic=syst,
-                    weight=evtWeight_gen
+                    weight=evtWeight
                 )
                 iBin = (idx_QCDSampleHTBin * 5) + 1
                 output['hNEventsQCD'].fill(
                     dataset=dataset,
                     CutFlow50=(ones_list[mask_genBHadrons_status2_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBHadrons_status2_eventwise]
+                    weight=evtWeight[mask_genBHadrons_status2_eventwise]
                 )
                 iBin = (idx_QCDSampleHTBin * 5) + 2
                 output['hNEventsQCD'].fill(
                     dataset=dataset,
                     CutFlow50=(ones_list[mask_genBQuarks_hardSctred_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
+                    weight=evtWeight[mask_genBQuarks_hardSctred_eventwise]
                 )
                 iBin = (idx_QCDSampleHTBin * 5) + 3
                 output['hNEventsQCD'].fill(
                     dataset=dataset,
                     CutFlow50=(ones_list[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise] * iBin),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
+                    weight=evtWeight[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
                 )
                 
                 iBin = (idx_QCDSampleHTBin * 5)
@@ -4113,59 +3917,59 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_genBHadrons_status2_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBHadrons_status2_eventwise]
+                    weight=evtWeight[mask_genBHadrons_status2_eventwise]
                 )
                 output['hGenLHE_HT_SelQCDbGen'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
+                    weight=evtWeight[mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise]
                 )
                 output['hGenLHE_HT_SelQCDbEnrich'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_genBQuarks_hardSctred_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
+                    weight=evtWeight[mask_genBQuarks_hardSctred_eventwise]
                 )
                 
                 output['hGenLHE_HT_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_stitch_CutBQuarkPt_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBQuarkPt_eventwise]
+                    weight=evtWeight[mask_QCD_stitch_CutBQuarkPt_eventwise]
                 )
                 output['hGenLHE_HT_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_stitch_CutBHadron_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBHadron_eventwise]
+                    weight=evtWeight[mask_QCD_stitch_CutBHadron_eventwise]
                 )
                 output['hGenLHE_HT_QCDStitch'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_stitch_eventwise]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_eventwise]
+                    weight=evtWeight[mask_QCD_stitch_eventwise]
                 )
                 output['hGenLHE_HT_QCD_bEnrich_PhSp'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_bEnrich_PhSp]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_bEnrich_PhSp]
+                    weight=evtWeight[mask_QCD_bEnrich_PhSp]
                 )
                 output['hGenLHE_HT_QCD_bGen_PhSp'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_bGen_PhSp]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_bGen_PhSp]
+                    weight=evtWeight[mask_QCD_bGen_PhSp]
                 )
                 output['hGenLHE_HT_QCD_Incl_Remnant_PhSp'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_Incl_Remnant_PhSp]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_Incl_Remnant_PhSp]
+                    weight=evtWeight[mask_QCD_Incl_Remnant_PhSp]
                 )
+                
 
-                '''
                 output['hGenBquark_Status_all'].fill(
                     dataset=dataset,
                     PytPartStatus=(ak.flatten(genBQuarks.status)),
@@ -4188,42 +3992,41 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         Boolean=(ak.to_numpy(genBQuarks_first[mask_genBQuarks].hasFlags(statusFlag_))),
                         systematic=syst
                     )
-                '''
-                
+
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 1)
                 output['hGenBquark_leadingPt_all'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[mask_tmp][:, 0]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 2)
                 output['hGenBquark_subleadingPt_all'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[mask_tmp][:, 1]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 3)
                 output['hGenBquark_thirdLeadingPt_all'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[mask_tmp][:, 2]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
                 output['hGenBquark_forthLeadingPt_all'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[mask_tmp][:, 3]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
                 output['hGenBquark_forthLeadingPt_UltraLow_all'].fill(
                     dataset=dataset,
                     PtUltraLow=(genBQuarks_pT[mask_tmp][:, 3]),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4232,28 +4035,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 2)
                 output['hGenBquark_subleadingPt_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 3)
                 output['hGenBquark_thirdLeadingPt_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
                 output['hGenBquark_forthLeadingPt_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4262,28 +4065,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 2)
                 output['hGenBquark_subleadingPt_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 3)
                 output['hGenBquark_thirdLeadingPt_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
                 output['hGenBquark_forthLeadingPt_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3]),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4292,13 +4095,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hLeadingPtGenBquark_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4307,13 +4110,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hLeadingPtGenBquarkHardSctred_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4322,13 +4125,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hLeadingPtGenBHadron_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 1)
@@ -4336,13 +4139,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hLeadingPtGenBHadronStatus2_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4351,13 +4154,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4366,13 +4169,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4381,13 +4184,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 1)
@@ -4395,13 +4198,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4410,13 +4213,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4425,13 +4228,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4440,13 +4243,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 1)
@@ -4454,13 +4257,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4470,13 +4273,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hSubleadingPtGenBquark_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4485,13 +4288,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hSubleadingPtGenBquarkHardSctred_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4500,13 +4303,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hSubleadingPtGenBHadron_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 2)
@@ -4514,13 +4317,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hSubleadingPtGenBHadronStatus2_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4529,13 +4332,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hSubleadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4544,13 +4347,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hSubleadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4559,13 +4362,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hSubleadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 2)
@@ -4573,13 +4376,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hSubleadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4588,13 +4391,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hSubleadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4603,13 +4406,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hSubleadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4618,13 +4421,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hSubleadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 2)
@@ -4632,13 +4435,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hSubleadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4649,13 +4452,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hThirdLeadingPtGenBquark_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4664,13 +4467,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hThirdLeadingPtGenBquarkHardSctred_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4679,13 +4482,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hThirdLeadingPtGenBHadron_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
@@ -4693,13 +4496,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hThirdLeadingPtGenBHadronStatus2_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4708,13 +4511,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hThirdLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4723,13 +4526,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hThirdLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4738,13 +4541,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hThirdLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
@@ -4752,13 +4555,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hThirdLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4767,13 +4570,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hThirdLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4782,13 +4585,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hThirdLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4797,13 +4600,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hThirdLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
@@ -4811,13 +4614,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hThirdLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )              
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4828,13 +4631,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hFourthLeadingPtGenBquark_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][mask_tmp][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4843,13 +4646,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hFourthLeadingPtGenBquarkHardSctred_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][mask_tmp][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4858,13 +4661,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hFourthLeadingPtGenBHadron_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][mask_tmp][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
@@ -4872,13 +4675,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
                 output['hFourthLeadingPtGenBHadronStatus2_eta_all'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[mask_tmp]
+                    weight=evtWeight[mask_tmp]
                 )
 
 
@@ -4887,13 +4690,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hFourthLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4902,13 +4705,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hFourthLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4917,13 +4720,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hFourthLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
@@ -4931,13 +4734,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
                 output['hFourthLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
                 )
 
 
@@ -4946,13 +4749,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hFourthLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4961,13 +4764,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hFourthLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
 
 
@@ -4976,13 +4779,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hFourthLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 
                 mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
@@ -4990,13 +4793,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     dataset=dataset,
                     PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 output['hFourthLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
                     dataset=dataset,
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
                     systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
+                    weight=evtWeight[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )                
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -5047,7 +4850,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight[mask_events_FatJet_matched_genB_HToAATo4B]
                 )
-
+                '''
 
             for sel_name in self.sel_names_all.keys(): # loop of list of selections
                 
@@ -5123,11 +4926,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     #if self.datasetInfo['isSignal']:
                     if (self.datasetInfo['isSignal'] and \
                         (runMode_SignificancsScan2D or \
-                         runMode_OptimizePNetTaggerCut or \
-                         runMode_SignalGenCuts) ):
+                         runMode_OptimizePNetTaggerCut) ):
                         sel_SR_forHExt = sel_SR_forHExt & (n_leadingFatJat_matched_genB_HToAATo4B >= 4)
                     sel_SR_forHExt = ak.fill_none(sel_SR_forHExt, False) 
-
+                    '''
 
                     # all events
                     iBin = 0
@@ -5205,8 +5007,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     )
-
-
+                    
+                    '''
 
                     # 2018 HEM15/16 issue ----------------------               
                     if self.datasetInfo["era"] == Era_2018 and runMode_2018HEM1516IssueValidation:
@@ -5223,17 +5025,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             mask_DataWithHEM1516Issue = isRunAffectedBy2018HEM1516Issue
                             evtWeight_DataPreHEM1516Issue               = evtWeight
                             evtWeight_DataWithHEM1516Issue              = evtWeight
-                            evtWeight_woHEM1516Fix_DataPreHEM1516Issue  = evtWeight_woHEM1516Fix
-                            evtWeight_woHEM1516Fix_DataWithHEM1516Issue = evtWeight_woHEM1516Fix
+                            evtWeight_woHEM1516Fix_DataPreHEM1516Issue  = evtWeight
+                            evtWeight_woHEM1516Fix_DataWithHEM1516Issue = evtWeight
                         else:
                             mask_DataPreHEM1516Issue  = trues_list
                             mask_DataWithHEM1516Issue = trues_list
-                            evtWeight_DataPreHEM1516Issue               = evtWeight              * (1. - DataFractionAffectedBy2018HEM1516Issue)
-                            evtWeight_DataWithHEM1516Issue              = evtWeight              * (DataFractionAffectedBy2018HEM1516Issue)
-                            evtWeight_woHEM1516Fix_DataPreHEM1516Issue  = evtWeight_woHEM1516Fix * (1. - DataFractionAffectedBy2018HEM1516Issue)
-                            evtWeight_woHEM1516Fix_DataWithHEM1516Issue = evtWeight_woHEM1516Fix * (DataFractionAffectedBy2018HEM1516Issue)
-
-                        
+                            evtWeight_DataPreHEM1516Issue               = evtWeight * (1. - DataFractionAffectedBy2018HEM1516Issue)
+                            evtWeight_DataWithHEM1516Issue              = evtWeight * (DataFractionAffectedBy2018HEM1516Issue)
+                            evtWeight_woHEM1516Fix_DataPreHEM1516Issue  = evtWeight * (1. - DataFractionAffectedBy2018HEM1516Issue)
+                            evtWeight_woHEM1516Fix_DataWithHEM1516Issue = evtWeight * (DataFractionAffectedBy2018HEM1516Issue)
+                            
+                            ''' 
                         # inclusive, DataPreHEM1516Issue
                         sel_tmp_ = sel_SR_forHExt & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPt_DataPreHEM1516Issue'+sHExt].fill(
@@ -5350,21 +5152,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             dataset=dataset,
                             Pt=(leadingFatJet.pt[ sel_tmp_ ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )  
                         sel_tmp_ =  sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516Fix'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )
                         sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516Fix'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )
 
                         # wo HEM1516 fix, DataPreHEM1516Issue
@@ -5420,21 +5222,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             dataset=dataset,
                             Pt=(leadingFatJet.pt[ sel_tmp_ ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )            
                         sel_tmp_ =  sel_SR_forHExt & mask_HEM1516Issue_Phi
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )
                         sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
-                            weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
+                            weight=evtWeight[ sel_tmp_ ]
                         )
                         # w/ HEM1516 fix in data (DataPreHEM1516Issue), but w/o HEM1516_MC_Reweights
                         sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
@@ -6175,338 +5977,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     )
-                    output['hnLeptonsTight'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nLeptonsTight[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hnLeptons_nonoverlap_leadingFatJet'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nLeptons_nonoverlap_leadingFatJet[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hnLeptons_nonoverlap_selFatJets'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nLeptons_nonoverlap_selFatJets[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-
-
-                    ## leadingNonHto4bFatJet                  
-                    output['hLeadingNonHto4bFatJetPt'+sHExt].fill(
-                        dataset=dataset,
-                        Pt=(leadingNonHto4bFatJet.pt[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )            
-                    output['hLeadingNonHto4bFatJetEta'+sHExt].fill(
-                        dataset=dataset,
-                        Eta=(leadingNonHto4bFatJet.eta[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPhi'+sHExt].fill(
-                        dataset=dataset,
-                        Phi=(leadingNonHto4bFatJet.phi[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetMass'+sHExt].fill(
-                        dataset=dataset,
-                        Mass=(leadingNonHto4bFatJet.mass[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetMSoftDrop'+sHExt].fill(
-                        dataset=dataset,
-                        Mass=(leadingNonHto4bFatJet.msoftdrop[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetId'+sHExt].fill(
-                        dataset=dataset,
-                        nObject=(leadingNonHto4bFatJet.jetId[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )                                           
-                    output['hdPhi_LeadingFJ_LeadingNonHto4bFJ'+sHExt].fill(
-                        dataset=dataset,
-                        deltaPhi=abs(leadingFatJet.delta_phi(leadingNonHto4bFatJet)[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTagMD_WvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.deepTagMD_WvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTagMD_ZvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.deepTagMD_ZvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )                    
-                    output['hLeadingNonHto4bFatJetDeepTag_WvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.deepTag_WvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_ZvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.deepTag_ZvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_VvsQCD_max'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_VvsQCD_max[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_W'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_W[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_Z'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_Z[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_V_max'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_V_max[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_WZvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_WZvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetDeepTag_WZvsQCD2'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_DeepTag_WZvsQCD2[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetParticleNet_WvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.particleNet_WvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetParticleNet_ZvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet.particleNet_ZvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_VvsQCD_max'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_VvsQCD_max[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_W'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_W[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_Z'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_Z[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_V_max'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_V_max[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_WZvsQCD'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_WZvsQCD[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    output['hLeadingNonHto4bFatJetPNet_WZvsQCD2'+sHExt].fill(
-                        dataset=dataset,
-                        MLScore1k=(leadingNonHto4bFatJet_PNet_WZvsQCD2[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )
-                    
-
-                    # ak4 jets ----
-                    output['hnAK4Jets_NonoverlapLeadingFatJet'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4Jets_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4Jets_NonoverlapLeadingFatJet'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt))
-                                ]
-                        )
-                    output['hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4Jets_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
-                                ]
-                        )
-
-                    output['hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4JetsCentral_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt))
-                                ]
-                        )
-                    output['hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt))
-                                ]
-                        )
-
-
-
-                    output['hnAK4Jets_NonoverlapSelFatJets'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4Jets_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4Jets_NonoverlapSelFatJets'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt))
-                                ]
-                        )
-                    output['hnAK4Jets_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4Jets_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4Jets_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt))
-                                ]
-                        )
-
-                    output['hnAK4JetsCentral_NonoverlapSelFatJets'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4JetsCentral_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4JetsCentral_nonoverlaping_selFatJets).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4JetsCentral_NonoverlapSelFatJets'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4JetsCentral_nonoverlaping_selFatJets).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_selFatJets).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_nonoverlaping_selFatJets).pt))
-                                ]
-                        )
-                    output['hnAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                        dataset=dataset,
-                        nObject10=(nAk4JetsCentral_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                        systematic=syst,
-                        weight=evtWeight[sel_SR_forHExt]
-                    )    
-                    if ak.count(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_selFatJets).pt[sel_SR_forHExt]) > 0:
-                        output['hPtLeadingAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                            dataset=dataset,
-                            Pt=(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_selFatJets).pt[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_selFatJets).pt))
-                                ]),
-                            systematic=syst,
-                            weight=evtWeight[
-                                sel_SR_forHExt & 
-                                (~ak.is_none(ak.firsts(ak4JetsCentral_bTag_nonoverlaping_selFatJets).pt))
-                                ]
-                        )
-
+                    '''
 
 
                     ### 2-D distribution ----------------------------------------------------------
@@ -6532,16 +6003,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systematic=syst,
                         weight=evtWeight[sel_SR_forHExt]
                     ) 
-                    
-                    
-
-                    
-                    
-
-
-
-                    ### 2-D distribution ----------------------------------------------------------
-
+                    '''
                     if runMode_SignificancsScan2D:
 
                         ## 2-D hLeadingFatJetDeepTagMD_H4qvsQCD
@@ -8457,7 +7919,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
-                        
+                    '''                        
 
         
 
@@ -8559,7 +8021,7 @@ def printWithType(sX, X):
     
 if __name__ == '__main__':
     print("htoaa_Analysis:: main: {}".format(sys.argv)); sys.stdout.flush()
-    print(f"htoaa_Analysis_VHHadronicMode:: here14 {datetime.now() = }")
+    print(f"htoaa_Analysis_GGFMode:: here14 {datetime.now() = }")
 
     if len(sys.argv) != 2:
         print("htoaa_Analysis:: Command-line config file missing.. \t **** ERROR **** \n")
@@ -8569,7 +8031,7 @@ if __name__ == '__main__':
     
     config = GetDictFromJsonFile(sConfig)
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
-    print(f"htoaa_Analysis_VHHadronicMode:: here15 {datetime.now() = }")
+    print(f"htoaa_Analysis_GGFMode:: here15 {datetime.now() = }")
 
     nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventToReadInBatch
     sInputFiles         = config["inputFiles"]
@@ -8601,15 +8063,15 @@ if __name__ == '__main__':
             )
             print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
             if not os.path.exists(MCSamplesStitchInputFileName):
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
-                print(f'htoaa_Analysis_VHHadronicMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
+                print(f'htoaa_Analysis_GGFMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
                 exit(0)
             print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
             with uproot.open(MCSamplesStitchInputFileName) as f_:
                 print(f"{f_.keys() = }"); sys.stdout.flush() 
                 hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
 
-    print(f"htoaa_Analysis_VHHadronicMode:: here16 {datetime.now() = }")    
+    print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
         
         
     #branchesToRead = htoaa_nanoAODBranchesToRead
@@ -8624,7 +8086,7 @@ if __name__ == '__main__':
     print(f"Initial sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile}");  sys.stdout.flush()
-    print(f"htoaa_Analysis_VHHadronicMode:: here17 {datetime.now() = }")
+    print(f"htoaa_Analysis_GGFMode:: here17 {datetime.now() = }")
 
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
@@ -8639,7 +8101,7 @@ if __name__ == '__main__':
             server = server
             )
         if not isReadingSuccessful:
-            logging.critical('htoaa_Analysis_VHHadronicMode:: getNanoAODFile() for input file %s failed. **** CRITICAL ERROR ****. \nAborting...' % (sInputFile)); sys.stdout.flush();
+            logging.critical('htoaa_Analysis_GGFMode:: getNanoAODFile() for input file %s failed. **** CRITICAL ERROR ****. \nAborting...' % (sInputFile)); sys.stdout.flush();
             exit(0)
         
         # Check if input file exists or not
@@ -8652,12 +8114,12 @@ if __name__ == '__main__':
                 print(f"sInputFile: {sInputFile} file not found.")
             except OSError: 
                 print(f"sInputFile: {sInputFile} OS error occurred.")
-        print(f"htoaa_Analysis_VHHadronicMode:: {sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");     
+        print(f"htoaa_Analysis_GGFMode:: {sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");     
 
         if fileSize > NanoAODFileSize_Min:     
             sInputFiles[iFile] = sInputFile
         else:
-            logging.critical('htoaa_Analysis_VHHadronicMode:: Input file %s file size below threshold (%g MB). **** CRITICAL ERROR ****. \nAborting...' % (sInputFile, NanoAODFileSize_Min) ); sys.stdout.flush();
+            logging.critical('htoaa_Analysis_GGFMode:: Input file %s file size below threshold (%g MB). **** CRITICAL ERROR ****. \nAborting...' % (sInputFile, NanoAODFileSize_Min) ); sys.stdout.flush();
             exit(0)
     
         
@@ -8674,7 +8136,7 @@ if __name__ == '__main__':
                 print(f"sInputFile: {sInputFile} OS error occurred.")
         print(f"\t{sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");  
     sys.stdout.flush()
-    print(f"htoaa_Analysis_VHHadronicMode:: here18 {datetime.now() = }")
+    print(f"htoaa_Analysis_GGFMode:: here18 {datetime.now() = }")
 
 
     sampleInfo = {
@@ -8689,7 +8151,7 @@ if __name__ == '__main__':
         sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
         if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
             sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
-    print(f"htoaa_Analysis_VHHadronicMode:: here19 {datetime.now() = }", flush=flushStdout)
+    print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()
     tracemalloc.start()
@@ -8738,7 +8200,6 @@ if __name__ == '__main__':
         
         if isMC and \
             MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-            SplitQCDInGENCats and \
             "QCD" in sample_category:
             sample_category_toUse = "QCD"
         
@@ -8752,7 +8213,6 @@ if __name__ == '__main__':
                 sHExt_toUse = ''
                 if isMC and \
                     MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                    SplitQCDInGENCats and \
                     "QCD" in sample_category:                    
                     for sHExt in HistogramNameExtensions_QCD:
                         if sHExt in key:

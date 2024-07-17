@@ -57,7 +57,8 @@ Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2017: [41.48, 2.3],
     Era_2018: {
         'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
-        'Trg_Combo_AK4AK8Jet_HT':                             [59.83, 2.5], # See ./data/luminosity/2018/Luminosity_HLTPaths.xlsx
+        'Trg_Combo_AK4AK8Jet_HT':                             [59.83, 2.5], # https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
+        'Trg_Combo_AK4AK8Jet_HT_VBF':                         [59.83, 2.5], # https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
         'Trg_Combo_AK4AK8Jet_HT_MET':                         [59.83, 2.5], # Copied from Trg_Combo_AK4AK8Jet_HT. Needs to be checked.
         'Trg_Combo_MET':                                      [59.83, 2.5], # https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
         'HLT_IsoMu24':                                        [59.82, 2.5], # See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_IsoMu24_v.xlsx
@@ -74,6 +75,12 @@ Luminosities_forGGFMode_perEra = {
             'D': 31.839
         },
         'Trg_Combo_AK4AK8Jet_HT': {
+            'A': 14.027,
+            'B':  7.067,
+            'C':  6.895,
+            'D': 31.839,
+        },
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
             'A': 14.027,
             'B':  7.067,
             'C':  6.895,
@@ -114,12 +121,30 @@ Luminosities_forGGFMode_perEra = {
 Triggers_perEra = {
     Era_2018: {
         'Trg_Combo_AK4AK8Jet_HT': {
-            'HLT_PFJet500':                                       ['L1_SingleJet180'], 
-            'HLT_PFHT1050':                                       ['L1_HTT360er'],
-            'HLT_AK8PFHT800_TrimMass50':                          ['L1_HTT360er'],
-            'HLT_AK8PFJet500':                                    ['L1_SingleJet180'],
-            'HLT_AK8PFJet400_TrimMass30':                         ['L1_SingleJet180'],
-            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': ['L1_SingleJet180'],
+            'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
+            'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
+            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
+            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
+            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
+            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
+            #
+            'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
+            'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],            
+        },
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
+            'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
+            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
+            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
+            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
+            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
+            #
+            'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
+            'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
+            #
+            'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
+            'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
+            
         },
         'Trg_Combo_AK4AK8Jet_HT_MET': {
             'HLT_PFJet500':                                       ['L1_SingleJet180'], 
@@ -131,12 +156,11 @@ Triggers_perEra = {
             'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':              ['L1_ETMHF100', 'L1_ETM150'],
             'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er'],
         },
-        'Trg_Combo_MET': {
+        'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
             'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
             'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
             'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
             'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
             'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
         },
         
@@ -217,9 +241,9 @@ DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >
 bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
     Era_2018: {
         'AK4DeepJet': { # https://btv-wiki.docs.cern.ch/ScaleFactors/UL2018/
-            'L': 0.246,
-            'M': 0.325,
-            'L': 0.267
+            'L': 0.0490,
+            'M': 0.2783,
+            'L': 0.7100
         },
         'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
             'L': 0.1208,
@@ -242,6 +266,8 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             #'WP-60': 0.978,
             'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
             'WP-40': 0.992,
+            'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
+            'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
         }
     },
 }
