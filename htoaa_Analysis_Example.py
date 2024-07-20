@@ -17,6 +17,7 @@ import uproot as uproot
 from parse import *
 import logging
 
+
 '''
 XYZ -> H->aa->4b boosted analysis macro
 
@@ -45,7 +46,7 @@ from htoaa_CommonTools import (
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
     selectMETFilters,
     selGenPartsWithStatusFlag,
-    getTopPtRewgt, getPURewgts, getHTReweight,
+    getTopPtRewgt, add_pdf_as_weight, add_HiggsEW_kFactors, get_JER_and_JES, get_JMR_JMS, getPURewgts, getPURewgts_variation, add_ps_weight, getHTReweight, add_jetTriggerSF,
     printVariable, insertInListBeforeThisElement,
 )
 from htoaa_Samples import (
@@ -216,7 +217,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             with uproot.open(Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]) as f_:
                 #print(f"{f_.keys() = }"); sys.stdout.flush() 
                 self.hPURewgt = f_['%s' % Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]].to_hist()
-
         dataset_axis    = hist.Cat("dataset", "Dataset")
         systematic_axis = hist.Cat("systematic", "Systematic Uncertatinty")
 
@@ -224,10 +224,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         cutFlow_axis          = hist.Bin("CutFlow",                r"Cuts",                       21,    -0.5,    20.5)
         nObject_axis          = hist.Bin("nObject",                r"No. of object",              21,    -0.5,    20.5)
-        pt_axis               = hist.Bin("Pt",                     r"$p_{T}$ [GeV]",             200,       0,    1000)
-        eta_axis              = hist.Bin("Eta",                    r"$#eta$",                    100,      -6,       6)
+        pt_axis               = hist.Bin("Pt",                     r"$p_{T}$ [GeV]",              50,       0,    1000)
+        eta_axis              = hist.Bin("Eta",                    r"$#eta$",                    100,      -3.2,       3.2)
         phi_axis              = hist.Bin("Phi",                    r"$\phi$",                    100,   -3.14,    3.13)
-        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
+        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 50,       70,     220)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
         deltaR_axis           = hist.Bin("deltaR",                 r"$delta$ r ",                500,       0,       5)
         
@@ -306,7 +306,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
-            systematics_shift = [None] # [None, "JESUp", "JESDown", "JERUp", "JERDown"]
+            systematics_shift = [None, "JESUp", "JESDown", "JERUp", "JERDown", "JMSUp", "JMSDown"]
             for _syst in systematics_shift:
                 output += self.process_shift(events, _syst)
         else:
@@ -338,8 +338,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         ## RECO level object selection ---------------------------------------------------------------------
-        leadingFatJet = ak.firsts(events.FatJet)
-        leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]
+        #leadingFatJet = ak.firsts(events.FatJet)
+        FatJets = events.FatJet
+        leadingFatJet = ak.firsts(FatJets)
+
+        if self.datasetInfo['isMC']:
+            correctedJets = get_JER_and_JES(events, FatJets, self.datasetInfo["era"], shift_syst)   
+            leadingFatJet = ak.firsts(correctedJets)
+            leadingFatJet.msoftdrop = get_JMR_JMS(ak.firsts(FatJets), self.datasetInfo["era"], shift_syst)
+
+        leadingFatJet_asSingletons = ak.singletons(leadingFatJet) # for e.g. [[0.056304931640625], [], [0.12890625], [0.939453125], [0.0316162109375]]  
+
 
         ## sel leptons
         muonsTight     = self.objectSelector.selectMuons(events.Muon)
@@ -437,7 +446,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         sel_SR           = selection.all(* self.sel_names_all["SR"])        
- 
+
 
         ################
         # EVENT WEIGHTS
@@ -449,7 +458,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo["isMC"]:
             # lumiScale ------------------------------------
             lumiScale_toUse = np.full(len(events), self.datasetInfo["lumiScale"])
-
+            datasetFull = dataset+"_"+self.datasetInfo["era"] 
             # MC PURewgt ----------------------------------
             wgt_PU = getPURewgts(
                 PU_list  = events.Pileup.nTrueInt,
@@ -464,11 +473,96 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
+            #pile up weight
+            puWeights = getPURewgts_variation(events,self.datasetInfo["era"])
             weights.add(
                 "PUWeight",
-                weight = wgt_PU
+                weight     = puWeights[0],
+                weightUp   = puWeights[1],
+                weightDown = puWeights[2],
             )
-                   
+            # ps weight
+            psWeights=add_ps_weight(events,events.PSWeight, dataset)
+            weights.add(
+                "ISR",
+                weight=psWeights[0],
+                weightUp=psWeights[1],
+                weightDown=psWeights[2],
+            )
+            weights.add(
+                "FSR",
+                weight=psWeights[0],
+                weightUp=psWeights[3],
+                weightDown=psWeights[4],
+            )
+            #trigger variation
+            triggerSF = add_jetTriggerSF(events, self.datasetInfo["era"], selection)
+            weights.add(
+                "trigger",
+                weight=triggerSF[0],
+                weightUp=triggerSF[1],
+                weightDown=triggerSF[2],
+            )
+
+            # apply only for the signal
+             # Q2 Uncertainty weights
+            if ak.mean(ak.num(events.LHEScaleWeight)) == 9:
+                scaleWeightSelector = [0, 1, 3, 5, 7, 8]
+            elif ak.mean(ak.num(events.LHEScaleWeight)) == 8:
+                scaleWeightSelector = [0, 1, 3, 4, 6, 7]
+            else:
+                scaleWeightSelector = []
+            LHEScaleVariation = events.LHEScaleWeight[:, scaleWeightSelector]
+
+            '''
+            LHE scale variation weights 
+            [0] is renscfact=0.5 facscfact=0.5 ; <=
+            [1] is renscfact=0.5 facscfact=1 ; <=
+            [2] is renscfact=0.5 facscfact=2 ;
+            [3] is renscfact=1 facscfact=0.5 ; <=
+            [4] is renscfact=1 facscfact=1 ;
+            [5] is renscfact=1 facscfact=2 ; <=
+            [6] is renscfact=2 facscfact=0.5 ;
+            [7] is renscfact=2 facscfact=1 ; <=
+            [8] is renscfact=2 facscfact=2 ; <=
+            '''
+            if "HToAATo4B" in dataset :
+                for i in range(6):
+                    weights.add(
+                        f"LHEScale{i}",
+                        weight=np.ones(len(events)),
+                        weightUp=LHEScaleVariation[:, i],
+                    )
+
+            # PDF weight
+            PDF_aS_weight = add_pdf_as_weight(events,events.LHEPdfWeight,dataset)
+            weights.add(
+                "PDF",
+                weight=PDF_aS_weight[0],
+                weightUp=PDF_aS_weight[1],
+                weightDown=PDF_aS_weight[2],
+            )
+
+            #weights.add(
+            #    "aS",
+            #    weight=PDF_aS_weight[0],
+            #    weightUp=PDF_aS_weight[3],
+            #    weightDown=PDF_aS_weight[4],
+            #)
+            #weights.add(
+            #    "PDFaS",
+            #    weight=PDF_aS_weight[0],
+            #    weightUp=PDF_aS_weight[5],
+            #    weightDown=PDF_aS_weight[6],
+            #)
+
+            result=add_HiggsEW_kFactors(events.GenPart, dataset)
+            if result is not None:
+                name, value = result            
+                weights.add(
+                    name,
+                    weight=value,
+            )
 
         ###################
         # FILL HISTOGRAMS
@@ -478,8 +572,25 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo['isMC']:
             if shift_syst is None:
                 systList = [
-                    "central"
+                    "central",
+                    "PUWeightUp",
+                    "PUWeightDown",
+                    "ISRUp",
+                    "ISRDown",
+                    "FSRUp",
+                    "FSRDown",
+                    "triggerUp",
+                    "triggerDown",
+                    "PDFUp",
+                    "PDFDown",
+                    #"aSUp",
+                    #"aSDown",
+                    #"PDFaSUp",
+                    #"PDFaSDown",
+
                 ]
+                if "HToAATo4B" in dataset :
+                    systList += [f"LHEScale{i}Up" for i in range(6)]
             else:
                 systList = [shift_syst]
         else:
@@ -505,7 +616,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             weightSyst = syst
             
             # in the case of 'central', or the jet energy systematics, no weight systematic variation is used (weightSyst=None)
-            if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown"]:
+            if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown", "JMSUp", "JMSDown"]:
                 weightSyst = None
 
             
