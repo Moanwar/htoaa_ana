@@ -393,6 +393,44 @@ def selectMETFilters(flags_list, era, isMC):
 
     return mask_METFilters
     
+def selectAK4Jets(Jets, era, pT_Thsh=0):
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
+    if '2018' in era or '2017' in era:
+        # AK4CHS jets
+        JetsSelected_HB = (
+            (abs(Jets.eta)      <= 2.6) & 
+            (Jets.neHEF         < 0.90) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
+            (Jets.neEmEF        < 0.90) & # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
+            (Jets.nConstituents > 1)    & # Number of Constituents: Jet_nConstituents	UChar_t	Number of particles in the jet
+            (Jets.muEF          < 0.80) & # Muon Fraction: Jet_muEF	Float_t	muon Energy Fraction
+            (Jets.chHEF         > 0)    & # Charged Hadron Fraction: Jet_chHEF	Float_t	charged Hadron Energy Fraction
+            #(                     )    & # Charged Multiplicity > 0 ??
+            (Jets.chEmEF        < 0.80)   # Charged EM Fraction: Jet_chEmEF	Float_t	charged Electromagnetic Energy Fraction
+        )
+        JetsSelected_HE1 = (
+            (abs(Jets.eta)      > 2.6)  & (abs(Jets.eta)      <= 2.7) & 
+            (Jets.neHEF         < 0.90) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
+            (Jets.neEmEF        < 0.99) & # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
+            (Jets.muEF          < 0.80) & # Muon Fraction: Jet_muEF	Float_t	muon Energy Fraction
+            #() & # Charged Multiplicity > 0 ??
+            (Jets.chEmEF        < 0.80)   # Charged EM Fraction: Jet_chEmEF	Float_t	charged Electromagnetic Energy Fraction
+        )
+        JetsSelected_HE2 = (
+            (abs(Jets.eta)      > 2.7)  & (abs(Jets.eta)      <= 3.0) & 
+            (Jets.neEmEF        > 0.01) & (Jets.neEmEF        < 0.99)   # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
+            #() & # Number of Neutral Particles: 
+        )
+        JetsSelected_HF = (
+            (abs(Jets.eta)      > 3.0)  & (abs(Jets.eta)      <= 5.0) & 
+            (Jets.neHEF         < 0.20) & # Neutral Hadron Fraction: Jet_neHEF	Float_t	neutral Hadron Energy Fraction
+            (Jets.neEmEF        < 0.90)   # Neutral EM Fraction: Jet_neEmEF	Float_t	neutral Electromagnetic Energy Fraction
+            #() & # Number of Neutral Particles: 
+        )
+        JetsSelected = ( JetsSelected_HB | JetsSelected_HE1 | JetsSelected_HE2 | JetsSelected_HF )
+        
+    return Jets[JetsSelected & (Jets.pt > pT_Thsh)]
+        
+
 
 
 def getLumiScaleForPhSpOverlapRewgtMode(
