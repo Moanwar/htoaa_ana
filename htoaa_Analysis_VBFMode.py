@@ -3418,10 +3418,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "PUWeight",
                 weight = wgt_PU
             )
+
+            wgt_HiggsPt = None
             if self.datasetInfo['isSignal']:
-                weights.add(
-                    "GGHPtRewgt",
-                    weight = wgt_HiggsPt
+                wgt_HiggsPt = getHiggsPtRewgtForGGToHToAATo4B(
+                    GenHiggsPt_list = ak.firsts(genHiggs.pt)
                 )
             if self.datasetInfo['isQCD_bGen']:
                 weights.add(
@@ -3460,11 +3461,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "PUWeight",
                 weight = wgt_PU
             )
+
             if self.datasetInfo['isSignal']:
-                weights_woHEM1516Fix.add(
+                weights_gen.add(
                     "GGHPtRewgt",
                     weight = wgt_HiggsPt
                 )
+
             if self.datasetInfo['isQCD_bGen']:
                 weights_woHEM1516Fix.add(
                     "HTRewgt",
