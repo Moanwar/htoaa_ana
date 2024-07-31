@@ -704,29 +704,32 @@ def get_JMR_JMS(Jet, year, shift_syst=""):
     #)
 
 
-def add_ps_weight(events,ps_weights,dataset):
+def get_PSWeight(events, dataset):
     """
     Parton Shower Weights (FSR and ISR)
     "Default" variation: https://twiki.cern.ch/twiki/bin/view/CMS/HowToPDF#Which_set_of_weights_to_use
     i.e. scaling ISR up and down
+
+    PS weights (w_var / w_nominal);   [0] is ISR=2 FSR=1; [1] is ISR=1 FSR=2; [2] is ISR=0.5 FSR=1; [3] is ISR=1 FSR=0.5
     """
     nweights = len(events)
     nom = np.ones(nweights)
 
-    up_isr = np.ones(nweights)
+    up_isr   = np.ones(nweights)
     down_isr = np.ones(nweights)
-    up_fsr = np.ones(nweights)
+    up_fsr   = np.ones(nweights)
     down_fsr = np.ones(nweights)
 
-    if len(ps_weights[0]) == 4 and "HToAATo4B" in dataset:
-        up_isr = ps_weights[:, 0]  # ISR=2, FSR=1
-        down_isr = ps_weights[:, 2]  # ISR=0.5, FSR=1
+    if hasattr(events, 'PSWeight') and "HToAATo4B" in dataset:
+        if len(events.PSWeight[0]) == 4:
+            up_isr   = events.PSWeight[:, 0]  # ISR=2, FSR=1
+            down_isr = events.PSWeight[:, 2]  # ISR=0.5, FSR=1
 
-        up_fsr = ps_weights[:, 1]  # ISR=1, FSR=2
-        down_fsr = ps_weights[:, 3]  # ISR=1, FSR=0.5
+            up_fsr   = events.PSWeight[:, 1]  # ISR=1, FSR=2
+            down_fsr = events.PSWeight[:, 3]  # ISR=1, FSR=0.5
 
-    elif len(ps_weights[0]) > 1:
-        print("PS weight vector has length ", len(ps_weights[0]))
+        elif len(events.PSWeight[0]) > 1:
+            print("PS weight vector has length ", len(ps_weights[0]))
 
     return [nom, up_isr, down_isr, up_fsr, down_fsr]
 
@@ -1399,6 +1402,13 @@ def array_PutUpperBound(array_list, k):
         ak.full_like(array_list, k)
     )
     return a_new
+
+
+def stringHasSubstring(string, substringList):
+    hasSubstring = False
+    for s_ in substringList:
+        if s_ in string: hasSubstring = True
+    return hasSubstring
 
 
 def printVariable(sName, var):

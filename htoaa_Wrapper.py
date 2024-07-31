@@ -256,6 +256,7 @@ if __name__ == '__main__':
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
     parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
+    parser.add_argument('-systematics',       type=str, default='no',                        help='No,Full,PU,JES etc')    
     parser.add_argument('-dryRun',            action='store_true', default=False)    
     args=parser.parse_args()
     print("args: {}".format(args))
@@ -274,6 +275,7 @@ if __name__ == '__main__':
     iJobSubmission          = args.iJobSubmission
     xrdcpIpAftNResub        = args.xrdcpIpAftNResub
     server                  = args.server
+    systematics             = args.systematics
     dryRun                  = args.dryRun
 
     SourceCodeDir     = os.getcwd()
@@ -318,6 +320,7 @@ if __name__ == '__main__':
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
             "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
             "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
         ] )
 
@@ -327,6 +330,7 @@ if __name__ == '__main__':
         selSamplesToExclude_list.extend( [
             "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
             "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
+            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
             "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
         ] )  
 
@@ -335,8 +339,7 @@ if __name__ == '__main__':
         selSamplesToExclude_list.extend( [
             "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
             "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-
-                
+            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
         ] )
 
     ## ------------------------------------------------------------------------------------------
@@ -597,7 +600,8 @@ if __name__ == '__main__':
                         config["nEvents"] = sample_nEvents
                         if sample_isMC:
                             config["crossSection"] = sample_cossSection
-                            config["sumEvents"] = sample_sumEvents
+                            config["sumEvents"]    = sample_sumEvents
+                            config["systematics"]  = systematics
                             
                             if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
                                sample_category in samples_wMCSamplesStitch_PhSpOverlapRewgt:

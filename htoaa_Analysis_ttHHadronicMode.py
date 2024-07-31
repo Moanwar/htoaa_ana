@@ -135,6 +135,11 @@ class ObjectSelection:
         self.NLeptonsTight_MaxThsh    = 0
     
         self.NonHto4bFatJetPNet_TvsQCD_Thsh = 0.8 # 0.94
+        self.NonHto4bFatJetPNet_TvsQCD_Thsh_WP25 = 0.98
+        self.NonHto4bFatJetPNet_TvsQCD_Thsh_WP40 = 0.80
+        self.NonHto4bFatJetPNet_TvsQCD_Thsh_WP60 = 0.40
+        
+
 
         self.MuonPtThsh         = 10
         self.MuonMVAId          =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
@@ -506,6 +511,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "ge1NonHto4bFatJet"
         ]
         categories_dict = OD()  
+        '''
         categories_dict["tt0l_ge1NonHFatJet_0BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
             "0BNonoverlappingSelFatJets"
         ]
@@ -519,6 +525,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "0NonHto4bFatJet",
             "ge2BNonoverlappingSelFatJets"
         ]
+        '''
+        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Hi"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "1BNonoverlappingSelFatJets",
+            "NonHto4bFatJetPNetTvsQCD_WP25",
+        ]
+        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Med"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "1BNonoverlappingSelFatJets",
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+        ]
+        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Lo"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "1BNonoverlappingSelFatJets",
+            "NonHto4bFatJetPNetTvsQCD_WP60",
+        ]
+        
+
+
 
 
         ''' 
@@ -3140,16 +3162,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
 
-
-
-
-
-
-
-
-
-
-
         if "leadingNonHto4bFatJetPt" in self.sel_conditions_all_list:
             selection.add(
                 "leadingNonHto4bFatJetPt",
@@ -3172,11 +3184,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 (leadingNonHto4bFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
             )
         mask_ge1NonHto4bFatJet_ = (
-            (leadingNonHto4bFatJet.pt > self.objectSelector.FatJetPtThsh) &
-            (abs(leadingNonHto4bFatJet.eta) < self.objectSelector.FatJetEtaThsh) &
-            (leadingNonHto4bFatJet.jetId == self.objectSelector.FatJetJetID) &
-            (leadingNonHto4bFatJet.msoftdrop > self.objectSelector.FatJetMSoftDropThshLow) &
-            (leadingNonHto4bFatJet.msoftdrop < self.objectSelector.FatJetMSoftDropThshHigh)
+            (leadingNonHto4bFatJet.pt        >  self.objectSelector.FatJetPtThsh) &
+            (abs(leadingNonHto4bFatJet.eta)  <  self.objectSelector.FatJetEtaThsh) &
+            (leadingNonHto4bFatJet.jetId     == self.objectSelector.FatJetJetID) &
+            (leadingNonHto4bFatJet.msoftdrop >  self.objectSelector.FatJetMSoftDropThshLow) &
+            (leadingNonHto4bFatJet.msoftdrop <  self.objectSelector.FatJetMSoftDropThshHigh)
         )
         if "ge1NonHto4bFatJet" in self.sel_conditions_all_list:
             selection.add(
@@ -3188,17 +3200,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "0NonHto4bFatJet",
                 ~ mask_ge1NonHto4bFatJet_
             )
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3313,14 +3314,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ((leadingFatJet_PNet_massH_Hto4b_avg > massHiggsWindow[0]) & 
                      (leadingFatJet_PNet_massH_Hto4b_avg < massHiggsWindow[1] ))
                 )
-
         
-        # leadingNonHto4bFatJet_PNet_TvsQCD
-        if "PNetTvsQCDLoose" in self.sel_conditions_all_list:
-            selection.add(
-                "PNetTvsQCDLoose",
-                leadingNonHto4bFatJet.particleNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh
-            )
+        
         
         if "nLeptonsTight" in self.sel_conditions_all_list:
             selection.add(
@@ -3348,6 +3343,23 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "0NonHto4bFatJet",
                 ( ak.fill_none(ak.count(nonHto4bFatJet.pt, axis=1), 0) == 0 )
             ) 
+
+        # leadingNonHto4bFatJet_PNet_TvsQCD
+        if "NonHto4bFatJetPNetTvsQCD_WP25" in self.sel_conditions_all_list:
+            selection.add(
+                "NonHto4bFatJetPNetTvsQCD_WP25",
+                leadingNonHto4bFatJet.particleNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh_WP25
+            )
+        if "NonHto4bFatJetPNetTvsQCD_WP40" in self.sel_conditions_all_list:
+            selection.add(
+                "NonHto4bFatJetPNetTvsQCD_WP40",
+                leadingNonHto4bFatJet.particleNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh_WP40
+            )
+        if "NonHto4bFatJetPNetTvsQCD_WP60" in self.sel_conditions_all_list:
+            selection.add(
+                "NonHto4bFatJetPNetTvsQCD_WP60",
+                leadingNonHto4bFatJet.particleNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh_WP60
+            )
             
 
 
@@ -3726,7 +3738,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo['isMC']:
             if shift_syst is None:
                 systList = [
-                    "central"
+                    "Nom"
                 ]
             else:
                 systList = [shift_syst]
@@ -3753,7 +3765,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             weightSyst = syst
             
             # in the case of 'central', or the jet energy systematics, no weight systematic variation is used (weightSyst=None)
-            if syst in ["central", "JERUp", "JERDown", "JESUp", "JESDown"]:
+            if syst in ["Nom", "JERUp", "JERDown", "JESUp", "JESDown"]:
                 weightSyst = None
 
             

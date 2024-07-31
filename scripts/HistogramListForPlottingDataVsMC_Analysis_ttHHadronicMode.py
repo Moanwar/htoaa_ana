@@ -57,14 +57,14 @@ sLableSig = [
     #'ZH_HToAATo4B_M-20'
     'ttHtoaato4b_mA_20',
      ]
-systematics_list = ['central']
+systematics_list = ['Nom'] # ['central']
 systematics_forData = 'noweight'
 #selectionTags = ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
 HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
 
-scale_MCSig = 80 # 20 #50 #1000
+scale_MCSig = 5 #80 # 20 #50 #1000
 yRatioLimit = [0.4, 1.6]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
@@ -296,6 +296,7 @@ histograms_dict  = OD([
     ("hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD", {sXLabel: 'hLeadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD', sYLabel: 'Events', sXRange: [0.9, 1], sNRebinX: nRebinXTmp_ }),
     ("hdPhi_LeadingFJ_LeadingNonHto4bFJ", {sXLabel: 'hdPhi_LeadingFJ_LeadingNonHto4bFJ', sYLabel: 'Events', sXRange: [0, 3.14], sNRebinX: 10 }),
     ("hLeadingNonHto4bFatJetPNet_WZvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetPNet_WZvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
+    ("hLeadingNonHto4bFatJetParticleNet_WvsQCD",  {sXLabel: 'hLeadingNonHto4bFatJetPNet_WvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
     ("hLeadingNonHto4bFatJetDeepTagMD_TvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_TvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
     ("hLeadingNonHto4bFatJetDeepTag_TvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTag_TvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
     ("hLeadingNonHto4bFatJetDeepTagMD_HbbvsQCD", {sXLabel: 'hLeadingNonHto4bFatJetDeepTagMD_HbbvsQCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: nRebinXTmp_ }),
@@ -315,6 +316,8 @@ histograms_dict  = OD([
     ("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events',  }),
     ("hnLeptons_nonoverlap_leadingFatJet", {sXLabel: 'hnLeptons_nonoverlap_leadingFatJet', sYLabel: 'Events',  }),
     ("hnLeptons_nonoverlap_selFatJets", {sXLabel: 'hnLeptons_nonoverlap_selFatJets', sYLabel: 'Events',  }),
+    
+    ("hPtSumAK4JetsCentral_NonoverlapLeadingFatJets", {sXLabel: 'hPtSumAK4JetsCentral_NonoverlapLeadingFatJets', sYLabel: 'Events', sXRange: [180, 1500], sNRebinX: 20 }),
     
     
 
