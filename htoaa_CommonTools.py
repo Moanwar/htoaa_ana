@@ -724,51 +724,74 @@ def add_HiggsEW_kFactors(genHiggs, dataset):
     else :
         return None
     
-def get_JER_and_JES(events, FatJets, year, shift_syst=""):
+def get_JER_and_JES(events, Jets, year, shift_syst="", jettype=""):
     #UL2018 -> (19UL18_V5 , 19UL18_JRV2) / UL17 -> (19UL17_V5, 19UL17_JRV2) / UL2016APV -> (19UL16APV_V7, 20UL16APV_JRV3) / UL2016 -> (19UL16_V7, 20UL16_JRV3)  
     #UL17 https://cms-talk.web.cern.ch/t/ak8-jets-jec-for-summer19ul17-mc/23154/8
     #https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECDataMC#Recommended_for_MC
     #https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-    FatJets["pt_raw"], FatJets["mass_raw"] = (1 - FatJets.rawFactor) * FatJets.pt, (1 - FatJets.rawFactor) * FatJets.mass
-    FatJets['pt_gen'] = ak.values_astype(ak.fill_none(FatJets.matched_gen.pt, 0), np.float32)
-    FatJets['rho'] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, FatJets.pt)[0]
+    Jets["pt_raw"], Jets["mass_raw"] = (1 - Jets.rawFactor) * Jets.pt, (1 - Jets.rawFactor) * Jets.mass
+    Jets['pt_gen'] = ak.values_astype(ak.fill_none(Jets.matched_gen.pt, 0), np.float32)
+    Jets['rho'] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, Jets.pt)[0]
     events_cache = events.caches[0]
 
     Jetext = extractor()
-    Jetext.add_weight_sets([
-        f"* * data/JERS/{year}UL_V_MC_L1FastJet_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_L2Relative_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_Uncertainty_AK8PFPuppi.junc.txt",
-        f"* * data/JERS/{year}UL_JR_MC_PtResolution_AK8PFPuppi.jr.txt",
-        f"* * data/JERS/{year}UL_JR_MC_SF_AK8PFPuppi.jersf.txt",
-    ])
+    if jettype == "AK8":
+        Jetext.add_weight_sets([
+            f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_L1FastJet_AK8PFPuppi.jec.txt",
+            f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_L2Relative_AK8PFPuppi.jec.txt",
+            f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_Uncertainty_AK8PFPuppi.junc.txt",
+            f"* * data/JERS/AK8PFPuppi/{year}UL_JR_MC_PtResolution_AK8PFPuppi.jr.txt",
+            f"* * data/JERS/AK8PFPuppi/{year}UL_JR_MC_SF_AK8PFPuppi.jersf.txt",
+        ])
+    elif jettype == "AK4":
+        Jetext.add_weight_sets([
+            f"* * data/JERS/AK4PFchs/{year}UL_V_MC_L1FastJet_AK4PFchs.jec.txt",
+            f"* * data/JERS/AK4PFchs/{year}UL_V_MC_L2Relative_AK4PFchs.jec.txt",
+            f"* * data/JERS/AK4PFchs/{year}UL_V_MC_Uncertainty_AK4PFchs.junc.txt",
+            f"* * data/JERS/AK4PFchs/{year}UL_JR_MC_PtResolution_AK4PFchs.jr.txt",
+            f"* * data/JERS/AK4PFchs/{year}UL_JR_MC_SF_AK4PFchs.jersf.txt",
+        ])
+
     Jetext.finalize()
     Jetevaluator = Jetext.make_evaluator()
+    if jettype == "AK8":
+        jec_names = [f"{year}UL_V_MC_L1FastJet_AK8PFPuppi", f"{year}UL_V_MC_L2Relative_AK8PFPuppi",
+                     f"{year}UL_V_MC_Uncertainty_AK8PFPuppi", f"{year}UL_JR_MC_PtResolution_AK8PFPuppi",
+                     f"{year}UL_JR_MC_SF_AK8PFPuppi"]
+    elif jettype == "AK4":
+        jec_names = [f"{year}UL_V_MC_L1FastJet_AK4PFchs", f"{year}UL_V_MC_L2Relative_AK4PFchs",
+                     f"{year}UL_V_MC_Uncertainty_AK4PFchs", f"{year}UL_JR_MC_PtResolution_AK4PFchs",
+                     f"{year}UL_JR_MC_SF_AK4PFchs"]
 
-    jec_names = [f"{year}UL_V_MC_L1FastJet_AK8PFPuppi", f"{year}UL_V_MC_L2Relative_AK8PFPuppi",
-                 f"{year}UL_V_MC_Uncertainty_AK8PFPuppi", f"{year}UL_JR_MC_PtResolution_AK8PFPuppi",
-                 f"{year}UL_JR_MC_SF_AK8PFPuppi"]
     jec_stack = JECStack({name: Jetevaluator[name] for name in jec_names})
     
     name_map = jec_stack.blank_name_map
     name_map.update({"JetPt": "pt", "JetMass": "mass", "JetEta": "eta", "JetA": "area",
                      "ptGenJet": "pt_gen", "ptRaw": "pt_raw", "massRaw": "mass_raw", "Rho": "rho"})
     
-    corrected_jets = CorrectedJetsFactory(name_map, jec_stack).build(FatJets, lazy_cache=events.caches[0])
+    corrected_jets = CorrectedJetsFactory(name_map, jec_stack).build(Jets, lazy_cache=events.caches[0])
     
-    if shift_syst == "JERUp":
-        FatJets = corrected_jets.JER.up
-    elif shift_syst == "JERDown":
-        FatJets = corrected_jets.JER.down
-    elif shift_syst == "JESUp":
-        FatJets = corrected_jets.JES_jes.up
-    elif shift_syst == "JESDown":
-        FatJets = corrected_jets.JES_jes.down
+    if shift_syst == "JERAK8Up" and jettype == "AK8":
+        Jets = corrected_jets.JER.up
+    elif shift_syst == "JERAK8Down" and jettype == "AK8":
+        Jets = corrected_jets.JER.down
+    elif shift_syst == "JESAK8Up" and jettype == "AK8":
+        Jets = corrected_jets.JES_jes.up
+    elif shift_syst == "JESAK8Down" and jettype == "AK8":
+        Jets = corrected_jets.JES_jes.down
+    elif shift_syst == "JERAK4Up" and jettype == "AK4":
+        Jets = corrected_jets.JER.up
+    elif shift_syst == "JERAK4Down" and jettype == "AK4":
+        Jets = corrected_jets.JER.down
+    elif shift_syst == "JESAK4Up" and jettype == "AK4":
+        Jets = corrected_jets.JES_jes.up
+    elif shift_syst == "JESAK4Down" and jettype == "AK4":
+        Jets = corrected_jets.JES_jes.down
     else:
         # either nominal or some shift systematic unrelated to jets
-        FatJets = corrected_jets
+        Jets = corrected_jets
 
-    return FatJets
+    return Jets
 
 def add_jetTriggerSF(events, year, selection):
 
