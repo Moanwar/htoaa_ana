@@ -369,7 +369,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #"leadingFatJet_nSV"
                 #"LooseMassAk4Jets",
                 "nLeptonsTight",
-                "nak4jets_tight",
+                "nak4jets_loose",
             ]),
         ])
 
@@ -404,7 +404,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     #"subleadingAk4JetJetID",
                     #"LooseMassAk4Jets",
                     "nLeptonsTight",
-                    "nak4jets_tight",
+                    "nak4jets_loose",
                 ]),
             ])
             self.objectSelector.FatJetPtThsh = 250
@@ -2925,7 +2925,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
        
         # create a PackedSelection object
         # this will help us later in composing the boolean selections easily
-        selection = PackedSelection()
+        selection = PackedSelection(dtype='uint64')
 
         if "run:ls" in self.sel_conditions_all_list:
             # self.datasetInfo['dataLSSelGoldenJSON']
@@ -3262,6 +3262,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             selection.add("dR_GenH_GenB_0p8", max_dr_GenH_GenB < 0.8)
             selection.add("dR_LeadingFatJet_GenB_0p8", max_dr_LeadingFatJet_GenB < 0.8)
 
+
             # 
             sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8"]
             self.sel_names_all.update( OD([
@@ -3360,9 +3361,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 hPURewgt = self.hPURewgt
             )
 
-            # MC VBF HToAATo4B Higgs pT reweight
+            # MC GGF HToAATo4B Higgs pT reweight
             wgt_HiggsPt = None
-            if self.datasetInfo['isSignal']:
+            if self.datasetInfo['isSignalGGH']:
                 wgt_HiggsPt = getHiggsPtRewgtForGGToHToAATo4B(
                     GenHiggsPt_list = ak.firsts(genHiggs.pt)
                 )
@@ -3419,11 +3420,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight = wgt_PU
             )
 
-            wgt_HiggsPt = None
-            if self.datasetInfo['isSignal']:
-                wgt_HiggsPt = getHiggsPtRewgtForGGToHToAATo4B(
-                    GenHiggsPt_list = ak.firsts(genHiggs.pt)
+            if self.datasetInfo['isSignalGGH']:
+                weights.add(
+                    "GGHPtRewgt",
+                    weight = wgt_HiggsPt
                 )
+                
             if self.datasetInfo['isQCD_bGen']:
                 weights.add(
                     "HTRewgt",
@@ -3462,8 +3464,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight = wgt_PU
             )
 
-            if self.datasetInfo['isSignal']:
-                weights_gen.add(
+            if self.datasetInfo['isSignalGGH']:
+                weights.add(
                     "GGHPtRewgt",
                     weight = wgt_HiggsPt
                 )
@@ -3495,7 +3497,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight=np.copysign(np.ones(len(events)), events.genWeight)
             )
-            if self.datasetInfo['isSignal']:
+            if self.datasetInfo['isSignalGGH']:
                 weights_gen.add(
                     "GGHPtRewgt",
                     weight = wgt_HiggsPt
