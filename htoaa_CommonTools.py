@@ -665,44 +665,6 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
     return wgt_HT
     
 
-def get_JMR_JMS(Jet, year, shift_syst=""):
-    # jet mass https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsDP23044
-
-    substr_cset = correctionlib.CorrectionSet.from_file("data/jms/Substructure_jmssf.json")
-
-    jet_pt   = Jet.pt #np.array(ak.fill_none(Jet.pt, 0.))
-
-    jms_nom  = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"")
-    jms_up   = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"up")
-    jms_down = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"down")
-
-    mass = Jet.msoftdrop
-
-    corrected_mass_up   = mass * jms_up
-    corrected_mass_down = mass * jms_down
-    corrected_mass_nomi = mass * jms_nom
-
-    for index, value in enumerate(corrected_mass_up):
-        if value < corrected_mass_nomi[index] and value > 50 :
-            print("corrected_mass_up is less than corrected_mass_nomi = ", corrected_mass_nomi[index], " corrected_mass_up = ", corrected_mass_up[index])
-    for index, value in enumerate(corrected_mass_nomi):
-        if value < corrected_mass_down[index] and value > 50 :
-            print("corrected_mass_nomi is less than corrected_mass_down = ", corrected_mass_nomi[index], " corrected_mass_down = ", corrected_mass_down[index])
-
-    if shift_syst == "JMSUp":
-        corrected_mass = mass * jms_up
-    elif shift_syst == "JMSDown":
-        corrected_mass = mass * jms_down
-    else:
-        corrected_mass = mass * jms_nom
-    return corrected_mass
-
-#smearing = np.random.normal(mass[:,])
-# scale to JMR nom, down, up (minimum at 0)
-#jmr_central, jmr_down, jmr_up = (
-    #((smearing * max(jmrValues[year][i] - 1, 0)) + 1) for i in range(3)
-    #)
-
 
 def get_PSWeight(events, dataset):
     """
@@ -729,7 +691,7 @@ def get_PSWeight(events, dataset):
             down_fsr = events.PSWeight[:, 3]  # ISR=1, FSR=0.5
 
         elif len(events.PSWeight[0]) > 1:
-            print("PS weight vector has length ", len(ps_weights[0]))
+            print("PS weight vector has length ", len(events.PSWeight[0]))
 
     return [nom, up_isr, down_isr, up_fsr, down_fsr]
 
@@ -778,6 +740,28 @@ def add_pdf_as_weight(events, pdf_weights,dataset):
     #down_pdfas = nom - pdfas_unc
 
     return [nom, up_pdf, down_pdf]#, up_aS, down_aS, up_pdfas, down_pdfas, up_pdfas, down_pdfas]
+
+
+def get_QCDScaleWeight(events, dataset):
+    nEvents = len(events)
+    nom  = renorm_up = renorm_down = factr_up = factr_down = np.ones(nEvents)
+
+    if hasattr(events, 'LHEScaleWeight') and "HToAATo4B" in dataset:
+        if len(events.LHEScaleWeight[0]) == 9:
+            # https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2018UL/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1.html#LHEPdfWeight
+            # LHEScaleWeight	Float_t	LHE scale variation weights (w_var / w_nominal); [0] is renscfact=0.5d0 facscfact=0.5d0 ; [1] is renscfact=0.5d0 facscfact=1d0 ; [2] is renscfact=0.5d0 facscfact=2d0 ; [3] is renscfact=1d0 facscfact=0.5d0 ; [4] is renscfact=1d0 facscfact=1d0 ; [5] is renscfact=1d0 facscfact=2d0 ; [6] is renscfact=2d0 facscfact=0.5d0 ; [7] is renscfact=2d0 facscfact=1d0 ; [8] is renscfact=2d0 facscfact=2d0
+            # [1] is renscfact=0.5d0 facscfact=1d0.      [7] is renscfact=2d0 facscfact=1d0
+            # [3] is renscfact=1d0 facscfact=0.5d0.      [5] is renscfact=1d0 facscfact=2d0 ;
+            # renorm_up = 1, down = 7.   fact_up = 3, down = 5
+            renorm_up   = events.LHEScaleWeight[:, 1]
+            renorm_down = events.LHEScaleWeight[:, 7]
+            factr_up    = events.LHEScaleWeight[:, 3]
+            factr_down  = events.LHEScaleWeight[:, 5]
+        
+        elif len(events.nLHEScaleWeight[0]) > 1:
+            print("LHEScaleWeight  vector has length ", len(events.nLHEScaleWeight[0]))
+            
+    return [nom, renorm_up, renorm_down, factr_up, factr_down]
 
 
 def add_HiggsEW_kFactors(genHiggs, dataset):
@@ -857,6 +841,45 @@ def get_JER_and_JES(events, FatJets, year, shift_syst=""):
         FatJets = corrected_jets
 
     return FatJets
+
+def get_JMR_JMS(Jet, year, shift_syst=""):
+    # jet mass https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsDP23044
+
+    substr_cset = correctionlib.CorrectionSet.from_file("data/jms/Substructure_jmssf.json")
+
+    jet_pt   = Jet.pt #np.array(ak.fill_none(Jet.pt, 0.))
+
+    jms_nom  = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"")
+    jms_up   = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"up")
+    jms_down = substr_cset[f"jmssf_{year}"].evaluate(jet_pt,"down")
+
+    mass = Jet.msoftdrop
+
+    corrected_mass_up   = mass * jms_up
+    corrected_mass_down = mass * jms_down
+    corrected_mass_nomi = mass * jms_nom
+
+    for index, value in enumerate(corrected_mass_up):
+        if value < corrected_mass_nomi[index] and value > 50 :
+            print("corrected_mass_up is less than corrected_mass_nomi = ", corrected_mass_nomi[index], " corrected_mass_up = ", corrected_mass_up[index])
+    for index, value in enumerate(corrected_mass_nomi):
+        if value < corrected_mass_down[index] and value > 50 :
+            print("corrected_mass_nomi is less than corrected_mass_down = ", corrected_mass_nomi[index], " corrected_mass_down = ", corrected_mass_down[index])
+
+    if shift_syst == "JMSUp":
+        corrected_mass = mass * jms_up
+    elif shift_syst == "JMSDown":
+        corrected_mass = mass * jms_down
+    else:
+        corrected_mass = mass * jms_nom
+    return corrected_mass
+
+#smearing = np.random.normal(mass[:,])
+# scale to JMR nom, down, up (minimum at 0)
+#jmr_central, jmr_down, jmr_up = (
+    #((smearing * max(jmrValues[year][i] - 1, 0)) + 1) for i in range(3)
+    #)
+
 
 
 def get_jetTriggerSF(events, year, selection):
@@ -1021,9 +1044,9 @@ def fillCoffeaHist(
 ):
     mask_ = ~ ak.is_none(xValue, axis=0) # do not fill 'None'
     kwargs = {
-        'dataset': dataset,
-        'systematic': syst,
-        'weight': wgt[mask_],
+        'dataset'              : dataset,
+        'systematic'           : syst,
+        'weight'               : wgt[mask_],
         h.dense_axes()[0].name : xValue[mask_]
     } 
     if yValue:
