@@ -696,14 +696,15 @@ def get_PSWeight(events, dataset):
     return [nom, up_isr, down_isr, up_fsr, down_fsr]
 
 
-def add_pdf_as_weight(events, pdf_weights,dataset):
+def add_pdf_as_weight(events, dataset):
 
 
     nom = np.ones(len(events))
     up_pdfas   = up_aS   = up_pdf    = np.ones(len(events))
     down_pdfas = down_aS = down_pdf  = np.ones(len(events))
 
-    docstring = pdf_weights.__doc__
+    
+
 
     # NNPDF31_nnlo_as_0118_nf_4_mc_hessian
     # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_as_0118_nf_4_mc_hessian/NNPDF31_nnlo_as_0118_nf_4_mc_hessian.info
@@ -711,8 +712,11 @@ def add_pdf_as_weight(events, pdf_weights,dataset):
     # Hessian PDF weights
     # Eq. 21 of https://arxiv.org/pdf/1510.03865v1.pdf                                   
     #print (" no. of PDF column  ",len(pdf_weights[0]))
-    if "HToAATo4B" in dataset:
-        arg = pdf_weights[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
+    if hasattr(events, 'LHEPdfWeight') and "HToAATo4B" in dataset:
+        #docstring = pdf_weights.__doc__
+        #docstring = events.LHEPdfWeight.__doc__
+        #arg = pdf_weights[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
+        arg = events.LHEPdfWeight[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
         summed = ak.sum(np.square(arg),axis=1)
         #pdf_unc = np.sqrt( (1./99.) * summed )
         pdf_unc = np.sqrt( summed )
@@ -1054,6 +1058,98 @@ def fillCoffeaHist(
     if zValue:
         kwargs[h.dense_axes()[2].name] = zValue[mask_]
     h.fill( **kwargs )
+
+def fillCoffeaHist_1(**kwargs):
+    ''' 
+    kwargs: arguments in the form of pyton dictionary
+        dataset = '',
+        syst    = None, 
+        xValue  = None,
+        yValue  = None,
+        zValue  = None,        
+        wgt     = None
+
+        Either of the following arguments to pass:
+        a) h = coffea_hist.Hist('tmp'),
+        b) accumulator = <>, hName = <histogram name string>.   -->  This will assign: h = accumulator[hName] 
+    '''
+
+    #print(f"fillCoffeaHist_1::kwargs ({type(kwargs)}) {kwargs }", flush=True)
+
+
+    if ('h' in kwargs):
+        h = kwargs['h']
+    elif (('accumulator' in kwargs) and ('hName' in kwargs)):
+        h = kwargs['accumulator'][ kwargs['hName'] ]
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments should contains either (a) histogram or (b) accumulator (\'output\') and histogram name. **** ERROR ****')
+        exit(0)
+
+    dataset = '',
+    syst   = None, 
+    xValue = None,
+    yValue = None,
+    zValue = None,        
+    wgt    = None    
+
+    for s_ in ['dataset', 'syst', 'xValue', 'wgt']:
+        if s_ not in kwargs:
+            logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'{s_}\'. **** ERROR ****')
+            exit(0)
+
+    '''
+    if 'dataset' in kwargs:
+        dataset = kwargs['dataset']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'dataset\'. **** ERROR ****')
+        exit(0)
+    
+    if 'syst' in kwargs:
+        syst = kwargs['syst']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'syst\'. **** ERROR ****')
+        exit(0)
+    
+    if 'xValue' in kwargs:
+        xValue = kwargs['xValue']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'xValue\'. **** ERROR ****')
+        exit(0)
+    
+    if 'yValue' in kwargs:
+        yValue = kwargs['yValue']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'yValue\'. **** ERROR ****')
+        exit(0)
+    
+    if 'zValue' in kwargs:
+        zValue = kwargs['zValue']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'zValue\'. **** ERROR ****')
+        exit(0)
+    
+    if 'wgt' in kwargs:
+        wgt = kwargs['wgt']
+    else:
+        logging.error(f'htoaa_CommonTools::fillCoffeaHist():: Function arguments does not contain \'wgt\'. **** ERROR ****')
+        exit(0)
+    '''
+    
+    
+    mask_ = ~ ak.is_none(kwargs['xValue'], axis=0) # do not fill 'None'
+    kwargs_histFill = {
+        'dataset'              : kwargs['dataset'],
+        'systematic'           : kwargs['syst'],
+        'weight'               : kwargs['wgt'][mask_],
+        h.dense_axes()[0].name : kwargs['xValue'][mask_]
+    } 
+    if 'yValue' in kwargs:
+        kwargs_histFill[h.dense_axes()[1].name] = kwargs['yValue'][mask_]
+    if 'zValue' in kwargs:
+        kwargs_histFill[h.dense_axes()[2].name] = kwargs['zValue'][mask_]
+        
+    h.fill( **kwargs_histFill )    
+
 
 
 

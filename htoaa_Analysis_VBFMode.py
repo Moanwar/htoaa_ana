@@ -159,6 +159,7 @@ class ObjectSelection:
         self.NAk4BtagCentralNonoverlapFJHto4b_MaxThsh = 0
 
         # VBF jj
+        self.NAk4lNonoverlapFJHto4b_MinThsh = 1
         self.MassVBFjj_MinThsh_Tight =   850
         self.DEtaVBFjj_MinThsh_Tight =   3.2
         #
@@ -470,14 +471,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "leadingFatJetMSoftDrop",
                 #"leadingFatJetZHbb_Xbb_avg",
                 "leadingFatJetZHbb",
+                "nAk4Jets_nonoverlaping_leadingFatJet",
+                #"AK4JetsBtagCentralNonoverlapFJHto4bVeto",
+                "AK4JetsBtagNonoverlapFJHto4bVeto",
                 #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
                 #"leadingFatJetParticleNetMD_XbbvsQCD",
                 #"leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD",
                 #"leadingFatJet_nSV"
                 "nLeptonsTight",
-                "nonHto4bFatJetVjjVeto",
-                "MetZvvVeto",
-                "AK4JetsBtagCentralNonoverlapFJHto4bVeto",
+                #"nonHto4bFatJetVjjVeto",
+                #"MetZvvVeto",
+                
             ]),
         ])
 
@@ -605,7 +609,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # selection region addition each SR conditions successively
         #for iCondition in range(self.sel_names_all["Presel"].index(HLT_AK8PFJet330_name), len(self.sel_names_all["Presel"]) - 1):
         #for iCondition in range(self.sel_names_all["Presel"].index("leadingFatJetPt"), len(self.sel_names_all["Presel"]) - 1):
-        for iCondition in range(self.sel_names_all["Presel"].index("leadingFatJetMSoftDrop"), len(self.sel_names_all["Presel"]) - 1):
+        #for iCondition in range(self.sel_names_all["Presel"].index("leadingFatJetMSoftDrop"), len(self.sel_names_all["Presel"]) - 1):
+        for iCondition in range(self.sel_names_all["Presel"].index("nPV"), len(self.sel_names_all["Presel"]) - 1):
             conditionName = self.sel_names_all["Presel"][iCondition]
             self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["Presel"][0 : (iCondition+1)]
         
@@ -3091,13 +3096,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if "leadingFatJetPt" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetPt",
-                ((leadingFatJet.pt >= self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
+                #((leadingFatJet.pt >= self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
+                ((leadingFatJet.pt > self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
                  (leadingFatJet.pt <  self.objectSelector.FatJetPt_gg0lIncl_MaxThsh))
             )
         if "leadingFatJetPt_gg0lIncl" in self.sel_conditions_all_list:
             selection.add(
                 "leadingFatJetPt_gg0lIncl",
-                ((leadingFatJet.pt >= self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
+                #((leadingFatJet.pt >= self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
+                ((leadingFatJet.pt > self.objectSelector.FatJetPt_gg0lIncl_MinThsh) &
                  (leadingFatJet.pt <  self.objectSelector.FatJetPt_gg0lIncl_MaxThsh))
             )
         if "leadingFatJetPt_gg0lLo" in self.sel_conditions_all_list:
@@ -3268,11 +3275,23 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     (abs(events.MET.delta_phi(leadingFatJet)) > self.objectSelector.DPhi_FJHto4b_MET_MinThsh) )
             )
 
+        if "nAk4Jets_nonoverlaping_leadingFatJet" in self.sel_conditions_all_list:
+            selection.add(
+                "nAk4Jets_nonoverlaping_leadingFatJet",
+                (nAk4Jets_nonoverlaping_leadingFatJet >= self.objectSelector.NAk4lNonoverlapFJHto4b_MinThsh)
+            )
         if "AK4JetsBtagCentralNonoverlapFJHto4bVeto" in self.sel_conditions_all_list:
             selection.add(
                 "AK4JetsBtagCentralNonoverlapFJHto4bVeto",
                 (nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAk4BtagCentralNonoverlapFJHto4b_MaxThsh)
             )
+        if "AK4JetsBtagNonoverlapFJHto4bVeto" in self.sel_conditions_all_list:
+            selection.add(
+                "AK4JetsBtagNonoverlapFJHto4bVeto",
+                (nAk4Jets_bTag_nonoverlaping_leadingFatJet <= self.objectSelector.NAk4BtagCentralNonoverlapFJHto4b_MaxThsh)
+            )
+
+        
 
         mask_jjvbf_Tight = (
             (mass_leadingPair_ak4Jets_nonoverlaping_leadingFatJet >  self.objectSelector.MassVBFjj_MinThsh_Tight) &
@@ -3495,11 +3514,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
             # MC TrgEff ------------------------------------
-            wgt_TrgEff, wgt_TrgEffUp, wgt_TrgEffDown  = get_jetTriggerSF(
-                events = events,
-                year   = self.datasetInfo["era"],
-                selection = selection
-            )
+            #wgt_TrgEff, wgt_TrgEffUp, wgt_TrgEffDown  = get_jetTriggerSF(
+            #    events = events,
+            #    year   = self.datasetInfo["era"],
+            #    selection = selection
+            #)
 
             # MC GGF HToAATo4B Higgs pT reweight
             wgt_HiggsPt = None
@@ -3568,12 +3587,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_PUUp,
                 weightDown = wgt_PUDown
             )
-            weights.add(
-                "TrgEff",
-                weight     = wgt_TrgEff,
-                weightUp   = wgt_TrgEffUp,
-                weightDown = wgt_TrgEffDown
-            )
+            #weights.add(
+            #    "TrgEff",
+            #    weight     = wgt_TrgEff,
+            #    weightUp   = wgt_TrgEffUp,
+            #    weightDown = wgt_TrgEffDown
+            #)
             
             if self.datasetInfo['isSignalGGH']:
                 weights.add(
@@ -3634,12 +3653,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp = wgt_PUUp,
                 weightDown = wgt_PUDown
             )
-            weights_woHEM1516Fix.add(
-                "TrgEff",
-                weight     = wgt_TrgEff,
-                weightUp   = wgt_TrgEffUp,
-                weightDown = wgt_TrgEffDown
-            )
+            #weights_woHEM1516Fix.add(
+            #    "TrgEff",
+            #    weight     = wgt_TrgEff,
+            #    weightUp   = wgt_TrgEffUp,
+            #    weightDown = wgt_TrgEffDown
+            #)
             if self.datasetInfo['isSignalGGH']:
                 weights_woHEM1516Fix.add(
                     "GGHPtRewgt",
