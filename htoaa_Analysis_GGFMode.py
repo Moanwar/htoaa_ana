@@ -86,8 +86,8 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
  
 printLevel = 0
 histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
-nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = -1 # 1000 # 100000 # -1
+nEventToReadInBatch = 20 #2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = 20 #-1 # 1000 # 100000 # -1
 flushStdout = True
 #pd.set_option('display.max_columns', None)  
 
@@ -595,6 +595,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         '''
 
         print(f"self.sel_names_all: {json.dumps(self.sel_names_all, indent=4)}")
+
+        self.evtWeights_list = ['PU', ]
+        if self.datasetInfo['isSignalGGH']:
+            self.evtWeights_list.extend( ['GGHHiggsPt'] )
+        if self.datasetInfo['isQCD_bGen']:
+            self.evtWeights_list.extend( ['QCDHT'] )
+        if self.datasetInfo['isTTbar']:
+            self.evtWeights_list.extend( ['TopPt'] )
+        
         
 
 
@@ -724,6 +733,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         alphaS_axis           = hist.Bin("alphaS",                 r"alphaS",                    101,    0.01,     0.2)
         PU_axis               = hist.Bin("PU",                     r"PU",                         99,     0.0,    99.0)
         Ratio_axis            = hist.Bin("Ratio",                  r"Ratio",                     100,     0.0,    2.0)
+        Weight_axis           = hist.Bin("Weight",                 r"Event weight",              [-10,-3,*np.arange(-2,2,0.05), 3, 10])
         
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
@@ -984,6 +994,42 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 sHExt = "_%s" % (sel_name)
                 if sHExt_0 != '':
                     sHExt += "_%s" % (sHExt_0)
+
+                if histogramSaveLevel >= 1:
+                    histos.update(OD([
+                        ('hEventWeight_PU'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PU'}),
+                        ('hEventWeight_PUUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PUUp'}),
+                        ('hEventWeight_PUDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PUDown'}),
+                        ('hEventWeight_PS'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PS'}),
+                        ('hEventWeight_PS_ISRUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PS_ISRUp'}),
+                        ('hEventWeight_PS_ISRDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PS_ISRDown'}),
+                        ('hEventWeight_PS_FSRUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PS_FSRUp'}),
+                        ('hEventWeight_PS_FSRDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PS_FSRDown'}),
+                        ('hEventWeight_QCDPdfNom'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPdfNom'}),
+                        ('hEventWeight_QCDPdfUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPdfUp'}),
+                        ('hEventWeight_QCDPdfDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPdfDown'}),
+                        ('hEventWeight_QCDScale_Nom'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_Nom'}),
+                        ('hEventWeight_QCDScale_RenormUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_RenormUp'}),
+                        ('hEventWeight_QCDScale_RenormDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_RenormDown'}),
+                        ('hEventWeight_QCDScale_FactorizationUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_FactorizationUp'}),
+                        ('hEventWeight_QCDScale_FactorizationDown'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_FactorizationDown'}),
+
+                                               
+                    ]))
+                    if self.datasetInfo['isSignalGGH']:
+                        histos.update(OD([
+                            ('hEventWeight_GGHHiggsPt'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_GGHHiggsPt'}),
+                        ]))
+                    if self.datasetInfo['isQCD_bGen']:
+                        histos.update(OD([
+                            ('hEventWeight_QCDHT'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDHT'}),
+                        ]))
+                    if self.datasetInfo['isTTbar']:
+                        histos.update(OD([
+                            ('hEventWeight_TopPt'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_TopPt'}),
+                        ]))
+
+
 
                 if histogramSaveLevel >= 0:
                     histos.update(OD([
@@ -2119,7 +2165,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             hXaxis = deepcopy(histAttributes[sXaxis])
             hXaxis.label = histAttributes[sXaxisLabel]
 
-            if sYaxis not in histAttributes.keys():
+            if histName.startswith('hEventWeight_'): 
+                # TH1 w/o syst
+                self._accumulator.add({
+                    histName: hist.Hist(
+                        "Counts",
+                        dataset_axis,
+                        hXaxis, #nObject_axis,
+                    )
+                })
+            elif sYaxis not in histAttributes.keys():
                 # TH1
                 self._accumulator.add({
                     histName: hist.Hist(
@@ -2399,7 +2454,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable("\n events.GenPart[genBBar_pairs['bbar']]", events.GenPart[genBBar_pairs['bbar']])
                 printVariable("\n ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)", ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1))
                 printVariable("\n events.GenPart[ ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)]", events.GenPart[ ak.concatenate([genBBar_pairs['b'], genBBar_pairs['bbar']], axis=-1)] )
-                printVariable("\n genB_fromHToAA", genB_fromHToAA)
+                #printVariable("\n genB_fromHToAA", genB_fromHToAA)
 
             
                 
@@ -3415,7 +3470,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ################
         
         # create a processor Weights object, with the same length as the number of events in the chunk
-        weights              = Weights(len(events))
+        weights              = Weights(len(events), storeIndividual=True)
         weights_gen          = Weights(len(events))
         weights_GenHToAATo4B = Weights(len(events))
         weights_woHEM1516Fix = Weights(len(events))
@@ -3832,8 +3887,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             output['cutflow'][iName] += sel_i.sum()
             output['cutflow'][sWeighted+iName] +=  weights.weight()[sel_i].sum()
 
-        
-        #print(f"{weights.variations = }")
+        if printLevel >= 0:
+            print(f"{weights.variations = }")
 
         for syst in systList:
 
@@ -5307,8 +5362,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         sel_SR_forHExt = sel_SR_forHExt & (n_leadingFatJat_matched_genB_HToAATo4B >= 4)
                     sel_SR_forHExt = ak.fill_none(sel_SR_forHExt, False) 
 
-
                     if histogramSaveLevel >= 0:
+                        # Cut flow table ------------------------------------------                    
                         # all events
                         iBin = 0
                         output['hCutFlow'+sHExt].fill(
@@ -5337,6 +5392,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
+                        # 2DAlphabetFit histograms --------------------------------
                         if 'particleNetMD_Hto4b_Haa4b' in events.FatJet.fields:
                             output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
                                 dataset=dataset,
@@ -5360,6 +5416,91 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 weight=evtWeight[sel_SR_forHExt]
                             )    
 
+                    # Event weights histograms ------------------------------------------------------
+                    if histogramSaveLevel >= 1 and self.datasetInfo['isMC'] and syst == "Nom":
+                        output['hEventWeight_PU'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PU[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PUUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PUUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PUDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PUDown[sel_SR_forHExt]
+                        )
+                        if self.datasetInfo['isSignalGGH']:
+                            output['hEventWeight_GGHHiggsPt'+sHExt].fill(
+                                dataset=dataset,
+                                Weight=wgt_HiggsPt[sel_SR_forHExt]
+                            )
+                        if self.datasetInfo['isQCD_bGen']:
+                            output['hEventWeight_QCDHT'+sHExt].fill(
+                                dataset=dataset,
+                                Weight=wgt_HT[sel_SR_forHExt]
+                            )
+                        if self.datasetInfo['isTTbar']:
+                            output['hEventWeight_TopPt'+sHExt].fill(
+                                dataset=dataset,
+                                Weight=wgt_TopPt[sel_SR_forHExt]
+                            )
+                        output['hEventWeight_PS'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PS_Nom[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PS_ISRUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PS_ISRUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PS_ISRDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PS_ISRDown[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PS_FSRUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PS_FSRUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_PS_FSRDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_PS_FSRDown[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDPdfNom'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDPdfNom[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDPdfUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDPdfUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDPdfDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDPdfDown[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_Nom'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_Nom[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_RenormUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_RenormUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_RenormDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_RenormDown[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_FactorizationUp'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_FactorizationUp[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_FactorizationDown'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_FactorizationDown[sel_SR_forHExt]
+                        )
+                    # ------------------------------------------------------    
+                        
+                        
+                        
 
                     if histogramSaveLevel >= 1: 
                         output['hPV_npvsGood'+sHExt].fill(
@@ -8809,9 +8950,17 @@ if __name__ == '__main__':
                 print(f"h1 ({type(h1)}): h1")
                 '''
 
+                print(f"value ({type(value)}): value")
 
                 for _dataset in value.axis('dataset').identifiers():
                     #print(f"_dataset ({type(_dataset)}): {_dataset}")
+
+                    #print(f"value.fields : {value.fields}", fl)
+                    #print(f"value.fields() ({type(value.fields())}): {value.fields()}")
+                    if 'systematic' not in value.fields: # hWeight histogram do not have 'systematics' axes
+                        h1 = value.integrate('dataset',_dataset).to_hist()
+                        fOut['%s/%s' % (sDir1_toUse, sHistoName_toUse)] = h1
+                        continue
 
                     for _syst in value.axis('systematic').identifiers():
                         #print(f"_syst ({type(_syst)}): {_syst}")

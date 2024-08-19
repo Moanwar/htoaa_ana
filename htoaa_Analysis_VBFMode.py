@@ -546,9 +546,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         #categories_dict["VBFLoose"] = categories_dict["gg0lIncl"] + ["jjvbf_Loose"]
         #categories_dict["VBFTight"] = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
-        categories_dict["VBFTight_woVetoBTag"]       = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
-        categories_dict["VBFTight_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["jjvbf_Tight", "AK4JetsBtagNonoverlapFJHto4bVeto"]
-        categories_dict["VBFTight_wVetoBTagCentral"] = categories_dict["gg0lIncl"] + ["jjvbf_Tight", "AK4JetsBtagCentralNonoverlapFJHto4bVeto"]
+        #categories_dict["VBFTight_woVetoBTag"]       = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
+        categories_dict["VBFTight_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Tight"]
+        #categories_dict["VBFTight_wVetoBTagCentral"] = categories_dict["gg0lIncl"] + ["jjvbf_Tight", "AK4JetsBtagCentralNonoverlapFJHto4bVeto"]
+        
+        #categories_dict["VBFLoose_woVetoBTag"]       = categories_dict["gg0lIncl"] + ["jjvbf_Loose"]
+        categories_dict["VBFLoose_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Loose"]
+        #categories_dict["VBFLoose_wVetoBTagCentral"] = categories_dict["gg0lIncl"] + ["jjvbf_Loose", "AK4JetsBtagCentralNonoverlapFJHto4bVeto"]
+        
         categories_dict.pop("gg0lIncl")
 
          
@@ -558,6 +563,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #  WP80 : 0.920 (WP80) < signal, 0.50 (WP99) < sideband < 0.920 (WP80)
         
         for sCatName, catSels in categories_dict.items():
+            #self.sel_names_all["%s" % (sCatName)] = catSels
+            
             self.sel_names_all["%s_SRWP40" % (sCatName)] = catSels + [
                 "leadingFatJetParticleNetMD_Hto4b_Htoaa4bOverQCD_WP40"
             ]
