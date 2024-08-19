@@ -445,7 +445,9 @@ def selectAK4Jets(Jets, era, pT_Thsh=0):
     return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
         
 
-def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
+#def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
+def selectMuons(eventsObj, pT_Thsh=10, MiniPFRelIsoIdThsh=0.10, DxyThsh=0.2, DzThsh=0.5):
+    ''' Old selection
     # MuonMVAId    : (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
     # MuonMiniIsoId: (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
     maskSelMuons = (
@@ -455,10 +457,27 @@ def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
         (eventsObj.miniIsoId >= MiniIsoId) & 
         (eventsObj.mvaTTH > MVATTHThsh)
     )
+    '''
+
+
+    # Andrew's proposal: https://indico.cern.ch/event/1420612/contributions/5973322/attachments/2863763/5011683/Hichem24_0524.pdf#page=4
+    # Andrew: "be sure to apply the muon miniIso cut manually (rather than using the miniIsoId bit), as the ID bit in NanoAOD is buggy."
+    #          --> miniPFRelIso_all <= 0.10 #(tight WP)
+    maskSelMuons = (
+        (eventsObj.pt > pT_Thsh) &
+        (abs(eventsObj.eta) < 2.4) & 
+        ((eventsObj.mediumPromptId == True) | (eventsObj.highPtId > 0)) & 
+        (eventsObj.miniPFRelIso_all <= MiniPFRelIsoIdThsh) & # (eventsObj.miniIsoId >= 2) &
+        (abs(eventsObj.dxy) < DxyThsh) &
+        (abs(eventsObj.dz) < DzThsh) 
+    )
+
     return eventsObj[maskSelMuons]
     
 
-def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WP80', MVATTHThsh=0.3):
+#def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL', MVATTHThsh=0.3):
+def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL'):
+    '''
     # ElectronMVAId: 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
     maskSelElectrons = (
         (eventsObj.pt > pT_Thsh) &
@@ -466,6 +485,15 @@ def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WP80', MVATTHTh
         (eventsObj[MVAId] > 0) &
         (eventsObj.mvaTTH > MVATTHThsh)
     )
+    '''
+
+    # Hichem's slide: https://indico.cern.ch/event/1420612/contributions/5973322/attachments/2863763/5011683/Hichem24_0524.pdf#page=9
+    maskSelElectrons = (
+        (eventsObj.pt > pT_Thsh) &
+        (abs(eventsObj.eta) < 2.5) & ((abs(eventsObj.eta) < 1.44) | (abs(eventsObj.eta) > 1.57)) &
+        (eventsObj[MVAId] > 0)
+    )
+
     return eventsObj[maskSelElectrons]
 
 

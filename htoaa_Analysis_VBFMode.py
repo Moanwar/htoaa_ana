@@ -144,6 +144,8 @@ class ObjectSelection:
         self.NNonHo4bFatJetPNet_WZvsQCD_MaxThsh = 0
 
         # Lepton veto
+        '''
+        # Old selection
         self.MuonPtThsh         = 10
         self.MuonMVAId          =  3 # (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
         self.MuonMiniIsoId      =  3 # (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
@@ -151,6 +153,15 @@ class ObjectSelection:
         self.ElectronPtThsh     = 10
         self.ElectronMVAId      = 'mvaFall17V2Iso_WP80' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
         self.ElectronMVATTHThsh = 0.3
+        '''
+        # New selection
+        self.MuonPtThsh         = 10
+        self.MuonMiniPFRelIsoId =  0.10 # 0.10: tight-WP
+        self.MuonDxyThsh        = 0.2
+        self.MuonDzThsh         = 0.5
+        self.ElectronPtThsh     = 10
+        self.ElectronMVAId      = 'mvaFall17V2Iso_WP90' # 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
+        
 
         self.NLeptonsTight_MaxThsh    = 0
         
@@ -3026,7 +3037,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ), 0)
         
 
+        if printLevel >= 1000:
+            printVariable('\n events.Muon.mediumPromptId\n', events.Muon.mediumPromptId)
+            printVariable('\n events.Muon.highPtId\n', events.Muon.highPtId)
+            
+
         ## sel leptons
+        '''Old selection
         muonsTight     = selectMuons(
             events.Muon, 
             pT_Thsh    =self.objectSelector.MuonPtThsh, 
@@ -3038,6 +3055,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             pT_Thsh    =self.objectSelector.ElectronPtThsh, 
             MVAId      =self.objectSelector.ElectronMVAId, 
             MVATTHThsh =self.objectSelector.ElectronMVATTHThsh )
+        '''
+        muonsTight     = selectMuons(
+            events.Muon, 
+            pT_Thsh            = self.objectSelector.MuonPtThsh, 
+            MiniPFRelIsoIdThsh = self.objectSelector.MuonMiniPFRelIsoId,
+            DxyThsh            = self.objectSelector.MuonDxyThsh,
+            DzThsh             = self.objectSelector.MuonDzThsh )
+        electronsTight = selectElectrons(
+            events.Electron, 
+            pT_Thsh    = self.objectSelector.ElectronPtThsh, 
+            MVAId      = self.objectSelector.ElectronMVAId )
         leptonsTight   = ak.concatenate([muonsTight, electronsTight], axis=1)
         nLeptonsTight  = ak.fill_none(ak.count(leptonsTight.pt, axis=1), 0)
         #nLeptons_matched_leadingFatJet = ak.fill_none(ak.sum(leadingFatJet.metric_table( leptonsTight, axis=None ) < 0.8, axis=1), 0)
