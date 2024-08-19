@@ -481,7 +481,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "nLeptonsTight",
                 #"nonHto4bFatJetVjjVeto",
                 #"MetZvvVeto",
-                
+                "AK4JetsBtagNonoverlapFJHto4bVeto",
             ]),
         ])
 
@@ -547,13 +547,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #categories_dict["VBFLoose"] = categories_dict["gg0lIncl"] + ["jjvbf_Loose"]
         #categories_dict["VBFTight"] = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
         #categories_dict["VBFTight_woVetoBTag"]       = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
-        categories_dict["VBFTight_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Tight"]
+        #categories_dict["VBFTight_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Tight"]
         #categories_dict["VBFTight_wVetoBTagCentral"] = categories_dict["gg0lIncl"] + ["jjvbf_Tight", "AK4JetsBtagCentralNonoverlapFJHto4bVeto"]
+        categories_dict["VBFTight]"]        = categories_dict["gg0lIncl"] + ["jjvbf_Tight"]
         
         #categories_dict["VBFLoose_woVetoBTag"]       = categories_dict["gg0lIncl"] + ["jjvbf_Loose"]
-        categories_dict["VBFLoose_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Loose"]
+        #categories_dict["VBFLoose_wVetoBTag"]        = categories_dict["gg0lIncl"] + ["AK4JetsBtagNonoverlapFJHto4bVeto", "jjvbf_Loose"]
         #categories_dict["VBFLoose_wVetoBTagCentral"] = categories_dict["gg0lIncl"] + ["jjvbf_Loose", "AK4JetsBtagCentralNonoverlapFJHto4bVeto"]
-        
+        categories_dict["VBFLoose"]        = categories_dict["gg0lIncl"] + ["jjvbf_Loose"]
+
         categories_dict.pop("gg0lIncl")
 
          
@@ -3477,9 +3479,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # 
             sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8"]
             self.sel_names_all.update( OD([
-                ("GenHToAATo4B_1", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
+                #("GenHToAATo4B_1", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
                 ("GenHToAATo4B", [*sel_names_GEN]),
             ]) )
+            '''
             for idx, cutName in enumerate(cuts_reco):
                 if idx == 0:
                     self.sel_names_all.update( OD([
@@ -3489,6 +3492,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     self.sel_names_all.update( OD([
                         ("GenSR_%d" % (idx+1),  [*self.sel_names_all["GenSR_%d" % (idx)], cutName]),
                     ]) ) 
+            '''
             '''
             self.sel_names_all.update( OD([
                 ("GenHToAATo4B_1", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
