@@ -101,7 +101,36 @@ def getTH1BinContent(histo, xValue):
     #print(f"htoaa_CommonTools.py::getTH1BinContent():: {histo = },   {xBin = },    {histo[xBin] = },   {histo[xBin].value = }")
     return histo[xBin]
 
+def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
+    # MuonMVAId    : (1=MvaLoose, 2=MvaMedium, 3=MvaTight, 4=MvaVTight, 5=MvaVVTight)
+    # MuonMiniIsoId: (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)
+    maskSelMuons = (
+        (eventsObj.pt > pT_Thsh) &
+        (abs(eventsObj.eta) < 2.4) & 
+        (eventsObj.mvaId >= MVAId) &
+        (eventsObj.miniIsoId >= MiniIsoId) & 
+        (eventsObj.mvaTTH > MVATTHThsh)
+    )
+    return eventsObj[maskSelMuons]
     
+
+def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WP80', MVATTHThsh=0.3):
+    # ElectronMVAId: 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
+    maskSelElectrons = (
+        (eventsObj.pt > pT_Thsh) &
+        (abs(eventsObj.eta) < 2.3) & 
+        (eventsObj[MVAId] > 0) &
+        (eventsObj.mvaTTH > MVATTHThsh)
+    )
+    return eventsObj[maskSelElectrons]
+
+def stringHasSubstring(string, substringList):
+    hasSubstring = False
+    for s_ in substringList:
+        if s_ in string: hasSubstring = True
+    return hasSubstring
+
+
 def getNanoAODFile(
         fileName, 
         useLocalFileIfExists = True, 
@@ -317,6 +346,27 @@ def xrdcpFile(sFileName, sFileNameLocal, nTry = 3, cp_command = 'xrdcp'):
 
     return False
     
+def fillCoffeaHist(
+        h = coffea_hist.Hist('tmp'),
+        dataset = '',
+        syst = None, 
+        xValue = None,
+        yValue = None,
+        zValue = None,        
+        wgt = None
+):
+    mask_ = ~ ak.is_none(xValue, axis=0) # do not fill 'None'
+    kwargs = {
+        'dataset'              : dataset,
+        'systematic'           : syst,
+        'weight'               : wgt[mask_],
+        h.dense_axes()[0].name : xValue[mask_]
+    } 
+    if yValue:
+        kwargs[h.dense_axes()[1].name] = yValue[mask_]
+    if zValue:
+        kwargs[h.dense_axes()[2].name] = zValue[mask_]
+    h.fill( **kwargs )
 
 
 def selectRunLuminosityBlock_ApprochEventBase(golden_json_path, runNumber_list, luminosityBlock_list):
@@ -395,6 +445,7 @@ def selectMETFilters(flags_list, era, isMC):
     
 def selectAK4Jets(Jets, era, pT_Thsh=0):
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
+    '''
     if '2018' in era or '2017' in era:
         # AK4CHS jets
         JetsSelected_HB = (
@@ -429,7 +480,13 @@ def selectAK4Jets(Jets, era, pT_Thsh=0):
         JetsSelected = ( JetsSelected_HB | JetsSelected_HE1 | JetsSelected_HE2 | JetsSelected_HF )
         
     return Jets[JetsSelected & (Jets.pt > pT_Thsh)]
-        
+    ''' 
+    maskJetsSelected = (
+        (Jets.jetId >= 6) & 
+        ( (Jets.pt > 50) | (Jets.puId >= 4 ) )
+    )
+
+    return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
 
 
 
@@ -604,6 +661,7 @@ def getPURewgts_variation(events, year):
     return [puNom, puUp, puDown]
 
 def add_ps_weight(events,ps_weights,dataset):
+#def get_PSWeight(events, dataset):
     """
     Parton Shower Weights (FSR and ISR)
     "Default" variation: https://twiki.cern.ch/twiki/bin/view/CMS/HowToPDF#Which_set_of_weights_to_use
@@ -617,14 +675,14 @@ def add_ps_weight(events,ps_weights,dataset):
     up_fsr = np.ones(nweights)
     down_fsr = np.ones(nweights)
 
-    if len(ps_weights[0]) == 4 and "HToAATo4B" in dataset:
+    if len(ps_weights[0]) == 4 and "Htoaato4b" in dataset:
         up_isr = ps_weights[:, 0]  # ISR=2, FSR=1
         down_isr = ps_weights[:, 2]  # ISR=0.5, FSR=1
 
         up_fsr = ps_weights[:, 1]  # ISR=1, FSR=2
         down_fsr = ps_weights[:, 3]  # ISR=1, FSR=0.5
 
-    elif len(ps_weights[0]) > 1:
+    elif len(ps_weights[0]) > 4:
         print("PS weight vector has length ", len(ps_weights[0]))
 
     return [nom, up_isr, down_isr, up_fsr, down_fsr]
@@ -663,7 +721,7 @@ def add_pdf_as_weight(events, pdf_weights,dataset):
     # Hessian PDF weights
     # Eq. 21 of https://arxiv.org/pdf/1510.03865v1.pdf                                   
     #print (" no. of PDF column  ",len(pdf_weights[0]))
-    if "HToAATo4B" in dataset:
+    if "Htoaato4b" in dataset:
         arg = pdf_weights[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
         summed = ak.sum(np.square(arg),axis=1)
         #pdf_unc = np.sqrt( (1./99.) * summed )
@@ -793,6 +851,7 @@ def get_JER_and_JES(events, Jets, year, shift_syst="", jettype=""):
 
     return Jets
 
+#def get_jetTriggerSF(events, year, selection):
 def add_jetTriggerSF(events, year, selection):
 
     leadingjet = ak.firsts(events.FatJet)
