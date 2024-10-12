@@ -1,0 +1,3 @@
+[submodule "LundReweighting"]
+	path = LundReweighting
+	url = https://github.com/moanwar/LundReweighting.git
