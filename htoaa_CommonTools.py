@@ -497,6 +497,13 @@ def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL'):
     return eventsObj[maskSelElectrons]
 
 
+def calWeightSystematicsVariation(wgt_):
+    delta          = 1 - wgt_
+    wgtSystVarUp   = wgt_ + np.abs(delta)
+    wgtSystVarDown = wgt_ - np.abs(delta)
+    return [wgtSystVarUp, wgtSystVarDown]
+
+
 def getLumiScaleForPhSpOverlapRewgtMode(
         hLumiScale ,
         sample_category ,
@@ -610,6 +617,8 @@ def getTopPtRewgt(eventsGenPart, isPythiaTuneCP5):
 
     wgt_TopPtRewgt = np.sqrt(wgt_TopPtRewgt)
     #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
+
+
     return wgt_TopPtRewgt
 
 
@@ -661,7 +670,9 @@ def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     wgt_HiggsPt = 1.45849 - 0.00400668*GenHiggsPt_list + 4.02577e-06*GenHiggsPt_list**2 - 1.38804e-09*GenHiggsPt_list**3 
     wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.09) )
     wgt_HiggsPt = np.minimum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 1.02) )
-    return wgt_HiggsPt
+
+    wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown = calWeightSystematicsVariation(wgt_HiggsPt)
+    return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
 
 
 def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
@@ -829,6 +840,10 @@ def add_HiggsEW_kFactors(genHiggs, dataset):
 
 
 def get_JER_and_JES(events, FatJets, year, shift_syst=""):
+    #print(f"{FatJets.fields = }")
+    #printVariable('\n FatJets.pt\n', FatJets.pt)
+
+
     #UL2018 -> (19UL18_V5 , 19UL18_JRV2) / UL17 -> (19UL17_V5, 19UL17_JRV2) / UL2016APV -> (19UL16APV_V7, 20UL16APV_JRV3) / UL2016 -> (19UL16_V7, 20UL16_JRV3)  
     #UL17 https://cms-talk.web.cern.ch/t/ak8-jets-jec-for-summer19ul17-mc/23154/8
     #https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECDataMC#Recommended_for_MC
@@ -840,11 +855,11 @@ def get_JER_and_JES(events, FatJets, year, shift_syst=""):
 
     Jetext = extractor()
     Jetext.add_weight_sets([
-        f"* * data/JERS/{year}UL_V_MC_L1FastJet_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_L2Relative_AK8PFPuppi.jec.txt",
-        f"* * data/JERS/{year}UL_V_MC_Uncertainty_AK8PFPuppi.junc.txt",
-        f"* * data/JERS/{year}UL_JR_MC_PtResolution_AK8PFPuppi.jr.txt",
-        f"* * data/JERS/{year}UL_JR_MC_SF_AK8PFPuppi.jersf.txt",
+        f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_L1FastJet_AK8PFPuppi.jec.txt",
+        f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_L2Relative_AK8PFPuppi.jec.txt",
+        f"* * data/JERS/AK8PFPuppi/{year}UL_V_MC_Uncertainty_AK8PFPuppi.junc.txt",
+        f"* * data/JERS/AK8PFPuppi/{year}UL_JR_MC_PtResolution_AK8PFPuppi.jr.txt",
+        f"* * data/JERS/AK8PFPuppi/{year}UL_JR_MC_SF_AK8PFPuppi.jersf.txt",
     ])
     Jetext.finalize()
     Jetevaluator = Jetext.make_evaluator()
@@ -860,6 +875,7 @@ def get_JER_and_JES(events, FatJets, year, shift_syst=""):
     
     corrected_jets = CorrectedJetsFactory(name_map, jec_stack).build(FatJets, lazy_cache=events.caches[0])
     
+    #print(f"{corrected_jets.fields = }")
     if shift_syst == "JERUp":
         FatJets = corrected_jets.JER.up
     elif shift_syst == "JERDown":
@@ -871,6 +887,33 @@ def get_JER_and_JES(events, FatJets, year, shift_syst=""):
     else:
         # either nominal or some shift systematic unrelated to jets
         FatJets = corrected_jets
+
+    #print(f"{FatJets.fields = }")
+    #print(f"{corrected_jets.JER.fields = }")
+    #print(f"{corrected_jets.JER.up.fields = }")
+    #print(f"{corrected_jets.JES_jes.fields = }")
+    #print(f"{corrected_jets.JES_jes.up.fields = }")
+    #print(f"{corrected_jets.jet_energy_uncertainty_jes.fields = }")
+    #print(f"{corrected_jets.jet_energy_correction.fields = }")
+    #print(f"{corrected_jets.jet_energy_resolution.fields = }")
+    #print(f"{corrected_jets.jet_energy_resolution_scale_factor.fields = }")
+    #print(f"{corrected_jets.jet_energy_resolution_correction.fields = }")
+    #print(f"{corrected_jets..fields = }")
+    
+    #printVariable('\n corrected_jets\n', corrected_jets)
+
+    #printVariable('\n corrected_jets.pt\n', corrected_jets.pt)
+    #printVariable('\n corrected_jets.JER\n', corrected_jets.JER)
+    #printVariable('\n corrected_jets.JER.up\n', corrected_jets.JER.up)
+    #printVariable('\n corrected_jets.JER.down\n', corrected_jets.JER.down)
+    #printVariable('\n\n\n corrected_jets.JES_jes\n', corrected_jets.JES_jes)
+    #printVariable('\n corrected_jets.JES_jes.up\n', corrected_jets.JES_jes.up)
+    #printVariable('\n corrected_jets.JES_jes.down)\n', corrected_jets.JES_jes.down)
+    #printVariable('\n \n', )
+    #printVariable('\n \n', )
+    
+    
+    
 
     return FatJets
 
