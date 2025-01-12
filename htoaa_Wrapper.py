@@ -249,7 +249,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
-    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "UnskimmedHToAATo4BNanoAOD", "SkimmedNanoAOD_Hto4b_0p8"], required=False)
+    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "UnskimmedHToAATo4BNanoAOD", "SkimmedNanoAOD_Hto4b_0p8", "SkimmedNanoAOD_v2"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=1)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
@@ -424,6 +424,7 @@ if __name__ == '__main__':
                 if   sNTuples == "CentralNanoAOD":                 fileList = sampleInfo[sampleFormat]
                 elif sNTuples == "UnskimmedHToAATo4BNanoAOD":      fileList = sampleInfo["skimmedNanoAOD"]["unskimmed"]
                 elif sNTuples == "SkimmedNanoAOD_Hto4b_0p8":       fileList = sampleInfo["skimmedNanoAOD"]["skim_Hto4b_0p8"]
+                elif sNTuples == "SkimmedNanoAOD_v2":              fileList = sampleInfo["skimmedNanoAOD"]["skim_v2"]
 
                 files = []
                 for iEntry in fileList:

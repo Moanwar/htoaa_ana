@@ -395,6 +395,33 @@ def selectMETFilters(flags_list, era, isMC):
     return mask_METFilters
     
 
+def selectFatJets(FatJets, pT_Thsh=170, eta_Thsh=2.4, Msd_Thsh=20, JetID=6):
+    maskJetsSelected = (
+        (FatJets.pt        >  pT_Thsh)    &
+        (abs(FatJets.eta)  <  eta_Thsh)   &
+        (FatJets.msoftdrop >  Msd_Thsh)   &
+        (FatJets.jetId     >= int(JetID)) 
+    )
+    return FatJets[maskJetsSelected]
+
+
+def getCandidateHiggs(FatJets, Xbb_Thsh=0):
+    if 'particleNetMD_XbbvsQCD' not in FatJets.fields:
+        logging.error(f'htoaa_CommonTools::getCandidateHiggs():: FatJet has no "particleNetMD_XbbvsQCD" branch. \n{FatJets.fields = }\n The code is not compatible with the input NanoAODs. \t\t **** ERROR **** \n\n')
+        exit(0)
+
+    maskJetsSelected = (
+        (FatJets.particleNetMD_XbbvsQCD > Xbb_Thsh)
+    )
+    candHs = FatJets[maskJetsSelected]
+    if 'PNet_X4b_v2a_Haa34b_score' in FatJets.fields:
+        candHs_PNet_X4b_v2_Haa34b = candHs.PNet_X4b_v2a_Haa34b_score + candHs.PNet_X4b_v2b_Haa34b_score
+        idx_candHs_PNet_X4b_v2_Haa34b_max = ak.argmax(candHs_PNet_X4b_v2_Haa34b, axis=-1, keepdims=True)
+        candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa34b_max])
+
+    return candH, idx_candHs_PNet_X4b_v2_Haa34b_max
+
+
 def selectAK4Jets(Jets, era, pT_Thsh=0):
     # Not sure what to refer?
     #   1) https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
@@ -437,10 +464,12 @@ def selectAK4Jets(Jets, era, pT_Thsh=0):
     '''
 
     # 2) https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#Jets
+    # Andrew's event categorization: https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=4
     maskJetsSelected = (
         (Jets.jetId >= 6) & 
         ( (Jets.pt > 50) | (Jets.puId >= 4 ) )
     )
+
 
     return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
         
@@ -463,10 +492,25 @@ def selectMuons(eventsObj, pT_Thsh=10, MiniPFRelIsoIdThsh=0.10, DxyThsh=0.2, DzT
     # Andrew's proposal: https://indico.cern.ch/event/1420612/contributions/5973322/attachments/2863763/5011683/Hichem24_0524.pdf#page=4
     # Andrew: "be sure to apply the muon miniIso cut manually (rather than using the miniIsoId bit), as the ID bit in NanoAOD is buggy."
     #          --> miniPFRelIso_all <= 0.10 #(tight WP)
+    '''
+    2024Dec: https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=4
+    pt > 10 && abs(eta) < 2.4 && miniPFRelIso_all < 0.10 &&
+    abs(dxy) < 0.02 && abs(dz) < 0.10 &&
+    (mediumPromptId >= 1 || (pt > 200 && highPtId >= 1))
+    '''
+    '''
+    printVariable('eventsObj[:10].mediumPromptId', eventsObj[:10].mediumPromptId)
+    printVariable('eventsObj[:10].pt > 200', eventsObj[:10].pt > 200)
+    printVariable('eventsObj[:10].highPtId', eventsObj[:10].highPtId )
+    printVariable('eventsObj[:10].highPtId > 0', eventsObj[:10].highPtId > 0)
+    printVariable('((eventsObj.pt > 200) & (eventsObj.highPtId > 0))', ((eventsObj.pt > 200) & (eventsObj.highPtId > 0))[:10])
+    printVariable('((eventsObj.mediumPromptId) | (eventsObj.pt > 200 & eventsObj.highPtId > 0))', ((eventsObj.mediumPromptId) | ((eventsObj.pt > 200) & (eventsObj.highPtId > 0)))[:10])
+    '''
     maskSelMuons = (
         (eventsObj.pt > pT_Thsh) &
         (abs(eventsObj.eta) < 2.4) & 
-        ((eventsObj.mediumPromptId == True) | (eventsObj.highPtId > 0)) & 
+        #((eventsObj.mediumPromptId == True) | (eventsObj.pt > 200 & eventsObj.highPtId > 0)) & 
+        ((eventsObj.mediumPromptId) | ((eventsObj.pt > 200) & (eventsObj.highPtId > 0))) & 
         (eventsObj.miniPFRelIso_all <= MiniPFRelIsoIdThsh) & # (eventsObj.miniIsoId >= 2) &
         (abs(eventsObj.dxy) < DxyThsh) &
         (abs(eventsObj.dz) < DzThsh) 
@@ -476,7 +520,8 @@ def selectMuons(eventsObj, pT_Thsh=10, MiniPFRelIsoIdThsh=0.10, DxyThsh=0.2, DzT
     
 
 #def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL', MVATTHThsh=0.3):
-def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL'):
+#def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL', DxyThsh=0.02, DzThsh=0.10):
+def selectElectrons(eventsObj, pT_Thsh=10, DxyThsh=0.02, DzThsh=0.10):
     '''
     # ElectronMVAId: 'mvaFall17V2Iso_WP80', 'mvaFall17V2Iso_WP90' 'mvaFall17V2Iso_WPL'
     maskSelElectrons = (
@@ -488,10 +533,28 @@ def selectElectrons(eventsObj, pT_Thsh=10, MVAId='mvaFall17V2Iso_WPL'):
     '''
 
     # Hichem's slide: https://indico.cern.ch/event/1420612/contributions/5973322/attachments/2863763/5011683/Hichem24_0524.pdf#page=9
+    '''
+    all:
+    pt > 10 && abs(eta) < 2.5 && (abs(eta) < 1.44 || abs(eta) > 1.57) &&
+    mvaFall17V2Iso_WPL >= 1 &&
+    (mvaFall17V2Iso_WP90 >= 1 || (pt > 35 && cutBased_HEEP >= 1))
+    Trigger:
+    pt > 35 && abs(dxy) < 0.02 && abs(dz) < 0.10 &&
+    mvaFall17V2Iso_WP90 >= 1 && (mvaFall17V2Iso_WP80 >= 1 || cutBased_HEEP >= 1)
+    '''
+    
     maskSelElectrons = (
+        # all
         (eventsObj.pt > pT_Thsh) &
         (abs(eventsObj.eta) < 2.5) & ((abs(eventsObj.eta) < 1.44) | (abs(eventsObj.eta) > 1.57)) &
-        (eventsObj[MVAId] > 0)
+        #(eventsObj[MVAId] > 0)
+        (eventsObj.mvaFall17V2Iso_WPL  >= 1) &
+        ((eventsObj.mvaFall17V2Iso_WP90 >= 1) | ( (eventsObj.pt > 35) & (eventsObj.cutBased_HEEP >= 1) ) ) &
+        # trigger electron
+        (eventsObj.mvaFall17V2Iso_WP90 >= 1) & 
+        ((eventsObj.mvaFall17V2Iso_WP80 >= 1) | (eventsObj.cutBased_HEEP >= 1)) & 
+        (abs(eventsObj.dxy) < DxyThsh) &
+        (abs(eventsObj.dz)  < DzThsh)
     )
 
     return eventsObj[maskSelElectrons]
@@ -1108,6 +1171,28 @@ def executeBashCommand(sCmd1):
     return result.stdout
 
 
+
+def getRunOnSelEventsList(sFileOrList):
+    rle_sel = []
+    if not sFileOrList:
+        return rle_sel
+
+    if os.path.exists(sFileOrList):
+        # rle list is read from a file
+        with open(sFileOrList) as f_:
+            for fLine_ in f_:
+               rle_sel.append(fLine_.replace('\n','')) 
+    else:
+        # rle list read directly from provided 'string' seperated by ,
+        rle_list = sFileOrList.split(',')
+        for rle_ in rle_list:
+            rle_sel.append(rle_)
+
+    #print(f"getRunOnSelEventsList():: {rle_sel = }")
+    return rle_sel
+
+
+
 def fillCoffeaHist(
         h = coffea_hist.Hist('tmp'),
         dataset = '',
@@ -1609,9 +1694,11 @@ def printVariable(sName, var):
     if not printInDetail:
         #print(f"{sName} ({type(var)}) ({len(var)}): {var}")
         try:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var.tolist()}")
+            #print(f"{sName} ({type(var)}) ({len(var)}): {var.tolist()}")
+            print(f"{sName} ({len(var)}): {var.tolist()}")
         except:
-            print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+            #print(f"{sName} ({type(var)}) ({len(var)}): {var}")
+            print(f"{sName} ({len(var)}): {var}")
     else:
         try:
             print(f"{sName} ({type(var)}) ({len(var)}): {var.to_list()}")

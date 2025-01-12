@@ -43,6 +43,10 @@ sPathSkimmedNanoAODs = {
             'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
             'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root' 
         },
+        'skim_v2': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v2_2024_11_22/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/$SAMPLENAME/hadd/PNet_*.root' 
+        },
     }
 }
 
@@ -171,7 +175,26 @@ Triggers_perEra = {
         }
     }
 }
+'''
+## Andrew's slides on triggers https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=11
+trigFat :
+((HLT_PFJet500 || HLT_AK8PFJet500 || HLT_AK8PFJet400_TrimMass30 || HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4) && (L1_SingleJet180)) 
+|| 
+((HLT_AK8PFHT800_TrimMass50 || HLT_PFHT1050) && (L1_SingleJet180 || L1_HTT360er))
 
+trigBtag : 
+(HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 && (L1_DoubleJet112er2p3_dEta_Max1p6 || L1_DoubleJet150er2p5)) 
+|| 
+(HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 && (L1_HTT320er || L1_HTT360er || L1_HTT400er || L1_ETT2000 || L1_HTT320er_QuadJet_70_55_40_40_er2p4 || L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3))
+
+trigVBF :
+(HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2 || HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1) && (L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5 || L1_HTT320er || L1_SingleJet180)
+
+trigMET :
+ ((HLT_PFMET120_PFMHT120_IDTight_PFHT60 || HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) && (L1_ETMHF90_HTT60er || L1_ETMHF100_HTT60er || L1_ETMHF110_HTT60er)) 
+|| 
+((HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1 || HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned || HLT_PFMETTypeOne140_PFMHT140_IDTight) && (L1_ETMHF100 || L1_ETMHF110 || L1_ETMHF120 || L1_ETMHF130))
+'''
 
 sFilesGoldenJSON = {
     Era_2016: '',
@@ -205,7 +228,7 @@ MET_Filters[Era_2018] = {
         "EcalDeadCellTriggerPrimitiveFilter", # ECAL TP filter ("Flag_EcalDeadCellTriggerPrimitiveFilter")
         "BadPFMuonFilter",                    # Bad PF Muon Filter ("Flag_BadPFMuonFilter")
         "BadPFMuonDzFilter",                  # Bad PF Muon Dz Filter ("Flag_BadPFMuonDzFilter")
-        "hfNoisyHitsFilter",                  # HF noisy hits filter ("Flag_hfNoisyHitsFilter")
+        #"hfNoisyHitsFilter", ##                 # HF noisy hits filter ("Flag_hfNoisyHitsFilter")
         "eeBadScFilter",                      # ee badSC noise filter ("Flag_eeBadScFilter")
         "ecalBadCalibFilter",                 # ECAL bad calibration filter update ("Flag_ecalBadCalibFilter")
     ],
@@ -243,7 +266,7 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         'AK4DeepJet': { # https://btv-wiki.docs.cern.ch/ScaleFactors/UL2018/
             'L': 0.0490,
             'M': 0.2783,
-            'L': 0.7100
+            'T': 0.7100
         },
         'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
             'L': 0.1208,
@@ -255,7 +278,9 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         'DDBvLV2': { # not provided for UL samples
             'M': 0.8, # taken from Si's code
         },
-        'ParticleNetMD_XbbvsQCD': { # BTV-22-001 
+        'ParticleNetMD_XbbvsQCD': { 
+            'VL': 0.75,
+            # BTV-22-001 
             # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
             # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
             'L': 0.9172
