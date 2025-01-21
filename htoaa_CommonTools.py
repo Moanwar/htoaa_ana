@@ -1041,6 +1041,110 @@ def get_jetTriggerSF(events, year, selection):
     return [nom_trg, up_trg, down_trg]
 
 
+def get_Ak4BtagSF(jet, btagWPThsh, year):
+
+    ## Read btagEfficiency histograms with correa.extractor
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "btagSFEffi_bFlavour %s %s" % (
+            bTagSFEfficiencyDict[year]['histogramName']['b-flavour'],
+            bTagSFEfficiencyDict[year]['inputFile']
+            )
+        ])
+    extractor_.add_weight_sets([
+        "btagSFEffi_cFlavour %s %s" % (
+            bTagSFEfficiencyDict[year]['histogramName']['c-flavour'],
+            bTagSFEfficiencyDict[year]['inputFile']
+            )
+        ])
+    extractor_.add_weight_sets([
+        "btagSFEffi_lightFlavour %s %s" % (
+            bTagSFEfficiencyDict[year]['histogramName']['light-flavour'],
+            bTagSFEfficiencyDict[year]['inputFile']
+            )
+        ])
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+
+
+    
+    ## load btagEffi from coffea.extractor
+    btagEffi = ak.ones_like(jet.pt)
+    btagEffi = ak.where(
+        (abs(jet.hadronFlavour) == 5),
+        evaluator_['btagSFEffi_bFlavour'](jet.pt, abs(jet.eta)),
+        btagEffi
+    )
+    btagEffi = ak.where(
+        (abs(jet.hadronFlavour) == 4),
+        evaluator_['btagSFEffi_cFlavour'](jet.pt, abs(jet.eta)),
+        btagEffi
+    )
+    btagEffi = ak.where(
+        ~((abs(jet.hadronFlavour) == 5) | (abs(jet.hadronFlavour) == 4) ),
+        evaluator_['btagSFEffi_lightFlavour'](jet.pt, abs(jet.eta)),
+        btagEffi
+    )
+
+    syst_types = ['Nom']
+    if   kDatasetToAnalyze == DatasetToAnalyze.SingleYear:
+        syst_types.extend(['Up', 'Down'])
+    elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
+        syst_types.extend(['Upuncorrelated', 'Downuncorrelated', 'Upcorrelated', 'Downcorrelated'])
+
+    btagWgt_dict = {}
+    for syst_type in syst_types:
+
+        ## use appropriate btagSF
+        btagSF = []
+        if   syst_type == "Nom":               btagSF = jet.btagSF_deepjet_M
+        elif syst_type == "Up":                btagSF = jet.btagSF_deepjet_M_up
+        elif syst_type == "Down":              btagSF = jet.btagSF_deepjet_M_down
+        elif syst_type == "Upuncorrelated":    btagSF = jet.btagSF_deepjet_M_up_uncorrelated
+        elif syst_type == "Downuncorrelated":  btagSF = jet.btagSF_deepjet_M_down_uncorrelated
+        elif syst_type == "Upcorrelated":      btagSF = jet.btagSF_deepjet_M_up_correlated
+        elif syst_type == "Downcorrelated":    btagSF = jet.btagSF_deepjet_M_down_correlated
+        
+
+        btagWgt_perJet = ak.ones_like(jet.pt)
+        btagWgt_perJet = ak.where(
+            (jet.btagDeepFlavB > btagWPThsh), # b-tagged jets
+            btagSF,
+            btagWgt_perJet
+        )
+        btagWgt_perJet = ak.where(
+            (jet.btagDeepFlavB <= btagWPThsh), # not b-tagged jets
+            (1 - (btagSF*btagEffi)) / (1 - btagEffi),
+            btagWgt_perJet
+        )
+        
+        btagWgt_dict[syst_type] = ak.prod(btagWgt_perJet, axis=-1)
+
+        '''
+        printVariable('jets %s '%syst_type, ak.zip([
+            jet.pt,
+            jet.eta,
+            jet.hadronFlavour,
+            btagSF,
+            btagEffi,
+            btagWgt_perJet
+        ]))
+        printVariable('jets %s '%syst_type, btagWgt_dict[syst_type])
+        '''
+    
+    return btagWgt_dict
+
+    
+
+
+
+    
+
+        
+
+
+
     
 def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
     # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags

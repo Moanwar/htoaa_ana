@@ -149,15 +149,15 @@ Samples2018 = OD([
         "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
     ]),
 
-    ("ttZ", [
-        "ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8",
-    ]),
-    ("ttW", [
-        "ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8",
-    ]),
-    ("tZq", [
-        "tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8",
-    ]),
+#    ("ttZ", [
+#        "ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8",
+#    ]),
+#    ("ttW", [
+#        "ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8",
+#    ]),
+#    ("tZq", [
+#        "tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8",
+#    ]),
     
     
 
@@ -179,8 +179,10 @@ Samples2018 = OD([
     ]),
 
     ("Zll", [
-        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
-        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        #"DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        #"DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8"
     ]),
 
     #("DYJets_Incl_NLO", [
@@ -290,43 +292,43 @@ Samples2018 = OD([
     ('ggH', [   #('GluGluHToBB_Pt-200ToInf', [
         "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
     ]),
-    ('VBFH', [   #('VBFHToBB_powheg', [
-        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
+#    ('VBFH', [   #('VBFHToBB_powheg', [
+#        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+#    ]),
     #('VBFHToBB_herwig', [
     #    "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
     #]),
-    ('VBFH_dipoleRecoilOn', [
-        "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    ('VBFWH_dipoleRecoilOn', [
-        "VBFWH_HToBB_WToLNu_M-125_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8",
-    ]),
+#    ('VBFH_dipoleRecoilOn', [
+#        "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
+#    ]),
+#    ('VBFWH_dipoleRecoilOn', [
+#        "VBFWH_HToBB_WToLNu_M-125_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8",
+#    ]),
 
-    ('WHbbqq', [
-        "WplusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "WminusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('WHbblv', [
-        "WplusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "WminusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('ZH', [
-        "ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('ggZH', [
-        "ggZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ggZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ggZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ggZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    ('ttH', [
-        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
-        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
+#    ('WHbbqq', [
+#        "WplusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "WminusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
+#    ('WHbblv', [
+#        "WplusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "WminusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
+#    ('ZH', [
+#        "ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
+#    ('ggZH', [
+#        "ggZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ggZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ggZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ggZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+#    ]),
+#    ('ttH', [
+#        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
+#        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
 
 
     ("ggHtoaato4b_mA_12", ["SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8"]),

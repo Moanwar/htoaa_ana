@@ -25,6 +25,14 @@ Era_2016 = '2016'
 Era_2017 = '2017'
 Era_2018 = '2018'
 
+class DatasetToAnalyze(enum.Enum):
+    FullRun2 = 'FullRun2'
+    SingleYear = 'SingleYear'
+
+### Set DatasetToAnalyze.SingleYear: to analyze a single year, DatasetToAnalyze.FullRun2: to analyse full Run2 data
+# This is important for co-related/de-correlated systematic uncertainties.
+kDatasetToAnalyze = DatasetToAnalyze.SingleYear # DatasetToAnalyze.SingleYear, DatasetToAnalyze.FullRun2
+
 sFileSamplesInfo = {
     Era_2016: "Samples_2016UL.json",
     Era_2017: "Samples_2017UL.json",
@@ -35,17 +43,17 @@ sFileSamplesInfo = {
 # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD*/r1/PNet_*.root
 sPathSkimmedNanoAODs = {
     Era_2018: {
-        'unskimmed': {
+        'skim_v1': {
             'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root',
             'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root' 
         },
-        'skim_Hto4b_0p8': {
-            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
-            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root' 
-        },
+        #'skim_Hto4b_0p8': {
+        #    'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
+        #    'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root' 
+        #},
         'skim_v2': {
-            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v2_2024_11_22/$SAMPLETAG/$SAMPLENAME/skims/Hto4b_0p8/PNet_*.root',
-            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/$SAMPLENAME/hadd/PNet_*.root' 
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root' 
         },
     }
 }
@@ -285,7 +293,7 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
             'L': 0.9172
         },
-        'ParticleNetMD_Hto4b_Htoaa4bOverQCD': {
+        'PNet_Xto4bv1_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
             # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
             'WP-80': 0.920,
             #'WP-60': 0.978,
@@ -293,8 +301,29 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             'WP-40': 0.992,
             'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
             'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
-        }
+        },
+        'PNet_Xto4bv2_Htoaa4b': {
+            # Htoaato4b channel: https://mattermost.web.cern.ch/cms-exp/pl/icc97qchspnfprkiozptnqkksy  
+            # X4b_v2 = (FatJet_PNet_X4b_v2a_Haa4b_score + FatJet_PNet_X4b_v2b_Haa4b_score) / 2.0 
+            'SRWP-40': 0.96,  'SBWP-40': 0.84,    # fake rate 0.1%
+            'SRWP-50': 0.945, 'SBWP-50': 0.74,    # fake rate 0.2%
+            'SRWP-60': 0.93,  'SBWP-60': 0.66,    # fake rate 0.3%
+            'SRWP-65': 0.92,  'SBWP-65': 0.60,    # fake rate 0.4%
+            'SRWP-70': 0.90,  'SBWP-70': 0.50,    # fake rate 0.5%
+            'SRWP-80': 0.84, #'SBWP-80': 0,       # fake rate 0.1%
+        },        
     },
+}
+
+bTagSFEfficiencyDict = {
+    Era_2018: { # 'AK4DeepJet' WP-M
+        'inputFile':    'data/correction/mc/BtagSF/2018/jetBtagEfficiency.root',
+        'histogramName': {
+            'b-flavour':     'hJetBtagEffi_b_QCD_TT_Presel',
+            'c-flavour':     'hJetBtagEffi_c_QCD_TT_Presel',
+            'light-flavour': 'hJetBtagEffi_l_QCD_TT_Presel',            
+        }
+    }
 }
 
 

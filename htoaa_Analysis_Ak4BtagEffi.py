@@ -66,7 +66,6 @@ from htoaa_CommonTools import (
     getHiggsPtRewgtForGGToHToAATo4B, getTopPtRewgt, getPURewgts, getHTReweight,
     getPURewgts_variation, get_jetTriggerSF, get_PSWeight, add_pdf_as_weight, get_QCDScaleWeight,
     get_JER_and_JES,
-    get_Ak4BtagSF,
     calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
     fillCoffeaHist, fillCoffeaHist_1,
     printVariable, insertInListBeforeThisElement, stringHasSubstring,
@@ -88,8 +87,8 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
  
 printLevel = 0
 histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
-nEventToReadInBatch = 10 # 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
-nEventsToAnalyze = 10 # -1 # 1000 # 100000 # -1
+nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
+nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
 #pd.set_option('display.max_columns', None)  
 
@@ -476,25 +475,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "METFilters",
                 "candH",
                 "leadingFatJetPt",
-                #"leadingFatJetEta",
-                #"JetID",
-                #"L1_SingleJet180",
-                #HLT_AK8PFJet330_name,
                 sTrgSelection,
-                #"leadingFatJetBtagDeepB",
-                #"leadingFatJetMSoftDrop",
-                #"leadingFatJetZHbb_Xbb_avg",
-                #"leadingFatJetZHbb",
-                #"leadingFatJetXbbVsQCD",
-                #"leadingFatJetDeepTagMD_bbvsLight", #"leadingFatJetParticleNetMD_Xbb",
-                #"leadingFatJetParticleNetMD_XbbvsQCD",
-                #"leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD",
-                #"leadingFatJet_nSV"
-                "nLeptonsTight",
-                #"nonHto4bFatJetVjjVeto",
-                "MetZvvVeto",
-                "DijetVBFVeto",
-                "BJetVeto"
+                #"nLeptonsTight",
+                #"MetZvvVeto",
+                #"DijetVBFVeto",
+                #"BJetVeto"
             ]),
         ])
 
@@ -795,7 +780,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         PU_axis               = hist.Bin("PU",                     r"PU",                         99,     0.0,    99.0)
         Ratio_axis            = hist.Bin("Ratio",                  r"Ratio",                     100,     0.0,    2.0)
         Weight_axis           = hist.Bin("Weight",                 r"Event weight",              [-10,-3,*np.arange(-2,2,0.05), 3, 10])
-        
+        ptVarBin_axis         = hist.Bin("PtVarBin",               r"$p_{T}$ [GeV]",             [0, 100, 200, 300, 500, 700, 1000, 99999])
+        absEtaVarBin_axis       = hist.Bin("absEtaVarBin",         r"abs($#eta$)",               [0., 0.5, 1.0, 1.5, 2., 2.5])
+
         sXaxis      = 'xAxis'
         sXaxisLabel = 'xAxisLabel'
         sYaxis      = 'yAxis'
@@ -1113,6 +1100,34 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
 
+                if histogramSaveLevel >= 0 and self.datasetInfo['isMC']:
+                    histos.update(OD([
+                        ('hJetBtagEffi_b_deom'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),     
+                        ('hJetBtagEffi_b_nume'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),    
+
+                        ('hJetBtagEffi_c_deom'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),     
+                        ('hJetBtagEffi_c_nume'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),    
+                        
+                        ('hJetBtagEffi_l_deom'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),     
+                        ('hJetBtagEffi_l_nume'+sHExt,     
+                        {sXaxis: ptVarBin_axis,       sXaxisLabel: r"AK4 jet pT [GeV]",
+                        sYaxis: absEtaVarBin_axis,    sYaxisLabel: r"abs(AK4 jet \eta)"}),    
+                        
+                        
+                        
+                    ]))
+
+
                 if histogramSaveLevel >= 1:
                     histos.update(OD([
 
@@ -1140,6 +1155,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetPNet_X4b_v2ab64_Haa4b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2ab64_Haa4b_score"}),
                         
                     ]))
+
 
 
                 if histogramSaveLevel >= 2:
@@ -3314,6 +3330,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         , 0)
 
 
+        if printLevel >= 100:
+            printVariable('ak4JetsCentral_nonoverlaping_leadingFatJet', ak.zip([
+                ak4JetsCentral_nonoverlaping_leadingFatJet.pt,
+                ak4JetsCentral_nonoverlaping_leadingFatJet.partonFlavour,
+                ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour,
+                ak4JetsCentral_nonoverlaping_leadingFatJet.btagDeepFlavB
+            ]))
+
 
 
 
@@ -3872,13 +3896,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable('\n wgt_QCDScale_FactorizationDown',wgt_QCDScale_FactorizationDown )
                 #printVariable('\n ', )
                 
-            # btagSF
-            wgt_Ak4Btag_dict = get_Ak4BtagSF(
-                jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
-                btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
-                year = self.datasetInfo["era"]
-            )
-                
+
 
 
 
@@ -3962,28 +3980,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_QCDPdfUp,
                 weightDown = wgt_QCDPdfDown
             )
-            if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
-                weights.add(
-                    "Btag",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Up'],
-                    weightDown = wgt_Ak4Btag_dict['Down']
-                )
-            elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-                weights.add(
-                    "BtagUncorr",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
-                )
-                weights.add(
-                    "BtagCorr",
-                    weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
-                )
-                
-
 
             
             
@@ -4182,20 +4178,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         systList.extend( [
                             "GGHPtRewgtUp",
                             "GGHPtRewgtDown",
-                        ] ) 
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['btag', 'full'] ):
-                        if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear:
-                            systList.extend( [
-                                "BtagUp",
-                                "BtagDown",
-                            ] ) 
-                        elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-                            systList.extend( [
-                                "BtagUncorrUp",
-                                "BtagUncorrDown",
-                                "BtagCorrUp",
-                                "BtagCorrDown",                                
-                            ] )                                           
+                        ] )                    
                     
                     
                 
@@ -5751,6 +5734,78 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             )    
+
+                    if histogramSaveLevel >= 0 and self.datasetInfo['isMC'] and syst == "Nom":
+                        ## AK4 jet b-tag efficiency: numerator and denominaotor histograms
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            (abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 5) 
+                        )
+                        output['hJetBtagEffi_b_deom'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            (abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 4) 
+                        )
+                        output['hJetBtagEffi_c_deom'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            ~(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 5) &
+                            ~(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 4)
+                        )
+                        output['hJetBtagEffi_l_deom'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            (abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 5) &
+                            (ak4JetsCentral_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh)
+                        )
+                        output['hJetBtagEffi_b_nume'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            (abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 4) &
+                            (ak4JetsCentral_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh)
+                        )
+                        output['hJetBtagEffi_c_nume'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+                        sel_SR_forHExt_tmp_ = (
+                            (sel_SR_forHExt) & 
+                            ~(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 5) &
+                            ~(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.hadronFlavour) == 4) &
+                            (ak4JetsCentral_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh)
+                        )
+                        output['hJetBtagEffi_l_nume'+sHExt].fill(
+                            dataset=dataset,
+                            PtVarBin=ak.flatten(ak4JetsCentral_nonoverlaping_leadingFatJet.pt[sel_SR_forHExt_tmp_]),
+                            absEtaVarBin=ak.flatten(abs(ak4JetsCentral_nonoverlaping_leadingFatJet.eta[sel_SR_forHExt_tmp_])),
+                            systematic=syst
+                        )
+                                            
+
+
 
                     # Event weights histograms ------------------------------------------------------
                     if histogramSaveLevel >= 1 and self.datasetInfo['isMC'] and syst == "Nom":

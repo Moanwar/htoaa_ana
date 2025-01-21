@@ -243,13 +243,14 @@ if __name__ == '__main__':
         "htoaa_Analysis_ZH_4b2nu.py", 
         "htoaa_Analysis_VBFMode.py", 
         "htoaa_Analysis_ttHHadronicMode.py",
+        "htoaa_Analysis_Ak4BtagEffi.py",
         "htoaa_Analysis_Example.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
-    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "UnskimmedHToAATo4BNanoAOD", "SkimmedNanoAOD_Hto4b_0p8", "SkimmedNanoAOD_v2"], required=False)
+    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "SkimmedNanoAOD_v1", "SkimmedNanoAOD_v2"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=1)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
@@ -309,7 +310,7 @@ if __name__ == '__main__':
     ## Settings ---------------------------------------------------------------------------------
 
     ## MCSamplesStitchOptions.PhSpOverlapRewgt
-    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRewgt 
+    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove # MCSamplesStitchOptions.PhSpOverlapRewgt 
     samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
     ## MCSamplesStitchOptions.PhSpOverlapRemove
     #MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove 
@@ -419,13 +420,15 @@ if __name__ == '__main__':
                     
                 print(f"sample_category: {sample_category}, sample: {sample}", flush=True)
 
+                sNTuples_toUse = "CentralNanoAOD"
+                if   sNTuples == "SkimmedNanoAOD_v1":              sNTuples_toUse = "skim_v1"
+                elif sNTuples == "SkimmedNanoAOD_v2":              sNTuples_toUse = "skim_v2"
+
                 sampleInfo = samplesInfo[sample] # Samples_Era.json      
                 fileList   = None
                 if   sNTuples == "CentralNanoAOD":                 fileList = sampleInfo[sampleFormat]
-                elif sNTuples == "UnskimmedHToAATo4BNanoAOD":      fileList = sampleInfo["skimmedNanoAOD"]["unskimmed"]
-                elif sNTuples == "SkimmedNanoAOD_Hto4b_0p8":       fileList = sampleInfo["skimmedNanoAOD"]["skim_Hto4b_0p8"]
-                elif sNTuples == "SkimmedNanoAOD_v2":              fileList = sampleInfo["skimmedNanoAOD"]["skim_v2"]
-
+                else:                                              fileList = sampleInfo["skimmedNanoAOD"][sNTuples_toUse]
+                
                 files = []
                 for iEntry in fileList:
                     # file name with wildcard charecter *
@@ -437,6 +440,11 @@ if __name__ == '__main__':
                 sample_cossSection = sampleInfo["cross_section"] if sample_isMC else None
                 sample_nEvents     = sampleInfo["nEvents"]
                 sample_sumEvents   = sampleInfo["sumEvents"] if sample_isMC else None
+                if   not (sNTuples == "CentralNanoAOD"): 
+                    sample_nEvents     = sampleInfo["skimmedNanoAOD"]["%s_nEvents"   % (sNTuples_toUse)]
+                    sample_sumEvents   = sampleInfo["skimmedNanoAOD"]["%s_sumEvents" % (sNTuples_toUse)] if sample_isMC else None
+                
+
 
                 if printLevel >= 6:
                     print("\nsample: {}".format(sample))

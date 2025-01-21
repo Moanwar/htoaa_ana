@@ -3089,6 +3089,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         # mask satisfying HEM1516 issues conditions
+        '''
+        # Iteration 1
         scaleAK4ToAK8 = 0.4
         mask_HEM1516Issue = ak.fill_none((
             (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
@@ -3099,6 +3101,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ), False)
         mask_HEM1516Issue_Phi = ak.fill_none((
             (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        '''
+        # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
+        mask_HEM1516Issue = ak.fill_none((
+            (leadingFatJet.eta < -1.1) & 
+            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (leadingFatJet.eta < -1.1)
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
         ), False)
         isRunAffectedBy2018HEM1516Issue = (
             (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 

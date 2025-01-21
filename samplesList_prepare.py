@@ -99,6 +99,7 @@ if __name__ == '__main__':
     if os.path.exists( sFileSamplesInfo[era] ):
         with open(sFileSamplesInfo[era]) as fSamplesInfo:
             samples_details = json.load(fSamplesInfo)
+        print(f"{sFileSamplesInfo[era]} exists, so updating it")
         print(f"samples_details.keys(): {samples_details.keys()}")
     else:
         samples_details = OD()
@@ -138,8 +139,11 @@ if __name__ == '__main__':
 
             samples_details[sampleName][sSkimmedNanoAOD] = OD()
             for skimName_ in sPathSkimmedNanoAODs[era]:
-                samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sNFiles)] = 0
-                samples_details[sampleName][sSkimmedNanoAOD][skimName_                     ] = []
+                samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sNEvents)]   = 0
+                if isMC:
+                    samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sSumEvents)] = 0
+                samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sNFiles)]    = 0
+                samples_details[sampleName][sSkimmedNanoAOD][skimName_                     ]    = []
 
             # temperary fix
             #if "skimmedNanoAOD_nFiles" in samples_details[sampleName_]:
@@ -153,10 +157,11 @@ if __name__ == '__main__':
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
         #print(f"{datasetName = },  {isMC = }")
 
+        sampleName_part2_forData = ''
         if not isMC:
             # for data sample
-            sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
-            sampleName = '%s_%s' % (sampleName, sampleName_part2)  # JetHT_Run2018A
+            sampleName_part2_forData = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+            sampleName = '%s_%s' % (sampleName, sampleName_part2_forData)  # JetHT_Run2018A
 
         if updateCrossSections:
             if isMC:
@@ -182,36 +187,11 @@ if __name__ == '__main__':
         #if datasetName_parts[1] == 'SingleMuon':
         sSampleTagDir_used = sSampleTagDir_used.replace('v1', 'v*') # SingleMuon, EGamma  had DatasetTag v2/3 in MiniAOD and v1 in NanoAOD. So use wildcard charester *
 
+        sSampleEraTagDir_used = ''
+        if not isMC:
+            sSampleEraTagDir_used = sampleName_part2_forData
+
         sDataType = 'MC' if isMC else 'Data'
-
-        # Loop over multiple skim version we have
-        for skimName_ in sPathSkimmedNanoAODs[era]:
-            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs[era][skimName_][sDataType] 
-            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root           
-            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root
-            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLENAME', sSampleNameDir_used)
-            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLETAG',  sSampleTagDir_used)
-
-            sSkimmedNanoAODs = []
-            if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) )
-            else:                                 sSkimmedNanoAODs.append( sPathSkimmedNanoAODs_toUse )
-            print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
-            
-            '''if sSkimmedNanoAOD_nFiles not in samples_details[sampleName]:
-                samples_details[sampleName][sSkimmedNanoAOD_nFiles]  = len(sSkimmedNanoAODs)
-                samples_details[sampleName][sSkimmedNanoAOD]         = sSkimmedNanoAODs
-            else:
-                samples_details[sampleName][sSkimmedNanoAOD_nFiles] += len(sSkimmedNanoAODs)
-                samples_details[sampleName][sSkimmedNanoAOD].extend(   sSkimmedNanoAODs )'''
-            samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sNFiles)] += len(   sSkimmedNanoAODs )
-            samples_details[sampleName][sSkimmedNanoAOD][skimName_                     ].extend(   sSkimmedNanoAODs )
-
-        #if addSkimmedNanoAOD:
-        #    continue
-        
-
-        #if sampleName not in samples_details:
-        #    samples_details[sampleName] = deepcopy(sampleDetail_dict_template)
 
         samples_details[sampleName][sNDatasets]         += 1
         samples_details[sampleName][sDataset  ].append(    datasetName )
@@ -230,7 +210,52 @@ if __name__ == '__main__':
         samples_details[sampleName][sNEvents       ]         += nEventsTotal
         samples_details[sampleName][sNanoAOD_nFiles]         += nFiles
         samples_details[sampleName][sNanoAOD       ].extend(    files        )
-        
+
+        # Loop over multiple skim version we have
+        for skimName_ in sPathSkimmedNanoAODs[era]:
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs[era][skimName_][sDataType] 
+            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/$SAMPLENAME/r1/PNet_*.root           
+            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root
+            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root  /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v2_2024_11_22/JetHT/r1_Run2018D/PNet_v1_Skim_5_9.root
+            # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root            /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/ZZ_TuneCP5_13TeV-pythia8/r1/PNet_v1_Skim.root
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLENAME', sSampleNameDir_used)
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLETAG',  sSampleTagDir_used)
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used)
+
+            sSkimmedNanoAODs = []
+            if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) )
+            else:                                 sSkimmedNanoAODs.append( sPathSkimmedNanoAODs_toUse )
+            print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
+            
+            '''if sSkimmedNanoAOD_nFiles not in samples_details[sampleName]:
+                samples_details[sampleName][sSkimmedNanoAOD_nFiles]  = len(sSkimmedNanoAODs)
+                samples_details[sampleName][sSkimmedNanoAOD]         = sSkimmedNanoAODs
+            else:
+                samples_details[sampleName][sSkimmedNanoAOD_nFiles] += len(sSkimmedNanoAODs)
+                samples_details[sampleName][sSkimmedNanoAOD].extend(   sSkimmedNanoAODs )'''
+            samples_details[sampleName][sSkimmedNanoAOD]['%s_%s' % (skimName_, sNFiles)] += len(   sSkimmedNanoAODs )
+            samples_details[sampleName][sSkimmedNanoAOD][skimName_                     ].extend(   sSkimmedNanoAODs )
+
+            # No need to store NEvents and sumEvents equal to zero when there is no skimmedNanoAOD files available.
+            if len(sSkimmedNanoAODs) == 0: continue 
+
+            # fill in 'NEvents' and 'sumEvents' for the skim samples if provided, else fill those numbers from the central NanoAODs
+            for sEvents_ in ['%s_%s' % (skimName_, sNEvents),   '%s_%s' % (skimName_, sSumEvents)]:
+                if (not isMC) and sEvents_ == '%s_%s' % (skimName_, sSumEvents): continue # sumEvents for data is invalid
+
+                if sEvents_ in datasetDetails:
+                    samples_details[sampleName][sSkimmedNanoAOD][sEvents_] = datasetDetails[sEvents_]
+                else:
+                    nEvents_ =  0
+                    if sEvents_ == '%s_%s' % (skimName_, sNEvents):
+                        nEvents_ = nEventsTotal # use total events from NanoAOD DAS
+                    if sEvents_ == '%s_%s' % (skimName_, sSumEvents):
+                        nEvents_ = samples_details[sampleName][sSumEvents] # use previously calculated sumEvents
+                    samples_details[sampleName][sSkimmedNanoAOD][sEvents_] = nEvents_
+                    
+            
+                    
+
 
     # Running the samples_prepare.py on exising Sample.json changes order of samples. 
     # Hence, to forcefully follow order of samples as in list_datasetAndXs, 
