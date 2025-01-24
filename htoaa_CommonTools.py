@@ -395,9 +395,10 @@ def selectMETFilters(flags_list, era, isMC):
     return mask_METFilters
     
 
-def selectFatJets(FatJets, pT_Thsh=170, eta_Thsh=2.4, Msd_Thsh=20, JetID=6):
+def selectFatJets(FatJets, pT_Thsh=170, eta_Thsh=2.4, Msd_Thsh=20, JetID=6, shift_syst=None):
+
     maskJetsSelected = (
-        (FatJets.pt        >  pT_Thsh)    &
+        (FatJets.pt_toUse  >  pT_Thsh)    &
         (abs(FatJets.eta)  <  eta_Thsh)   &
         (FatJets.msoftdrop >  Msd_Thsh)   &
         (FatJets.jetId     >= int(JetID)) 
@@ -414,7 +415,7 @@ def getCandidateHiggs(FatJets, Xbb_Thsh=0):
         (FatJets.particleNetMD_XbbvsQCD > Xbb_Thsh)
     )
     candHs = FatJets[maskJetsSelected]
-    if 'PNet_X4b_v2a_Haa34b_score' in FatJets.fields:
+    if 'PNet_X4b_v2a_Haa34b_score' in FatJets.fields: # NanoAOD v2
         candHs_PNet_X4b_v2_Haa34b = candHs.PNet_X4b_v2a_Haa34b_score + candHs.PNet_X4b_v2b_Haa34b_score
         idx_candHs_PNet_X4b_v2_Haa34b_max = ak.argmax(candHs_PNet_X4b_v2_Haa34b, axis=-1, keepdims=True)
         candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa34b_max])

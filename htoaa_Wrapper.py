@@ -250,7 +250,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
-    parser.add_argument('-ntuples',           type=str, default="CentralNanoAOD", choices=["CentralNanoAOD", "SkimmedNanoAOD_v1", "SkimmedNanoAOD_v2"], required=False)
+    parser.add_argument('-ntuples',           type=str, default="SkimmedNanoAOD_v2", choices=["CentralNanoAOD", "SkimmedNanoAOD_v1", "SkimmedNanoAOD_v2"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=1)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
