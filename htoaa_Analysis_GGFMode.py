@@ -143,6 +143,7 @@ class ObjectSelection:
         self.FatJetZHbb_plus_Xbb_Thsh = 0.4
         self.FatJetZHbb_Xbb_avg_Thsh  = 0.4
         self.FatJetZHbb_Thsh          = 0.7
+        self.FatJetPNetWorkingPoints = ['40', '60', '80'] # ['40', '50', '60', '65', '70', '80']
 
         self.nSV_matched_leadingFatJet_Thsh = 3
 
@@ -588,18 +589,63 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ]
             '''
 
+            for wp_ in self.objectSelector.FatJetPNetWorkingPoints: 
+                self.sel_names_all["%s_Xto4bv2_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
+                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP%s" % (wp_)
+                ]
+                self.sel_names_all["%s_Xto4bv2_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
+                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_)
+                ] 
+
+                self.sel_names_all["%s_Xto4bv2a_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
+                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SRWP%s" % (wp_)
+                ]
+                self.sel_names_all["%s_Xto4bv2a_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
+                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SBWP%s" % (wp_)
+                ] 
+                
+                self.sel_names_all["%s_Xto4bv2b_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
+                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SRWP%s" % (wp_)
+                ]
+                self.sel_names_all["%s_Xto4bv2b_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
+                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SBWP%s" % (wp_)
+                ] 
+                
+                               
+
+            '''
             self.sel_names_all["%s_SRWP40" % (sCatName)] = catSels + [ # signal region
                 "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP40"
             ]
             self.sel_names_all["%s_SBWP40" % (sCatName)] = catSels + [ # side band
                 "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP40"
             ]
+            self.sel_names_all["%s_SRWP50" % (sCatName)] = catSels + [ # signal region
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP50"
+            ]
+            self.sel_names_all["%s_SBWP50" % (sCatName)] = catSels + [ # side band
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP50"
+            ]            
             self.sel_names_all["%s_SRWP60" % (sCatName)] = catSels + [ # signal region
                 "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP60"
             ]
             self.sel_names_all["%s_SBWP60" % (sCatName)] = catSels + [ # side band
                 "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP60"
             ]
+            self.sel_names_all["%s_SRWP65" % (sCatName)] = catSels + [ # signal region
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP65"
+            ]
+            self.sel_names_all["%s_SBWP65" % (sCatName)] = catSels + [ # side band
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP65"
+            ]
+            self.sel_names_all["%s_SRWP70" % (sCatName)] = catSels + [ # signal region
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP70"
+            ]
+            self.sel_names_all["%s_SBWP70" % (sCatName)] = catSels + [ # side band
+                "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP70"
+            ]
+            '''
+            
             
 
 
@@ -749,6 +795,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
                     [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
                     )
+            print(f"{self.SFs_ParticleNetMD_XbbvsQCD = }")
 
         
         
@@ -3637,6 +3684,49 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
         # PNet Xaa4b v2
+        if 'PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields:
+            for wp_ in self.objectSelector.FatJetPNetWorkingPoints: 
+                # leadingFatJetPNet_Xto4bv2_Htoaa4b tagger cut
+                if "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP%s" % (wp_),
+                        leadingFatJet_PNet_Xto4bv2_Htoaa4b > bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SRWP-%s' % wp_]
+                    )
+                if "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_),
+                        ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-%s' % wp_]) &
+                          (leadingFatJet_PNet_Xto4bv2_Htoaa4b <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SRWP-%s' % wp_]))
+                    )
+
+                # leadingFatJetPNet_Xto4bv2a_Htoaa4b tagger cut
+                if "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SRWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SRWP%s" % (wp_),
+                        leadingFatJet.PNet_X4b_v2a_Haa4b_score > bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2a_Htoaa4b']['SRWP-%s' % wp_]
+                    )
+                if "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SBWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SBWP%s" % (wp_),
+                        ( (leadingFatJet.PNet_X4b_v2a_Haa4b_score >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2a_Htoaa4b']['SBWP-%s' % wp_]) &
+                          (leadingFatJet.PNet_X4b_v2a_Haa4b_score <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2a_Htoaa4b']['SRWP-%s' % wp_]))
+                    )
+                    
+                # leadingFatJetPNet_Xto4bv2b_Htoaa4b tagger cut
+                if "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SRWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SRWP%s" % (wp_),
+                        leadingFatJet.PNet_X4b_v2b_Haa4b_score > bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2b_Htoaa4b']['SRWP-%s' % wp_]
+                    )
+                if "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SBWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SBWP%s" % (wp_),
+                        ( (leadingFatJet.PNet_X4b_v2b_Haa4b_score >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2b_Htoaa4b']['SBWP-%s' % wp_]) &
+                          (leadingFatJet.PNet_X4b_v2b_Haa4b_score <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2b_Htoaa4b']['SRWP-%s' % wp_]))
+                    )
+                
+
+        '''
         if "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP40" in self.sel_conditions_all_list and \
             (('PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields) ):
             selection.add(
@@ -3664,6 +3754,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-60']) &
                   (leadingFatJet_PNet_Xto4bv2_Htoaa4b <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SRWP-60']))
             )
+        '''
             
 
 
@@ -3831,7 +3922,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         sel_SR           = selection.all(* self.sel_names_all["Presel"])
         sel_GenHToAATo4B = None
 
-        if self.datasetInfo['isMC'] and self.datasetInfo['isSignal']:
+        if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] and 1==0:
             # max. dR(sel_leadingFatJet, GEN 4B from H->aa)
             dr_LeadingFatJet_GenB = ak.concatenate([leadingFatJet_asSingletons.delta_r(LVGenB_0), leadingFatJet_asSingletons.delta_r(LVGenBbar_0), leadingFatJet_asSingletons.delta_r(LVGenB_1), leadingFatJet_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_LeadingFatJet_GenB = ak.max(dr_LeadingFatJet_GenB, axis=-1)
@@ -3984,7 +4075,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )   
 
             # MC ParticleNetMD_XbbvsQCD SFs      SFs_ParticleNetMD_XbbvsQCD
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            if self.SFs_ParticleNetMD_XbbvsQCD != None:
+                print(f"{self.SFs_ParticleNetMD_XbbvsQCD = } is not None")
                 mask_ParticleNetMD_XbbvsQCD_SFRegion = (
                     (n_leadingFatJat_matched_genB >= 2) &
                     (leadingFatJetParticleNetMD_XbbvsQCD > self.objectSelector.FatJetParticleNetMD_XbbvsQCD_Thsh)
@@ -4087,7 +4180,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "TopPtReWeight",
                     weight = wgt_TopPt
                 )         
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 weights.add(
                     "SF_ParticleNetMD_XbbvsQCD",
                     weight = wgt_ParticleNetMD_XbbvsQCD
@@ -4196,7 +4290,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "TopPtReWeight",
                     weight = wgt_TopPt
                 )            
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 weights_woHEM1516Fix.add(
                     "SF_ParticleNetMD_XbbvsQCD",
                     weight = wgt_ParticleNetMD_XbbvsQCD
@@ -9491,7 +9586,7 @@ if __name__ == '__main__':
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
     print(f"htoaa_Analysis_GGFMode:: here15 {datetime.now() = }")
 
-    nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventToReadInBatch
+    nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventsToAnalyze
     sInputFiles         = config["inputFiles"]
     sOutputFile         = config["outputFile"]
     sample_dataset      = config["dataset"] 
@@ -9620,8 +9715,8 @@ if __name__ == '__main__':
 
     #client = Client("tls://localhost:8786")
     #executor = processor.DaskExecutor(client=client)
-    chunksize = nEventToReadInBatch
-    maxchunks = None if nEventsToAnalyze == -1 else int(nEventsToAnalyze/nEventToReadInBatch)
+    chunksize = nEventToReadInBatch  if nEventsToAnalyze == -1 else nEventsToAnalyze
+    maxchunks = None if nEventsToAnalyze == -1 else int(max(nEventsToAnalyze/nEventToReadInBatch, 1))
     nWorkers  = 4 if nEventsToAnalyze == -1 else 1
     print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}", flush=flushStdout)
     run = processor.Runner(

@@ -707,19 +707,26 @@ def getPURewgts(PU_list, hPURewgt):
 
 
 def getPURewgts_variation(events, year):
-    ## json files from: https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
-    fname = "data/correction/mc/PURewgt/{0}_UL/puWeights.json.gz".format(year)
-    hname = {
-        "2016APV": "Collisions16_UltraLegacy_goldenJSON",
-        "2016"   : "Collisions16_UltraLegacy_goldenJSON",
-        "2017"   : "Collisions17_UltraLegacy_goldenJSON",
-        "2018"   : "Collisions18_UltraLegacy_goldenJSON"
-    }
-    evaluator = correctionlib.CorrectionSet.from_file(fname)
 
-    puUp = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "up")
-    puDown = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "down")
-    puNom = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "nominal")
+    if 'puWeight' in events.fields:
+        # Read from PU weights stored in NanoAODv2
+        puNom  = events.puWeight
+        puUp   = events.puWeightUp
+        puDown = events.puWeightDown
+    else:
+        ## json files from: https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
+        fname = "data/correction/mc/PURewgt/{0}_UL/puWeights.json.gz".format(year)
+        hname = {
+            "2016APV": "Collisions16_UltraLegacy_goldenJSON",
+            "2016"   : "Collisions16_UltraLegacy_goldenJSON",
+            "2017"   : "Collisions17_UltraLegacy_goldenJSON",
+            "2018"   : "Collisions18_UltraLegacy_goldenJSON"
+        }
+        evaluator = correctionlib.CorrectionSet.from_file(fname)
+
+        puUp = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "up")
+        puDown = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "down")
+        puNom = evaluator[hname[str(year)]].evaluate(np.array(events.Pileup.nTrueInt), "nominal")        
 
     return [puNom, puUp, puDown]
 

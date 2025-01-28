@@ -310,8 +310,21 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             'SRWP-60': 0.93,  'SBWP-60': 0.66,    # fake rate 0.3%
             'SRWP-65': 0.92,  'SBWP-65': 0.60,    # fake rate 0.4%
             'SRWP-70': 0.90,  'SBWP-70': 0.50,    # fake rate 0.5%
-            'SRWP-80': 0.84, #'SBWP-80': 0,       # fake rate 0.1%
-        },        
+            'SRWP-80': 0.84,  'SBWP-80': 0.40,    # fake rate 0.1%
+        },       
+        'PNet_Xto4bv2a_Htoaa4b': {
+            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
+            'SRWP-40': 0.968,  'SBWP-40': 0.84,    # fake rate 0.1%
+            'SRWP-60': 0.944,  'SBWP-60': 0.66,    # fake rate 0.3%
+            'SRWP-80': 0.868,  'SBWP-80': 0.40,    # fake rate 0.1%
+        }, 
+        'PNet_Xto4bv2b_Htoaa4b': {
+            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
+            'SRWP-40': 0.952,  'SBWP-40': 0.84,    # fake rate 0.1%
+            'SRWP-60': 0.916,  'SBWP-60': 0.66,    # fake rate 0.3%
+            'SRWP-80': 0.814,  'SBWP-80': 0.40,    # fake rate 0.1%
+        }, 
+                
     },
 }
 

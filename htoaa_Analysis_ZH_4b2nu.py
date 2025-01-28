@@ -672,13 +672,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.histosExtensions = HistogramNameExtensions_QCD 
 
             ## MC ParticleNetMD_XbbvsQCD SFs
-            print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] = } "); sys.stdout.flush()
-            print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges'] = } "); sys.stdout.flush()
+            self.SFs_ParticleNetMD_XbbvsQCD = None
+            if self.objectSelector.wp_ParticleNetMD_XbbvsQCD in Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]].keys():
+                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] = } "); sys.stdout.flush()
+                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges'] = } "); sys.stdout.flush()
 
-            self.SFs_ParticleNetMD_XbbvsQCD = dense_lookup(
-                np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
-                [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
-                )
+                self.SFs_ParticleNetMD_XbbvsQCD = dense_lookup(
+                    np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
+                    [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
+                    )
+            print(f"{self.SFs_ParticleNetMD_XbbvsQCD = }")
 
         
         
@@ -1124,6 +1127,39 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     #('hLeadingFatJetParticleNetMD_Hto4b'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetParticleNetMD Hto4b"}),
 
 
+                    # NanoAODV2
+                    ('hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD"}),
+                    ('hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2a_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2a_Haa4b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2b_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2b_Haa4b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2ab_Haa4b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2ab_Haa4b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2a_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2a_Haa34b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2b_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2b_Haa34b_score"}),
+                    ('hLeadingFatJetPNet_X4b_v2ab_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2ab_Haa34b_score"}),                        
+                    #
+                    #('hLeadingFatJetMassH_v1'+sHExt,                    {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_1) [GeV]"}),
+                    #('hLeadingFatJetMassH_v2a'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_v2a) [GeV]"}),
+                    ('hLeadingFatJetMassH_v2b'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_v2b) [GeV]"}),
+                    #('hLeadingFatJetMassH_v2c'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_v2c) [GeV]"}),
+                    #('hLeadingFatJetMassH_v2d'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_v2d) [GeV]"}),
+                    #('hLeadingFatJetMassH_avg'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_avg) [GeV]"}),
+                    #('hLeadingFatJetMassH_std'+sHExt,                   {sXaxis: mass_axis1,      sXaxisLabel: r"m (leading FatJet MassH_std) [GeV]"}),
+                    #
+                    ('hLeadingFatJetPNet_massAa'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massAa"}), 
+                    #('hLeadingFatJetPNet_massAb'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massAb"}), 
+                    #('hLeadingFatJetPNet_massAc'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massAc"}), 
+                    #('hLeadingFatJetPNet_massAd'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massAd"}), 
+                    #('hLeadingFatJetPNet_massA_avg'+sHExt,      {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massA_avg"}), 
+                    #('hLeadingFatJetPNet_massA_std'+sHExt,      {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massA_std"}), 
+                    ('hLeadingFatJetPNet_34massAa'+sHExt,       {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_34massAa"}), 
+                    ('hLeadingFatJetPNet_34massAb'+sHExt,       {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_34massAb"}), 
+                    #('hLeadingFatJetPNet_34massAc'+sHExt,       {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_34massAc"}), 
+                    ('hLeadingFatJetPNet_34massAd'+sHExt,       {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_34massAd"}), 
+                    ('hLeadingFatJetPNet_massA1'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massA1"}), 
+                    ('hLeadingFatJetPNet_massA2'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massA2"}), 
+                    ('hLeadingFatJetPNet_massAA'+sHExt,         {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_massAA"}), 
+                    ('hLeadingFatJetPNet_dMassAA'+sHExt,        {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetPNet_dMassAA"}), 
+                    ('hLeadingFatJetPNet_dMassAA_relH'+sHExt,   {sXaxis: mass5_axis,       sXaxisLabel: r"hLeadingFatJetPNet_dMassAA_relH"}), 
 
 
                     ## SubJet corresponding to leadingFatJet
@@ -1188,6 +1224,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
                      {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
                       sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
+
+                    ## PNetMD Hto4b NanoAOD_v2
+                    ('hLeadingFatJetPNet_massH_v2b_vs_massAa'+sHExt,     
+                    {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetPNet_massH",
+                    sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massAa"}),     
+
+                    ('hLeadingFatJetMass_vs_massAa'+sHExt,     
+                    {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                    sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massAa"}),
+
+                    ('hLeadingFatJetMSoftDrop_vs_massAa'+sHExt,     
+                    {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
+                    sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massAa"}),        
 
                 ]))
 
@@ -2247,12 +2296,36 @@ class HToAATo4bProcessor(processor.ProcessorABC):
              
         if nEventsToAnalyze != -1:
             #print(f"\n (run:ls:event): {ak.zip([events.run, events.luminosityBlock, events.event])}") 
-            printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()           
+            printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()     
+        #printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])[:20]); #sys.stdout.flush()        
 
         #if not self.datasetInfo['isMC']:
         if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
+            
+            #systematics_shift = [None, "JERUp", "JERDown", "JESUp", "JESDown"] # [None, "JERUp", "JERDown", "JESUp", "JESDown"]
             systematics_shift = [None]
+            if not self.datasetInfo['systematicsToRun'] == 'no':
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jer', 'full'] ): 
+                    systematics_shift.extend( [
+                        "JERUp",
+                        "JERDown",
+                    ] )
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jes', 'full'] ): 
+                    systematics_shift.extend( [
+                        "JESUp",
+                        "JESDown",
+                    ] )
+                if (stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jeshemissue', 'full'] ) and 
+                   (self.datasetInfo["era"] == Era_2018) ):
+                    systematics_shift.extend( [
+                        "JESHEMIssueUp",
+                        "JESHEMIssueDown",
+                    ] )                
+
+
+            #if not self.datasetInfo['systematicsToRun'] == 'no': 
+            #    systematics_shift.appen()
             for _syst in systematics_shift:
                 output += self.process_shift(events, _syst)
         else:
@@ -3450,7 +3523,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )   
 
             # MC ParticleNetMD_XbbvsQCD SFs      SFs_ParticleNetMD_XbbvsQCD
-            if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 mask_ParticleNetMD_XbbvsQCD_SFRegion = (
                     (n_leadingFatJat_matched_genB >= 2) &
                     (leadingFatJetParticleNetMD_XbbvsQCD > self.objectSelector.FatJetParticleNetMD_XbbvsQCD_Thsh)
@@ -8500,8 +8574,8 @@ if __name__ == '__main__':
 
     #client = Client("tls://localhost:8786")
     #executor = processor.DaskExecutor(client=client)
-    chunksize = nEventToReadInBatch
-    maxchunks = None if nEventsToAnalyze == -1 else int(nEventsToAnalyze/nEventToReadInBatch)
+    chunksize = nEventToReadInBatch  if nEventsToAnalyze == -1 else nEventsToAnalyze
+    maxchunks = None if nEventsToAnalyze == -1 else int(max(nEventsToAnalyze/nEventToReadInBatch, 1))
     nWorkers  = 4 if nEventsToAnalyze == -1 else 1
     print(f"nEventsToAnalyze: {nEventsToAnalyze},  nEventToReadInBatch: {nEventToReadInBatch}, chunksize: {chunksize},  maxchunks: {maxchunks},  nWorkers: {nWorkers}", flush=flushStdout)
     run = processor.Runner(
