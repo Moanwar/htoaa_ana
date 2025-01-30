@@ -257,7 +257,8 @@ if __name__ == '__main__':
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
     parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
-    parser.add_argument('-systematics',       type=str, default='no',                        help='No,Full,PU,JES etc')    
+    parser.add_argument('-systematics',       type=str, default='no',                        help='No,Full,PU,JES etc') 
+    parser.add_argument('-jumpToHaddOutput',  action='store_true', default=False,            help="When running on earlier jobs, skip checking failed jobs and jump to hadd produced output.root files.")         
     parser.add_argument('-dryRun',            action='store_true', default=False,            help="Produce jpbs' config files without submiting jobs to HT condor server.")    
     args=parser.parse_args()
     print("args: {}".format(args))
@@ -277,6 +278,7 @@ if __name__ == '__main__':
     xrdcpIpAftNResub        = args.xrdcpIpAftNResub
     server                  = args.server
     systematics             = args.systematics
+    jumpToHaddOutput        = args.jumpToHaddOutput
     dryRun                  = args.dryRun
 
     SourceCodeDir     = os.getcwd()
@@ -433,7 +435,16 @@ if __name__ == '__main__':
                 for iEntry in fileList:
                     # file name with wildcard charecter *
                     if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
-                    else:              files.append( iEntry )
+                    #else:              files.append( iEntry )
+                    else:
+                        if not iEntry.startswith('/eos/'): # central NanoAOD
+                            files.append( iEntry )
+                        else: # File stored on /eos/ space, check if the file exist or not
+                            if os.path.exists(iEntry):
+                                files.append( iEntry )
+                            else:
+                                print(f"Input file {iEntry} does not exists **** ERROR **** \n")
+
                 if len(files) == 0: continue # no inputfile
                 
                 sample_dataset     = sampleInfo["dataset"]
@@ -677,7 +688,7 @@ if __name__ == '__main__':
                     if run_mode == 'condor':
                         cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
                         
-                        if not dryRun:
+                        if not (dryRun or jumpToHaddOutput):
                             if printLevel >= 5:
                                 print("Now:  %s " % cmd1)
                             os.system(cmd1)
@@ -720,7 +731,7 @@ if __name__ == '__main__':
             print('%s \t druRun with iJobSubmission: %d  \nTerminating...\n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
             exit(0)
             
-        if len(OpRootFiles_Target) == len(OpRootFiles_Exist):
+        if (len(OpRootFiles_Target) == len(OpRootFiles_Exist)) or jumpToHaddOutput:
             allJobsSuccessful = True
             break
         else:
