@@ -10,6 +10,7 @@ import math
 import awkward as ak
 import uproot as uproot
 from coffea import hist as coffea_hist
+from coffea.nanoevents.methods import nanoaod, vector
 import hist as hist
 #import ROOT as R
 from parse import *
@@ -24,6 +25,19 @@ from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl, kZJets, kWJets
 )
 #from numba import jit
+
+
+def getLorentVector(collection, pTName='pt_toUse', etaName='eta', phiName='phi', massName='mass_toUse'):
+    return ak.zip(
+        {
+            "pt":   collection[pTName],
+            "eta":  collection[etaName],
+            "phi":  collection[phiName],
+            "mass": collection[massName]            
+        },
+        with_name="PtEtaPhiMLorentzVector",
+        behavior=vector.behavior,
+    )
 
 def calculate_lumiScale(luminosity, crossSection, sumEvents):
     lumiScale = 1
@@ -468,11 +482,11 @@ def selectAK4Jets(Jets, era, pT_Thsh=0):
     # Andrew's event categorization: https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=4
     maskJetsSelected = (
         (Jets.jetId >= 6) & 
-        ( (Jets.pt > 50) | (Jets.puId >= 4 ) )
+        ( (Jets.pt_toUse > 50) | (Jets.puId >= 4 ) )
     )
 
 
-    return Jets[maskJetsSelected & (Jets.pt > pT_Thsh)]
+    return Jets[maskJetsSelected & (Jets.pt_toUse > pT_Thsh)]
         
 
 #def selectMuons(eventsObj, pT_Thsh=10, MVAId=3, MiniIsoId=3, MVATTHThsh=0.5):
@@ -562,9 +576,17 @@ def selectElectrons(eventsObj, pT_Thsh=10, DxyThsh=0.02, DzThsh=0.10):
 
 
 def calWeightSystematicsVariation(wgt_):
+    '''
     delta          = 1 - wgt_
     wgtSystVarUp   = wgt_ + np.abs(delta)
     wgtSystVarDown = wgt_ - np.abs(delta)
+    '''
+
+    ## Up: Twice deviation of wgt from 1. Down=1
+    delta          = wgt_ - 1
+    wgtSystVarUp   = wgt_ + delta
+    wgtSystVarDown = wgt_ - delta
+
     return [wgtSystVarUp, wgtSystVarDown]
 
 
@@ -682,8 +704,9 @@ def getTopPtRewgt(eventsGenPart, isPythiaTuneCP5):
     wgt_TopPtRewgt = np.sqrt(wgt_TopPtRewgt)
     #printVariable('wgt_TopPtRewgt ', wgt_TopPtRewgt)
 
+    wgt_TopPtRewgtUp, wgt_TopPtRewgtDown = calWeightSystematicsVariation(wgt_TopPtRewgt)
 
-    return wgt_TopPtRewgt
+    return [wgt_TopPtRewgt, wgt_TopPtRewgtUp, wgt_TopPtRewgtDown]
 
 
 def getPURewgts(PU_list, hPURewgt):
@@ -731,6 +754,17 @@ def getPURewgts_variation(events, year):
     return [puNom, puUp, puDown]
 
 
+def getHToAATo4BLundPlaneRewgt(events):    
+    if 'Lp' in events.fields:
+        wgt_LundPlane_Nom  = events.Lp.weights_nom 
+        wgt_LundPlane_Up   = events.Lp.weights_up 
+        wgt_LundPlane_Down = events.Lp.weights_down 
+    else:
+        wgt_LundPlane_Nom = wgt_LundPlane_Up = wgt_LundPlane_Down = np.ones(len(events))
+
+    return [wgt_LundPlane_Nom, wgt_LundPlane_Up, wgt_LundPlane_Down]
+        
+        
 def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     # Used in Brook's analysis
     #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
@@ -742,7 +776,17 @@ def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 0.09) )
     wgt_HiggsPt = np.minimum(wgt_HiggsPt, np.full(len(GenHiggsPt_list), 1.02) )
 
-    wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown = calWeightSystematicsVariation(wgt_HiggsPt)
+    # wgt_Nom is [0.4, 0.9] 
+    #wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown = calWeightSystematicsVariation(wgt_HiggsPt) # This gets negative wgts_Up/Down and wgt_Nom is [0.4, 0.9] 
+    # Apply +- 20% for Up/Down systematics uncertainties
+    wgt_HiggsPtSystVarUp   = wgt_HiggsPt * (1 - 0.20)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * (1 + 0.20)
+    # Take care that wgt_Down do not go above 1
+    wgt_HiggsPtSystVarDown = ak.where(
+        wgt_HiggsPtSystVarDown > 1,
+        np.ones_like(wgt_HiggsPtSystVarDown),
+        wgt_HiggsPtSystVarDown)
+                                      
     return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
 
 
@@ -1305,6 +1349,9 @@ def getRunOnSelEventsList(sFileOrList):
 
 
 
+def ak_drop_none(arr):
+    return arr[ ~ ak.is_none(arr) ]
+
 def fillCoffeaHist(
         h = coffea_hist.Hist('tmp'),
         dataset = '',
@@ -1820,11 +1867,20 @@ def printVariable(sName, var):
 
 def printVariablePtEtaPhi(sName, var):
     var_PtEtaPhi = ak.zip([
-        var.pt,
+        var.pt_toUse if 'pt_toUse' in var.fields else var.pt,
         var.eta,
         var.phi
     ])
     printVariable('%s PtEtaPhi' % sName, var_PtEtaPhi)
+
+def printVariablePtEtaPhiM(sName, var):
+    var_PtEtaPhiM = ak.zip([
+        var.pt_toUse if 'pt_toUse' in var.fields else var.pt,
+        var.eta,
+        var.phi,
+        var.mass_toUse if 'mass_toUse' in var.fields else var.mass
+    ])
+    printVariable('%s PtEtaPhiM' % sName, var_PtEtaPhiM)
 
 
 def akArray_isin(testArray, referenceArray):

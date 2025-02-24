@@ -1,4 +1,4 @@
-ls# %%
+# %%
 #from IPython.display import display, HTML
 #display(HTML("<style>.container { width:100% !important; }</style>"))
 
@@ -6,19 +6,21 @@ ls# %%
 
 # %%
 import os, sys
-import numpy as np
 from collections import OrderedDict as OD
+import enum
+from parse import *
 import math
+import numpy as np
 #import uproot3
 import uproot as uproot
 import hist
+
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
-import enum
 import mplhep as hep
-from parse import *
 
+from hist.intervals import ratio_uncertainty
 
 #sys.path.insert(1, '../') # to import file from other directory (../ in this case)
 sys.path.append( os.path.abspath('../') )
@@ -35,17 +37,21 @@ class DataBlindingOptions(enum.Enum):
     Unblind        = ' '
 
 
-#sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20240131_GGFMode_DataVsMC/2018/analyze_htoaa_stage1.root'
-#sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20240131_GGFMode_DataVsMC/2018/plots'
-sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20240723_tt0lbTbjj/2018/analyze_htoaa_stage1.root'
-sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20240723_tt0lbTbjj/2018/plots'
+#sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20240627_gg0l_1/2018/analyze_htoaa_stage1.root'
+#sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20240627_gg0l_1/2018/plots_tmp'
+#sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20250122_gg0l_DataMC_1/2018/analyze_htoaa_stage1.root'
+#sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20250122_gg0l_DataMC_1/2018/plots'
+#sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20250122_gg0l_DataMC_1/2018/plots_1'
+sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20250213_gg0l_H34bCat/2018/analyze_htoaa_stage1.root'
+sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20250213_gg0l_H34bCat/2018/plots_1'
 
-CAT = 'tt0l' # 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', 'tt0l', 
+
+CAT = 'gg0lIncl_H34b' # 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', 'tt0l', 
 # 'tt0l_ge1NonHFatJet_0BExtra', 'tt0l_ge1NonHFatJet_1BExtra', 'tt0l_ge1NonHFatJet_ge2BExtra', 'tt0l_0NonHFatJet_ge2B'
 
 sSubcategory = '%s_' % (CAT) if CAT in ['ZvvIncl', 'ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', 'tt0l_ge1NonHFatJet_0BExtra'] else '' # 'ZvvIncl' # 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'
 #selectionTags = ['%sSBWP80to40' % (sSubcategory)]
-selectionTags = ['tt0l_ge1NonHFatJet_1BExtra_Hi_SBWP95to60', 'tt0l_ge1NonHFatJet_1BExtra_Med_SBWP95to60', 'tt0l_ge1NonHFatJet_1BExtra_Lo_SBWP95to60']
+selectionTags = ['gg0lIncl_H34b_Xto34bv2_SRWP80'] # ['Presel', 'gg0lIncl_SRWP60', 'gg0lIncl_SBWP60'] #['tt0l_ge1NonHFatJet_1BExtra_Hi_SBWP95to60', 'tt0l_ge1NonHFatJet_1BExtra_Med_SBWP95to60', 'tt0l_ge1NonHFatJet_1BExtra_Lo_SBWP95to60']
 
 
 #from HistogramListForPlottingDataVsMC_TriggerStudy_GGFMode import *
@@ -63,8 +69,8 @@ cmsWorkStatus                  = 'Work in Progress'
 era                            = '2018'
 luminosity_total               = Luminosities_forGGFMode[era][HLT_toUse][0] # 54.54  #59.83
 dataBlindOption                = DataBlindingOptions.BlindPartially # DataBlindingOptions.BlindPartially , DataBlindingOptions.BlindFully , DataBlindingOptions.Unblind
-significantThshForDataBlinding = 4 # 0.125 # blind data in bins with S/sqrt(B) > significantThshForDataBlinding while running with dataBlindOption = DataBlindingOptions.BlindPartially
-
+#significantThshForDataBlinding = 4 # 0.125 # blind data in bins with S/sqrt(B) > significantThshForDataBlinding while running with dataBlindOption = DataBlindingOptions.BlindPartially
+significantThshForDataBlinding = 10 # for significance Z
 
 sOpDir = '%s/%s' % (sOpDir, CAT)
 if not os.path.exists(sOpDir):
@@ -88,8 +94,11 @@ def getNonZeroMin(arr):
 # %%
 # Function to draw box error bars
 # https://matplotlib.org/stable/gallery/statistics/errorbars_and_boxes.html#sphx-glr-gallery-statistics-errorbars-and-boxes-py
-def make_error_boxes(ax, xdata, ydata, xerror, yerror, facecolor='lightgrey',
-                     edgecolor='none', alpha=0.5):
+def make_error_boxes(ax, xdata, ydata, xerror, yerror, 
+                     facecolor='lightgrey',
+                     edgecolor='none', alpha=0.5, hatch='////', linewidth=0
+                     #kwagrs_
+                     ):
 
     # Loop over data points; create box from errors at each point
     # https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Rectangle.html
@@ -101,7 +110,7 @@ def make_error_boxes(ax, xdata, ydata, xerror, yerror, facecolor='lightgrey',
 
     # Create patch collection with specified colour/alpha
     pc = PatchCollection(errorboxes, facecolor=facecolor, alpha=alpha,
-                         edgecolor=edgecolor)
+                         edgecolor=edgecolor, hatch=hatch, linewidth=linewidth)
 
     # Add collection to axes
     ax.add_collection(pc)
@@ -113,11 +122,33 @@ def make_error_boxes(ax, xdata, ydata, xerror, yerror, facecolor='lightgrey',
 
     return artists
 
+
+## Calculate significance
+def calSignificance1(S, B):
+    significance = np.where(
+        B > 1e-10,
+        np.sqrt( 2 * ((S+B)*np.log(1 + (S/B)) - S) ),
+        np.full_like(S, 1e-6)
+    )
+    return significance
+
+def calSignificance2(S, B, Bvariance):
+    denom = np.sqrt(B + Bvariance)
+    significance = np.where(
+        denom > 0,
+        S / denom,
+        np.full_like(S, 1e-6)
+    )
+    return significance
+
 # %%
 #colors_bkg_list = ['blue', 'orange', 'brown'] # ["#9b59b6", "#e74c3c", "#34495e", "#2ecc71"] #['lightcoral', 'burlywood', 'cyan', 'saddlebrown', 'slateblue', 'lightpink', 'darkkhaki', 'antiquewhite', 'limegreen', 'violet', 'firebrick', 'darkorchid', 'tan', 'olive', 'purple']
 
-colors_bkg_list = [ 
+colors_bkg_list_NonCMS = [ 
     # ['color', <transperent>, '<fill pattern>']
+    ["#3f90da",    0.7,  ''],
+    ["#ffa90e",    0.7,  ''],
+
     ['lightcoral',    0.7,  ''],
     ['cyan',          0.7,  '' ],
     ['burlywood',     0.7,  '' ],     
@@ -150,7 +181,7 @@ colors_bkg_list = [
     ['rosybrown',     0.4,  '||' ],    
 ]
 
-colors_sig_list = [
+colors_sig_list_NonCMS = [
     # ['color', <transperent>, '<fill pattern>', ]
     ['blue',          0.9,  ''],
     ['red',           0.9,  ''],
@@ -158,6 +189,38 @@ colors_sig_list = [
     ['magenta',       0.9,  ''],
     ['orange',        0.9,  ''],
 ]
+
+## CMS color schemes: https://gitlab.cern.ch/cms-analysis/analysisexamples/plotting-demo/-/blob/master/1-tutorial_CAT_recommendations.ipynb?ref_type=heads
+# 6-color scheme: ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"]
+# 10-color scheme: "#3f90da", "#ffa90e", "#bd1f01", "#94a4a2", "#832db6", "#a96b59", "#e76300", "#b9ac70", "#717581", "#92dadd"]
+colors_bkg_list = [ 
+    # ['color', <transperent>, '<fill pattern>']
+    ["#3f90da",    1,  ''],
+    ["#ffa90e",    1,  ''],
+    ["#94a4a2",    1,  ''],
+    ["#a96b59",    1,  ''],
+    ["#b9ac70",    1,  ''],
+    ["#717581",    1,  ''],
+    ["#92dadd",    1,  ''],   
+
+]
+
+colors_sig_list = [
+    # ['color', <transperent>, '<fill pattern>', ]
+    ["#bd1f01",    1,  ''],
+    ["#832db6",    1,  ''],
+    ["#e76300",    1,  ''],
+    
+]
+
+#errps = {'hatch':'////', 'facecolor':'none', 'lw': 0, 'edgecolor': 'k', 'alpha': 0.5}
+errps = {'hatch':'////', 'facecolor':'none', 'linewidth': 0, 'edgecolor': 'k', 'alpha': 0.5}
+
+PlotRatioPlot = True
+PlotSignificancePlot = False #True
+
+
+hep.style.use("CMS")
 
 for sData, ExpData_list in ExpData_dict.items():
     luminosity_toUse = 0
@@ -167,7 +230,7 @@ for sData, ExpData_list in ExpData_dict.items():
         luminosity_toUse   += luminosity_forEra_
         print(f"{ExpData_list = }, {DatasetEra_ = }, {luminosity_forEra_ = } ")
     luminosity_Scaling_toUse = round(luminosity_toUse, 2) / round(luminosity_total, 2)
-    luminosity_toUse = round(luminosity_toUse, 2)
+    luminosity_toUse = round(luminosity_toUse, 1)
     print(f"{sData}: {ExpData_list}, {luminosity_toUse = }, {luminosity_total = },  {luminosity_Scaling_toUse = }")
 
     for selectionTag in selectionTags:    
@@ -195,6 +258,7 @@ for sData, ExpData_list in ExpData_dict.items():
                     nHistoDimemsions = None
                     yAxisRange_cal      = [1e20, -1e10]
                     yRatioAxisRange_cal = [1e20, -1e10]
+                    ySignfAxisRange_cal = [1e20, -1e10]                    
                     xError = np.array([])
                     hData = None
                     hBkgTot_values = None
@@ -204,57 +268,75 @@ for sData, ExpData_list in ExpData_dict.items():
                     hStack_centers = np.array([])
                     sStack_list = []
                     nBkgTot = 0
-                    significanceMax = [] #np.array([])
+                    hBkgTot = None
+                    significance_list = [] #np.array([])
 
                     sEventYieldTable = ''
 
                     print(f"\n\n {histo_name_toUse = }, {systematic = }, {yAxisScale = }, ")
                     #fig, axs = plt.subplots(ncols=1, nrows=2, figsize=(8,10), sharex='col', gridspec_kw={'height_ratios': [3, 1]}, subplot_kw={'ymargin': 0.4})
-                    fig, ax = plt.subplots(ncols=1, nrows=2, figsize=(8,10), sharex='col', gridspec_kw={'height_ratios': [4, 1], 'hspace': 0})
+                    ###fig, ax = plt.subplots(ncols=1, nrows=2, figsize=(8,10), sharex='col', gridspec_kw={'height_ratios': [4, 1], 'hspace': 0})
                     #fig, ax = plt.subplots(ncols=1, nrows=3, figsize=(8,10), sharex='col')
                     #print(f"fig: {fig}, axs: {axs}")
+
+                    if PlotRatioPlot and (not PlotSignificancePlot):
+                        fig, (axTop, axRatio) = plt.subplots(2, 1, gridspec_kw=dict(height_ratios=[3, 1], hspace=0.1), sharex=True)
+                    if PlotRatioPlot and PlotSignificancePlot:
+                        fig, (axTop, axRatio, axSignf) = plt.subplots(3, 1, gridspec_kw=dict(height_ratios=[3.5, 0.5, 0.5], hspace=0.1), sharex=True)
 
                     #fig1, ax1 = plt.subplots()
                     
                     histos_dict = OD()
                     mask_DataBlindedBins = None
 
-                    if len(MCBkg_list) > 0:
+                    
+                    #if len(MCBkg_list) > 0:
+                    if len(list(MCBkg_dict.keys())) > 0:
                         hBkg_list = []
                         sBkg_list = []
                         hBkg_integral_list = []
-                        for dataset in MCBkg_list:
-                            histo_name_toUse_full = 'evt/%s/%s_%s' % (dataset, histo_name_toUse, systematic)
-                            #print(f"{histo_name_toUse_full = }")
-                            h = fIpFile[histo_name_toUse_full].to_hist()
-                            nHistoDimemsions = len(h.axes)
-                            if nHistoDimemsions == 2 and yAxisScale == 'logY': break  # No need to plot 2-D hist with logY
-                            if isinstance(XRebinning, list) or isinstance(XRebinning, (np.ndarray, np.generic)):
-                                h = variableRebinTH1(h, XRebinning)  if nHistoDimemsions == 1 else h
-                            else:
-                                h = rebinTH1(h, nRebinX) if nHistoDimemsions == 1 else rebinTH2(h, nRebinX, nRebinY)
-                                #h = h.rebin(nRebinX) if nHistoDimemsions == 1 else rebinTH2(h, nRebinX, nRebinY)
+                        for i_, (MCBkgNameShort, MCBkg_list) in enumerate(MCBkg_dict.items()):
+                            h = None
+                            for dataset in MCBkg_list:
+                                histo_name_toUse_full = 'evt/%s/%s_%s' % (dataset, histo_name_toUse, systematic)
+                                #print(f"{histo_name_toUse_full = }")
+                                h_i = fIpFile[histo_name_toUse_full].to_hist()
+                                nHistoDimemsions = len(h_i.axes)
+                                if nHistoDimemsions == 2 and yAxisScale == 'logY': break  # No need to plot 2-D hist with logY
+                                if isinstance(XRebinning, list) or isinstance(XRebinning, (np.ndarray, np.generic)):
+                                    h_i = variableRebinTH1(h_i, XRebinning)  if nHistoDimemsions == 1 else h_i
+                                else:
+                                    h_i = rebinTH1(h_i, nRebinX) if nHistoDimemsions == 1 else rebinTH2(h_i, nRebinX, nRebinY)
+                                    #h_i = h_i.rebin(nRebinX) if nHistoDimemsions == 1 else rebinTH2(h_i, nRebinX, nRebinY)
+
+                                if dataset == MCBkg_list[0]:  h = h_i
+                                else:                         h = h + h_i
                             
                                 
 
                             h = h * luminosity_Scaling_toUse
 
+                            hBkgTot = h 
+                            if i_ == 0: 
+                                hBkgTot = h
+                            else:
+                                hBkgTot = hBkgTot + h 
+
                             nTot_ = h.values().sum()
                             hBkg_list.append(h)
-                            sBkg_list.append(dataset)
+                            sBkg_list.append(MCBkgNameShort)
                             hBkg_integral_list.append(nTot_)
 
-                            histos_dict[dataset] = h 
+                            histos_dict[MCBkgNameShort] = h 
                             if not isinstance(mask_DataBlindedBins, np.ndarray):
                                 mask_DataBlindedBins = np.full_like(h.values(), False)
 
                             if abs(nTot_ - 0) < 1e-10: continue
-                            #print(f"{histo_name_toUse_full} integral: {h.values.sum()}")
-                            #print(f"{h.axes = }, {len(h.axes) = }")
 
                             if nHistoDimemsions == 1:
-                                yMin_ = getNonZeroMin(h.values())
-                                yMax_ = np.max(h.values())
+                                mask_XRange = ((h.axes.centers[0] >= xAxisRange[0]) & (h.axes.centers[0] <= xAxisRange[1])) if xAxisRange else np.full_like(h.values(), True)
+                                yMin_ = getNonZeroMin(h.values()[mask_XRange])
+                                yMax_ = np.max(h.values()[mask_XRange])
                                 if yMin_ < yAxisRange_cal[0]:
                                     yAxisRange_cal[0] = yMin_
                                 if yMax_ > yAxisRange_cal[1]:
@@ -270,30 +352,24 @@ for sData, ExpData_list in ExpData_dict.items():
                         isReverseSortForStack = True
                         idx_hBkg_sortedByIntegral = sorted(range(len(hBkg_integral_list)), key=lambda i: hBkg_integral_list[i], reverse=isReverseSortForStack)            
 
-                        #print(f"sBkg_list: {sBkg_list} \nhBkg_integral_list (total {sum(hBkg_integral_list)}): {hBkg_integral_list} ")
-                        #print(f"sBkg_list sorted by integral: {[(sBkg_list[idx], hBkg_integral_list[idx]) for idx in idx_hBkg_sortedByIntegral]}")            
-
                         hStack_list = [ hBkg_list[idx] for idx in idx_hBkg_sortedByIntegral ]  
                         sStack_list = [ sBkg_list[idx] for idx in idx_hBkg_sortedByIntegral ]  
-                        #print(f"sStack_list: {sStack_list}")
-                        #print(f"xError ({type(xError)}) ({len(xError)}): {xError}")
 
                         hStack_values_list    = np.array( [ h.values() for h in hStack_list ] )
                         hStack_variance_list  = np.array( [ h.variances() for h in hStack_list ] )
                         hStack_error_list     = np.array( [ np.sqrt(h.variances()) for h in hStack_list ] )
-                        #print(f"{len(hStack_list) = }"); sys.stdout.flush()
                         hStack_edges          = hStack_list[0].axes[0].edges
                         hStack_centers        = hStack_list[0].axes[0].centers
                         xError                = (hStack_list[0].axes[0].edges[1:] - hStack_list[0].axes[0].edges[0:-1]) / 2 if len(xError) == 0 else xError
 
                         hBkgTot_values        = np.sum(hStack_values_list, axis=0)
                         hBkgTot_variance      = np.sum(hStack_variance_list, axis=0)
-                        #print(f"hBkgTot_values sum: {sum(hBkgTot_values)}")
 
                         # Update yRange for hStackBkg -------
                         if nHistoDimemsions == 1:
-                            yMin_ = getNonZeroMin(hBkgTot_values)
-                            yMax_ = np.max(hBkgTot_values)
+                            #mask_XRange = ((h.axes.centers[0] >= xAxisRange[0]) & (h.axes.centers[0] <= xAxisRange[1])) if xAxisRange else np.full_like(h.values(), True)
+                            yMin_ = getNonZeroMin(hBkgTot_values[mask_XRange])
+                            yMax_ = np.max(hBkgTot_values[mask_XRange])
                             if yMin_ < yAxisRange_cal[0]:
                                 yAxisRange_cal[0] = yMin_
                             if yMax_ > yAxisRange_cal[1]:
@@ -304,68 +380,43 @@ for sData, ExpData_list in ExpData_dict.items():
                         alpha_toUse  = [ colors_bkg_list[i][1] for i in range(nHists) ]
                         hatch_toUse  = [ colors_bkg_list[i][2] for i in range(nHists) ]
 
-                        # plot stack
-                        #hep.histplot(hStack_values_list, bins=hStack_edges, ax=ax[0], yerr=hStack_error_list, histtype='fill', stack=True, label=sStack_list, sort='yield')
-                        #hep.histplot(hStack_values_list, bins=hStack_edges, ax=ax[0], yerr=hStack_error_list, histtype='step', stack=True, label=sStack_list, linestyle="--", color=["green", "black", (1, 0, 0, 0.4)])
-                        #hep.histplot(hStack_values_list, bins=hStack_edges, ax=ax[0], histtype='fill', stack=True, label=sStack_list, color=["green", "darkorange", "red"])
-
-                        # https://matplotlib.org/stable/gallery/shapes_and_collections/hatch_style_reference.html
-                        
+                       
                         if nHistoDimemsions == 1: # 1-D histogram
                             hep.histplot(
                                 hStack_values_list, 
                                 bins=hStack_edges, 
-                                ax=ax[0], 
+                                ax=axTop, 
                                 histtype='fill', 
                                 stack=True, 
                                 label=sStack_list, 
                                 color=colors_toUse,
-                                alpha=alpha_toUse,
-                                hatch=hatch_toUse,
+                                #alpha=alpha_toUse,
+                                #hatch=hatch_toUse,
                                 sort='yield'
                                 )
 
-                            # plot total background
-                            #hep.histplot(hBkgTot_values, bins=hStack_edges, ax=ax, yerr=np.sqrt(hBkgTot_variance), histtype='errorbar', color='grey', label='Total background')
-                            
-                            # plot totoal background error bars only
+                            #hep.histplot(hBkgTot_values, histtype='band', ax=axTop, **errps)   
                             make_error_boxes(
-                                ax=ax[0], 
+                                ax=axTop, 
                                 xdata=hStack_centers, 
                                 ydata=hBkgTot_values, 
                                 xerror=xError, 
                                 yerror=np.sqrt(hBkgTot_variance), 
-                                facecolor='grey',
-                                edgecolor='none', 
-                                alpha=0.5
-                                )
+                                **errps
+                                )   
                             
                         elif nHistoDimemsions == 2 and 1==0: # 2-D histogram  
-                            #print(f"{list(hStack_list[0].values()) = }, \n{hStack_list[0].variances() = }, ")
-                            #print(f"{getNonZeroMin(h.values()) = }")
                             hep.hist2dplot(
                                 hBkgTot_values,
                                 xbins=hStack_list[0].axes[0].edges,
                                 ybins=hStack_list[0].axes[1].edges,
                                 #labels='Bkg_total',
                                 cmin=getNonZeroMin(hStack_list[0].values()),
-                                ax=ax[0]
+                                ax=axTop
                             )   
                         
                         # No. of events in total background
                         nBkgTot = np.sum(hBkgTot_values)
-
-
-                        '''
-                        if 1==1:
-                            if xAxisRange: ax[0].set_xlim(xAxisRange[0], xAxisRange[1])
-                            if yAxisRange: ax[0].set_ylim(yAxisRange[0], yAxisRange[1])
-                            else:          ax[0].set_ylim(yAxisRange_cal[0], yAxisRange_cal[1])
-                            if xAxisLabel: ax[0].set_xlabel(xAxisLabel)
-                            if yAxisLabel: ax[0].set_ylabel(yAxisLabel)
-                        '''
-                    #print(f"\nAfter MCBkg {yAxisRange_cal = }")
-
 
 
 
@@ -393,15 +444,15 @@ for sData, ExpData_list in ExpData_dict.items():
                             label_MCSig = dataset
                             label_MCSig = sLableSig[iSig]
                             if abs(scale_MCSig - 1) > 1e-6:
-                                #label_MCSig = '%s x %d' % (dataset, scale_MCSig)
                                 if scale_MCSig >= 1:
                                     label_MCSig = '%s x %d' % (label_MCSig, scale_MCSig)
                                 else:
                                     label_MCSig = '%s x %g' % (label_MCSig, scale_MCSig)
                                 
                             if nHistoDimemsions == 1:
-                                yMin_ = getNonZeroMin(h.values())
-                                yMax_ = np.max(h.values())
+                                mask_XRange = ((h.axes.centers[0] >= xAxisRange[0]) & (h.axes.centers[0] <= xAxisRange[1])) if xAxisRange else np.full_like(h.values(), True)
+                                yMin_ = getNonZeroMin(h.values()[mask_XRange])
+                                yMax_ = np.max(h.values()[mask_XRange])
                                 if yMin_ < yAxisRange_cal[0]:
                                     yAxisRange_cal[0] = yMin_
                                 if yMax_ > yAxisRange_cal[1]:
@@ -412,7 +463,7 @@ for sData, ExpData_list in ExpData_dict.items():
                                 hep.histplot(
                                     h.values() * scale_MCSig, 
                                     bins=histo_edges, 
-                                    ax=ax[0], 
+                                    ax=axTop, 
                                     yerr=np.sqrt(h.variances()) * scale_MCSig, 
                                     histtype='step', #'errorbar', 
                                     label=label_MCSig,
@@ -435,18 +486,19 @@ for sData, ExpData_list in ExpData_dict.items():
 
                                 S_ = h.values()
                                 B_ = np.sqrt(hBkgTot_values)
-                                significance_i = np.divide(S_, B_, where=B_!=0, out=np.zeros(B_.shape))
+                                #significance_i = np.divide(S_, B_, where=B_!=0, out=np.zeros(B_.shape))
+                                significance_i = calSignificance1(S_, hBkgTot.values())
+                                #significance_i = calSignificance2(S_, hBkgTot.values(), hBkgTot.variances())
+
                                 # set high significant when S_ > 0 and B_ = 0
                                 significance_i = np.where(
                                     np.logical_and(S_ > 0, hBkgTot_values < 1e-6),
                                     np.full(B_.shape, 10000),
                                     significance_i)
-                                significanceMax.append(significance_i)
-
-                                #ax1.plot(h.axes[0].centers, significance_i)
+                                significance_list.append(significance_i)
 
                         
-                        significanceMax = np.array(significanceMax)
+                        significanceMax = np.array(significance_list)
                         #print(f"{significanceMax = }")
                         #significanceMax = np.sum(significanceMax, axis=0)
                         #significanceMax = np.divide(significanceMax, len(MCSig_list) )
@@ -472,8 +524,9 @@ for sData, ExpData_list in ExpData_dict.items():
                         xError = (hData.axes[0].edges[1:] - hData.axes[0].edges[0:-1]) / 2
 
                         if nHistoDimemsions == 1:
-                            yMin_ = getNonZeroMin(hData.values())
-                            yMax_ = np.max(hData.values())
+                            mask_XRange = ((hData.axes.centers[0] >= xAxisRange[0]) & (hData.axes.centers[0] <= xAxisRange[1])) if xAxisRange else np.full_like(hData.values(), True)
+                            yMin_ = getNonZeroMin(hData.values()[mask_XRange])
+                            yMax_ = np.max(hData.values()[mask_XRange])
                             if yMin_ < yAxisRange_cal[0]:
                                 yAxisRange_cal[0] = yMin_
                             if yMax_ > yAxisRange_cal[1]:
@@ -528,19 +581,20 @@ for sData, ExpData_list in ExpData_dict.items():
 
                         #print(f"{hData_values_toUse = }")
                         if nHistoDimemsions == 1:
-                            #hep.histplot(hData.values(), bins=hData.axes[0].edges, ax=ax[0], yerr=np.sqrt(hData.variances()), histtype='errorbar', color='black', label='Data')
+                            #hep.histplot(hData.values(), bins=hData.axes[0].edges, ax=axTop, yerr=np.sqrt(hData.variances()), histtype='errorbar', color='black', label='Data')
                             hep.histplot(
                                 hData_values_toUse, 
                                 bins=hData.axes[0].edges, 
-                                ax=ax[0], 
+                                ax=axTop, 
                                 yerr=hData_errors_toUse, 
                                 histtype='errorbar', 
                                 color='black', 
-                                label='%s %s' % (sData, dataBlindOption_toUse.value)
+                                label='%s %s' % (sData, dataBlindOption_toUse.value),
+                                capsize=2,
                                 )
 
                             # highlight blinded bins
-                            ax[0].plot(
+                            axTop.plot(
                                 hData.axes[0].centers[mask_DataBlindedBins],
                                 np.zeros_like(hData.axes[0].centers)[mask_DataBlindedBins],
                                 label='Data blinded bins',
@@ -557,7 +611,7 @@ for sData, ExpData_list in ExpData_dict.items():
                                 ybins=hData.axes[1].edges,
                                 #labels='Bkg_total',
                                 cmin=getNonZeroMin(hData_values_toUse),
-                                ax=ax[1]
+                                ax=axRatio
                             )                                              
 
                         #print(f"hData integral: {hData.values().sum()}")
@@ -570,11 +624,17 @@ for sData, ExpData_list in ExpData_dict.items():
                         ratio_error  = np.divide(ratio_error, hBkgTot_values, where=hBkgTot_values!=0, out=np.zeros(hData.shape))
                         ratio_syst   = np.sqrt(hBkgTot_variance)
                         ratio_syst   = np.divide(ratio_syst, hBkgTot_values, where=hBkgTot_values!=0, out=np.zeros(hData.shape))
+                        ratio_syst_CMS = ratio_uncertainty(hData_values_toUse, hBkgTot_values, 'poisson-ratio')
+
+                        #print(f"{ratio_syst      = }")
+                        #print(f"{ratio_syst_CMS = }")
+
+                        #print(f"{list(zip(ratio_syst, ratio_syst_CMS[0], ratio_syst_CMS[1])) = }")
 
                         #print(f"ratio_values ({ratio_values.shape}): {ratio_values}")
                         if nHistoDimemsions == 1:
-                            yMin_ = getNonZeroMin( ratio_values - ratio_error)
-                            yMax_ = np.max( ratio_values + ratio_error)
+                            yMin_ = getNonZeroMin( ratio_values[mask_XRange] - ratio_error[mask_XRange])
+                            yMax_ = np.max( ratio_values[mask_XRange] + ratio_error[mask_XRange])
                             if yMin_ < yRatioAxisRange_cal[0]:
                                 yRatioAxisRange_cal[0] = yMin_
                             if yMax_ > yRatioAxisRange_cal[1]:
@@ -584,17 +644,19 @@ for sData, ExpData_list in ExpData_dict.items():
                             hep.histplot(
                                 ratio_values_toUse, 
                                 bins=hData.axes[0].edges, 
-                                ax=ax[1], 
+                                ax=axRatio, 
                                 yerr=ratio_error, 
                                 histtype='errorbar', 
                                 color='black', 
-                                label='Data'
+                                label='Data',
+                                capsize=2,
                                 )
-                            #if xAxisRange: ax[1].set_xlim(xAxisRange[0], xAxisRange[1])
+                            #if xAxisRange: axRatio.set_xlim(xAxisRange[0], xAxisRange[1])
 
                             # plot totoal background error bars only for ratio plot
+                            '''
                             make_error_boxes(
-                                ax=ax[1], 
+                                ax=axRatio, 
                                 xdata=hData.axes[0].centers, 
                                 ydata=np.full(len(hData.axes[0].centers), 1), 
                                 xerror=xError, 
@@ -603,9 +665,21 @@ for sData, ExpData_list in ExpData_dict.items():
                                 edgecolor='none', 
                                 alpha=0.5
                                 )
+                            '''
+                            '''
+                            make_error_boxes(
+                                ax=axRatio, 
+                                xdata=hData.axes[0].centers, 
+                                ydata=np.full(len(hData.axes[0].centers), 1), 
+                                xerror=xError, 
+                                yerror=ratio_syst, 
+                                **errps
+                                )
+                            '''
+                            axRatio.stairs(1+ratio_syst_CMS[1], edges=hData.axes[0].edges, baseline=1-ratio_syst_CMS[0], **errps)
                             
                             # highlight blinded bins
-                            ax[1].plot(
+                            axRatio.plot(
                                 hData.axes[0].centers[mask_DataBlindedBins],
                                 np.ones_like(hData.axes[0].centers)[mask_DataBlindedBins],
                                 label='Data blinded',
@@ -622,7 +696,7 @@ for sData, ExpData_list in ExpData_dict.items():
                                 ybins=hData.axes[1].edges,
                                 #labels='Bkg_total',
                                 cmin=yRatioLimit[0], cmax=yRatioLimit[1],
-                                ax=ax[0]
+                                ax=axTop
                             )    
 
                     if yAxisScale == 'linearY' and dataBlindOption_toUse != DataBlindingOptions.BlindFully and 1==0:
@@ -636,11 +710,37 @@ for sData, ExpData_list in ExpData_dict.items():
                             dataName_tmp_ = dataName
                         print(f"Blinded x points: {histos_dict[dataName_tmp_].axes[0].centers[mask_DataBlindedBins] = }")
                         print(f"\n\n\n Event yield table {histo_name_toUse}: \n{sEventYieldTable}\n\n")
+
+                    
+                    if PlotSignificancePlot and len(significance_list) > 0:
+                        for i_, significance_i in enumerate(significance_list):
+                            hep.histplot(
+                                significance_i, 
+                                bins=hBkgTot.axes[0].edges, 
+                                ax=axSignf, 
+                                histtype='step', #'errorbar', 
+                                #label=label_MCSig,
+                                color=colors_sig_list[i_][0],                             
+                                #marker='o',
+                                #markerfacecolor=colors_sig_list[iSig][0],
+                                #markersize=3
+                            ) 
+                            if nHistoDimemsions == 1:
+                                mask_XRange = ((hBkgTot.axes.centers[0] >= xAxisRange[0]) & (hBkgTot.axes.centers[0] <= xAxisRange[1])) if xAxisRange else np.full_like(hBkgTot.values(), True)
+                                yMin_ = getNonZeroMin(significance_i[mask_XRange])
+                                yMax_ = np.max(significance_i[mask_XRange])
+                                if yMin_ < ySignfAxisRange_cal[0]:
+                                    ySignfAxisRange_cal[0] = yMin_
+                                if yMax_ > ySignfAxisRange_cal[1]:
+                                    ySignfAxisRange_cal[1] = yMax_                        
+
+
+
                     
                     # Upper plot cosmetics ---------
-                    if xAxisRange: ax[0].set_xlim(xAxisRange[0], xAxisRange[1])
+                    if xAxisRange: axTop.set_xlim(xAxisRange[0], xAxisRange[1])
                     print(f"\nAt the end {yAxisRange_cal = }")
-                    if yAxisRange: ax[0].set_ylim(yAxisRange[0], yAxisRange[1])
+                    if yAxisRange: axTop.set_ylim(yAxisRange[0], yAxisRange[1])
                     elif nHistoDimemsions == 1:          
                         #yMaxOffset = 10**(math.log10(yAxisRange_cal[1] / abs(yAxisRange_cal[0])) * 0.4) if yAxisScale == 'logY' else 1.6
                         yMaxOffset = 10**(math.log10(yAxisRange_cal[1] / abs(yAxisRange_cal[0])) * 0.55) if yAxisScale == 'logY' else 2.0
@@ -652,15 +752,19 @@ for sData, ExpData_list in ExpData_dict.items():
                             yAxisRange_cal[0] = yAxisRange_cal[0]
                             yAxisRange_cal[1] = yAxisRange_cal[1] * yMaxOffset
                         print(f"\nAt the end updated {yAxisRange_cal = } \t {yAxisScale = }")
-                        ax[0].set_ylim(yAxisRange_cal[0], yAxisRange_cal[1])
-                    if xAxisLabel: ax[0].set_xlabel(xAxisLabel, fontsize=14)
-                    if yAxisLabel: ax[0].set_ylabel(yAxisLabel, fontsize=14)       
-                    handles_, labels_ = ax[0].get_legend_handles_labels()         
-                    ax[0].legend(reversed(handles_), reversed(labels_), fontsize=12, loc='best', ncol=2, bbox_to_anchor=(-0.1, 0.65, 1.1, 0.36))
+                        axTop.set_ylim(yAxisRange_cal[0], yAxisRange_cal[1])
+                    if xAxisLabel:                              axTop.set_xlabel(xAxisLabel)
+                    if (PlotRatioPlot or PlotSignificancePlot): axTop.set_xlabel("")
+                    if yAxisLabel:                              axTop.set_ylabel(yAxisLabel)       
+                    if yAxisScale == 'logY': axTop.set_yscale('log', base=10)
+                    handles_, labels_ = axTop.get_legend_handles_labels()         
+                    #axTop.legend(reversed(handles_), reversed(labels_), fontsize=14, loc='best', ncol=2, bbox_to_anchor=(-0.1, 0.65, 1.1, 0.36))
+                    #axTop.legend(reversed(handles_), reversed(labels_), title='Category: %s'%(CAT), loc='best', ncol=2)
+                    axTop.legend(reversed(handles_), reversed(labels_), loc='best', ncol=2)
+                    #axTop.legend(reversed(handles_), reversed(labels_), )
 
-                    if yAxisScale == 'logY': ax[0].set_yscale('log', base=10)
-                    #ax[0].set_ymargin(1.)
-                    ax[0].grid()
+                     #axTop.set_ymargin(1.)
+                    #axTop.grid()
 
                     # Ratio plot cosmetics ---------
                     if yRatioAxisRange_cal[0] < yRatioLimit[0]: yRatioAxisRange_cal[0] = yRatioLimit[0]
@@ -669,30 +773,53 @@ for sData, ExpData_list in ExpData_dict.items():
                     yRatioAxisRange_cal[0] = 1 - yRatioAxisRange_cal_maxDeviation
                     yRatioAxisRange_cal[1] = 1 + yRatioAxisRange_cal_maxDeviation
                     yRatioAxisRange_cal[0] = max(yRatioAxisRange_cal[0], 0)
-                    if xAxisRange: ax[1].set_xlim(xAxisRange[0], xAxisRange[1]) 
-                    ax[1].set_ylim(yRatioAxisRange_cal[0], yRatioAxisRange_cal[1])
+                    if xAxisRange: axRatio.set_xlim(xAxisRange[0], xAxisRange[1]) 
+                    axRatio.set_ylim(yRatioAxisRange_cal[0], yRatioAxisRange_cal[1])
                     print(f"{yRatioAxisRange_cal = }") 
 
-                    if xAxisLabel: ax[1].set_xlabel(xAxisLabel, fontsize=14)
-                    ax[1].set_ylabel('Data/MC', fontsize=14)
+                    if xAxisLabel: axRatio.set_xlabel(xAxisLabel)
+                    if PlotSignificancePlot: axRatio.set_xlabel("")
+                    #axRatio.set_ylabel('Data/MC')
+                    axRatio.set_ylabel(r'$\frac{Data}{MC}$')
                     
-                    ax[1].axhline(y=1, linestyle='--')
-                    ax[1].grid()
+                    axRatio.axhline(y=1, ls='--', color='k')
+                    #axRatio.grid()
+
+                    # Significance plot cosmetics ---------
+                    if PlotSignificancePlot:
+                        if ySignfAxisRange_cal[0] < ySignfLimit[0]: ySignfAxisRange_cal[0] = ySignfLimit[0]
+                        if ySignfAxisRange_cal[1] > ySignfLimit[1]: ySignfAxisRange_cal[1] = ySignfLimit[1] 
+                        axSignf.set_ylim(ySignfAxisRange_cal[0], ySignfAxisRange_cal[1])
+                        if xAxisRange: axSignf.set_xlim(xAxisRange[0], xAxisRange[1]) 
+                        if xAxisLabel: axSignf.set_xlabel(xAxisLabel)
+                        axSignf.set_ylabel('Sign.')
+                        #axSignf.set_yscale('log')
+
 
                     
 
                     isData = True if dataBlindOption_toUse != DataBlindingOptions.BlindFully else False
                     fontsize_toUse = 18 if isData else 15
-                    hep.cms.label(ax=ax[0], data=isData, year=era, lumi=luminosity_toUse, label=cmsWorkStatus, fontsize=fontsize_toUse)
+                    #hep.cms.label(ax=axTop, data=isData, year=era, lumi=luminosity_toUse, label=cmsWorkStatus, fontsize=fontsize_toUse)
+                    hep.cms.label(ax=axTop, data=isData, year=era, lumi=luminosity_toUse, label=cmsWorkStatus)
+                    #hep.cms.label("Work in Progress", ax=axTop, data=isData, year=era, lumi=luminosity_toUse, )
 
-                    ax[0].text(0.70, 0.55, selectionTag,
-                            fontsize=12, fontstyle='italic',
+                    
+                    axTop.text(0.8, 0.51, 'Cat. %s'%(CAT), #selectionTag,
+                            fontsize=18, fontstyle='italic',
                             horizontalalignment='center',
                             verticalalignment='center',
-                            transform=ax[0].transAxes
+                            transform=axTop.transAxes
                             )
+                    
+                    
+                    sOpDir_toUse = '%s/%s' % (sOpDir, selectionTag)
+                    if not os.path.exists(sOpDir_toUse):
+                        os.makedirs(sOpDir_toUse)
 
-                    fig.savefig('%s/%s_%s_%s_%s.png' % (sOpDir,histo_name_toUse,systematic,sData, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
+                    #fig.savefig('%s/%s_%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic,sData, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
+                    fig.savefig('%s/%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
+    
 
                     plt.close(fig)
 

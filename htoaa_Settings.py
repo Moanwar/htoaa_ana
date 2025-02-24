@@ -305,12 +305,14 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         'PNet_Xto4bv2_Htoaa4b': {
             # Htoaato4b channel: https://mattermost.web.cern.ch/cms-exp/pl/icc97qchspnfprkiozptnqkksy  
             # X4b_v2 = (FatJet_PNet_X4b_v2a_Haa4b_score + FatJet_PNet_X4b_v2b_Haa4b_score) / 2.0 
-            'SRWP-40': 0.96,  'SBWP-40': 0.84,    # fake rate 0.1%
-            'SRWP-50': 0.945, 'SBWP-50': 0.74,    # fake rate 0.2%
-            'SRWP-60': 0.93,  'SBWP-60': 0.66,    # fake rate 0.3%
-            'SRWP-65': 0.92,  'SBWP-65': 0.60,    # fake rate 0.4%
-            'SRWP-70': 0.90,  'SBWP-70': 0.50,    # fake rate 0.5%
-            'SRWP-80': 0.84,  'SBWP-80': 0.40,    # fake rate 0.1%
+            'SRWP-40':  0.96,   'SBWP-40':  0.84,    # fake rate 0.1%
+            'SRWP-45a': 0.955,  'SBWP-45a': 0.80,    # fake rate ??%
+            'SRWP-45b': 0.950,  'SBWP-45b': 0.77,    # fake rate ??%
+            'SRWP-50':  0.945,  'SBWP-50':  0.74,    # fake rate 0.2%
+            'SRWP-60':  0.93,   'SBWP-60':  0.66,    # fake rate 0.3%
+            'SRWP-65':  0.92,   'SBWP-65':  0.60,    # fake rate 0.4%
+            'SRWP-70':  0.90,   'SBWP-70':  0.50,    # fake rate 0.5%
+            'SRWP-80':  0.84,   'SBWP-80':  0.40,    # fake rate 0.1%
         },       
         'PNet_Xto4bv2a_Htoaa4b': {
             # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
@@ -324,7 +326,15 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             'SRWP-60': 0.916,  'SBWP-60': 0.66,    # fake rate 0.3%
             'SRWP-80': 0.814,  'SBWP-80': 0.40,    # fake rate 0.1%
         }, 
-                
+        'PNet_Xto34bv2_Htoaa4b': {
+            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/48j5369mdbnyf8o9anb96ebjra 
+            'SRWP-40':  0.89,   'SBWP-40':  0.55,    # fake rate 0.6%
+            'SRWP-50':  0.85,   'SBWP-50':  0.41,    # fake rate 1.1%
+            'SRWP-60':  0.78,   'SBWP-60':  0.27,    # fake rate 1.9%
+            'SRWP-65':  0.73,   'SBWP-65':  0.21,    # fake rate 2.6%
+            'SRWP-70':  0.67,   'SBWP-70':  0.14,    # fake rate 3.5%
+            'SRWP-80':  0.53,   'SBWP-80':  0.03,    # fake rate 6.3%
+        },                 
     },
 }
 
