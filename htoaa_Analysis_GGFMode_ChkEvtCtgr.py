@@ -2426,6 +2426,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         #FatJetToUse = get_JER_and_JES(events, events.FatJet, self.datasetInfo["era"], shift_syst)
         FatJetToUse = events.FatJet
+        JetsToUse    = events.Jet
+        FatJetToUse['pt_toUse'] = FatJetToUse.pt
+        JetsToUse['pt_toUse']    = JetsToUse.pt
+
+
 
 
         if printLevel >= 1000 :
@@ -3250,7 +3255,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         ## sel AK4 jets
-        ak4Jets = selectAK4Jets(Jets=events.Jet, era=self.datasetInfo["era"], pT_Thsh=30)
+        ak4Jets = selectAK4Jets(Jets=JetsToUse, era=self.datasetInfo["era"], pT_Thsh=30)
         mask_ak4Jets_nonoverlaping_leadingFatJet           = ak4Jets.delta_r(leadingFatJet) > 0.8
         ak4Jets_nonoverlaping_leadingFatJet                = ak4Jets[ mask_ak4Jets_nonoverlaping_leadingFatJet ]
         nAk4Jets_nonoverlaping_leadingFatJet               = ak.fill_none(ak.count(ak4Jets_nonoverlaping_leadingFatJet.pt, axis=1), 0)

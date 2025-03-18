@@ -545,7 +545,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             self.sel_names_all["Presel"] = insertInListBeforeThisElement(
                 list1                  = self.sel_names_all["Presel"], 
                 sConditionToAdd        = "2018HEM1516Issue", 
-                addBeforeThisCondition = "leadingFatJetMSoftDrop"
+                addBeforeThisCondition = "leadingFatJetPt"
             )
 
 

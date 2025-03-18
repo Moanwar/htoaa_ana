@@ -1095,6 +1095,15 @@ def get_jetTriggerSF(events, year, selection):
 
 def get_Ak4BtagSF(jet, btagWPThsh, year):
 
+    # If NanoAOD ntuples does not have btagSF stored, btagSF=1
+    if 'btagSF_deepjet_M' not in jet.fields:
+        btagWgt_dict = {}
+        for syst_ in ['Nom', 'Up', 'Down', 'Upuncorrelated', 'Downuncorrelated', 'Upcorrelated', 'Downcorrelated']:
+            btagWgt_dict[syst_] = np.ones(len(jet.pt))
+
+        return btagWgt_dict
+
+
     ## Read btagEfficiency histograms with correa.extractor
     extractor_ = extractor()
     extractor_.add_weight_sets([
@@ -1125,17 +1134,17 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
     btagEffi = ak.ones_like(jet.pt)
     btagEffi = ak.where(
         (abs(jet.hadronFlavour) == 5),
-        evaluator_['btagSFEffi_bFlavour'](jet.pt, abs(jet.eta)),
+        evaluator_['btagSFEffi_bFlavour'](jet.pt_toUse, abs(jet.eta)),
         btagEffi
     )
     btagEffi = ak.where(
         (abs(jet.hadronFlavour) == 4),
-        evaluator_['btagSFEffi_cFlavour'](jet.pt, abs(jet.eta)),
+        evaluator_['btagSFEffi_cFlavour'](jet.pt_toUse, abs(jet.eta)),
         btagEffi
     )
     btagEffi = ak.where(
         ~((abs(jet.hadronFlavour) == 5) | (abs(jet.hadronFlavour) == 4) ),
-        evaluator_['btagSFEffi_lightFlavour'](jet.pt, abs(jet.eta)),
+        evaluator_['btagSFEffi_lightFlavour'](jet.pt_toUse, abs(jet.eta)),
         btagEffi
     )
 
@@ -1497,15 +1506,24 @@ def rebinTH1(h1_, nRebins):
         h1Rebin_ = h1_[::10j]
     elif nRebins == 12:
         h1Rebin_ = h1_[::12j]        
+    elif nRebins == 15:
+        h1Rebin_ = h1_[::15j]        
     elif nRebins == 20:
         h1Rebin_ = h1_[::20j]
+    elif nRebins == 25:
+        h1Rebin_ = h1_[::25j]
+    elif nRebins == 30:
+        h1Rebin_ = h1_[::30j]
     elif nRebins == 40:
         h1Rebin_ = h1_[::40j]
     elif nRebins == 50:
         h1Rebin_ = h1_[::50j]
     elif nRebins == 100:
         h1Rebin_ = h1_[::100j]
-        print("Rebin 100 <<<")
+    elif nRebins == 200:
+        h1Rebin_ = h1_[::200j]
+    elif nRebins == 250:
+        h1Rebin_ = h1_[::250j]
     else:
         print(f"nRebins={nRebins} is not yet implemented... Implement it \t\t **** ERROR ****")        
         

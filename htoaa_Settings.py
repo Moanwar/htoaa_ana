@@ -293,6 +293,15 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
             'L': 0.9172
         },
+        'ParticleNetMD_Hto4b_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
+            # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
+            'WP-80': 0.920,
+            #'WP-60': 0.978,
+            'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
+            'WP-40': 0.992,
+            'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
+            'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
+        },
         'PNet_Xto4bv1_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
             # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
             'WP-80': 0.920,
@@ -418,7 +427,8 @@ massHiggs_windows_dict = {
 
 ### Miscellaneous variables
 SplitQCDInGENCats = False
-HistogramNameExtensions_QCD = ['0bCat', '1bCat', '2bCat', '3bCat', '4bCat', '5bAndMoreCat'] 
+HistogramNameExtensions_QCD = ['0bCat', '1bCat', '2bCat', '3bCat', '4bAndMoreCat'] # ['0bCat', '1bCat', '2bCat', '3bCat', '4bCat', '5bAndMoreCat']
+ 
 
 
 

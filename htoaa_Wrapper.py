@@ -243,6 +243,7 @@ if __name__ == '__main__':
         "htoaa_Analysis_ZH_4b2nu.py", 
         "htoaa_Analysis_VBFMode.py", 
         "htoaa_Analysis_ttHHadronicMode.py",
+        "htoaa_Analysis_CR_QCD4b.py",
         "htoaa_Analysis_Ak4BtagEffi.py",
         "htoaa_Analysis_Example.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
@@ -279,11 +280,11 @@ if __name__ == '__main__':
     server                  = args.server
     systematics             = args.systematics
     jumpToHaddOutput        = args.jumpToHaddOutput
-    dryRun                  = args.dryRun
+    dryRun                  = args.dryRun 
 
     SourceCodeDir     = os.getcwd()
     DestinationDir    = "../analysis/%s/%s" % (anaVersion, era)
-    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s/%s" % (UserName, anaVersion, era)
+    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s/%s" % (UserName, anaVersion, era) 
 
     os.chdir( SourceCodeDir )
     os.makedirs( DestinationDir, exist_ok=True )
@@ -319,7 +320,9 @@ if __name__ == '__main__':
     #samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
     #  Settings for GGF H->aa->4b analysis
-    if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py"]:
+    if sAnalysis in [
+        "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py", "htoaa_Analysis_CR_QCD4b.py",
+        ]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
             "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 

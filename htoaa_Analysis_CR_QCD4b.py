@@ -4,7 +4,7 @@ import os
 import sys
 from datetime import datetime
 #import time
-print(f"htoaa_Analysis_GGFMode:: here1 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here1 {datetime.now() = }"); sys.stdout.flush()
 import subprocess
 import json
 from urllib.request import urlopen
@@ -13,19 +13,19 @@ from collections import OrderedDict as OD
 import time
 import tracemalloc
 import math
-print(f"htoaa_Analysis_GGFMode:: here2 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here2 {datetime.now() = }"); sys.stdout.flush()
 import numpy as np
 from copy import copy, deepcopy
-print(f"htoaa_Analysis_GGFMode:: here3 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here3 {datetime.now() = }"); sys.stdout.flush()
 #import uproot
 #import uproot3 as uproot
 import uproot as uproot
-print(f"htoaa_Analysis_GGFMode:: here4 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here4 {datetime.now() = }"); sys.stdout.flush()
 #import parse
 from parse import *
-print(f"htoaa_Analysis_GGFMode:: here4.1 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here4.1 {datetime.now() = }"); sys.stdout.flush()
 import logging
-print(f"htoaa_Analysis_GGFMode:: here5 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here5 {datetime.now() = }"); sys.stdout.flush()
 
 # comment test3
 '''
@@ -35,7 +35,7 @@ References:
   * Coffea framework used for TTGamma analysis: https://github.com/nsmith-/TTGamma_LongExercise/blob/FullAnalysis/ttgamma/processor.py
 * Coffea installation: /home/siddhesh/anaconda3/envs/ana_htoaa/lib/python3.10/site-packages/coffea
 '''
-print(f"htoaa_Analysis_GGFMode:: here6 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here6 {datetime.now() = }"); sys.stdout.flush()
 #import coffea.processor as processor
 from coffea import processor, util
 from coffea.nanoevents import schemas
@@ -49,13 +49,13 @@ from coffea import hist # /afs/cern.ch/work/s/ssawant/private/softwares/anaconda
 import awkward as ak
 #import uproot
 #from dask.distributed import Client
-print(f"htoaa_Analysis_GGFMode:: here7 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here7 {datetime.now() = }"); sys.stdout.flush()
 from particle import Particle # For PDG particle listing https://github.com/scikit-hep/particle
-print(f"htoaa_Analysis_GGFMode:: here8 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here8 {datetime.now() = }"); sys.stdout.flush()
 
 
 from htoaa_Settings import *
-print(f"htoaa_Analysis_GGFMode:: here9 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here9 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_CommonTools import (
     getLorentVector,
     GetDictFromJsonFile, akArray_isin,
@@ -74,16 +74,16 @@ from htoaa_CommonTools import (
     fillCoffeaHist, fillCoffeaHist_1,
     printVariable, printVariablePtEtaPhi, printVariablePtEtaPhiM, insertInListBeforeThisElement, stringHasSubstring,
 )
-print(f"htoaa_Analysis_GGFMode:: here10 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here10 {datetime.now() = }"); sys.stdout.flush()
 from htoaa_Samples import (
     kData, kQCD_bEnrich, kQCD_bGen, kQCDIncl
 )
-print(f"htoaa_Analysis_GGFMode:: here11 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here11 {datetime.now() = }"); sys.stdout.flush()
 
 from inspect import currentframe, getframeinfo
-print(f"htoaa_Analysis_GGFMode:: here12 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here12 {datetime.now() = }"); sys.stdout.flush()
 frameinfo = getframeinfo(currentframe())
-print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush()
+print(f"htoaa_Analysis_CR_QCD4b:: here13 {datetime.now() = }"); sys.stdout.flush()
 
 
 # use GOldenJSON
@@ -147,7 +147,7 @@ class ObjectSelection:
         self.FatJetZHbb_plus_Xbb_Thsh = 0.4
         self.FatJetZHbb_Xbb_avg_Thsh  = 0.4
         self.FatJetZHbb_Thsh          = 0.7
-        self.FatJetPNetXto4bv2WorkingPoints = ['40'] #['40', '60', '80'] #['40', '45a', '45b', '50', '60', '65', '70', '80']  # ['40', '50', '60', '65', '70', '80']   ['40', '60', '80']
+        self.FatJetPNetXto4bv2WorkingPoints = [] #['40'] #['40', '60', '80'] #['40', '45a', '45b', '50', '60', '65', '70', '80']  # ['40', '50', '60', '65', '70', '80']   ['40', '60', '80']
         
         self.nSV_matched_leadingFatJet_Thsh = 3
 
@@ -179,7 +179,10 @@ class ObjectSelection:
         self.NLeptonsTight_MaxThsh    = 0
         
         # AK4 b-jet veto
-        self.Ak4JetDeepJetB_Thsh = bTagWPs[self.era]['AK4DeepJet']['M']
+        self.Ak4JetDeepJetB_Thsh          = bTagWPs[self.era]['AK4DeepJet']['M']
+        self.Ak4JetDeepJetB_WPMedium_Thsh = bTagWPs[self.era]['AK4DeepJet']['M']
+        self.Ak4JetDeepJetB_WPTight_Thsh  = bTagWPs[self.era]['AK4DeepJet']['T']
+        
 
 
         # VBF AK4 di-jet veto
@@ -357,7 +360,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "nLeptonsTight",
                 "MetZvvVeto",
                 "DijetVBFVeto",
-                "BJetVeto"
+                #"BJetVeto"
             ]),
         ])
 
@@ -415,45 +418,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         
-        categories_dict = OD()
-        categories_dict["gg0lIncl"] = [ "leadingFatJetPt_gg0lIncl" if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        categories_dict["gg0lLo"]   = [ "leadingFatJetPt_gg0lLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        categories_dict["gg0lHi"]   = [ "leadingFatJetPt_gg0lHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-                 
-        for sCatName, catSels in categories_dict.items():
-            #self.sel_names_all["%s" % (sCatName)] = catSels
-            
-            if CrossCheckEvtYieldsWithAndrew:
-                self.sel_names_all["%s_SRWP40" % (sCatName)] = catSels + [
-                    "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP40"
-                ]    
-            '''        
-            self.sel_names_all["%s_SRWP60" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP60"
-            ]
-            self.sel_names_all["%s_SRWP80" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP80"
-            ]
-            self.sel_names_all["%s_SBWP80to40" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP80to40"
-            ]
-            self.sel_names_all["%s_SBWP95to60" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP95to60"
-            ]
-            self.sel_names_all["%s_SBWP99to80" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP99to80"
-            ]
-            '''
+        categories_dict = OD()                 
+        categories_dict["CR4b_3M2T"] = self.sel_names_all["Presel"] + ["3M2T_AK4Bjets"]
+        categories_dict["CR4b_3M3T"] = self.sel_names_all["Presel"] + ["3M3T_AK4Bjets"]
+        categories_dict["CR4b_4M3T"] = self.sel_names_all["Presel"] + ["4M3T_AK4Bjets"]
+        categories_dict["CR4b_4M4T"] = self.sel_names_all["Presel"] + ["4M4T_AK4Bjets"]
 
-            
-            for wp_ in self.objectSelector.FatJetPNetXto4bv2WorkingPoints: 
-                self.sel_names_all["%s_Xto4bv2_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
-                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SRWP%s" % (wp_)
-                ]
-                self.sel_names_all["%s_Xto4bv2_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
-                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_)
-                ] 
-                
+        for sCatName, catSels in categories_dict.items():
+            self.sel_names_all[sCatName] = catSels
+        
 
         
         #for sCatName, catSels in categories_dict.items():
@@ -482,6 +455,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #    self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["Presel"][0 : (iCondition+1)]
         
 
+        #self.sel_names_all.pop('Presel'), None
 
         print(f"self.sel_names_all: {json.dumps(self.sel_names_all, indent=4)}")
 
@@ -513,7 +487,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 with open(sFilesGoldenJSON[self.datasetInfo["era"]]) as fDataGoldenJSON:
                     dataLSSelGoldenJSON = json.load(fDataGoldenJSON)
             if dataLSSelGoldenJSON == None:
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sFilesGoldenJSON[self.datasetInfo["era"]] = } could not read.')
+                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {sFilesGoldenJSON[self.datasetInfo["era"]] = } could not read.')
                 exit(0) 
 
             # convert runNumber in str to int
@@ -525,7 +499,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # lumiScale --------------------------------------------------------------------------------------------------
             if sTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
                 exit(0) 
 
             self.datasetInfo["lumiScale"] = calculate_lumiScale(
@@ -563,6 +537,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 SplitQCDInGENCats:
                 # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
                 self.histosExtensions = HistogramNameExtensions_QCD 
+            elif self.datasetInfo['isQCD']:
+                self.histosExtensions = HistogramNameExtensions_QCD
+            print(f"{self.histosExtensions = }")
 
             ## MC ParticleNetMD_XbbvsQCD SFs
             self.SFs_ParticleNetMD_XbbvsQCD = None
@@ -610,9 +587,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         mass5_axis            = hist.Bin("Mass5",                  r"$m$ [GeV]",                 150,       0,      5)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
-        mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,    -1.1,     1.1)
+        mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,       0,       1)
         mlScore_axis1         = hist.Bin("MLScore1",               r"ML score",                  100,    -1.1,     1.1)
-        mlScore_axis1k        = hist.Bin("MLScore1k",              r"ML score",                 1100,     0.0,     1.1)
+        mlScore_axis1k        = hist.Bin("MLScore1k",              r"ML score",                  100,       0,       1)
         mlScore_axis2k        = hist.Bin("MLScore2k",              r"ML score",                 2100,     0.0,     2.1)
         mlScore_axis1k_m1To2  = hist.Bin("MLScore1k_m1To2",        r"ML score",                 1100,    -1.1,     2.1)
         jetN2_axis            = hist.Bin("N2",                     r"N2b1",                      100,       0,       3)
@@ -622,6 +599,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         deltaPhi_axis         = hist.Bin("deltaPhi",               r"$delta$ phi ",             1000,       0,       3.14) # <<<<<<<<<
         #HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
         HT_axis               = hist.Bin("HT",                     r"HT",                       4000,       0,    4000)
+        HT_axis1              = hist.Bin("HT1",                    r"HT",                         30,       0,    3000)
         PytPartStatus_axis    = hist.Bin("PytPartStatus",          r"PytPartStatus",             421,  -210.5,   210.5)
         boolean_axis          = hist.Bin("Boolean",                r"Boolean",                     2,    -0.5,     1.5)
         pdgId_axis            = hist.Bin("PdgId",                  r"PdgId",                     101,    -0.5,   100.5)
@@ -747,6 +725,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ]))
         
         for sel_name in self.sel_names_all.keys(): # loop of list of selections
+            if sel_name == "Presel": continue
 
             # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
             for sHExt_0 in self.histosExtensions:    
@@ -811,13 +790,29 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             
                         ]))
 
-
-
                 if histogramSaveLevel >= 0:
                     histos.update(OD([
                         ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
                         ('hCutFlowWeighted'+sHExt,                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
+                    ]))
 
+                if histogramSaveLevel >= 0:
+                    histos.update(OD([
+                        ('hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD"}),
+                        ('hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2a_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2a_Haa4b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2b_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2b_Haa4b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2ab_Haa4b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2ab_Haa4b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2a_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2a_Haa34b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2b_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2b_Haa34b_score"}),
+                        ('hLeadingFatJetPNet_X4b_v2ab_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2ab_Haa34b_score"}),                        
+                        
+
+                    ]))
+
+
+                if histogramSaveLevel >= 3:
+                    histos.update(OD([
                         ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
                         {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
                         sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
@@ -884,6 +879,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
                         ('hLeadingFatJetMass'+sHExt,                        {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet) [GeV]"}),
                         ('hLeadingFatJetMSoftDrop'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m_{soft drop} (leading FatJet) [GeV]"}),
+                        ('hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD)"}),
                         ('hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123'+sHExt,     {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg_v0123"}), ## selected
                         ('hLeadingFatJetParticleNet_massA_Hto4b_avg_v013'+sHExt,      {sXaxis: mass_axis1,       sXaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg_v013"}), ## selected
                         
@@ -892,15 +888,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hMET_pT'+sHExt,                                   {sXaxis: pt_axis,         sXaxisLabel: r"MET pT [GeV]"}),
                         ('hPuppiMET_pT'+sHExt,                              {sXaxis: pt_axis,         sXaxisLabel: r"PuppiMET pT [GeV]"}),
                         
+                        ('h1stAK4JetBtag_OverlapLeadingFJ'+sHExt,           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(1st AK4 b-tag jet overlaping leading AK8 jet)$ [GeV]"}),
+                        ('h2ndAK4JetBtag_OverlapLeadingFJ'+sHExt,           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(2nd AK4 b-tag jet overlaping leading AK8 jet)$ [GeV]"}),
+                        ('h3rdAK4JetBtag_OverlapLeadingFJ'+sHExt,           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(3rd AK4 b-tag jet overlaping leading AK8 jet)$ [GeV]"}),
+                        ('h4thAK4JetBtag_OverlapLeadingFJ'+sHExt,           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(4th AK4 b-tag jet overlaping leading AK8 jet)$ [GeV]"}),
+                        
                         # NanoAODV2
-                        ('hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD"}),
-                        ('hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2a_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2a_Haa4b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2b_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2b_Haa4b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2ab_Haa4b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v2ab_Haa4b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2a_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2a_Haa34b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2b_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2b_Haa34b_score"}),
-                        ('hLeadingFatJetPNet_X4b_v2ab_Haa34b_score'+sHExt,   {sXaxis: mlScore_axis1k,  sXaxisLabel: r"hLeadingFatJetPNet_X4b_v2ab_Haa34b_score"}),                        
                         #
                         #('hLeadingFatJetMassH_v1'+sHExt,                    {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_1) [GeV]"}),
                         #('hLeadingFatJetMassH_v2a'+sHExt,                   {sXaxis: mass_axis,       sXaxisLabel: r"m (leading FatJet MassH_v2a) [GeV]"}),
@@ -930,6 +923,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         
                         
                     ]))
+                    if self.datasetInfo['isQCD']: 
+                        histos.update(OD([
+                            ('hGenLHE_HT_SelQCD'+sHExt,                  {sXaxis: HT_axis1,         sXaxisLabel: r"LHE HT [GeV]"}),
+
+                        ]))
+
 
 
                 if histogramSaveLevel >= 2:
@@ -980,7 +979,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetParticleNetMD_Xcc'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_Xcc"}),
                         ('hLeadingFatJetParticleNetMD_Xqq'+sHExt,           {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD_Xqq"}),
 
-                        ('hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD)"}),
+                        #('hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xbb + QCD)"}),
                         ('hLeadingFatJetParticleNetMD_XccOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xcc + QCD)"}),
                         ('hLeadingFatJetParticleNetMD_XqqOverQCD'+sHExt,    {sXaxis: mlScore_axis,    sXaxisLabel: r"LeadingFatJetParticleNetMD Xbb/(Xqq + QCD)"}),
 
@@ -2118,6 +2117,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #mask_leadingFatJat_matched_genB = leadingFatJet.delta_r(vGenBQuarksHardSctred_genBHadronsStatus2_sel) < 0.8
             #n_leadingFatJat_matched_genB = ak.sum(mask_leadingFatJat_matched_genB, axis=1)
             n_leadingFatJat_matched_genB = leadingFatJet.nBHadrons
+            #printVariable('\n n_leadingFatJat_matched_genB', n_leadingFatJat_matched_genB[:50])
+            #print(f"{ak.max(n_leadingFatJat_matched_genB, axis=0) = }")
 
 
             if self.datasetInfo['isSignal']:                
@@ -2241,6 +2242,25 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #nAk4Jets_nonbTag_nonoverlaping_leadingFatJet          = ak.fill_none(ak.count(ak4Jets_nonbTag_nonoverlaping_leadingFatJet.eta, axis=1), 0)
 
         
+        # AK4 jets overlapping AK8 Higgs jet
+        ak4JetsPresel = selectAK4Jets(Jets=JetsToUse, era=self.datasetInfo["era"], pT_Thsh = 15)
+        ak4Jets_overlap_leadingFJ = ak4JetsPresel[ak4JetsPresel.delta_r(leadingFatJet) <= 0.8]
+
+        ak4JetsCentral_bTagM_overlap_leadingFJ = ak4Jets_overlap_leadingFJ[(
+            (abs(ak4Jets_overlap_leadingFJ.eta) < 2.4) & 
+            (ak4Jets_overlap_leadingFJ.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_WPMedium_Thsh)
+        )]
+        nAk4JetsCentral_bTagM_overlap_leadingFJ   = ak.fill_none(ak.count(ak4JetsCentral_bTagM_overlap_leadingFJ.eta, axis=1), 0)
+
+        ak4JetsCentral_bTagT_overlap_leadingFJ = ak4Jets_overlap_leadingFJ[(
+            (abs(ak4Jets_overlap_leadingFJ.eta) < 2.4) & 
+            (ak4Jets_overlap_leadingFJ.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_WPTight_Thsh)
+        )]
+        nAk4JetsCentral_bTagT_overlap_leadingFJ   = ak.fill_none(ak.count(ak4JetsCentral_bTagT_overlap_leadingFJ.eta, axis=1), 0)
+
+        
+ 
+        
 
         ## VBF jj
         ## 'AK8' Higgs category
@@ -2264,8 +2284,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # EVENT SELECTION
         #####################
         
-        # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
-        cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + self.sel_names_all["Presel"] #.copy()
 
        
         # create a PackedSelection object
@@ -2494,6 +2512,33 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet == 0
             )
 
+
+        # CR QCD4b
+        if "3M2T_AK4Bjets" in self.sel_conditions_all_list:
+            selection.add(
+                "3M2T_AK4Bjets",
+                ( (nAk4JetsCentral_bTagM_overlap_leadingFJ == 3) &
+                  (nAk4JetsCentral_bTagT_overlap_leadingFJ == 2) )
+            )        
+        if "3M3T_AK4Bjets" in self.sel_conditions_all_list:
+            selection.add(
+                "3M3T_AK4Bjets",
+                ( (nAk4JetsCentral_bTagM_overlap_leadingFJ == 3) &
+                  (nAk4JetsCentral_bTagT_overlap_leadingFJ == 3) )
+            )        
+        if "4M3T_AK4Bjets" in self.sel_conditions_all_list:
+            selection.add(
+                "4M3T_AK4Bjets",
+                ( (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 4) &
+                  (nAk4JetsCentral_bTagT_overlap_leadingFJ == 3) )
+            )        
+        if "4M4T_AK4Bjets" in self.sel_conditions_all_list:
+            selection.add(
+                "4M4T_AK4Bjets",
+                ( (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 4) &
+                  (nAk4JetsCentral_bTagT_overlap_leadingFJ >= 4) )
+            )        
+
         
 
         for LumiSecSelThsh in LumiSecSelThsh_list:
@@ -2510,7 +2555,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         # Trigger selection
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
@@ -2571,10 +2616,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         #print(f'{self.sel_names_all["Presel"] = }')
         #sel_SR          = selection.all("nPV", "FatJetGet")
-        sel_SR           = selection.all(* self.sel_names_all["Presel"])
+        #sel_SR           = selection.all(* self.sel_names_all["Presel"])
+        if self.datasetInfo['isSignal'] and runMode_SignalGenChecks and syst == "Nom":  
+            sel_SR           = selection.all(* self.sel_names_all["Presel"])
         sel_GenHToAATo4B = None
 
         if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] and 1==0:
+            # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
+            cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + self.sel_names_all["Presel"] #.copy()
+
             # max. dR(sel_leadingFatJet, GEN 4B from H->aa)
             dr_LeadingFatJet_GenB = ak.concatenate([leadingFatJet_asSingletons.delta_r(LVGenB_0), leadingFatJet_asSingletons.delta_r(LVGenBbar_0), leadingFatJet_asSingletons.delta_r(LVGenB_1), leadingFatJet_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_LeadingFatJet_GenB = ak.max(dr_LeadingFatJet_GenB, axis=-1)
@@ -4530,7 +4580,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
             for sel_name in self.sel_names_all.keys(): # loop of list of selections
-                
+                if sel_name == "Presel": continue
 
                 if sel_name.startswith('Gen'): continue
 
@@ -4627,6 +4677,63 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
+                    if histogramSaveLevel >= 0:
+                        ## PNetMD Hto4b NanoAOD_v2
+                        if 'PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields:
+                            output['hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v1_Haa4b_vs_QCD[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            output['hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v1_Haa4b_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            output['hLeadingFatJetPNet_X4b_v2a_Haa4b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v2a_Haa4b_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            output['hLeadingFatJetPNet_X4b_v2b_Haa4b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v2b_Haa4b_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            lFJ_PNet_X4b_v2ab_Haa4ab_score = (leadingFatJet.PNet_X4b_v2a_Haa4b_score + leadingFatJet.PNet_X4b_v2b_Haa4b_score) / 2.0
+                            output['hLeadingFatJetPNet_X4b_v2ab_Haa4b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=lFJ_PNet_X4b_v2ab_Haa4ab_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            output['hLeadingFatJetPNet_X4b_v2a_Haa34b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v2a_Haa34b_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            output['hLeadingFatJetPNet_X4b_v2b_Haa34b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=leadingFatJet.PNet_X4b_v2b_Haa34b_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+                            lFJ_PNet_X4b_v2ab_Haa34ab_score = (leadingFatJet.PNet_X4b_v2a_Haa34b_score + leadingFatJet.PNet_X4b_v2b_Haa34b_score) / 2.0
+                            output['hLeadingFatJetPNet_X4b_v2ab_Haa34b_score'+sHExt].fill(
+                                dataset=dataset,
+                                MLScore1k=lFJ_PNet_X4b_v2ab_Haa34ab_score[sel_SR_forHExt],
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+
+
+
+                    if histogramSaveLevel >= 3:
                         # 2DAlphabetFit histograms --------------------------------
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
                             output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
@@ -4943,6 +5050,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
+                        output['hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt].fill(
+                            dataset=dataset,
+                            MLScore=(leadingFatJet.particleNetMD_XbbvsQCD[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
                         output['hnleadingNonHto4bFatJet_WZvsQCD'+sHExt].fill(
                             dataset=dataset,
                             nObject10=(nleadingNonHto4bFatJet_WZvsQCD[sel_SR_forHExt]),
@@ -4961,6 +5074,36 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )
+
+                        selTmp_ = sel_SR_forHExt & (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 1)
+                        output['h1stAK4JetBtag_OverlapLeadingFJ'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak4JetsCentral_bTagM_overlap_leadingFJ.pt_toUse[selTmp_][:, 0]),
+                            systematic=syst,
+                            weight=evtWeight[selTmp_]
+                        ) 
+                        selTmp_ = sel_SR_forHExt & (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 2)
+                        output['h2ndAK4JetBtag_OverlapLeadingFJ'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak4JetsCentral_bTagM_overlap_leadingFJ.pt_toUse[selTmp_][:, 1]),
+                            systematic=syst,
+                            weight=evtWeight[selTmp_]
+                        ) 
+                        selTmp_ = sel_SR_forHExt & (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 3)
+                        output['h3rdAK4JetBtag_OverlapLeadingFJ'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak4JetsCentral_bTagM_overlap_leadingFJ.pt_toUse[selTmp_][:, 2]),
+                            systematic=syst,
+                            weight=evtWeight[selTmp_]
+                        ) 
+                        selTmp_ = sel_SR_forHExt & (nAk4JetsCentral_bTagM_overlap_leadingFJ >= 4)
+                        output['h4thAK4JetBtag_OverlapLeadingFJ'+sHExt].fill(
+                            dataset=dataset,
+                            Pt=(ak4JetsCentral_bTagM_overlap_leadingFJ.pt_toUse[selTmp_][:, 3]),
+                            systematic=syst,
+                            weight=evtWeight[selTmp_]
+                        ) 
+                        
 
                         ## PNetMD Hto4b
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
@@ -4985,56 +5128,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             )
                         ## PNetMD Hto4b NanoAOD_v2
                         if 'PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields:
-                            output['hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v1_Haa4b_vs_QCD[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            output['hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v1_Haa4b_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            output['hLeadingFatJetPNet_X4b_v2a_Haa4b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v2a_Haa4b_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            output['hLeadingFatJetPNet_X4b_v2b_Haa4b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v2b_Haa4b_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            lFJ_PNet_X4b_v2ab_Haa4ab_score = (leadingFatJet.PNet_X4b_v2a_Haa4b_score + leadingFatJet.PNet_X4b_v2b_Haa4b_score) / 2.0
-                            output['hLeadingFatJetPNet_X4b_v2ab_Haa4b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=lFJ_PNet_X4b_v2ab_Haa4ab_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            output['hLeadingFatJetPNet_X4b_v2a_Haa34b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v2a_Haa34b_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            output['hLeadingFatJetPNet_X4b_v2b_Haa34b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=leadingFatJet.PNet_X4b_v2b_Haa34b_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
-                            lFJ_PNet_X4b_v2ab_Haa34ab_score = (leadingFatJet.PNet_X4b_v2a_Haa34b_score + leadingFatJet.PNet_X4b_v2b_Haa34b_score) / 2.0
-                            output['hLeadingFatJetPNet_X4b_v2ab_Haa34b_score'+sHExt].fill(
-                                dataset=dataset,
-                                MLScore1k=lFJ_PNet_X4b_v2ab_Haa34ab_score[sel_SR_forHExt],
-                                systematic=syst,
-                                weight=evtWeight[sel_SR_forHExt]
-                            )
 
                             # massH                            
                             ''' output['hLeadingFatJetMassH_v1'+sHExt].fill(
@@ -5168,6 +5261,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             output['hLeadingFatJetPNet_dMassAA_relH'+sHExt].fill(
                                 dataset=dataset,
                                 Mass5=(leadingFatJet.PNet_dMassAA_relH[sel_SR_forHExt]),
+                                systematic=syst,
+                                weight=evtWeight[sel_SR_forHExt]
+                            )
+
+                        if self.datasetInfo['isQCD']: 
+                            output['hGenLHE_HT_SelQCD'+sHExt].fill(
+                                dataset=dataset,
+                                HT1=(events.LHE.HT[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             )
@@ -5398,12 +5499,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hLeadingFatJetParticleNetMD_Xqq'+sHExt].fill(
                             dataset=dataset,
                             MLScore=(leadingFatJet.particleNetMD_Xqq[sel_SR_forHExt]),
-                            systematic=syst,
-                            weight=evtWeight[sel_SR_forHExt]
-                        )
-                        output['hLeadingFatJetParticleNetMD_XbbOverQCD'+sHExt].fill(
-                            dataset=dataset,
-                            MLScore=(leadingFatJetParticleNetMD_XbbvsQCD[sel_SR_forHExt]),
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )
@@ -6363,6 +6458,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             '''
 
+        print(f"process_shift():: {shift_syst = } dataset: {dataset} done", flush=flushStdout)
+
         return output
 
 
@@ -6402,7 +6499,7 @@ def printWithType(sX, X):
     
 if __name__ == '__main__':
     print("htoaa_Analysis:: main: {}".format(sys.argv)); sys.stdout.flush()
-    print(f"htoaa_Analysis_GGFMode:: here14 {datetime.now() = }")
+    print(f"htoaa_Analysis_CR_QCD4b:: here14 {datetime.now() = }")
 
     if len(sys.argv) != 2:
         print("htoaa_Analysis:: Command-line config file missing.. \t **** ERROR **** \n")
@@ -6412,7 +6509,7 @@ if __name__ == '__main__':
     
     config = GetDictFromJsonFile(sConfig)
     print("Config {}: \n{}".format(sConfig, json.dumps(config, indent=4)))
-    print(f"htoaa_Analysis_GGFMode:: here15 {datetime.now() = }")
+    print(f"htoaa_Analysis_CR_QCD4b:: here15 {datetime.now() = }")
 
     nEventsToAnalyze    = config["nEventsToAnalyze"] if "nEventsToAnalyze" in config else nEventsToAnalyze
     sInputFiles         = config["inputFiles"]
@@ -6446,15 +6543,15 @@ if __name__ == '__main__':
             )
             print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
             if not os.path.exists(MCSamplesStitchInputFileName):
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
-                print(f'htoaa_Analysis_GGFMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
+                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {MCSamplesStitchInputFileName = } does not exists')
+                print(f'htoaa_Analysis_CR_QCD4b.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
                 exit(0)
             print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
             with uproot.open(MCSamplesStitchInputFileName) as f_:
                 print(f"{f_.keys() = }"); sys.stdout.flush() 
                 hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
 
-    print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
+    print(f"htoaa_Analysis_CR_QCD4b:: here16 {datetime.now() = }")    
         
         
     #branchesToRead = htoaa_nanoAODBranchesToRead
@@ -6469,7 +6566,7 @@ if __name__ == '__main__':
     print(f"Initial sInputFiles ({len(sInputFiles)}) (type {type(sInputFiles)}):");
     for sInputFile in sInputFiles:
         print(f"\t{sInputFile}");  sys.stdout.flush()
-    print(f"htoaa_Analysis_GGFMode:: here17 {datetime.now() = }")
+    print(f"htoaa_Analysis_CR_QCD4b:: here17 {datetime.now() = }")
 
     for iFile in range(len(sInputFiles)):     
         sInputFile = sInputFiles[iFile]
@@ -6484,7 +6581,7 @@ if __name__ == '__main__':
             server = server
             )
         if not isReadingSuccessful:
-            logging.critical('htoaa_Analysis_GGFMode:: getNanoAODFile() for input file %s failed. **** CRITICAL ERROR ****. \nAborting...' % (sInputFile)); sys.stdout.flush();
+            logging.critical('htoaa_Analysis_CR_QCD4b:: getNanoAODFile() for input file %s failed. **** CRITICAL ERROR ****. \nAborting...' % (sInputFile)); sys.stdout.flush();
             exit(0)
         
         # Check if input file exists or not
@@ -6497,12 +6594,12 @@ if __name__ == '__main__':
                 print(f"sInputFile: {sInputFile} file not found.")
             except OSError: 
                 print(f"sInputFile: {sInputFile} OS error occurred.")
-        print(f"htoaa_Analysis_GGFMode:: {sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");     
+        print(f"htoaa_Analysis_CR_QCD4b:: {sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");     
 
         if fileSize > NanoAODFileSize_Min:     
             sInputFiles[iFile] = sInputFile
         else:
-            logging.critical('htoaa_Analysis_GGFMode:: Input file %s file size below threshold (%g MB). **** CRITICAL ERROR ****. \nAborting...' % (sInputFile, NanoAODFileSize_Min) ); sys.stdout.flush();
+            logging.critical('htoaa_Analysis_CR_QCD4b:: Input file %s file size below threshold (%g MB). **** CRITICAL ERROR ****. \nAborting...' % (sInputFile, NanoAODFileSize_Min) ); sys.stdout.flush();
             exit(0)
     
         
@@ -6519,7 +6616,7 @@ if __name__ == '__main__':
                 print(f"sInputFile: {sInputFile} OS error occurred.")
         print(f"\t{sInputFile} \t {os.path.exists(sInputFile) = }, {fileSize = } MB");  
     sys.stdout.flush()
-    print(f"htoaa_Analysis_GGFMode:: here18 {datetime.now() = }")
+    print(f"htoaa_Analysis_CR_QCD4b:: here18 {datetime.now() = }")
 
 
     sampleInfo = {
@@ -6535,7 +6632,7 @@ if __name__ == '__main__':
         if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
             sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
         sampleInfo["systematicsToRun"] = systematicsToRun
-    print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }", flush=flushStdout)
+    print(f"htoaa_Analysis_CR_QCD4b:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()
     tracemalloc.start()
@@ -6582,13 +6679,9 @@ if __name__ == '__main__':
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         sample_category_toUse = sample_category
-        
         if isMC and \
-            MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-            SplitQCDInGENCats and \
             "QCD" in sample_category:
-            sample_category_toUse = "QCD"
-        
+            sample_category_toUse = "QCD"        
         sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
@@ -6598,8 +6691,6 @@ if __name__ == '__main__':
                 sHistoName_toUse = key
                 sHExt_toUse = ''
                 if isMC and \
-                    MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                    SplitQCDInGENCats and \
                     "QCD" in sample_category:                    
                     for sHExt in HistogramNameExtensions_QCD:
                         if sHExt in key:
