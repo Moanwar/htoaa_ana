@@ -89,7 +89,7 @@ print(f"htoaa_Analysis_ttHHadronicMode:: here13 {datetime.now() = }"); sys.stdou
 
  
 printLevel = 0
-histogramSaveLevel = 0 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 1 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -456,6 +456,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "ge2BNonoverlappingSelFatJets"
         ]
         '''
+        '''
         categories_dict["tt0l_ge1NonHFatJet_1BExtra_Hi"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
             "1BNonoverlappingSelFatJets",
             "NonHto4bFatJetPNetTvsQCD_WP25",
@@ -468,10 +469,54 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "1BNonoverlappingSelFatJets",
             "NonHto4bFatJetPNetTvsQCD_WP60",
         ]
-        
+        '''
+        '''
+        categories_dict["tt0l_ge1NonHFatJet_Med_0BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+            "0BNonoverlappingSelFatJets",            
+        ]
+        categories_dict["tt0l_ge1NonHFatJet_Med_1BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+            "1BNonoverlappingSelFatJets",            
+        ]
+        categories_dict["tt0l_ge1NonHFatJet_Med_ge2BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+            "ge2BNonoverlappingSelFatJets",            
+        ]
+        '''
+        '''
+        categories_dict["tt0l_ge1NonHFatJet_Med_1BAK4"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+            "1BNonoverlappingCandHFatJet",            
+        ]
+        categories_dict["tt0l_ge1NonHFatJet_Med_ge2BAK4"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
+            "NonHto4bFatJetPNetTvsQCD_WP40",
+            "ge2BNonoverlappingCandHFatJet",            
+        ]
+        '''
+       
 
         categories_dict = OD()
-        categories_dict["ttHad"] = self.sel_names_all["Presel"]
+        categories_dict["tt0l"] = self.sel_names_all["Presel"]
+        categories_dict["tt0l_1TFJ_0B0JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "0BNonoverlappingSelFatJets",
+            "0JetNonoverlappingSelFatJets",
+        ]
+        categories_dict["tt0l_1TFJ_0Bge1JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "0BNonoverlappingSelFatJets",
+            "ge1JetNonoverlappingSelFatJets",
+        ]
+        categories_dict["tt0l_1TFJ_1B1JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "1BNonoverlappingSelFatJets",
+            "1JetNonoverlappingSelFatJets",
+        ]
+        categories_dict["tt0l_1TFJ_1Bge2JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "1BNonoverlappingSelFatJets",
+            "ge2JetNonoverlappingSelFatJets",
+        ]
+        
+        
+        
 
         for sCatName, catSels in categories_dict.items():
             #self.sel_names_all["%s" % (sCatName)] = catSels
@@ -684,7 +729,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         alphaS_axis           = hist.Bin("alphaS",                 r"alphaS",                    101,    0.01,     0.2)
         PU_axis               = hist.Bin("PU",                     r"PU",                         99,     0.0,    99.0)
         Ratio_axis            = hist.Bin("Ratio",                  r"Ratio",                     100,     0.0,    2.0)
-        Weight_axis           = hist.Bin("Weight",                 r"Event weight",              [-10,-3,*np.arange(-2,2,0.05), 3, 10])
+        Weight_axis           = hist.Bin("Weight",                 r"Event weight",              [-10,-3,*np.arange(-2.025,2,0.05), 3, 10])
         
         
         sXaxis      = 'xAxis'
@@ -954,6 +999,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         
                         ('hLeadingNonHto4bFatJetPNet_WZvsQCD'+sHExt,          {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJet_PNet_WZvsQCD"}),
                         ('hLeadingNonHto4bFatJetPNet_TvsQCD'+sHExt,           {sXaxis: mlScore_axis1k,    sXaxisLabel: r"LeadingNonHto4bFatJetPNet_TvsQCD"}),
+                        
+                        ('hnAK4JetsCentral_NonoverlapSelFatJets'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of central AK4 jets non-overlap H, T FatJets "}),
+                        ('hnAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt,                     {sXaxis: nObject10_axis,  sXaxisLabel: r"No. of b-tagged AK4 jets non-overlap H, T FatJets "}),                      
                         
 
                         # NanoAODV2
@@ -2290,7 +2338,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         nAk4Jets_nonoverlaping_leadingFatJet               = ak.fill_none(ak.count(ak4Jets_nonoverlaping_leadingFatJet.eta, axis=1), 0)
 
         ak4JetsCentral_nonoverlaping_leadingFatJet         = ak4Jets_nonoverlaping_leadingFatJet[abs(ak4Jets_nonoverlaping_leadingFatJet.eta) < 2.4]
-        #nAk4JetsCentral_nonoverlaping_leadingFatJet        = ak.fill_none(ak.count(ak4JetsCentral_nonoverlaping_leadingFatJet.eta, axis=1), 0)
+        nAk4JetsCentral_nonoverlaping_leadingFatJet        = ak.fill_none(ak.count(ak4JetsCentral_nonoverlaping_leadingFatJet.eta, axis=1), 0)
 
         #mask_ak4Jets_bTag_nonoverlaping_leadingFatJet      = ak4Jets_nonoverlaping_leadingFatJet.btagDeepFlavB > self.objectSelector.Ak4JetDeepJetB_Thsh
         #ak4Jets_bTag_nonoverlaping_leadingFatJet           = ak4Jets_nonoverlaping_leadingFatJet[mask_ak4Jets_bTag_nonoverlaping_leadingFatJet]
@@ -2566,11 +2614,32 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "ge2BNonoverlappingSelFatJets",
                 ( nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 2 )
             ) 
+        if "0JetNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "0JetNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_nonoverlaping_selFatJets == 0 )
+            )
+        if "1JetNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "1JetNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_nonoverlaping_selFatJets == 1 )
+            )
+        if "ge1JetNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "ge1JetNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_nonoverlaping_selFatJets >= 1 )
+            )
+        if "ge2JetNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "ge2JetNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_nonoverlaping_selFatJets >= 2 )
+            )        
+        
         if "0NonHto4bFatJet" in self.sel_conditions_all_list: 
             selection.add(
                 "0NonHto4bFatJet",
                 ( ak.fill_none(ak.count(nonHto4bFatJet.pt, axis=1), 0) == 0 )
-            ) 
+            )         
 
         # leadingNonHto4bFatJet_PNet_TvsQCD
         if "NonHto4bFatJetPNetTvsQCD_WP25" in self.sel_conditions_all_list:
@@ -2626,7 +2695,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "BJet",
                 (
                     (leadingNonHto4bFatJet_PNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh) & 
-                    (nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet >= 1)
+                    (nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 0)
                 )
             )
 
@@ -2880,7 +2949,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 
             # btagSF
             wgt_Ak4Btag_dict = get_Ak4BtagSF(
-                jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
+                jet         = ak4JetsCentral_nonoverlaping_selFatJets, 
                 btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
                 year = self.datasetInfo["era"]
             )
@@ -4474,6 +4543,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
                         
+                        # AK4 jets
+                        output['hnAK4JetsCentral_NonoverlapSelFatJets'+sHExt].fill(
+                            dataset=dataset,
+                            nObject10=(nAk4JetsCentral_nonoverlaping_selFatJets[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hnAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt].fill(
+                            dataset=dataset,
+                            nObject10=(nAk4JetsCentral_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
                         
 
 
@@ -5200,350 +5282,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ) 
 
 
-                        ## leadingNonHto4bFatJet    
-                        '''   
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPt'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.pt[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetEta'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.eta[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPhi'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.phi[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetMass'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.mass[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetMSoftDrop'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.msoftdrop[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetId'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.jetId[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hdPhi_LeadingFJ_LeadingNonHto4bFJ'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (abs(leadingFatJet.delta_phi(leadingNonHto4bFatJet)[sel_SR_forHExt])),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTagMD_WvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTagMD_WvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTagMD_ZvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTagMD_ZvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_WvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTag_WvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_ZvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTag_ZvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_VvsQCD_max'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_VvsQCD_max[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_W'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_W[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_Z'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_Z[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_V_max'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_V_max[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_WZvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_WZvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )                    
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_WZvsQCD2'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_DeepTag_WZvsQCD2[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetParticleNet_WvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.particleNet_WvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetParticleNet_ZvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.particleNet_ZvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_VvsQCD_max'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_VvsQCD_max[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_W'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_W[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_Z'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_Z[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_V_max'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_V_max[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_WZvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_WZvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_WZvsQCD2'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet_PNet_WZvsQCD2[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTagMD_TvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTagMD_TvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTag_TvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTag_TvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetDeepTagMD_HbbvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.deepTagMD_HbbvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_TvsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (leadingNonHto4bFatJet.particleNet_TvsQCD[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hLeadingNonHto4bFatJetPNet_XbbVsQCD'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ((leadingNonHto4bFatJet.particleNetMD_Xbb/(leadingNonHto4bFatJet.particleNetMD_Xbb + leadingNonHto4bFatJet.particleNetMD_QCD))[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-
-
-                        fillCoffeaHist(
-                            h = output['hnAK4Jets_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4Jets_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4Jets_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4Jets_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4JetsCentral_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4JetsCentral_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4JetsCentral_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4JetsCentral_bTag_NonoverlapLeadingFatJet'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4JetsCentral_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4Jets_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4Jets_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4Jets_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4Jets_bTag_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4Jets_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4Jets_bTag_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4JetsCentral_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4JetsCentral_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4JetsCentral_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4JetsCentral_nonoverlaping_selFatJets).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hnAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = (nAk4JetsCentral_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        fillCoffeaHist(
-                            h = output['hPtLeadingAK4JetsCentral_bTag_NonoverlapSelFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.firsts(ak4JetsCentral_bTag_nonoverlaping_selFatJets).pt[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-
-                        fillCoffeaHist(
-                            h = output['hPtSumAK4JetsCentral_NonoverlapLeadingFatJets'+sHExt],
-                            dataset=dataset,
-                            syst = syst,
-                            xValue = ak.sum(ak4JetsCentral_nonoverlaping_leadingFatJet.pt, axis=1)[sel_SR_forHExt],
-                            wgt = evtWeight[sel_SR_forHExt]
-                        )
-                        '''
-                        
-
-                        
-
-                        
-
-                        
-                        
-                        
+                        ## leadingNonHto4bFatJet                            
                         output['hLeadingNonHto4bFatJetId'+sHExt].fill(
                             dataset=dataset,
                             nObject=(leadingNonHto4bFatJet.jetId[sel_SR_forHExt]),
@@ -5714,25 +5453,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_leadingFatJet).pt))
                                     ]
                             )
-                        output['hnAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                            dataset=dataset,
-                            nObject10=(nAk4Jets_bTag_nonoverlaping_leadingFatJet[sel_SR_forHExt]),
-                            systematic=syst,
-                            weight=evtWeight[sel_SR_forHExt]
-                        )    
-                        if ak.count(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[sel_SR_forHExt]) > 0:
-                            output['hPtLeadingAK4Jets_bTag_NonoverlapLeadingFatJet'+sHExt].fill(
-                                dataset=dataset,
-                                Pt=(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt[
-                                    sel_SR_forHExt & 
-                                    (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
-                                    ]),
-                                systematic=syst,
-                                weight=evtWeight[
-                                    sel_SR_forHExt & 
-                                    (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_leadingFatJet).pt))
-                                    ]
-                            )
 
                         output['hnAK4JetsCentral_NonoverlapLeadingFatJet'+sHExt].fill(
                             dataset=dataset,
@@ -5792,25 +5512,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 weight=evtWeight[
                                     sel_SR_forHExt & 
                                     (~ak.is_none(ak.firsts(ak4Jets_nonoverlaping_selFatJets).pt))
-                                    ]
-                            )
-                        output['hnAK4Jets_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                            dataset=dataset,
-                            nObject10=(nAk4Jets_bTag_nonoverlaping_selFatJets[sel_SR_forHExt]),
-                            systematic=syst,
-                            weight=evtWeight[sel_SR_forHExt]
-                        )    
-                        if ak.count(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt[sel_SR_forHExt]) > 0:
-                            output['hPtLeadingAK4Jets_bTag_NonoverlapSelFatJets'+sHExt].fill(
-                                dataset=dataset,
-                                Pt=(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt[
-                                    sel_SR_forHExt & 
-                                    (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt))
-                                    ]),
-                                systematic=syst,
-                                weight=evtWeight[
-                                    sel_SR_forHExt & 
-                                    (~ak.is_none(ak.firsts(ak4Jets_bTag_nonoverlaping_selFatJets).pt))
                                     ]
                             )
 

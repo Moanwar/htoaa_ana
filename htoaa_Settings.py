@@ -351,10 +351,11 @@ bTagSFEfficiencyDict = {
     Era_2018: { # 'AK4DeepJet' WP-M
         'inputFile':    'data/correction/mc/BtagSF/2018/jetBtagEfficiency.root',
         'histogramName': {
-            'b-flavour':     'hJetBtagEffi_b_QCD_TT_Presel',
-            'c-flavour':     'hJetBtagEffi_c_QCD_TT_Presel',
-            'light-flavour': 'hJetBtagEffi_l_QCD_TT_Presel',            
-        }
+            'b-flavour':     'hJetBtagEffi_b_TT_Presel', #'hJetBtagEffi_b_QCD_TT_Presel',
+            'c-flavour':     'hJetBtagEffi_c_TT_Presel', #'hJetBtagEffi_c_QCD_TT_Presel',
+            'light-flavour': 'hJetBtagEffi_l_TT_Presel', #'hJetBtagEffi_l_QCD_TT_Presel',           
+        },
+        'pTAxisRange': [20, 1000],
     }
 }
 

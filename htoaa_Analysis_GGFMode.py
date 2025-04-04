@@ -90,7 +90,7 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-histogramSaveLevel = 0 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True

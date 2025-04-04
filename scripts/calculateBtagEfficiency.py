@@ -3,12 +3,12 @@ from ROOT import gROOT, gBenchmark, gRandom, gSystem
 import ctypes
  
 
-sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250120_JetBtagEffi/2018/analyze_htoaa_stage1.root"
-sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250120_JetBtagEffi/2018/jetBtagEfficiency.root"
+sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/analyze_htoaa_stage1.root"
+sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/jetBtagEfficiency.root"
 samples = {
-    'TT': ['TT0l'],
-    'QCD': ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl'],
-    'QCD_TT': ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl','TT0l'],
+    'TT':     ['TT0l','TT1l'],
+    'QCD':    ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl'],
+    'QCD_TT': ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl','TT0l','TT1l'],
     
 }
 WPs = {
@@ -64,9 +64,17 @@ for jetFlavour in JetFlavours:
             hEfficiency = hNumerator.Clone(sEffiName); hEfficiency.Divide(hNumerator, hDenominator);
             hEfficiency.SetName(sEffiName)
             hEfficiency.SetTitle(sEffiName)
+            hDenominator.SetName(sEffiName+'_denominator')
+            hDenominator.SetTitle(sEffiName+'_denominator')
+            hNumerator.SetName(sEffiName+'_numerator')
+            hNumerator.SetTitle(sEffiName+'_numerator')
+            
+
 
             fOut.cd()
             hEfficiency.Write()
+            hDenominator.Write()
+            hNumerator.Write()
 
             
 

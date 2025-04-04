@@ -1127,24 +1127,37 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
     extractor_.finalize()
     evaluator_ = extractor_.make_evaluator()
 
+    pTRangeMin_btagSFEffiHist =bTagSFEfficiencyDict[year]['pTAxisRange'][0]
+    pTRangeMax_btagSFEffiHist =bTagSFEfficiencyDict[year]['pTAxisRange'][1]
 
-
+    jet_pt_toUse = jet.pt_toUse
+    # Cap jet_pt in [pTRangeMin_btagSFEffiHist, pTRangeMax_btagSFEffiHist]
+    jet_pt_toUse = ak.where(
+        (jet_pt_toUse < pTRangeMin_btagSFEffiHist),
+        ak.full_like(jet_pt_toUse, pTRangeMin_btagSFEffiHist),
+        jet_pt_toUse
+    )
+    jet_pt_toUse = ak.where(
+        (jet_pt_toUse > pTRangeMax_btagSFEffiHist),
+        ak.full_like(jet_pt_toUse, pTRangeMax_btagSFEffiHist),
+        jet_pt_toUse
+    )  
     
     ## load btagEffi from coffea.extractor
-    btagEffi = ak.ones_like(jet.pt)
+    btagEffi = ak.ones_like(jet_pt_toUse)
     btagEffi = ak.where(
         (abs(jet.hadronFlavour) == 5),
-        evaluator_['btagSFEffi_bFlavour'](jet.pt_toUse, abs(jet.eta)),
+        evaluator_['btagSFEffi_bFlavour'](jet_pt_toUse, abs(jet.eta)),
         btagEffi
     )
     btagEffi = ak.where(
         (abs(jet.hadronFlavour) == 4),
-        evaluator_['btagSFEffi_cFlavour'](jet.pt_toUse, abs(jet.eta)),
+        evaluator_['btagSFEffi_cFlavour'](jet_pt_toUse, abs(jet.eta)),
         btagEffi
     )
     btagEffi = ak.where(
         ~((abs(jet.hadronFlavour) == 5) | (abs(jet.hadronFlavour) == 4) ),
-        evaluator_['btagSFEffi_lightFlavour'](jet.pt_toUse, abs(jet.eta)),
+        evaluator_['btagSFEffi_lightFlavour'](jet_pt_toUse, abs(jet.eta)),
         btagEffi
     )
 
