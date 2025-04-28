@@ -118,9 +118,9 @@ def merge_histograms(path, signal):
     print(f"Scaled histograms saved in {signal+sTagExtra}_Data_2018.root")
 
 # Run the function
-pathOriginal   = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata/gg0lIncl/' #'/eos/user/m/moanwar/htoaa/analysis/VBF_channel/2DAlphabetfiles_VBF_BKgIncl/VBFHi_Xto4bv2/'
-pathPseudoData = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata_0/gg0lIncl/'
-signal = 'gg0lIncl' #'VBFjjHi'
+signal = 'gg0lLo' #'VBFjjHi'
+pathOriginal   = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles/%s/' % (signal) #'/eos/user/m/moanwar/htoaa/analysis/VBF_channel/2DAlphabetfiles_VBF_BKgIncl/VBFHi_Xto4bv2/'
+pathPseudoData = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata/%s/' % (signal)
 
 # Copy the original directory and work with the copy
 shutil.copytree(pathOriginal, pathPseudoData, dirs_exist_ok=True)

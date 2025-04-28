@@ -474,23 +474,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.sel_names_all["%s_Xto4bv2_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
                     "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_)
                 ] 
-                
-
-                '''
-                self.sel_names_all["%s_Xto4bv2a_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
-                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SRWP%s" % (wp_)
+                self.sel_names_all["%s_Xto4bv2_SBplusSRWP%s" % (sCatName, wp_)] = catSels + [ # side band + signal region
+                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_)
                 ]
-                self.sel_names_all["%s_Xto4bv2a_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
-                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SBWP%s" % (wp_)
-                ] 
                 
-                self.sel_names_all["%s_Xto4bv2b_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
-                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SRWP%s" % (wp_)
-                ]
-                self.sel_names_all["%s_Xto4bv2b_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
-                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SBWP%s" % (wp_)
-                ] 
-                '''
 
         
         #for sCatName, catSels in categories_dict.items():
@@ -1191,8 +1178,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                     ]))            
             
-        for statusFlag_ in GENPART_STATUSFLAGS_LIST:
-            histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
+        #for statusFlag_ in GENPART_STATUSFLAGS_LIST:
+        #    histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
         
         self._accumulator = processor.dict_accumulator({
             'cutflow': processor.defaultdict_accumulator(int)
@@ -2378,6 +2365,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_),
                         ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-%s' % wp_]) &
                           (leadingFatJet_PNet_Xto4bv2_Htoaa4b <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SRWP-%s' % wp_]))
+                    )
+                if "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_),
+                        ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-%s' % wp_]) )
                     )
 
 

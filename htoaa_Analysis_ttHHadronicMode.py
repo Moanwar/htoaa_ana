@@ -357,7 +357,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "nLeptonsTight",
                 "MetZvvVeto",
                 #"DijetVBFVeto",
-                "BJet"
+                "TopFatJet"
             ]),
         ])
         '''
@@ -497,6 +497,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
        
 
         categories_dict = OD()
+        '''
         categories_dict["tt0l"] = self.sel_names_all["Presel"]
         categories_dict["tt0l_1TFJ_0B0JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
             "0BNonoverlappingSelFatJets",
@@ -514,6 +515,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             "1BNonoverlappingSelFatJets",
             "ge2JetNonoverlappingSelFatJets",
         ]
+        '''
+        categories_dict["tt0l_1TFJ_0BOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "0BNonoverlappingSelFatJets",
+        ]
+        categories_dict["tt0l_1TFJ_ge1BOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "ge1BNonoverlappingSelFatJets",
+        ]
+        categories_dict["tt0l_1TFJ_ge0BOutsideSelFJ"] = self.sel_names_all["Presel"] + [
+            "ge0BNonoverlappingSelFatJets",
+        ]
+
         
         
         
@@ -550,24 +562,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ]
                 self.sel_names_all["%s_Xto4bv2_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
                     "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBWP%s" % (wp_)
-                ] 
-                
-
-                '''
-                self.sel_names_all["%s_Xto4bv2a_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
-                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SRWP%s" % (wp_)
                 ]
-                self.sel_names_all["%s_Xto4bv2a_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
-                    "leadingFatJetPNet_Xto4bv2a_Htoaa4b_SBWP%s" % (wp_)
-                ] 
-                
-                self.sel_names_all["%s_Xto4bv2b_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
-                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SRWP%s" % (wp_)
+                self.sel_names_all["%s_Xto4bv2_SBplusSRWP%s" % (sCatName, wp_)] = catSels + [ # side band + signal region
+                    "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_)
                 ]
-                self.sel_names_all["%s_Xto4bv2b_SBWP%s" % (sCatName, wp_)] = catSels + [ # side band
-                    "leadingFatJetPNet_Xto4bv2b_Htoaa4b_SBWP%s" % (wp_)
-                ] 
-                '''
 
         
         #for sCatName, catSels in categories_dict.items():
@@ -1321,8 +1319,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt,      {sXaxis: phi_axis,        sXaxisLabel: r"\phi (leading FatJet)"}),
                     ]))            
             
-        for statusFlag_ in GENPART_STATUSFLAGS_LIST:
-            histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
+        #for statusFlag_ in GENPART_STATUSFLAGS_LIST:
+        #    histos['hGenBquark_first_%s_all' % (statusFlag_)] = {sXaxis: boolean_axis,    sXaxisLabel: r"GEN first Bquark %s"  % (statusFlag_)}
         
         self._accumulator = processor.dict_accumulator({
             'cutflow': processor.defaultdict_accumulator(int)
@@ -2588,6 +2586,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-%s' % wp_]) &
                           (leadingFatJet_PNet_Xto4bv2_Htoaa4b <= bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SRWP-%s' % wp_]))
                     )
+                if "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_) in self.sel_conditions_all_list:
+                    selection.add(
+                        "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_),
+                        ( (leadingFatJet_PNet_Xto4bv2_Htoaa4b >  bTagWPs[self.datasetInfo["era"]]['PNet_Xto4bv2_Htoaa4b']['SBWP-%s' % wp_]) )
+                    )
 
 
         
@@ -2604,11 +2607,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "0BNonoverlappingSelFatJets",
                 ( nAk4JetsCentral_bTag_nonoverlaping_selFatJets == 0 )
             ) 
+        if "ge0BNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "ge0BNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 0 )
+            )         
         if "1BNonoverlappingSelFatJets" in self.sel_conditions_all_list:
             selection.add(
                 "1BNonoverlappingSelFatJets",
                 ( nAk4JetsCentral_bTag_nonoverlaping_selFatJets == 1 )
             ) 
+        if "ge1BNonoverlappingSelFatJets" in self.sel_conditions_all_list:
+            selection.add(
+                "ge1BNonoverlappingSelFatJets",
+                ( nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 1 )
+            )         
         if "ge2BNonoverlappingSelFatJets" in self.sel_conditions_all_list:
             selection.add(
                 "ge2BNonoverlappingSelFatJets",
@@ -2690,12 +2703,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     (dEta_leadingPair_ak4Jets_nonoverlaping_leadingFatJet  > self.objectSelector.VBFDijetEta_MinThsh)   )
             )
         
-        if "BJet" in self.sel_conditions_all_list:
+        if "TopFatJet" in self.sel_conditions_all_list:
             selection.add(
-                "BJet",
+                "TopFatJet",
                 (
-                    (leadingNonHto4bFatJet_PNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh) & 
-                    (nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 0)
+                    (leadingNonHto4bFatJet_PNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh) #& 
+                    #(nAk4JetsCentral_bTag_nonoverlaping_selFatJets >= 0)
                 )
             )
 
