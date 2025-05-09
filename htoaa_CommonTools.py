@@ -48,6 +48,14 @@ def calculate_lumiScale(luminosity, crossSection, sumEvents):
     return lumiScale
 
 
+def calculate_deltaPhi(phi1, phi2): 
+    # phi in [-pi, pi] range
+    return (phi1 - phi2 + np.pi) % (2 * np.pi) - np.pi
+
+def calculate_AbsDeltaPhi(phi1, phi2):
+    return calculate_deltaPhi(phi1, phi2)
+
+
 def getSampleHTRange(sample_datasetNameFull):
     sample_HT_Min = sample_HT_Max = None
     # for e.g. sample_dataset: "QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8"

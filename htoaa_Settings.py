@@ -204,6 +204,32 @@ trigMET :
 ((HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1 || HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned || HLT_PFMETTypeOne140_PFMHT140_IDTight) && (L1_ETMHF100 || L1_ETMHF110 || L1_ETMHF120 || L1_ETMHF130))
 '''
 
+## 2018 HEM1516 issue
+HEM1516Issue2018_AffectedRunRange = [319077, 325175]
+DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365. Calculated for 2018 HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 trigger 
+Weight_HEM1516Issue2018_perTrigger = {
+    # Google-sheet: https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
+    'HLT_PFHT1050':	                                                 0.3523,
+    'HLT_PFJet500':                	                                 0.3523,
+    'HLT_AK8PFHT800_TrimMass50':	                                 0.3523,
+    'HLT_AK8PFJet500':	                                             0.3523,
+    'HLT_AK8PFJet400_TrimMass30':	                                 0.3523,
+    'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':	         0.2895,
+                                    
+    'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':	     0.2895,
+    'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': 0.3523,
+                                    
+    'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1': 	 0.2895,
+    'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':	             0.2895,
+                                    
+    'HLT_PFMET120_PFMHT120_IDTight_PFHT60': 	                     0.3522,
+    'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':	                     0.3523,
+    'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':	                 0.3522,
+    'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':	         0.2895,
+    'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':	                     0.3523,
+    'HLT_PFMETTypeOne140_PFMHT140_IDTight':	                         0.3523,    
+}
+
 sFilesGoldenJSON = {
     Era_2016: '',
     Era_2017: '',    
@@ -266,9 +292,6 @@ sFileLumiScalesPhSpOverlapRewgt = {
     }
 }
 
-HEM1516Issue2018_AffectedRunRange = [319077, 325175]
-DataFractionAffectedBy2018HEM1516Issue = 0.7105 # factor = (luminosity for run >= 319077) / (2018 luminosity) = 38.7501 / 54.5365. Calculated for 2018 HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4 trigger 
-
 bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
     Era_2018: {
         'AK4DeepJet': { # https://btv-wiki.docs.cern.ch/ScaleFactors/UL2018/
@@ -322,6 +345,7 @@ bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
             'SRWP-65':  0.92,   'SBWP-65':  0.60,    # fake rate 0.4%
             'SRWP-70':  0.90,   'SBWP-70':  0.50,    # fake rate 0.5%
             'SRWP-80':  0.84,   'SBWP-80':  0.40,    # fake rate 0.1%
+            'SRWP-95':  0.66, # 'SBWP-60'
         },       
         'PNet_Xto4bv2a_Htoaa4b': {
             # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 

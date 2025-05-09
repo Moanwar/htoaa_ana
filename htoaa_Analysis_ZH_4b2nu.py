@@ -52,6 +52,7 @@ print(f"htoaa_Analysis_ZH_4b2nu:: here9 {datetime.now() = }"); sys.stdout.flush(
 from htoaa_CommonTools import (
     getLorentVector,
     GetDictFromJsonFile, akArray_isin,
+    calculate_AbsDeltaPhi, calculate_deltaPhi,
     selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
@@ -904,8 +905,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hPuppiMET_pT'+sHExt,                              {sXaxis: pt_axis,         sXaxisLabel: r"PuppiMET pT [GeV]"}),
                         ('hdPhi_MET_leadingFatJet'+sHExt,                   {sXaxis: deltaPhi_axis,   sXaxisLabel: r"deltaPhi(MET, leadingFatJet)"}),
                         ('hdPhi_PuppiMET_leadingFatJet'+sHExt,              {sXaxis: deltaPhi_axis,   sXaxisLabel: r"deltaPhi(PuppiMET, leadingFatJet)"}),
-                        ('hMETPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
-                        ('hPuppiMETPhi'+sHExt,                         {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
+                        ('hMETPhi'+sHExt,                                   {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
+                        ('hPuppiMETPhi'+sHExt,                              {sXaxis: phi_axis,        sXaxisLabel: r"\phi (MET)"}),
                         
 
                         # NanoAODV2
@@ -1327,6 +1328,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         ones_list  = np.ones(len(events))
+        zeros_list  = np.zeros(len(events))
         trues_list = np.ones(len(events), dtype=bool)
         falses_list = np.full(len(events), False)
 
@@ -2061,65 +2063,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         leadingFatJet_nSubJets_bTag_M            = ak.count(leadingFatJet_subJets[mask_leadingFatJet_subJets_bTagDeepCSV_M].btagDeepB, axis=1)
         
 
-        # mask satisfying HEM1516 issues conditions
-        '''
-        scaleAK4ToAK8 = 0.4
-        mask_HEM1516Issue_FatJet = ak.fill_none((
-            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
-            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        # Discussion in Boosted H->aa->4b channel: https://mattermost.web.cern.ch/cms-exp/pl/iucci5aegjdzdqrqyhz18fn3ba
-        mask_HEM1516Issue_JetMet = ak.fill_none(( 
-            ak.any((
-                (events.Jet.eta > (-3.2 )) & (events.Jet.eta < (-1.3 )) & 
-                (events.Jet.phi > (-1.57)) & (events.Jet.phi < (-0.87)) & 
-                (abs(events.Jet.phi - events.MET.phi) < 0.3)            & 
-                ((events.Jet.chEmEF + events.Jet.neEmEF) * events.Jet.pt > 10)
-            ), axis=-1)
-        ), False)
-        mask_HEM1516Issue = mask_HEM1516Issue_FatJet | mask_HEM1516Issue_JetMet
-        isRunAffectedBy2018HEM1516Issue = (
-            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
-            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
-        )
-        '''
-
-        ## mask satisfying HEM1516 issues conditions
-        '''
-        # Iteration 1
-        scaleAK4ToAK8 = 0.4
-        mask_HEM1516Issue = ak.fill_none((
-            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
-            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        '''
-        # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
-        mask_HEM1516Issue = ak.fill_none((
-            (leadingFatJet.eta < -1.1) & 
-            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
-        ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
-            (leadingFatJet.eta < -1.1)
-        ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
-            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
-        ), False)       
-        isRunAffectedBy2018HEM1516Issue = (
-            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
-            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
-        )
 
         
         ## match leadingFat jet to genB 
@@ -2204,6 +2147,94 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         , 0)
 
         
+        # mask satisfying HEM1516 issues conditions
+        '''
+        scaleAK4ToAK8 = 0.4
+        mask_HEM1516Issue_FatJet = ak.fill_none((
+            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        # Discussion in Boosted H->aa->4b channel: https://mattermost.web.cern.ch/cms-exp/pl/iucci5aegjdzdqrqyhz18fn3ba
+        mask_HEM1516Issue_JetMet = ak.fill_none(( 
+            ak.any((
+                (events.Jet.eta > (-3.2 )) & (events.Jet.eta < (-1.3 )) & 
+                (events.Jet.phi > (-1.57)) & (events.Jet.phi < (-0.87)) & 
+                (abs(events.Jet.phi - events.MET.phi) < 0.3)            & 
+                ((events.Jet.chEmEF + events.Jet.neEmEF) * events.Jet.pt > 10)
+            ), axis=-1)
+        ), False)
+        mask_HEM1516Issue = mask_HEM1516Issue_FatJet | mask_HEM1516Issue_JetMet
+        isRunAffectedBy2018HEM1516Issue = (
+            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
+            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
+        )
+        '''
+
+        ## mask satisfying HEM1516 issues conditions
+        '''
+        # Iteration 1
+        scaleAK4ToAK8 = 0.4
+        mask_HEM1516Issue = ak.fill_none((
+            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        '''
+        # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
+        # and https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=21
+
+        ak4Jets_forHEM1516IssueInZvv = JetsToUse[(
+            (((JetsToUse.chEmEF + JetsToUse.neEmEF) * JetsToUse.pt_toUse) > 10) & 
+            (np.abs(JetsToUse.phi + 1.22) < 0.55 ) &
+            (JetsToUse.eta > -3.2) &
+            (JetsToUse.eta < -1.1) &     
+            (calculate_AbsDeltaPhi(METToUse.phi_toUse, JetsToUse.phi) < 0.3)   
+        )] 
+        nAk4Jets_forHEM1516IssueInZvv               = ak.fill_none(ak.count(ak4Jets_forHEM1516IssueInZvv.eta, axis=1), 0)
+        mask_HEM1516Issue = ak.fill_none((
+            (
+                (leadingFatJet.eta < -1.1) & 
+                (np.abs(leadingFatJet.phi + 1.22) < 0.55) 
+            ) |
+            (
+                (np.abs(METToUse.phi_toUse + 1.22) < 0.55 ) &
+                (nAk4Jets_forHEM1516IssueInZvv > 0)
+            )
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (
+                (leadingFatJet.eta < -1.1)
+            ) |
+            ( 
+                (np.abs(METToUse.phi_toUse + 1.22) < 0.55 ) &
+                (nAk4Jets_forHEM1516IssueInZvv > 0)
+            )
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (
+                (np.abs(leadingFatJet.phi + 1.22) < 0.55) 
+            ) | 
+            (
+                (np.abs(METToUse.phi_toUse + 1.22) < 0.55 ) &
+                (nAk4Jets_forHEM1516IssueInZvv > 0)
+            )
+        ), False)       
+        isRunAffectedBy2018HEM1516Issue = (
+            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
+            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
+        )
+
 
         #####################
         # EVENT SELECTION
@@ -2403,7 +2434,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if "dPhiLeadingFJHto4bAndMet" in self.sel_conditions_all_list:
             selection.add(
                 "dPhiLeadingFJHto4bAndMet",
-                ( abs(events.MET.delta_phi(leadingFatJet)) > self.objectSelector.DPhi_FJHto4b_MET_MinThsh )
+                ( calculate_AbsDeltaPhi(METToUse.phi_toUse, leadingFatJet.phi) > self.objectSelector.DPhi_FJHto4b_MET_MinThsh )
             )
             
         if "nLeptonsTight" in self.sel_conditions_all_list:
@@ -2454,12 +2485,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # Trigger selection
+        if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # 2018HEM1516Issue weight set to 1 as default
+            wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
                 logging.critical(f'htoaa_Analysis_ZH_4b2nu.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
+                wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
                 HLTName_toUse = HLTName.replace('HLT_', '')
                 mask_HLT = events.HLT[HLTName_toUse] == True
@@ -2467,12 +2502,31 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 mask_L1Ts = falses_list
                 for L1TName in L1TList:
                     L1TName_toUse = L1TName.replace('L1_', '')
+
                     mask_L1T_i = events.L1[L1TName_toUse] == True
                     mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired
 
                 mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
                 mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
 
+                # calculate 2018HEM1516Issue weight for current HLT trigger
+                if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+                    wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
+                    wgt_HEM1516Issue_Trgwise = np.where(
+                        (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
+                        np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
+                        wgt_HEM1516Issue_Trgwise
+                    )
+
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: 
+                # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
+                # Those events will be rejected anyway.
+                wgt_HEM1516Issue_Trgwise = np.where(
+                    (wgt_HEM1516Issue_Trgwise < 1e-6),
+                    ones_list,
+                    wgt_HEM1516Issue_Trgwise
+                )             
+            
             selection.add(
                 sTrgSelection,
                 mask_Trgs
@@ -2609,7 +2663,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
                 wgt_HEM1516Issue = ak.where(
                     mask_HEM1516Issue, # events w/ jets in HEM15/16 affected phase space 
-                    np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
+                    wgt_HEM1516Issue_Trgwise, #np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
                     ones_list
                 )
 
@@ -2693,11 +2747,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
                 
             # btagSF
-            wgt_Ak4Btag_dict = get_Ak4BtagSF(
-                jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
-                btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
-                year = self.datasetInfo["era"]
-            )
+            #wgt_Ak4Btag_dict = get_Ak4BtagSF(
+            #    jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
+            #    btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
+            #    year = self.datasetInfo["era"]
+            #)
 
             weights.add(
                 "lumiWeight",
@@ -2789,26 +2843,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_QCDPdfUp,
                 weightDown = wgt_QCDPdfDown
             )
-            if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
-                weights.add(
-                    "Btag",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Up'],
-                    weightDown = wgt_Ak4Btag_dict['Down']
-                )
-            elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-                weights.add(
-                    "BtagUncorr",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
-                )
-                weights.add(
-                    "BtagCorr",
-                    weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
-                )
+            #if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
+            #    weights.add(
+            #        "Btag",
+            #        weight     = wgt_Ak4Btag_dict['Nom'],
+            #        weightUp   = wgt_Ak4Btag_dict['Up'],
+            #        weightDown = wgt_Ak4Btag_dict['Down']
+            #    )
+            #elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
+            #    weights.add(
+            #        "BtagUncorr",
+            #        weight     = wgt_Ak4Btag_dict['Nom'],
+            #        weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
+            #        weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+            #    )
+            #    weights.add(
+            #        "BtagCorr",
+            #        weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
+            #        weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
+            #        weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+            #    )
 
             
     
@@ -2902,26 +2956,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_QCDPdfUp,
                 weightDown = wgt_QCDPdfDown
             )
-            if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
-                weights_woHEM1516Fix.add(
-                    "Btag",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Up'],
-                    weightDown = wgt_Ak4Btag_dict['Down']
-                )
-            elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-                weights_woHEM1516Fix.add(
-                    "BtagUncorr",
-                    weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
-                )
-                weights_woHEM1516Fix.add(
-                    "BtagCorr",
-                    weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
-                )
+            #if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
+            #    weights_woHEM1516Fix.add(
+            #        "Btag",
+            #        weight     = wgt_Ak4Btag_dict['Nom'],
+            #        weightUp   = wgt_Ak4Btag_dict['Up'],
+            #        weightDown = wgt_Ak4Btag_dict['Down']
+            #    )
+            #elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
+            #    weights_woHEM1516Fix.add(
+            #        "BtagUncorr",
+            #        weight     = wgt_Ak4Btag_dict['Nom'],
+            #        weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
+            #        weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+            #    )
+            #    weights_woHEM1516Fix.add(
+            #        "BtagCorr",
+            #        weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
+            #        weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
+            #        weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+            #    )
 
 
             ## weights_gen -------------------------------
@@ -3949,6 +4003,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             dataset=dataset,
                             Weight=wgt_QCDPdfDown[sel_SR_forHExt]
                         )
+                        '''
                         output['hEventWeight_Ak4BtagNom'+sHExt].fill(
                             dataset=dataset,
                             Weight=wgt_Ak4Btag_dict['Nom'][sel_SR_forHExt]
@@ -3978,7 +4033,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             output['hEventWeight_Ak4BtagDowncorrelated'+sHExt].fill(
                                 dataset=dataset,
                                 Weight=wgt_Ak4Btag_dict['Downcorrelated'][sel_SR_forHExt]
-                            )                        
+                            )   
+                        '''                     
                     # ------------------------------------------------------    
                         
 
@@ -4027,6 +4083,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hMET_pT'+sHExt].fill(
                             dataset=dataset,
                             Pt=(METToUse.pt_toUse[sel_SR_forHExt]),
+                            systematic=syst,
+                            weight=evtWeight[sel_SR_forHExt]
+                        )
+                        output['hMETPhi'+sHExt].fill(
+                            dataset=dataset,
+                            Phi=(METToUse.phi_toUse[sel_SR_forHExt]),
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )
@@ -4959,12 +5021,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )      
-                        output['hMETPhi'+sHExt].fill(
-                            dataset=dataset,
-                            Phi=(events.MET.phi[ sel_SR_forHExt ]),
-                            systematic=syst,
-                            weight=evtWeight[ sel_SR_forHExt ]
-                        ) 
                         output['hPuppiMETPhi'+sHExt].fill(
                             dataset=dataset,
                             Phi=(events.PuppiMET.phi[ sel_SR_forHExt ]),

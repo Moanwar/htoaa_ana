@@ -589,7 +589,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
         mlScore_axis          = hist.Bin("MLScore",                r"ML score",                  100,       0,       1)
         mlScore_axis1         = hist.Bin("MLScore1",               r"ML score",                  100,    -1.1,     1.1)
-        mlScore_axis1k        = hist.Bin("MLScore1k",              r"ML score",                  100,       0,       1)
+        mlScore_axis1k        = hist.Bin("MLScore1k",              r"ML score",                 1000,       0,       1)
         mlScore_axis2k        = hist.Bin("MLScore2k",              r"ML score",                 2100,     0.0,     2.1)
         mlScore_axis1k_m1To2  = hist.Bin("MLScore1k_m1To2",        r"ML score",                 1100,    -1.1,     2.1)
         jetN2_axis            = hist.Bin("N2",                     r"N2b1",                      100,       0,       3)

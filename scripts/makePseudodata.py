@@ -3,125 +3,97 @@ import os
 import re
 import shutil
 
-MASSH   = 'pnet_vs_massA34a'    ## Higgs mass regression (mass, msoft, pnet)
-
 
 def merge_histograms(path, signal):
     sTagExtra = '' # '_Xto4bv2': for Mohamed,  '': for Siddhesh
 
     sOpDataOriginalFile = path + f"{signal+sTagExtra}_Data_2018.root"
-    sOpDataBackupFile = path + f"{signal+sTagExtra}_Data_2018_backup.root"
-    sOpPseudodataFile = path + f"{signal+sTagExtra}_Data_2018.root"
-    
+    sOpDataBackupFile   = path + f"{signal+sTagExtra}_Data_2018_backup.root"
+    sOpPseudodataFile   = path + f"{signal+sTagExtra}_Data_2018.root"
+
+    print(f"\n\n{path = }")
+    #print(f"Initially {os.listdir(path) = }", flush=True)
+
     # Keep back up of data
-    shutil.copy(sOpDataOriginalFile, sOpDataBackupFile)
-    print(f"{os.listdir(path) = }", flush=True)
+    #shutil.copy(sOpDataOriginalFile, sOpDataBackupFile)
+    shutil.move(sOpDataOriginalFile, sOpDataBackupFile)
+    #print(f"\nStage 1   {os.listdir(path) = }", flush=True)
+
+    # Open i/p files
+    fData       = ROOT.TFile(sOpDataBackupFile, "READ")
+    fPseudodata = ROOT.TFile(sOpPseudodataFile, "RECREATE")
+    fBkgs_dict  = { f:ROOT.TFile(path+f, "READ")  for f in os.listdir(path) if f.endswith(".root") and "Htoaato4b" not in f and "Data" not in f}
+    #print(f"\nStage 2   {os.listdir(path) = }", flush=True)
+    print(f"\n{fBkgs_dict.keys() = }")
+
+    # Loop over histogram-name combinations
+    for MASSH in MASSH_list:
+        for WP in WPs:
+            for Region in Regions:
+                Systematics = 'Nom'
+                print(f"\n\n{MASSH = }, {WP = }, {Region = }, {Systematics = }")
+
+                hData = None
+                hPseudodata = None
+                sPseudodata = None
+                
+                # Read hData
+                for histNameInFile in fData.GetListOfKeys():
+                    histNameInFile = histNameInFile.GetName()
+                    # select histogram name under consideration
+                    if MASSH in histNameInFile and WP in histNameInFile and Region in histNameInFile and Systematics in histNameInFile:
+                        sPseudodata = histNameInFile
+                        hData = fData.Get(histNameInFile)
+                        hData.SetName('%s_backup' % (hData.GetName()))
+                        hData.SetTitle('%s_backup' % (hData.GetTitle()))                        
+                print(f"{sPseudodata = }, hData: {hData.Integral()}")
+
+                # hadd all backgrounds
+                for sBkg, fBkg in fBkgs_dict.items():
+                    # Read hBkg
+                    for histNameInFile in fBkg.GetListOfKeys():
+                        histNameInFile = histNameInFile.GetName()
+                        # select histogram name under consideration
+                        if MASSH in histNameInFile and WP in histNameInFile and Region in histNameInFile and Systematics in histNameInFile:
+                            hBkg_i = fBkg.Get(histNameInFile)
+                            if hPseudodata is None:
+                                hPseudodata = hBkg_i.Clone(sPseudodata)
+                                hPseudodata.SetDirectory(0)
+                            else:
+                                hPseudodata.Add(hBkg_i)
+                            print(f"\t {sBkg} \t:{histNameInFile}, \t hBkg_i: {hBkg_i.Integral()}, \t hPseudodata: {hPseudodata.Integral()}")
+                print(f"{sPseudodata = }, hData: {hData.Integral()}, \t hPseudodata: {hPseudodata.Integral()}")
+
+                # Scale pseudodata to match number of data events
+                scale_factor = hData.Integral() / hPseudodata.Integral() if hPseudodata.Integral() > 0 else 1
+                hPseudodata.Scale(scale_factor)
+                print(f"{sPseudodata = }, hData: {hData.Integral()}, \t hPseudodata: {hPseudodata.Integral()} finally <<<<<<<<<<<<<<<<<<<<")
+
+                fPseudodata.cd()
+                hPseudodata.Write()
+
+    fData.Close()
+    fPseudodata.Close()
+    fBkgs_dict.clear()
+
+
+
+
+                        
+                        
+MASSH_list   = ['pnet_vs_massA34a']    ## Higgs mass regression (mass, msoft, pnet)
+WPs          = ['WP40', 'WP60']
+Regions      = ['Pass', 'Fail']
+Categories   = ['gg0lHi', 'gg0lLo', 'gg0lIncl']
+
+for signal in Categories:
+    #pathOriginal   = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles/%s/' % (signal) #'/eos/user/m/moanwar/htoaa/analysis/VBF_channel/2DAlphabetfiles_VBF_BKgIncl/VBFHi_Xto4bv2/'
+    #pathPseudoData = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata_Correct_1/%s/' % (signal)
+    pathOriginal   = '/eos/cms/store/user/ssawant/htoaa/analysis/20250502_gg0l_FullSyst/2018/2DAlphabet_inputFiles/%s/' % (signal) #'/eos/user/m/moanwar/htoaa/analysis/VBF_channel/2DAlphabetfiles_VBF_BKgIncl/VBFHi_Xto4bv2/'
+    pathPseudoData = '/eos/cms/store/user/ssawant/htoaa/analysis/20250502_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata/%s/' % (signal)
     
 
-    # Output file for merged histograms
-    #output_file = ROOT.TFile(path + f"{signal}_Xto4bv2_Data_2018.root", "RECREATE")
-    output_file = ROOT.TFile(sOpPseudodataFile, "RECREATE")
-
-    # Get all ROOT files except those containing "Htoaato4b" or "Data"
-    root_files = [path+f for f in os.listdir(path) if f.endswith(".root") and "Htoaato4b" not in f and "Data" not in f]
-
-    # Initialize histograms for merging
-    h_pass = None
-    h_fail = None
-
-    # Loop over ROOT files
-    for file_name in root_files:
-        input_file = ROOT.TFile.Open(file_name, "READ")
-        if not input_file or input_file.IsZombie():
-            print(f"Error opening file: {file_name}")
-            continue
-
-        # Loop over histograms in the file
-        for key in input_file.GetListOfKeys():
-            hist_name = key.GetName()
-            print("Processing histogram:", hist_name)
-
-            hist = input_file.Get(hist_name)
-            if not hist:
-                continue  # Skip if histogram does not exist
-
-            # Merge "Pass" histograms
-            if 'Pass' in hist_name:
-                if h_pass is None:
-                    h_pass = hist.Clone("histogram_Pass")
-                    h_pass.SetDirectory(0)
-                else:
-                    h_pass.Add(hist)
-
-            # Merge "Fail" histograms
-            elif 'Fail' in hist_name:
-                if h_fail is None:
-                    h_fail = hist.Clone("histogram_Fail")
-                    h_fail.SetDirectory(0)
-                else:
-                    h_fail.Add(hist)
-
-        input_file.Close()
-
-    # Save merged histograms
-    output_file.cd()
-    if h_pass:
-        h_pass.Write()
-    if h_fail:
-        h_fail.Write()
-    output_file.Close()
-
-    print(f"Merged histograms saved in {sOpPseudodataFile}")
-
-    Bkg_file = ROOT.TFile.Open(sOpPseudodataFile, "UPDATE")
-    if not Bkg_file or Bkg_file.IsZombie():
-        print("Error opening background file")
-        return
-
-    h_pass = Bkg_file.Get("histogram_Pass")
-    h_fail = Bkg_file.Get("histogram_Fail")
-
-    data_file = ROOT.TFile.Open(sOpDataBackupFile, "READ")
-    if not data_file or data_file.IsZombie():
-        print("Error opening data.root")
-        return
-
-    h_data_pass = data_file.Get(f"{signal+sTagExtra}_Data_2018_{MASSH}_WP40_Pass_Nom")
-    h_data_fail = data_file.Get(f"{signal+sTagExtra}_Data_2018_{MASSH}_WP40_Fail_Nom")
-
-    # Compute and apply scale factors
-    if h_pass and h_data_pass:
-        integral_pass = h_pass.Integral() if h_pass else 0
-        integral_data_pass = h_data_pass.Integral() if h_data_pass else 0
-        if integral_pass > 0 and integral_data_pass > 0:
-            scale_pass = integral_data_pass / integral_pass
-            h_pass.Scale(scale_pass)
-            print(f"Scaling Pass histograms by {scale_pass}")
-
-    if h_fail and h_data_fail:
-        integral_fail = h_fail.Integral() if h_fail else 0
-        integral_data_fail = h_data_fail.Integral() if h_data_fail else 0
-        if integral_fail > 0 and integral_data_fail > 0:
-            scale_fail = integral_data_fail / integral_fail
-            h_fail.Scale(scale_fail)
-            print(f"Scaling Fail histograms by {scale_fail}")
-
-    # Save scaled histograms
-    Bkg_file.cd()
-    if h_pass:
-        h_pass.Write(f"{signal+sTagExtra}_Data_2018_{MASSH}_WP40_Pass_Nom")
-    if h_fail:
-        h_fail.Write(f"{signal+sTagExtra}_Data_2018_{MASSH}_WP40_Fail_Nom")
-    Bkg_file.Close()
-    data_file.Close()
-
-    print(f"Scaled histograms saved in {signal+sTagExtra}_Data_2018.root")
-
-# Run the function
-signal = 'gg0lLo' #'VBFjjHi'
-pathOriginal   = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles/%s/' % (signal) #'/eos/user/m/moanwar/htoaa/analysis/VBF_channel/2DAlphabetfiles_VBF_BKgIncl/VBFHi_Xto4bv2/'
-pathPseudoData = '/eos/cms/store/user/ssawant/htoaa/analysis/20250305_gg0l_FullSyst/2018/2DAlphabet_inputFiles_pseudodata/%s/' % (signal)
-
-# Copy the original directory and work with the copy
-shutil.copytree(pathOriginal, pathPseudoData, dirs_exist_ok=True)
-merge_histograms(pathPseudoData, signal)
+    # Copy the original directory and work with the copy
+    if os.path.isdir(pathPseudoData): shutil.rmtree(pathPseudoData)
+    shutil.copytree(pathOriginal, pathPseudoData, dirs_exist_ok=True)
+    merge_histograms(pathPseudoData, signal)

@@ -1468,6 +1468,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         ones_list  = np.ones(len(events))
+        zeros_list  = np.zeros(len(events))
         trues_list = np.ones(len(events), dtype=bool)
         falses_list = np.full(len(events), False)
 
@@ -2211,36 +2212,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         leadingFatJet_nSubJets_bTag_M            = ak.count(leadingFatJet_subJets[mask_leadingFatJet_subJets_bTagDeepCSV_M].btagDeepB, axis=1)
         
 
-        ## mask satisfying HEM1516 issues conditions
-        '''
-        # Iteration 1
-        scaleAK4ToAK8 = 0.4
-        mask_HEM1516Issue = ak.fill_none((
-            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
-            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
-        ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
-            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
-        ), False)
-        '''
-        # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
-        mask_HEM1516Issue = ak.fill_none((
-            (leadingFatJet.eta < -1.1) & 
-            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
-        ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
-            (leadingFatJet.eta < -1.1)
-        ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
-            (np.abs(leadingFatJet.phi + 1.22) < 0.55)
-        ), False)       
-        isRunAffectedBy2018HEM1516Issue = (
-            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
-            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
-        )
 
         
         ## match leadingFat jet to genB 
@@ -2383,6 +2354,56 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dEta_leadingPair_ak4Jets_nonoverlaping_leadingFatJet = ak.fill_none(
             abs(LV_leading2Ak4Jets_nonoverlaping_leadingFatJet[:, 0].eta - LV_leading2Ak4Jets_nonoverlaping_leadingFatJet[:, 1].eta)
         , 0)
+
+
+        ## mask satisfying HEM1516 issues conditions
+        '''
+        # Iteration 1
+        scaleAK4ToAK8 = 0.4
+        mask_HEM1516Issue = ak.fill_none((
+            (leadingFatJet.eta > (-3.2  - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3  + scaleAK4ToAK8)) & 
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (leadingFatJet.eta > (-3.2 - scaleAK4ToAK8)) & (leadingFatJet.eta < (-1.3 + scaleAK4ToAK8))
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (leadingFatJet.phi > (-1.57 - scaleAK4ToAK8)) & (leadingFatJet.phi < (-0.87 + scaleAK4ToAK8))
+        ), False)
+        '''
+        # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
+        ak4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue = ak4JetsCentral_bTag_nonoverlaping_selFatJets[(
+            (ak4JetsCentral_bTag_nonoverlaping_selFatJets.eta < -1.2) &
+            (np.abs(ak4JetsCentral_bTag_nonoverlaping_selFatJets.phi + 1.22) < 0.45)
+        )]
+        nAk4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue   = ak.fill_none(ak.count(ak4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue.pt, axis=1), 0)
+        mask_HEM1516Issue = ak.fill_none((
+            (
+                (leadingFatJet.eta < -1.1) & 
+                (np.abs(leadingFatJet.phi + 1.22) < 0.55)
+            ) |
+            (
+                (leadingNonHto4bFatJet.eta < -1.1) & 
+                (np.abs(leadingNonHto4bFatJet.phi + 1.22) < 0.55)
+            ) |
+            (
+                (nAk4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue > 0)
+            )
+        ), False)
+        mask_HEM1516Issue_Eta = ak.fill_none((
+            (leadingFatJet.eta < -1.1) |
+            (leadingNonHto4bFatJet.eta < -1.1) |
+            (nAk4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue > 0)
+        ), False)
+        mask_HEM1516Issue_Phi = ak.fill_none((
+            (np.abs(leadingFatJet.phi + 1.22) < 0.55) |
+            (np.abs(leadingNonHto4bFatJet.phi + 1.22) < 0.55) |
+            (nAk4JetsCentral_bTag_nonoverlaping_selFatJets_forHIM1516Issue > 0)
+        ), False)       
+        isRunAffectedBy2018HEM1516Issue = (
+            (events.run >= HEM1516Issue2018_AffectedRunRange[0])  & 
+            (events.run <= HEM1516Issue2018_AffectedRunRange[1])
+        )
 
 
         #####################
@@ -2724,12 +2745,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # Trigger selection
+        if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # 2018HEM1516Issue weight set to 1 as default
+            wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
                 logging.critical(f'htoaa_Analysis_ttHHadronicMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
+                wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
                 HLTName_toUse = HLTName.replace('HLT_', '')
                 mask_HLT = events.HLT[HLTName_toUse] == True
@@ -2737,12 +2762,31 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 mask_L1Ts = falses_list
                 for L1TName in L1TList:
                     L1TName_toUse = L1TName.replace('L1_', '')
+
                     mask_L1T_i = events.L1[L1TName_toUse] == True
                     mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired
 
                 mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
                 mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
 
+                # calculate 2018HEM1516Issue weight for current HLT trigger
+                if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+                    wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
+                    wgt_HEM1516Issue_Trgwise = np.where(
+                        (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
+                        np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
+                        wgt_HEM1516Issue_Trgwise
+                    )
+
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: 
+                # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
+                # Those events will be rejected anyway.
+                wgt_HEM1516Issue_Trgwise = np.where(
+                    (wgt_HEM1516Issue_Trgwise < 1e-6),
+                    ones_list,
+                    wgt_HEM1516Issue_Trgwise
+                )             
+            
             selection.add(
                 sTrgSelection,
                 mask_Trgs
@@ -2878,7 +2922,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
                 wgt_HEM1516Issue = ak.where(
                     mask_HEM1516Issue, # events w/ jets in HEM15/16 affected phase space 
-                    np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
+                    wgt_HEM1516Issue_Trgwise, #np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
                     ones_list
                 )
 

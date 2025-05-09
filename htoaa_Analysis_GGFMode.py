@@ -147,7 +147,7 @@ class ObjectSelection:
         self.FatJetZHbb_plus_Xbb_Thsh = 0.4
         self.FatJetZHbb_Xbb_avg_Thsh  = 0.4
         self.FatJetZHbb_Thsh          = 0.7
-        self.FatJetPNetXto4bv2WorkingPoints = ['40'] #['40', '60', '80'] #['40', '45a', '45b', '50', '60', '65', '70', '80']  # ['40', '50', '60', '65', '70', '80']   ['40', '60', '80']
+        self.FatJetPNetXto4bv2WorkingPoints = ['40', '60', '80'] #['40', '60', '80'] #['40', '45a', '45b', '50', '60', '65', '70', '80']  # ['40', '50', '60', '65', '70', '80']   ['40', '60', '80']
         
         self.nSV_matched_leadingFatJet_Thsh = 3
 
@@ -1320,8 +1320,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         
 
-        ones_list  = np.ones(len(events))
-        trues_list = np.ones(len(events), dtype=bool)
+        ones_list   = np.ones(len(events))
+        zeros_list  = np.zeros(len(events))
+        trues_list  = np.ones(len(events), dtype=bool)
         falses_list = np.full(len(events), False)
 
         ###########################################
@@ -2518,12 +2519,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # Trigger selection
+        if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # 2018HEM1516Issue weight set to 1 as default
+            wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
                 logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
+                wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
                 HLTName_toUse = HLTName.replace('HLT_', '')
                 mask_HLT = events.HLT[HLTName_toUse] == True
@@ -2538,6 +2543,24 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
                 mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
 
+                # calculate 2018HEM1516Issue weight for current HLT trigger
+                if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+                    wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
+                    wgt_HEM1516Issue_Trgwise = np.where(
+                        (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
+                        np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
+                        wgt_HEM1516Issue_Trgwise
+                    )
+
+            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: 
+                # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
+                # Those events will be rejected anyway.
+                wgt_HEM1516Issue_Trgwise = np.where(
+                    (wgt_HEM1516Issue_Trgwise < 1e-6),
+                    ones_list,
+                    wgt_HEM1516Issue_Trgwise
+                )             
+            
             selection.add(
                 sTrgSelection,
                 mask_Trgs
@@ -2674,9 +2697,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
                 wgt_HEM1516Issue = ak.where(
                     mask_HEM1516Issue, # events w/ jets in HEM15/16 affected phase space 
-                    np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
+                    wgt_HEM1516Issue_Trgwise, #np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
                     ones_list
                 )
+                    
 
             # MC PURewgt ----------------------------------
             #wgt_PU = getPURewgts(
