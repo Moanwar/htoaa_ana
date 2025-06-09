@@ -26,6 +26,7 @@ from htoaa_Samples import (
 )
 #from numba import jit
 
+printLevel = 0
 
 def getLorentVector(collection, pTName='pt_toUse', etaName='eta', phiName='phi', massName='mass_toUse'):
     return ak.zip(
@@ -379,6 +380,108 @@ def selectRunLuminosityBlock(dataLSSelGoldenJSON, runNumber_list, luminosityBloc
     return mask_run_ls
 
 
+# -----------------------------------------------------------------------------------------
+# Gen-level selection 
+# -----------------------------------------------------------------------------------------
+def selectGenHiggs(events):
+    maskGenHiggs = (
+        ((events.GenPart.pdgId  == 25) | 
+         (events.GenPart.pdgId  == 35)) & # pdgId:: 25: H0, 35: H0/H0_2
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenHiggs:  {maskGenHiggs.to_list()} ")
+        print(f"\n events.GenPart[maskGenHiggs]:  {events.GenPart[maskGenHiggs].to_list()} ")
+        print(f"\n events.GenPart[maskGenHiggs].pt:  {events.GenPart[maskGenHiggs].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenHiggs].mass:  {events.GenPart[maskGenHiggs].mass.to_list()} ")
+    return events.GenPart[maskGenHiggs]
+
+def selectGenZBoson(events):
+    maskGenZBoson = (
+        (events.GenPart.pdgId  == 23) & # pdgId:: 23: Z
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenZBoson:  {maskGenZBoson.to_list()} ")
+        print(f"\n events.GenPart[maskGenZBoson]:  {events.GenPart[maskGenZBoson].to_list()} ")
+        print(f"\n events.GenPart[maskGenZBoson].pt:  {events.GenPart[maskGenZBoson].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenZBoson].mass:  {events.GenPart[maskGenZBoson].mass.to_list()} ")
+    return events.GenPart[maskGenZBoson]
+
+def selectGenWBoson(events):
+    maskGenWBoson = (
+        (abs(events.GenPart.pdgId)  == 24) & # pdgId:: 24: W
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenWBoson:  {maskGenWBoson.to_list()} ")
+        print(f"\n events.GenPart[maskGenWBoson]:  {events.GenPart[maskGenWBoson].to_list()} ")
+        print(f"\n events.GenPart[maskGenWBoson].pt:  {events.GenPart[maskGenWBoson].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenWBoson].mass:  {events.GenPart[maskGenWBoson].mass.to_list()} ")
+    return events.GenPart[maskGenWBoson]
+
+def selectGenWplusBoson(events):
+    maskGenWplusBoson = (
+        (events.GenPart.pdgId  == 24) & # pdgId:: 24: W+
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenWplusBoson:  {maskGenWplusBoson.to_list()} ")
+        print(f"\n events.GenPart[maskGenWplusBoson]:  {events.GenPart[maskGenWplusBoson].to_list()} ")
+        print(f"\n events.GenPart[maskGenWplusBoson].pt:  {events.GenPart[maskGenWplusBoson].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenWplusBoson].mass:  {events.GenPart[maskGenWplusBoson].mass.to_list()} ")
+    return events.GenPart[maskGenWplusBoson]
+
+def selectGenWminusBoson(events):
+    maskGenWminusBoson = (
+        (events.GenPart.pdgId  == -24) & # pdgId:: 24: W+
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenWminusBoson:  {maskGenWminusBoson.to_list()} ")
+        print(f"\n events.GenPart[maskGenWminusBoson]:  {events.GenPart[maskGenWminusBoson].to_list()} ")
+        print(f"\n events.GenPart[maskGenWminusBoson].pt:  {events.GenPart[maskGenWminusBoson].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenWminusBoson].mass:  {events.GenPart[maskGenWminusBoson].mass.to_list()} ")
+    return events.GenPart[maskGenWminusBoson]
+
+def selectGenTop(events):
+    maskGenTop = (
+        (events.GenPart.pdgId  == 6) & # pdgId:: 6: top-quark
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenTop:  {maskGenTop.to_list()} ")
+        print(f"\n events.GenPart[maskGenTop]:  {events.GenPart[maskGenTop].to_list()} ")
+        print(f"\n events.GenPart[maskGenTop].pt:  {events.GenPart[maskGenTop].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenTop].mass:  {events.GenPart[maskGenTop].mass.to_list()} ")
+    return events.GenPart[maskGenTop]
+
+def selectGenAntiTop(events):
+    maskGenAntiTop = (
+        (events.GenPart.pdgId  == -6) & # pdgId:: 6: top-quark
+        (events.GenPart.status == 62)   # statu 62: outgoing subprocess particle with primordial kT included https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    if printLevel >= 13:
+        print(f"\n maskGenAntiTop:  {maskGenAntiTop.to_list()} ")
+        print(f"\n events.GenPart[maskGenAntiTop]:  {events.GenPart[maskGenAntiTop].to_list()} ")
+        print(f"\n events.GenPart[maskGenAntiTop].pt:  {events.GenPart[maskGenAntiTop].pt.to_list()} ")
+        print(f"\n events.GenPart[maskGenAntiTop].mass:  {events.GenPart[maskGenAntiTop].mass.to_list()} ")
+    return events.GenPart[maskGenAntiTop]
+
+
+def selectGenQuarksFromHardScattering(events):
+    # Select quarks coming out of hard scattering
+    maskGenQuarksHardScattring = (
+        (abs(events.GenPart.pdgId)  >= 1) & # pdgId:: 1, 2, 3, 4, 5, 6: d, u, s, c, b and top-quark,
+        (abs(events.GenPart.pdgId)  <= 6) & 
+        (events.GenPart.status == 23)   # status 23: outgoing partile from hardest subprocess https://pythia.org/latest-manual/ParticleProperties.html
+    )
+    return events.GenPart[maskGenQuarksHardScattring]
+
+
+# -----------------------------------------------------------------------------------------
+# Gen-level selection 
+# -----------------------------------------------------------------------------------------    
 def selectMETFilters(flags_list, era, isMC):
     sFLagDataOrMC = "MC" if isMC else "Data"
 

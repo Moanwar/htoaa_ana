@@ -285,45 +285,26 @@ Samples2018 = OD([
 
 
 
-    #('ggH', [   #('GluGluHToBB_Pt-200ToInf', [
-    #    "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
+
+    #('GluGluHToBB_Incl', [
+    #    "GluGluHToBB_M-125_TuneCP5_MINLO_NNLOPS_13TeV-powheg-pythia8",
     #]),
-    ('GluGluHToBB_Incl', [
-        "GluGluHToBB_M-125_TuneCP5_MINLO_NNLOPS_13TeV-powheg-pythia8",
-    ]),
-    ('GluGluHToBB_Pt-200ToInf', [
+    ('ggH', [   #('GluGluHToBB_Pt-200ToInf', [
         "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
     ]),
-    ('VBFHToBB_powheg', [
-        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
+#    ('VBFH', [   #('VBFHToBB_powheg', [
+#        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+#    ]),
     #('VBFHToBB_herwig', [
     #    "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
     #]),
-    ('VBFH_dipoleRecoilOn', [
-        "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
-    ]),
+#    ('VBFH_dipoleRecoilOn', [
+#        "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
+#    ]),
 #    ('VBFWH_dipoleRecoilOn', [
 #        "VBFWH_HToBB_WToLNu_M-125_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8",
 #    ]),
-    ('VBFHToTauTau_powheg', [
-        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    
 
-
-    ('WplusHToBBQQ', [
-        "WplusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('WplusHToBBLNu', [
-        "WplusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('WminusHToBBQQ', [
-        "WminusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('WminusHToBBLNu', [
-        "WminusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
 #    ('WHbbqq', [
 #        "WplusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
 #        "WminusH_HToBB_WToQQ_M-125_TuneCP5_13TeV-powheg-pythia8"
@@ -332,46 +313,22 @@ Samples2018 = OD([
 #        "WplusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8",
 #        "WminusH_HToBB_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8"
 #    ]),
-    ('WHToMuMuG', [
-        "WHToMuMuG_M125_Dalitz_012j_TuneCP5_13TeV_amcatnloFXFX_pythia8"
-    ]),
-    ('WplusHToTauTau', [
-        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    ('WminusHToTauTau', [
-        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    
-    
-
-    ('ZHToBBX', [
-        "ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
-        "ZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('ZHToMuMuG', [
-        "ZHToMuMuG_M125_Dalitz_012j_TuneCP5_13TeV_amcatnloFXFX_pythia8"
-    ]),
+#    ('ZH', [
+#        "ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
+#        "ZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
 #    ('ggZH', [
 #        "ggZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8",
 #        "ggZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8",
 #        "ggZH_HToBB_ZToNuNu_M-125_TuneCP5_13TeV-powheg-pythia8",
 #        "ggZH_HToBB_ZToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
 #    ]),
-    ('ZHToTauTau', [
-        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8",
-    ]),
-    
-
-    ('ttHToBB', [
-        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
-        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
-    ]),
-    ('ttHToTauTau', [
-        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    
+#    ('ttH', [
+#        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
+#        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
 
 
     ("ggHtoaato4b_mA_12", ["SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
@@ -435,65 +392,65 @@ Samples2018 = OD([
     ("ttHtoaato4b_mA_60", ["SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
 
-    ("ggHtoaato4b_Incl_mA_12", ["SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_15", ["SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_20", ["SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_25", ["SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_30", ["SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_35", ["SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_40", ["SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_45", ["SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_50", ["SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_55", ["SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ggHtoaato4b_Incl_mA_60", ["SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_12", ["SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_15", ["SUSY_GluGluH_01J_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_20", ["SUSY_GluGluH_01J_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_25", ["SUSY_GluGluH_01J_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_30", ["SUSY_GluGluH_01J_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_35", ["SUSY_GluGluH_01J_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_40", ["SUSY_GluGluH_01J_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_45", ["SUSY_GluGluH_01J_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_50", ["SUSY_GluGluH_01J_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_55", ["SUSY_GluGluH_01J_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ggHtoaato4b_Incl_mA_60", ["SUSY_GluGluH_01J_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
-    ("VBFHtoaato4b_Incl_mA_12", ["SUSY_VBFH_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_15", ["SUSY_VBFH_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_20", ["SUSY_VBFH_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_25", ["SUSY_VBFH_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_30", ["SUSY_VBFH_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_35", ["SUSY_VBFH_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_40", ["SUSY_VBFH_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_45", ["SUSY_VBFH_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_50", ["SUSY_VBFH_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_55", ["SUSY_VBFH_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("VBFHtoaato4b_Incl_mA_60", ["SUSY_VBFH_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_12", ["SUSY_VBFH_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_15", ["SUSY_VBFH_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_20", ["SUSY_VBFH_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_25", ["SUSY_VBFH_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_30", ["SUSY_VBFH_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_35", ["SUSY_VBFH_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_40", ["SUSY_VBFH_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_45", ["SUSY_VBFH_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_50", ["SUSY_VBFH_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_55", ["SUSY_VBFH_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("VBFHtoaato4b_Incl_mA_60", ["SUSY_VBFH_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
-    ("WHtoaato4b_Incl_mA_12", ["SUSY_WH_WToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_15", ["SUSY_WH_WToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_20", ["SUSY_WH_WToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_25", ["SUSY_WH_WToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_30", ["SUSY_WH_WToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_35", ["SUSY_WH_WToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_40", ["SUSY_WH_WToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_45", ["SUSY_WH_WToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_50", ["SUSY_WH_WToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_55", ["SUSY_WH_WToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("WHtoaato4b_Incl_mA_60", ["SUSY_WH_WToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_12", ["SUSY_WH_WToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_15", ["SUSY_WH_WToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_20", ["SUSY_WH_WToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_25", ["SUSY_WH_WToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_30", ["SUSY_WH_WToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_35", ["SUSY_WH_WToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_40", ["SUSY_WH_WToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_45", ["SUSY_WH_WToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_50", ["SUSY_WH_WToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_55", ["SUSY_WH_WToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("WHtoaato4b_Incl_mA_60", ["SUSY_WH_WToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
-    ("ZHtoaato4b_Incl_mA_12", ["SUSY_ZH_ZToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_15", ["SUSY_ZH_ZToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_20", ["SUSY_ZH_ZToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_25", ["SUSY_ZH_ZToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_30", ["SUSY_ZH_ZToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_35", ["SUSY_ZH_ZToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_40", ["SUSY_ZH_ZToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_45", ["SUSY_ZH_ZToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_50", ["SUSY_ZH_ZToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_55", ["SUSY_ZH_ZToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ZHtoaato4b_Incl_mA_60", ["SUSY_ZH_ZToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_12", ["SUSY_ZH_ZToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_15", ["SUSY_ZH_ZToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_20", ["SUSY_ZH_ZToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_25", ["SUSY_ZH_ZToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_30", ["SUSY_ZH_ZToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_35", ["SUSY_ZH_ZToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_40", ["SUSY_ZH_ZToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_45", ["SUSY_ZH_ZToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_50", ["SUSY_ZH_ZToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_55", ["SUSY_ZH_ZToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ZHtoaato4b_Incl_mA_60", ["SUSY_ZH_ZToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
-    ("ttHtoaato4b_Incl_mA_12", ["SUSY_TTH_TTToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_15", ["SUSY_TTH_TTToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_20", ["SUSY_TTH_TTToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_25", ["SUSY_TTH_TTToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_30", ["SUSY_TTH_TTToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_35", ["SUSY_TTH_TTToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_40", ["SUSY_TTH_TTToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_45", ["SUSY_TTH_TTToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_50", ["SUSY_TTH_TTToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_55", ["SUSY_TTH_TTToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
-    ("ttHtoaato4b_Incl_mA_60", ["SUSY_TTH_TTToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_12", ["SUSY_TTH_TTToAll_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_15", ["SUSY_TTH_TTToAll_HToAATo4B_M-15_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_20", ["SUSY_TTH_TTToAll_HToAATo4B_M-20_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_25", ["SUSY_TTH_TTToAll_HToAATo4B_M-25_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_30", ["SUSY_TTH_TTToAll_HToAATo4B_M-30_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_35", ["SUSY_TTH_TTToAll_HToAATo4B_M-35_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_40", ["SUSY_TTH_TTToAll_HToAATo4B_M-40_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_45", ["SUSY_TTH_TTToAll_HToAATo4B_M-45_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_50", ["SUSY_TTH_TTToAll_HToAATo4B_M-50_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_55", ["SUSY_TTH_TTToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8"]),
+    #("ttHtoaato4b_Incl_mA_60", ["SUSY_TTH_TTToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"]),
 
     #("ggHtoaato4b_Incl_mA_All", [
     #    "SUSY_GluGluH_01J_HToAATo4B_M-12_TuneCP5_13TeV_madgraph_pythia8",
@@ -564,97 +521,9 @@ Samples2018 = OD([
     #    "SUSY_TTH_TTToAll_HToAATo4B_M-55_TuneCP5_13TeV_madgraph_pythia8",
     #    "SUSY_TTH_TTToAll_HToAATo4B_M-60_TuneCP5_13TeV_madgraph_pythia8"
     #]),
-
-    ('ggHtoaato4tau_mA_All', [
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-4_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-5_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-6_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-7_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-8_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-9_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-10_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-11_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-12_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-13_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-14_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-15_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-16_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-17_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-18_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-19_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-20_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYGluGluHToAA_AToTauTau_M-125_M-21_TuneCP5_13TeV_PSWeights_pythia8"
-    ]),
-    ('VBFHtoaato4tau_mA_All', [
-        "SUSYVBFHToAA_AToTauTau_M-125_M-4_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-5_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-6_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-7_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-8_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-9_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-10_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-11_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-12_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-13_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-14_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-15_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-16_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-17_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-18_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-19_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-20_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVBFHToAA_AToTauTau_M-125_M-21_TuneCP5_13TeV_PSWeights_pythia8"
-    ]),
-    ('VHtoaato4tau_mA_All', [
-        "SUSYVHToAA_AToTauTau_M-125_M-4_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-5_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-6_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-7_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-8_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-9_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-10_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-11_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-12_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-13_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-14_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-15_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-16_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-17_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-18_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-19_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-20_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYVHToAA_AToTauTau_M-125_M-21_TuneCP5_13TeV_PSWeights_pythia8"
-    ]),    
-    ('ttHtoaato4tau_mA_All', [
-        "SUSYttHToAA_AToTauTau_M-125_M-4_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-5_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-6_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-7_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-8_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-9_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-10_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-11_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-12_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-13_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-14_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-15_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-16_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-17_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-18_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-19_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-20_TuneCP5_13TeV_PSWeights_pythia8",
-        "SUSYttHToAA_AToTauTau_M-125_M-21_TuneCP5_13TeV_PSWeights_pythia8"
-    ]),
-    
-
-
-    #('', [
-    #    ""
-    #]),
     
     
 ])
-
 
 # run either "QCDIncl" or "QCDIncl_PSWeight" or both
 if   QCDInclMode == 1: # "QCDIncl"
@@ -670,5 +539,4 @@ elif QCDInclMode == 2: # "QCDIncl_PSWeight"
     Samples2018.pop("QCD_Incl_PSWeight", None)
     Samples2018[kQCDIncl] = list_tmp_
     #del list_tmp_
-
 

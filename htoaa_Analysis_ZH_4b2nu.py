@@ -83,7 +83,7 @@ print(f"htoaa_Analysis_ZH_4b2nu:: here13 {datetime.now() = }"); sys.stdout.flush
 
  
 printLevel = 0
-histogramSaveLevel = 1 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 0 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -617,10 +617,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         phi_axis              = hist.Bin("Phi",                    r"$\phi$",                    100,   -3.14,    3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 300,       0,     300)
+        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                  48,       0,     240)
         massCl1_axis          = hist.Bin("MassCl1",                r"$m$ [GeV]",                 350,       0,     350)
         mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,     70)
-        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                2*70,       0,     70)
+        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                  72,       0,      72)
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         mass5_axis            = hist.Bin("Mass5",                  r"$m$ [GeV]",                 150,       0,      5)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
@@ -2747,11 +2747,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
                 
             # btagSF
-            #wgt_Ak4Btag_dict = get_Ak4BtagSF(
-            #    jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
-            #    btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
-            #    year = self.datasetInfo["era"]
-            #)
+            wgt_Ak4Btag_dict = get_Ak4BtagSF(
+                jet         = ak4JetsCentral_nonoverlaping_leadingFatJet, 
+                btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
+                year = self.datasetInfo["era"]
+            )
 
             weights.add(
                 "lumiWeight",
@@ -2843,26 +2843,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_QCDPdfUp,
                 weightDown = wgt_QCDPdfDown
             )
-            #if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
-            #    weights.add(
-            #        "Btag",
-            #        weight     = wgt_Ak4Btag_dict['Nom'],
-            #        weightUp   = wgt_Ak4Btag_dict['Up'],
-            #        weightDown = wgt_Ak4Btag_dict['Down']
-            #    )
-            #elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-            #    weights.add(
-            #        "BtagUncorr",
-            #        weight     = wgt_Ak4Btag_dict['Nom'],
-            #        weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-            #        weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
-            #    )
-            #    weights.add(
-            #        "BtagCorr",
-            #        weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-            #        weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-            #        weightDown = wgt_Ak4Btag_dict['Downcorrelated']
-            #    )
+            if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
+                weights.add(
+                    "Btag",
+                    weight     = wgt_Ak4Btag_dict['Nom'],
+                    weightUp   = wgt_Ak4Btag_dict['Up'],
+                    weightDown = wgt_Ak4Btag_dict['Down']
+                )
+            elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
+                weights.add(
+                    "BtagUncorr",
+                    weight     = wgt_Ak4Btag_dict['Nom'],
+                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
+                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+                )
+                weights.add(
+                    "BtagCorr",
+                    weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
+                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
+                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+                )
 
             
     
@@ -2956,26 +2956,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = wgt_QCDPdfUp,
                 weightDown = wgt_QCDPdfDown
             )
-            #if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
-            #    weights_woHEM1516Fix.add(
-            #        "Btag",
-            #        weight     = wgt_Ak4Btag_dict['Nom'],
-            #        weightUp   = wgt_Ak4Btag_dict['Up'],
-            #        weightDown = wgt_Ak4Btag_dict['Down']
-            #    )
-            #elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
-            #    weights_woHEM1516Fix.add(
-            #        "BtagUncorr",
-            #        weight     = wgt_Ak4Btag_dict['Nom'],
-            #        weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-            #        weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
-            #    )
-            #    weights_woHEM1516Fix.add(
-            #        "BtagCorr",
-            #        weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-            #        weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-            #        weightDown = wgt_Ak4Btag_dict['Downcorrelated']
-            #    )
+            if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
+                weights_woHEM1516Fix.add(
+                    "Btag",
+                    weight     = wgt_Ak4Btag_dict['Nom'],
+                    weightUp   = wgt_Ak4Btag_dict['Up'],
+                    weightDown = wgt_Ak4Btag_dict['Down']
+                )
+            elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
+                weights_woHEM1516Fix.add(
+                    "BtagUncorr",
+                    weight     = wgt_Ak4Btag_dict['Nom'],
+                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
+                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+                )
+                weights_woHEM1516Fix.add(
+                    "BtagCorr",
+                    weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
+                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
+                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+                )
 
 
             ## weights_gen -------------------------------

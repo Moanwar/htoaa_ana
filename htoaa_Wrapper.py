@@ -245,6 +245,7 @@ if __name__ == '__main__':
         "htoaa_Analysis_ttHHadronicMode.py",
         "htoaa_Analysis_CR_QCD4b.py",
         "htoaa_Analysis_Ak4BtagEffi.py",
+        "htoaa_Analysis_HiggsPtRewgt.py",
         "htoaa_Analysis_Example.py"], required=True)
     parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
@@ -258,7 +259,7 @@ if __name__ == '__main__':
     parser.add_argument('-iJobSubmission',    type=int, default=0,                           help='Job submission iteration. Specify previous last job submittion iteration if script terminated for some reason.')
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
     parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
-    parser.add_argument('-systematics',       type=str, default='no',                        help='No,Full,PU,JES etc') 
+    parser.add_argument('-systematics',       type=str, default='No',                        help='No,Full,PU,JES etc') 
     parser.add_argument('-jumpToHaddOutput',  action='store_true', default=False,            help="When running on earlier jobs, skip checking failed jobs and jump to hadd produced output.root files.")         
     parser.add_argument('-dryRun',            action='store_true', default=False,            help="Produce jpbs' config files without submiting jobs to HT condor server.")    
     args=parser.parse_args()
@@ -327,7 +328,9 @@ if __name__ == '__main__':
         selSamplesToExclude_list.extend( [
             "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
             "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
-            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
+            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",          
+            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA",  
+            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All',      
         ] )
 
     #  Settings for GGF H->aa->4b trigger study
@@ -338,6 +341,8 @@ if __name__ == '__main__':
             "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
             "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
             "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
+            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
         ] )  
 
     if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
@@ -346,6 +351,21 @@ if __name__ == '__main__':
             "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
             "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
             "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
+        ] )
+
+    if sAnalysis in ["htoaa_Analysis_HiggsPtRewgt.py"]:
+        selSamplesToRun_list.extend( [
+            'GluGluHToBB_Incl', 'GluGluHToBB_Pt-200ToInf', 
+            'VBFHToBB_powheg', 'VBFH_dipoleRecoilOn', 'VBFHToTauTau_powheg', #'VBFHToBB_herwig', 
+            'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'WHToMuMuG', 'WplusHToTauTau', 'WminusHToTauTau', 
+            'ZHToBBX', 'ZHToMuMuG', 'ZHToTauTau', 
+            'ttHToBB', 'ttHToTauTau', 
+            "ggHtoaato4b_mA",      "VBFHtoaato4b_mA",      "WHtoaato4b_mA",      "ZHtoaato4b_mA",      "ttHtoaato4b_mA", 
+            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+            #
+            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
         ] )
 
     ## ------------------------------------------------------------------------------------------
@@ -363,6 +383,7 @@ if __name__ == '__main__':
     #print("\n\nsamplesInfo: {}".format(samplesInfo))
     print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
     print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
+    
         
     sFileRunCommand = "%s/%s" % (DestinationDirAbsolute, sRunCommandFile)
     sFileJobSubLog  = "%s/%s" % (DestinationDirAbsolute, sJobSubLogFile)
@@ -392,7 +413,8 @@ if __name__ == '__main__':
         jobStatus_dict             = {} # OD([])
         
         for sample_category, samples in samplesList.items():
-            #print("sample_category {}, samples {}".format(sample_category, samples))
+            if printLevel >=6:
+                print("sample_category {}, samples {}".format(sample_category, samples))
             sample_isMC = True
             for sampleSubString_toCheck in [kData, 'Run2016','Run2017', 'Run2018']:
                 if sampleSubString_toCheck in sample_category:
@@ -400,21 +422,34 @@ if __name__ == '__main__':
                     break
 
             for sample in samples:
+                if printLevel >=6:
+                    print("\t sample {} _0".format(sample))
                 if len(selSamplesToRun_list) > 0:
                     skipThisSample = True
                     for selSample in selSamplesToRun_list:
-                        if sample.startswith(selSample) or (selSample==sample_category): 
+                        selSample = selSample.replace('*','')
+                        if ( (selSample in sample         ) or
+                             (selSample in sample_category) ):
                             skipThisSample = False
+                    if printLevel >=6:
+                        print(f"\t\t _0p1 {sample = }, {skipThisSample = }")
                     if skipThisSample:
                         continue
-
+                if printLevel >=6:
+                    print("\t sample {} _1".format(sample))
+                
                 if len(selSamplesToExclude_list) > 0:
                     skipThisSample = False
                     for selSample in selSamplesToExclude_list:
-                        if sample.startswith(selSample) or (selSample==sample_category): 
+                        selSample = selSample.replace('*','')
+                        if ( (selSample in sample         ) or
+                             (selSample in sample_category) ):
                             skipThisSample = True
                     if skipThisSample:
                         continue
+                if printLevel >=6:
+                    print("\t sample {} _2".format(sample))
+                
                     
                 #
                 OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
@@ -799,3 +834,6 @@ if __name__ == '__main__':
         executeBashCommand("ls")
 
     fJobSubLog.close()
+
+    print('\n\n%s \t Finished running %s ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion))
+        

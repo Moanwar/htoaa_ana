@@ -90,7 +90,7 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
  
 printLevel = 0
-histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 0 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -607,10 +607,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         phi_axis              = hist.Bin("Phi",                    r"$\phi$",                    100,   -3.14,    3.13)
         #mass_axis     = hist.Bin("Mass",      r"$m$ [GeV]",       200, 0, 600)
         #mass_axis             = hist.Bin("Mass",      r"$m$ [GeV]",       400, 0, 200)
-        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 350,       0,     350)
+        #mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                 350,       0,     350)
+        mass_axis             = hist.Bin("Mass",                   r"$m$ [GeV]",                  48,       0,     240)
         massCl1_axis          = hist.Bin("MassCl1",                r"$m$ [GeV]",                 350,       0,     350)
-        mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,     70)
-        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                2*70,       0,     70)
+        mass_axis1            = hist.Bin("Mass1",                  r"$m$ [GeV]",               20*70,       0,      70)
+        mass_axis2            = hist.Bin("Mass2",                  r"$m$ [GeV]",                  72,       0,      72)
         mass10_axis           = hist.Bin("Mass10",                 r"$m$ [GeV]",                 300,       0,      10)
         mass5_axis            = hist.Bin("Mass5",                  r"$m$ [GeV]",                 150,       0,      5)
         logMass3_axis         = hist.Bin("logMass3",               r"$m$ [GeV]",                 300,       0,       3)
@@ -6608,8 +6609,8 @@ if __name__ == '__main__':
             #print(key, value)
             if key.startswith(sWeighted): continue # to print weighted and unweighted events for cuts on the same line
 
-            #print("%10f\t%10d\t%s" % (output['cutflow'][sWeighted+key], output['cutflow'][key], key), flush=flushStdout)
-            print("%10d\t%s" % (output['cutflow'][key], key), flush=flushStdout)
+            print("%10f\t%10d\t%s" % (output['cutflow'][sWeighted+key], output['cutflow'][key], key), flush=flushStdout)
+            #print("%10d\t%s" % (output['cutflow'][key], key), flush=flushStdout)
     
     
     if sOutputFile is not None:

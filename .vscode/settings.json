@@ -48,6 +48,7 @@
         "utility": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "cal_HiggsPtRewgts.C": "cpp"
     }
 }
