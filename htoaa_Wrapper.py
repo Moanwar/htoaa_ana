@@ -23,7 +23,7 @@ print(f"htoaa_Wraper:: here1 {datetime.now() = }")
 from htoaa_Settings import *
 print(f"htoaa_Wraper:: here2 {datetime.now() = }")
 from htoaa_Samples import (
-    Samples2018,
+    Samples2017, Samples2018,
     kData, kQCDIncl, kQCD_bGen, kQCD_bEnrich
 )
 print(f"htoaa_Wraper:: here3 {datetime.now() = }")
@@ -300,7 +300,9 @@ if __name__ == '__main__':
     os.chdir( SourceCodeDir )
     samplesList = None
     samplesInfo = None
-    if era == Era_2018:
+    if era == Era_2017:
+        samplesList = Samples2017 # htoaa_Samples.py
+    elif era == Era_2018:
         samplesList = Samples2018 # htoaa_Samples.py
     with open(sFileSamplesInfo[era]) as fSamplesInfo:
         samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
@@ -326,9 +328,9 @@ if __name__ == '__main__':
         ]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-            "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
-            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",          
+            "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+            "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+            "MET_Run2017*", "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",          
             "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA",  
             'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All',      
         ] )
@@ -337,9 +339,9 @@ if __name__ == '__main__':
     if sAnalysis in ["htoaa_triggerStudy_GGFMode.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-            "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
-            "MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
-            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+            "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
+            "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
+            "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
             "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
             "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
             'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
@@ -348,9 +350,9 @@ if __name__ == '__main__':
     if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
         # exclude irrelevant samples from running
         selSamplesToExclude_list.extend( [
-            "JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
-            "SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-            "EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+            "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
+            "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+            "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
             "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
             'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
         ] )

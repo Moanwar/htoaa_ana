@@ -10,41 +10,8 @@ kWJets        = "WJets"
 
 QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QCD_Incl" and "QCD_Incl_PSWeight". Use 2 as "QCD_Incl_PSWeight" (recommended)
 
-Samples2018 = OD([
-
-    #(kData, [
-    #    "JetHT_Run2018A",
-    #    "JetHT_Run2018B",
-    #    "JetHT_Run2018C",
-    #    "JetHT_Run2018D"
-    #]),
-
-    ## JetHT data
-    ("JetHT_Run2018A", ["JetHT_Run2018A"]),
-    ("JetHT_Run2018B", ["JetHT_Run2018B"]),
-    ("JetHT_Run2018C", ["JetHT_Run2018C"]),
-    ("JetHT_Run2018D", ["JetHT_Run2018D"]),
-
-    ## MET data
-    ("MET_Run2018A", ["MET_Run2018A"]),
-    ("MET_Run2018B", ["MET_Run2018B"]),
-    ("MET_Run2018C", ["MET_Run2018C"]),
-    ("MET_Run2018D", ["MET_Run2018D"]),
-
-    ## SingleMuon data
-    ("SingleMuon_Run2018A", ["SingleMuon_Run2018A"]),
-    ("SingleMuon_Run2018B", ["SingleMuon_Run2018B"]),
-    ("SingleMuon_Run2018C", ["SingleMuon_Run2018C"]),
-    ("SingleMuon_Run2018D", ["SingleMuon_Run2018D"]),
-
-    ## EGamma data
-    ("EGamma_Run2018A", ["EGamma_Run2018A"]),
-    ("EGamma_Run2018B", ["EGamma_Run2018B"]),
-    ("EGamma_Run2018C", ["EGamma_Run2018C"]),
-    ("EGamma_Run2018D", ["EGamma_Run2018D"]),
-    
-
-    
+SamplesMC = OD([
+   
     (kQCD_bEnrich,[
         "QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8",
@@ -658,17 +625,83 @@ Samples2018 = OD([
 
 # run either "QCDIncl" or "QCDIncl_PSWeight" or both
 if   QCDInclMode == 1: # "QCDIncl"
-    list_tmp_ = Samples2018["QCD_Incl"]
-    Samples2018.pop("QCD_Incl",          None)
-    Samples2018.pop("QCD_Incl_PSWeight", None)
-    Samples2018[kQCDIncl] = list_tmp_
+    list_tmp_ = SamplesMC["QCD_Incl"]
+    SamplesMC.pop("QCD_Incl",          None)
+    SamplesMC.pop("QCD_Incl_PSWeight", None)
+    SamplesMC[kQCDIncl] = list_tmp_
     #del list_tmp_
     
 elif QCDInclMode == 2: # "QCDIncl_PSWeight"
-    list_tmp_ = Samples2018["QCD_Incl_PSWeight"]
-    Samples2018.pop("QCD_Incl",          None)
-    Samples2018.pop("QCD_Incl_PSWeight", None)
-    Samples2018[kQCDIncl] = list_tmp_
+    list_tmp_ = SamplesMC["QCD_Incl_PSWeight"]
+    SamplesMC.pop("QCD_Incl",          None)
+    SamplesMC.pop("QCD_Incl_PSWeight", None)
+    SamplesMC[kQCDIncl] = list_tmp_
     #del list_tmp_
 
 
+
+Samples2017 = SamplesMC.copy() 
+Samples2017.update(OD([
+
+    ## JetHT data
+    ("JetHT_Run2017B", ["JetHT_Run2017B"]),
+    ("JetHT_Run2017C", ["JetHT_Run2017C"]),
+    ("JetHT_Run2017D", ["JetHT_Run2017D"]),
+    ("JetHT_Run2017E", ["JetHT_Run2017E"]),
+    ("JetHT_Run2017F", ["JetHT_Run2017F"]),    
+
+    ## MET data
+    ("MET_Run2017B", ["MET_Run2017B"]),
+    ("MET_Run2017C", ["MET_Run2017C"]),
+    ("MET_Run2017D", ["MET_Run2017D"]),
+    ("MET_Run2017E", ["MET_Run2017E"]),
+    ("MET_Run2017F", ["MET_Run2017F"]),
+
+    ## SingleMuon data
+    ("SingleMuon_Run2017B", ["SingleMuon_Run2017B"]),
+    ("SingleMuon_Run2017C", ["SingleMuon_Run2017C"]),
+    ("SingleMuon_Run2017D", ["SingleMuon_Run2017D"]),
+    ("SingleMuon_Run2017E", ["SingleMuon_Run2017E"]),
+    ("SingleMuon_Run2017F", ["SingleMuon_Run2017F"]),  
+
+    ## EGamma data
+    ("SingleElectron_Run2017B", ["SingleElectron_Run2017B"]),
+    ("SingleElectron_Run2017C", ["SingleElectron_Run2017C"]),
+    ("SingleElectron_Run2017D", ["SingleElectron_Run2017D"]),
+    ("SingleElectron_Run2017E", ["SingleElectron_Run2017E"]),
+    ("SingleElectron_Run2017F", ["SingleElectron_Run2017F"]), 
+]))
+
+Samples2018 = SamplesMC.copy ()
+Samples2018.update(OD([
+    #(kData, [
+    #    "JetHT_Run2018A",
+    #    "JetHT_Run2018B",
+    #    "JetHT_Run2018C",
+    #    "JetHT_Run2018D"
+    #]),
+
+    ## JetHT data
+    ("JetHT_Run2018A", ["JetHT_Run2018A"]),
+    ("JetHT_Run2018B", ["JetHT_Run2018B"]),
+    ("JetHT_Run2018C", ["JetHT_Run2018C"]),
+    ("JetHT_Run2018D", ["JetHT_Run2018D"]),
+
+    ## MET data
+    ("MET_Run2018A", ["MET_Run2018A"]),
+    ("MET_Run2018B", ["MET_Run2018B"]),
+    ("MET_Run2018C", ["MET_Run2018C"]),
+    ("MET_Run2018D", ["MET_Run2018D"]),
+
+    ## SingleMuon data
+    ("SingleMuon_Run2018A", ["SingleMuon_Run2018A"]),
+    ("SingleMuon_Run2018B", ["SingleMuon_Run2018B"]),
+    ("SingleMuon_Run2018C", ["SingleMuon_Run2018C"]),
+    ("SingleMuon_Run2018D", ["SingleMuon_Run2018D"]),
+
+    ## EGamma data
+    ("EGamma_Run2018A", ["EGamma_Run2018A"]),
+    ("EGamma_Run2018B", ["EGamma_Run2018B"]),
+    ("EGamma_Run2018C", ["EGamma_Run2018C"]),
+    ("EGamma_Run2018D", ["EGamma_Run2018D"]),
+]))
