@@ -2,7 +2,7 @@ from collections import OrderedDict as OD
 
 sXS13TeV           = "xs13TeV"
 
-list_XSs_Run2 = OD([
+list_XSs = OD([
     
     ## QCD_bEnriched_HT*
     # dasgoclient --query="dataset=/QCD_bEnriched_HT*/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v*/NANOAODSIM"    

@@ -49,6 +49,7 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "*.ipp": "cpp",
-        "cal_HiggsPtRewgts.C": "cpp"
+        "cal_HiggsPtRewgts.C": "cpp",
+        "calTreeSumEvents.C": "cpp"
     }
 }

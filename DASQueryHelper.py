@@ -71,3 +71,57 @@ def getDASParentDataset(dataset):
         print(f"\ndataset: {dataset},  parent ({nResults}) {parent_dataset}, ")
     return parent_dataset
 
+def checkDatasetDASName(dataset):
+    if printLevel >= 3:
+        print(f"\ncheckDatasetDASName({dataset = })")
+
+    cmd1 = ['bash','-c', 'dasgoclient --query="dataset=%s" --format=json'%(dataset)]
+    if printLevel >= 10:
+        print(f"cmd1: {cmd1}")
+    output = subprocess.check_output(cmd1) # output in bytes
+    output = output.decode("utf-8") # convert output in bytes to string
+    output = json.loads(output) # convert output in 'string' to 'dict'
+    if printLevel >= 10:
+        print('Output:')
+        print(json.dumps(output, indent=2))
+
+    correct_datasets_list = set()
+    for iResult in range(output['nresults']):
+        if 'dataset' not in output['data'][iResult]: continue
+        for j in range(len(output['data'][iResult]['dataset'])):
+            if 'name' not in output['data'][iResult]['dataset'][j]: continue
+
+            # Different output results dicts are printed when '*' is used in dataset name in DAS query
+            # So take care of both cases
+            isDatasetValid_ = False
+            # when '*' is not used in DAS dataset search query
+            if (('nevents' in output['data'][iResult]['dataset'][j]) and \
+                (output['data'][iResult]['dataset'][j]['nevents'] > 0) ): # non-zero nEvents in dataset
+                isDatasetValid_ = True
+            # when '*' is used in DAS dataset search query
+            if (('status' in output['data'][iResult]['dataset'][j]) and \
+                (output['data'][iResult]['dataset'][j]['status'] == 'VALID') ): # non-zero nEvents in dataset
+                isDatasetValid_ = True
+
+            if isDatasetValid_:
+                correct_datasets_list.add( output['data'][iResult]['dataset'][j]['name'] )
+
+    isDatasetNameCorrect = dataset in correct_datasets_list
+    if printLevel >= 3:
+        print(f"{isDatasetNameCorrect = }")
+        print(f"{correct_datasets_list = }")
+    return isDatasetNameCorrect, correct_datasets_list
+                
+
+def searchDatasetDASName(dataset0):
+    # /WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM
+    # Replace 'v2/' with 'v*/' wildcard characheer
+    dataset1 = dataset0
+    for i_ in range(1, 5):
+        dataset1 = dataset1.replace('v%s/'%(str(i_)), 'v*/')
+    if printLevel >= 3:
+        print(f"searchDatasetDASName():\n{dataset0 = } \n{dataset1 = }")
+
+    isDatasetNameCorrect, correct_datasets_list = checkDatasetDASName(dataset1)
+    return correct_datasets_list
+

@@ -42,6 +42,12 @@ sFileSamplesInfo = {
 # Refer https://docs.google.com/spreadsheets/d/1xDLsr3ikLJxuMPNiSRs79YjTzbN64RetXL3A-tL6-hY/edit?usp=sharing
 # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD*/r1/PNet_*.root
 sPathSkimmedNanoAODs = {
+    Era_2017: {
+        'skim_v2': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root' 
+        },
+    },
     Era_2018: {
         'skim_v1': {
             'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/$SAMPLETAG/$SAMPLENAME/r*/PNet_*.root',
@@ -67,6 +73,13 @@ Luminosities_Inclusive = { # [<lumi>, <uncertainty in percent> ] in fb^-1
 Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
+    Era_2017: { # [41.48, 2.3]
+        'Trg_Combo_AK4AK8Jet_HT' :     [41.54, 2.3], # https://twiki.cern.ch/twiki/bin/view/CMS/HLTPathsRunIIList#2017
+        'Trg_Combo_AK4AK8Jet_HT_VBF' : [41.54, 2.3],
+        'Trg_Combo_MET' :              [40.67, 2.3],
+        'Trg_Combo_Mu' :               [41.54, 2.3],
+        
+    },
     Era_2018: {
         'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': [54.54, 2.5], # for HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4_v* trigger. See ./data/luminosity/2018/output_brilcalc_314472-325175_UL18_HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_Final.xlsx 
         'Trg_Combo_AK4AK8Jet_HT':                             [59.83, 2.5], # https://docs.google.com/spreadsheets/d/19ot4nFlhiJoD6v81qhgyKSYjE5PhgqgT2dz98PNIWg0/edit?usp=sharing
@@ -131,6 +144,48 @@ Luminosities_forGGFMode_perEra = {
     }
 }
 Triggers_perEra = {
+    Era_2017: {
+        'Trg_Combo_AK4AK8Jet_HT': {
+            'HLT_PFJet500':                                                  ['L1_SingleJet180'], # 41.54   
+            'HLT_PFHT1050':                                                  ['L1_HTT380er'], # 41.54  
+            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_HTT380er'], # 36.49 / 41.54
+            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'], # 41.54            
+            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'], # 36.75 / 41.54            
+            'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54 
+            #
+            'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':       ['L1_DoubleJet100er2p3_dEta_Max1p6', 'L1_DoubleJet112er2p3_dEta_Max1p6'],  # 36.34 / 41.54
+            'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0': ['L1_HTT320er', 'L1_HTT380er', 'L1_QuadJet60er3p0', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_70_55_40_40_er2p5'], # 36.75 / 41.54 
+        },
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'HLT_PFJet500':                                                  ['L1_SingleJet180'], # 41.54  
+            'HLT_PFHT1050':                                                  ['L1_HTT380er'], # 41.54 
+            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_HTT380er'], # 36.49 / 41.54
+            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'], # 41.54
+            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'], # 36.75 / 41.54 
+            'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54
+            #
+            'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':       ['L1_DoubleJet100er2p3_dEta_Max1p6', 'L1_DoubleJet112er2p3_dEta_Max1p6'],  # 36.34 / 41.54
+            'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0': ['L1_HTT320er', 'L1_HTT380er', 'L1_QuadJet60er3p0', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_70_55_40_40_er2p5'], # 36.75 / 41.54
+            #
+            'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':    ['L1_SingleJet180', 'L1_HTT320er'], # 7.73 / 41.54 
+            'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':              ['L1_SingleJet180', 'L1_HTT320er'], # 7.73 / 41.54 
+        },       
+        'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
+            'HLT_PFMET120_PFMHT120_IDTight_PFHT60':          ['L1_ETMHF110_HTT60er'], # 36.75 / 41.54   
+            'HLT_PFMET120_PFMHT120_IDTight':                 ['L1_ETM110', 'L1_ETM120', 'L1_ETMHF120', 'L1_ETMHF150', 'L1_ETMHF120_Jet60_OR_DiJet30woTT28'], # 40.67 / 41.54 
+            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':  ['L1_ETMHF110_HTT60er'],# 36.75 / 41.54 
+            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':         ['L1_ETM110', 'L1_ETM120', 'L1_ETMHF120', 'L1_ETMHF150', 'L1_ETMHF120_Jet60_OR_DiJet30woTT28'], # 40.67 / 41.54 
+            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1': ['L1_ETM110', 'L1_ETM120', 'L1_ETMHF120', 'L1_ETMHF150', 'L1_ETMHF120_Jet60_OR_DiJet30woTT28'], # 36.75 / 41.54     
+            'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':   ['L1_ETMHF110_HTT60er'], # 36.75 / 41.54    
+            'HLT_PFMETTypeOne120_PFMHT120_IDTight':          ['L1_ETM110', 'L1_ETM120', 'L1_ETMHF120', 'L1_ETMHF150', 'L1_ETMHF120_Jet60_OR_DiJet30woTT28'], # 40.67 / 41.54 
+            'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':      ['L1_ETM110', 'L1_ETM120', 'L1_ETMHF120', 'L1_ETMHF150', 'L1_ETMHF120_Jet60_OR_DiJet30woTT28'], # 36.75 / 41.54 
+        },        
+        'Trg_Combo_Mu': {
+            'HLT_IsoMu24': ['L1_SingleMu22'], # 38.06 / 41.54
+            'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+            'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+        },
+    },
     Era_2018: {
         'Trg_Combo_AK4AK8Jet_HT': {
             'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
@@ -155,8 +210,7 @@ Triggers_perEra = {
             'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
             #
             'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
-            'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
-            
+            'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],            
         },
         'Trg_Combo_AK4AK8Jet_HT_MET': {
             'HLT_PFJet500':                                       ['L1_SingleJet180'], 
@@ -174,13 +228,12 @@ Triggers_perEra = {
             'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
             'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
             'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-        },
-        
+        },        
         'Trg_Combo_Mu': {
             'HLT_IsoMu24': ['L1_SingleMu22'],
             'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],
             'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'],
-        }
+        },
     }
 }
 '''
@@ -232,7 +285,7 @@ Weight_HEM1516Issue2018_perTrigger = {
 
 sFilesGoldenJSON = {
     Era_2016: '',
-    Era_2017: '',    
+    Era_2017: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt',    
     Era_2018: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt',    
 }
 

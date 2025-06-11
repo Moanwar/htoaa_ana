@@ -26,8 +26,12 @@ import glob
 
 
 from htoaa_Settings import *
-from DASQueryHelper import getDASDatasetFiles
-from SamplesAndCrosssection_NanoAOD_2018 import list_datasetAndXs_2018
+from DASQueryHelper import getDASDatasetFiles, checkDatasetDASName, searchDatasetDASName
+#from SamplesAndCrosssection_NanoAOD_2018 import list_datasets_2018
+from SamplesCrosssection_Catalogue import list_XSs, sXS13TeV
+from Samples_2017_Catalogue import list_datasets_2017
+from Samples_2018_Catalogue import list_datasets_2018
+
 
 printLevel = 0
 sXS     = "xs"
@@ -65,21 +69,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
     parser.add_argument('-era',                 dest='era', type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
     parser.add_argument('-updateCrossSections', action='store_true', default=False, help='update cross-sections only')
-    #parser.add_argument('-addSkimmedNanoAOD',   action='store_true', default=False, help='add skimmed NanoAOD files to the existing sample list')
+    parser.add_argument('-checkSampleDASName',   action='store_true', default=False, help='Check sample DAS names')
     args=parser.parse_args()
 
     era                 = args.era
     updateCrossSections = args.updateCrossSections
-    #addSkimmedNanoAOD   = args.addSkimmedNanoAOD
+    checkSampleDASName   = args.checkSampleDASName
     print(f"era: {era}")
     print(f"{updateCrossSections = }")
-    #print(f"{addSkimmedNanoAOD = }")
+    print(f"{checkSampleDASName = }")
 
 
-    list_datasetAndXs = None
+    list_datasets = None
     sFileSamplesInfo_toUse = None
-    if era == Era_2018:
-        list_datasetAndXs = list_datasetAndXs_2018
+    if era in [Era_2016, Era_2017, Era_2018]:    sXS = sXS13TeV
+    if era == Era_2017:    list_datasets = list_datasets_2017
+    if era == Era_2018:    list_datasets = list_datasets_2018
+
 
         
     sFileSamplesInfo_toUse = sFileSamplesInfo[era]
@@ -110,7 +116,7 @@ if __name__ == '__main__':
     # Should not reset when running with updateCrossSections
     if not updateCrossSections:
         #for sampleName_ in samples_details:
-        for iSample, (datasetName, datasetDetails) in enumerate(list_datasetAndXs.items()):
+        for iSample, (datasetName, datasetDetails) in enumerate(list_datasets.items()):
             datasetName_parts            = datasetName.split('/')
             sampleName                   = datasetName_parts[1]
             isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
@@ -125,7 +131,7 @@ if __name__ == '__main__':
                 if isSamplesListFromScratch:
                     samples_details[sampleName] = deepcopy(sampleDetail_dict_template)
                 else:
-                    # when adding a new sample to existing samples.json, add in order as in list_datasetAndXs_2018
+                    # when adding a new sample to existing samples.json, add in order as in list_datasets_2018
                     samples_details_tmp_ = samples_details.items()
                     samples_details_tmp_.insert(iSample, (sampleName, deepcopy(sampleDetail_dict_template)))
                     samples_details = samples_details_tmp_'''
@@ -149,9 +155,25 @@ if __name__ == '__main__':
             #if "skimmedNanoAOD_nFiles" in samples_details[sampleName_]:
             #    samples_details[sampleName_].pop("skimmedNanoAOD_nFiles", None)
 
+    if checkSampleDASName:
+        print(f"Running with checkSampleDASName mode:\n")
+        datasetNameNeedCorrection_dict = {}
+        for datasetName, datasetDetails in list_datasets.items():
+            print(f"{datasetName = }", flush=True)
+            isDatasetNameCorrect, correct_datasets_list = checkDatasetDASName(datasetName)
+            if not isDatasetNameCorrect:                  
+                correct_datasets_list = searchDatasetDASName(datasetName)
+                datasetNameNeedCorrection_dict[datasetName] = list(correct_datasets_list)
+
+        print(f"\n\n\nFollowing datasetNames were wrong. \nWrong dataset name: Correct dataset names\n")
+        print(f"{datasetNameNeedCorrection_dict = }")
+        if len(list(datasetNameNeedCorrection_dict.keys())) > 0:
+            print(json.dumps(datasetNameNeedCorrection_dict, indent=4))
+        exit(0)
+            
 
     # Now calculate..
-    for datasetName, datasetDetails in list_datasetAndXs.items():
+    for datasetName, datasetDetails in list_datasets.items():
         datasetName_parts            = datasetName.split('/')
         sampleName                   = datasetName_parts[1]
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
@@ -166,7 +188,10 @@ if __name__ == '__main__':
         if updateCrossSections:
             if isMC:
                 if sampleName in samples_details:
-                    samples_details[sampleName][sCross_section] = datasetDetails[sXS]
+                    if sampleName not in list_XSs:
+                        print(f"{sampleName} is not in list_XSs \t **** ERROR **** \nTerminating...")
+                        exit(0)                    
+                    samples_details[sampleName][sCross_section] = list_XSs[sampleName][sXS]
                 else:
                     print(f"Running updateCrossSections mode, but {sampleName} is not in samples_details \t **** ERROR **** \nTerminating...")
                     exit(0)
@@ -198,7 +223,10 @@ if __name__ == '__main__':
         
         if datasetName_parts[-1] == 'NANOAODSIM':
             # for MC sample
-            samples_details[sampleName][sCross_section] = datasetDetails[sXS]
+            if sampleName not in list_XSs:
+                print(f"{sampleName} is not in list_XSs \t **** ERROR **** \nTerminating...")
+                exit(0)
+            samples_details[sampleName][sCross_section] = list_XSs[sampleName][sXS]
         else:
             # for data sample
             if sCross_section in samples_details[sampleName]:
@@ -258,10 +286,10 @@ if __name__ == '__main__':
 
 
     # Running the samples_prepare.py on exising Sample.json changes order of samples. 
-    # Hence, to forcefully follow order of samples as in list_datasetAndXs, 
-    # order samples_details keys to follow order in list_datasetAndXs
+    # Hence, to forcefully follow order of samples as in list_datasets, 
+    # order samples_details keys to follow order in list_datasets
     samples_details_inOrder = OD()
-    for datasetName, datasetDetails in list_datasetAndXs.items():
+    for datasetName, datasetDetails in list_datasets.items():
         datasetName_parts            = datasetName.split('/')
         sampleName                   = datasetName_parts[1]
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
