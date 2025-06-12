@@ -251,7 +251,16 @@ if __name__ == '__main__':
             sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used)
 
             sSkimmedNanoAODs = []
-            if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) )
+            if "*" in sPathSkimmedNanoAODs_toUse:                                                                  # if multiple directories (e.g. r1, r2) exist, use latest directory
+                sDir0      = os.path.dirname( sPathSkimmedNanoAODs_toUse )
+                #print(f"{sPathSkimmedNanoAODs_toUse = }, {sDir0 = }", flush=True)
+                sDir_list  = glob.glob( sDir0 )                                                                    # list of directories, for e.g. r1, r2
+                sDir_list.sort(key=os.path.getctime)                                                               # sort directories
+                #print(f"{sDir_list = }", flush=True)
+                if len(sDir_list) == 0: continue
+                sDir_toUse = sDir_list[-1]                                                                         # use latested created directory
+                sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace(sDir0, sDir_toUse)                 # update path to use latest created directory              
+            if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) ) # use all files present in the latest directory
             else:                                 sSkimmedNanoAODs.append( sPathSkimmedNanoAODs_toUse )
             print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
             
