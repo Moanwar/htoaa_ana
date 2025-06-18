@@ -104,7 +104,7 @@ def fitHistogram(h, sFitFuncLocal, FitRangeLocal, sFitFull, FitRangeFull, sCanva
 
 
 def plotHistograms(histogram_dict, sCanvasName, xLable='', yLable='', setLogY=1):
-    colors_list = [1, 2, 4, 6]
+    colors_list = [1, 2, 4, 6, 28, 46, 7, 3]
 
     c1 = TCanvas(sCanvasName, sCanvasName, 600,500)
     c1.SetLogy(setLogY)
@@ -291,6 +291,7 @@ if __name__ == "__main__":
     # /afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV.out
     sFInHqtHiggsSpectrum_mTopInfinite = "/afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV_pt1To2kGeVBin1GeV.out"
     sFInHqtHiggsSpectrum_mTopFinite   = "/afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV_mTopFinite_pt1To2kGeVBin1GeV.out"
+    sFInHiggsSpectrum_GGH_NNLO        = "/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/GenHiggsPt_GGH_NNLO.root"
     sOutDir                           = "/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/%s" % (era)
     sFOutHqtHiggsHist_mTopInfinite    = "%s/Hqt_HiggsPtHist_mTopInfinite.root" % (sOutDir)
     sFOutHqtHiggsHist_mTopFinite      = "%s/Hqt_HiggsPtHist_mTopFinite.root" % (sOutDir)
@@ -304,7 +305,7 @@ if __name__ == "__main__":
     HiggsPt_fullRange                 = [  1, 2000] # GeV
     sFOutHiggsPtRewgt    = "%s/%sHiggsPtRewgt_%s.root" % (sOutDir, productionMode, 'HToAATo4Tau' if useHToAATo4TauSignal else 'HToAATo4B')
     xsHiggs_dict = {
-        'ggH': 33.8 * 1000, # 48.61 * 1000, # fb
+        'ggH': 48.61 * 1000, # 33.8 * 1000, # 48.61 * 1000, # fb
     }
     
 
@@ -426,20 +427,27 @@ if __name__ == "__main__":
             hGGFH_Hqt_stitched = readHistFromFile(sFOutHqtHiggsHist_mTopFinite, '%s_HqtStitched'%(sHistNameShort), nRebinX=nRebinX)            
             hGGFH_Hqt_stitched.Scale( 1./hGGFH_Hqt_stitched.Integral() ) # Normalize Hqt histogram to unit area
 
+            ## GGFH NNLO MC (Yihui) histogram
+            hGGFH_NNLO = readHistFromFile(sFInHiggsSpectrum_GGH_NNLO, sHistNameShort, nRebinX=nRebinX)
+            hGGFH_NNLO.Scale( 1./hGGFH_NNLO.Integral() ) # Normalize Hqt histogram to unit area
+
+
             
             hHiggsNLO = hGGFHTo2B_Stitch
 
-            hHToAATo4B_Stitch_cloneXSNorm  = hHToAATo4B_Stitch.Clone( '%s_XSNorm'%(hHToAATo4B_Stitch.GetName()))
-            hHiggsNLO_cloneXSNorm          = hHiggsNLO.Clone(         '%s_XSNorm'%(hHiggsNLO.GetName()))
-            hGGFH_Hqt_stitched_cloneXSNorm = hGGFH_Hqt_stitched.Clone('%s_XSNorm'%(hGGFH_Hqt_stitched.GetName()))
+            hHToAATo4B_Stitch_cloneXSNorm               = hHToAATo4B_Stitch.Clone( '%s_XSNorm'%(hHToAATo4B_Stitch.GetName()))
+            hHiggsNLO_cloneXSNorm                       = hHiggsNLO.Clone(         '%s_XSNorm'%(hHiggsNLO.GetName()))
+            hGGFH_Hqt_stitched_cloneXSNorm              = hGGFH_Hqt_stitched.Clone('%s_XSNorm'%(hGGFH_Hqt_stitched.GetName()))
             hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm = hGGFH_Hqt_stitched_mTopInfinite.Clone('%s_mTopInfinite_XSNorm'%(hGGFH_Hqt_stitched_mTopInfinite.GetName()))
-            for h_ in [hHToAATo4B_Stitch_cloneXSNorm, hHiggsNLO_cloneXSNorm, hGGFH_Hqt_stitched_cloneXSNorm, hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm]:
+            hGGFH_NNLO_cloneXSNorm                      = hGGFH_NNLO.Clone('%s_XSNorm'%(hGGFH_NNLO.GetName()))
+            for h_ in [hHToAATo4B_Stitch_cloneXSNorm, hHiggsNLO_cloneXSNorm, hGGFH_Hqt_stitched_cloneXSNorm, hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm, hGGFH_NNLO_cloneXSNorm]:
                 h_.Scale( xsHiggs_dict['ggH'] )
             histograms_dict_ = {
                 r"$gg\to H\to aa \to 4b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):            hHToAATo4B_Stitch_cloneXSNorm,
-                r"$gg\to H\to 2b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):                   hHiggsNLO_cloneXSNorm,
-                r"$gg\to H$ HqT2.0$, mTop finite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):                  hGGFH_Hqt_stitched_cloneXSNorm,
-                r"$gg\to H$ HqT2.0$, mTop infinite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):                  hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm,
+                r"$gg\to H\to 2b, NLO, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):              hHiggsNLO_cloneXSNorm,
+                r"$gg\to H$ HqT2.0$, mTop infinite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000): hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm,
+                r"$gg\to H$ HqT2.0$, mTop finite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):   hGGFH_Hqt_stitched_cloneXSNorm,
+                r"$gg\to H\to 2b, NNLO, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):             hGGFH_NNLO_cloneXSNorm,
             }
             cCompareSamplesXSNorm = plotHistograms(histograms_dict_, 'c%s_CompareSamplesXSNorm'%(sHistNameShort), yLable=r'$\frac{d\sigma}{dpT}$')
 

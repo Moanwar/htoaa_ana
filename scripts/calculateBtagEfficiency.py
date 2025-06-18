@@ -2,9 +2,12 @@ from ROOT import TCanvas, TFile, TProfile, TNtuple, TH1F, TH2F, TH1, TEfficiency
 from ROOT import gROOT, gBenchmark, gRandom, gSystem
 import ctypes
  
-
-sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/analyze_htoaa_stage1.root"
-sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/jetBtagEfficiency.root"
+# 2018
+#sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/analyze_htoaa_stage1.root"
+#sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/jetBtagEfficiency.root"
+# 2017
+sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/analyze_htoaa_stage1.root"
+sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/jetBtagEfficiency.root"
 samples = {
     'TT':     ['TT0l','TT1l'],
     'QCD':    ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl'],

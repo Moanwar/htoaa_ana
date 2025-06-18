@@ -50,6 +50,7 @@
         "typeinfo": "cpp",
         "*.ipp": "cpp",
         "cal_HiggsPtRewgts.C": "cpp",
-        "calTreeSumEvents.C": "cpp"
+        "calTreeSumEvents.C": "cpp",
+        "readTree.C": "cpp"
     }
 }

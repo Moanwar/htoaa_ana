@@ -62,7 +62,7 @@ from htoaa_CommonTools import (
     getTopPtRewgt, getPURewgts, getHTReweight,
     getPURewgts_variation, get_jetTriggerSF, get_PSWeight, add_pdf_as_weight, get_QCDScaleWeight,
     get_JER_and_JES,
-    get_Ak4BtagSF,
+    get_Ak4BtagSF, get_L1TPrefiringWgt,
     calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
     fillCoffeaHist,
     printVariable, printVariablePtEtaPhi, printVariablePtEtaPhiM, insertInListBeforeThisElement, stringHasSubstring,
@@ -83,7 +83,7 @@ print(f"htoaa_Analysis_ZH_4b2nu:: here13 {datetime.now() = }"); sys.stdout.flush
 
  
 printLevel = 0
-histogramSaveLevel = 0 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -548,14 +548,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f'luminosity: {Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0] = }, \
                     crossSection: {self.datasetInfo["sample_crossSection"]}, \
                     sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
-                    lumiScale: {self.datasetInfo["lumiScale"] }')
-
-            # MC PURewgt --------------------------------------------------------------------------------------------------
-            print(f'MC {self.datasetInfo["era"]} PU reweighting:: ip file: {Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]}, histogram: {Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]} ')
-            with uproot.open(Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]) as f_:
-                #print(f"{f_.keys() = }"); sys.stdout.flush() 
-                self.hPURewgt = f_['%s' % Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]].to_hist()
-                
+                    lumiScale: {self.datasetInfo["lumiScale"] }')               
         
             # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement ---------------------------------------------
             self.pdgId_BHadrons = []
@@ -576,18 +569,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 SplitQCDInGENCats:
                 # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
                 self.histosExtensions = HistogramNameExtensions_QCD 
-
-            ## MC ParticleNetMD_XbbvsQCD SFs
-            self.SFs_ParticleNetMD_XbbvsQCD = None
-            if self.objectSelector.wp_ParticleNetMD_XbbvsQCD in Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]].keys():
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] = } "); sys.stdout.flush()
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges'] = } "); sys.stdout.flush()
-
-                self.SFs_ParticleNetMD_XbbvsQCD = dense_lookup(
-                    np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
-                    [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
-                    )
-            print(f"{self.SFs_ParticleNetMD_XbbvsQCD = }")
 
         
         
@@ -2497,12 +2478,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
                 HLTName_toUse = HLTName.replace('HLT_', '')
+                if HLTName_toUse not in events.HLT.fields: continue
                 mask_HLT = events.HLT[HLTName_toUse] == True
 
                 mask_L1Ts = falses_list
                 for L1TName in L1TList:
                     L1TName_toUse = L1TName.replace('L1_', '')
-
+                    if L1TName_toUse not in events.L1.fields: continue
                     mask_L1T_i = events.L1[L1TName_toUse] == True
                     mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired
 
@@ -2753,6 +2735,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 year = self.datasetInfo["era"]
             )
 
+            # L1 prefiring
+            wgt_L1TPrefiring_dict = get_L1TPrefiringWgt(events.L1PreFiringWeight)
+
             weights.add(
                 "lumiWeight",
                 weight = lumiScale_toUse
@@ -2779,6 +2764,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #    weightUp   = wgt_TrgEffUp,
             #    weightDown = wgt_TrgEffDown
             #)
+            weights.add(
+                "L1Prefire",
+                weight     = wgt_L1TPrefiring_dict['Nom'],
+                weightUp   = wgt_L1TPrefiring_dict['Up'],
+                weightDown = wgt_L1TPrefiring_dict['Down']
+            )
             
             if self.datasetInfo['isSignal']:
                 weights.add(
@@ -2894,6 +2885,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #    weightUp   = wgt_TrgEffUp,
             #    weightDown = wgt_TrgEffDown
             #)
+            weights_woHEM1516Fix.add(
+                "L1Prefire",
+                weight     = wgt_L1TPrefiring_dict['Nom'],
+                weightUp   = wgt_L1TPrefiring_dict['Up'],
+                weightDown = wgt_L1TPrefiring_dict['Down']
+            )
             if self.datasetInfo['isSignal']:
                 weights_woHEM1516Fix.add(
                     "LPRewgt",
@@ -3087,7 +3084,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 "BtagCorrUp",
                                 "BtagCorrDown",                                
                             ] )                                           
-                    
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['l1prefire', 'full'] ):
+                        systList.extend( [
+                            "L1PrefireUp",
+                            "L1PrefireDown",
+                        ] )                    
                     
                 
             else:

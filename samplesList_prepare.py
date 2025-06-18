@@ -28,9 +28,11 @@ import glob
 from htoaa_Settings import *
 from DASQueryHelper import getDASDatasetFiles, checkDatasetDASName, searchDatasetDASName
 #from SamplesAndCrosssection_NanoAOD_2018 import list_datasets_2018
-from SamplesCrosssection_Catalogue import list_XSs, sXS13TeV
-from Samples_2017_Catalogue import list_datasets_2017
-from Samples_2018_Catalogue import list_datasets_2018
+from SamplesCrosssection_Catalogue  import list_XSs, sXS13TeV
+from Samples_2016postVFP_Catalogue  import list_datasets_2016postVFP
+from Samples_2016preVFP_Catalogue   import list_datasets_2016preVFP
+from Samples_2017_Catalogue         import list_datasets_2017
+from Samples_2018_Catalogue         import list_datasets_2018
 
 
 printLevel = 0
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
-    parser.add_argument('-era',                 dest='era', type=str, default=Era_2018, choices=[Era_2016, Era_2017, Era_2018], required=False)
+    parser.add_argument('-era',                 dest='era', type=str, default=Era_2018, choices=[Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018], required=False)
     parser.add_argument('-updateCrossSections', action='store_true', default=False, help='update cross-sections only')
     parser.add_argument('-checkSampleDASName',   action='store_true', default=False, help='Check sample DAS names')
     args=parser.parse_args()
@@ -82,9 +84,11 @@ if __name__ == '__main__':
 
     list_datasets = None
     sFileSamplesInfo_toUse = None
-    if era in [Era_2016, Era_2017, Era_2018]:    sXS = sXS13TeV
-    if era == Era_2017:    list_datasets = list_datasets_2017
-    if era == Era_2018:    list_datasets = list_datasets_2018
+    if era in [Era_2016, Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018]:    sXS = sXS13TeV
+    if era == Era_2016postVFP:   list_datasets = list_datasets_2016postVFP
+    if era == Era_2016preVFP:    list_datasets = list_datasets_2016preVFP
+    if era == Era_2017:          list_datasets = list_datasets_2017
+    if era == Era_2018:          list_datasets = list_datasets_2018
 
 
         
@@ -253,10 +257,8 @@ if __name__ == '__main__':
             sSkimmedNanoAODs = []
             if "*" in sPathSkimmedNanoAODs_toUse:                                                                  # if multiple directories (e.g. r1, r2) exist, use latest directory
                 sDir0      = os.path.dirname( sPathSkimmedNanoAODs_toUse )
-                #print(f"{sPathSkimmedNanoAODs_toUse = }, {sDir0 = }", flush=True)
                 sDir_list  = glob.glob( sDir0 )                                                                    # list of directories, for e.g. r1, r2
                 sDir_list.sort(key=os.path.getctime)                                                               # sort directories
-                #print(f"{sDir_list = }", flush=True)
                 if len(sDir_list) == 0: continue
                 sDir_toUse = sDir_list[-1]                                                                         # use latested created directory
                 sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace(sDir0, sDir_toUse)                 # update path to use latest created directory              

@@ -378,7 +378,7 @@ class ObjectSelection:
 class HToAATo4bProcessor(processor.ProcessorABC):
     def __init__(self, datasetInfo={}):
         print(f"HToAATo4bProcessor::__init__():: {datasetInfo = }")
-         
+            
         global runMode_SignalGenChecks;       runMode_SignalGenChecks  = False; # True
         global runMode_QCDGenValidation;      runMode_QCDGenValidation = True # False; # True
         global runMode_GenLHEPlots;           runMode_GenLHEPlots      = True # False
@@ -695,11 +695,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
                     lumiScale: {self.datasetInfo["lumiScale"] }')
 
-            # MC PURewgt --------------------------------------------------------------------------------------------------
-            print(f'MC {self.datasetInfo["era"]} PU reweighting:: ip file: {Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]}, histogram: {Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]} ')
-            with uproot.open(Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]) as f_:
-                #print(f"{f_.keys() = }"); sys.stdout.flush() 
-                self.hPURewgt = f_['%s' % Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]].to_hist()
                 
         
             # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement ---------------------------------------------
@@ -722,16 +717,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
                 self.histosExtensions = HistogramNameExtensions_QCD 
 
-            ## MC ParticleNetMD_XbbvsQCD SFs
-            self.SFs_ParticleNetMD_XbbvsQCD = None
-            if self.objectSelector.wp_ParticleNetMD_XbbvsQCD in Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]].keys():
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] = } "); sys.stdout.flush()
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges'] = } "); sys.stdout.flush()
-
-                self.SFs_ParticleNetMD_XbbvsQCD = dense_lookup(
-                    np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
-                    [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
-                    )
 
         
         

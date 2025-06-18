@@ -5605,10 +5605,8 @@
         "skimmedNanoAOD": {
             "skim_v2_nEvents": 0,
             "skim_v2_sumEvents": 0,
-            "skim_v2_nFiles": 1,
-            "skim_v2": [
-                "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/MC/PNet_v2_2024_11_22/GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8/r1/PNet_v1_Skim.root"
-            ]
+            "skim_v2_nFiles": 0,
+            "skim_v2": []
         }
     },
     "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8": {
@@ -6249,10 +6247,8 @@
         "skimmedNanoAOD": {
             "skim_v2_nEvents": 0,
             "skim_v2_sumEvents": 0,
-            "skim_v2_nFiles": 1,
-            "skim_v2": [
-                "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/MC/PNet_v2_2024_11_22/ZH_HToBB_ZToQQ_M-125_TuneCP5_13TeV-powheg-pythia8/r1/PNet_v1_Skim.root"
-            ]
+            "skim_v2_nFiles": 0,
+            "skim_v2": []
         }
     },
     "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8": {
@@ -8625,9 +8621,8 @@
         "skimmedNanoAOD": {
             "skim_v2_nEvents": 50331,
             "skim_v2_sumEvents": 50331,
-            "skim_v2_nFiles": 2,
+            "skim_v2_nFiles": 1,
             "skim_v2": [
-                "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/MC/PNet_v2_2024_11_22/SUSY_WH_WToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/r1/PNet_v1_Skim_0.root",
                 "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/MC/PNet_v2_2024_11_22/SUSY_WH_WToAll_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8/r1/PNet_v1_Skim_Lp_weight.root"
             ]
         }

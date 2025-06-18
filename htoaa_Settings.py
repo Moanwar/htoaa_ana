@@ -1,6 +1,7 @@
 
 from collections import OrderedDict as OD
 import enum
+import copy
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookXrootdService
 # cms-xrd-global.cern.ch "global redirector"
@@ -21,9 +22,11 @@ kLHE_HT_Max = 99999.0
 NanoAODFileSize_Min = 0.3 # in MB
 #------------------------------------
 
-Era_2016 = '2016'
-Era_2017 = '2017'
-Era_2018 = '2018'
+Era_2016        = '2016'
+Era_2016preVFP  = '2016preVFP'
+Era_2016postVFP = '2016postVFP'
+Era_2017        = '2017'
+Era_2018        = '2018'
 
 class DatasetToAnalyze(enum.Enum):
     FullRun2 = 'FullRun2'
@@ -34,14 +37,28 @@ class DatasetToAnalyze(enum.Enum):
 kDatasetToAnalyze = DatasetToAnalyze.SingleYear # DatasetToAnalyze.SingleYear, DatasetToAnalyze.FullRun2
 
 sFileSamplesInfo = {
-    Era_2016: "Samples_2016UL.json",
-    Era_2017: "Samples_2017UL.json",
-    Era_2018: "Samples_2018UL.json"
+    #Era_2016: "Samples_2016UL.json",
+    Era_2016preVFP:  "Samples_2016preVFPUL.json",
+    Era_2016postVFP: "Samples_2016postVFPUL.json",
+    Era_2017:        "Samples_2017UL.json",
+    Era_2018:        "Samples_2018UL.json"
 }
 
 # Refer https://docs.google.com/spreadsheets/d/1xDLsr3ikLJxuMPNiSRs79YjTzbN64RetXL3A-tL6-hY/edit?usp=sharing
 # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/QCD*/r1/PNet_*.root
 sPathSkimmedNanoAODs = {
+    Era_2016preVFP: {
+        'skim_v2': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2016/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2016APV/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root' 
+        },
+    },
+    Era_2016postVFP: {
+        'skim_v2': {
+            'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2016/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root',
+            'MC':   '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2016/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root' 
+        },
+    },
     Era_2017: {
         'skim_v2': {
             'Data': '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/$SAMPLENAME/r1_$ERATAG/PNet_*.root',
@@ -64,12 +81,76 @@ sPathSkimmedNanoAODs = {
     }
 }
 
+YearsAndEras_dict = {
+    Era_2017: ['B', 'C', 'D', 'E', 'F'],
+    Era_2018: ['A', 'B', 'C', 'D'],
+}
 Luminosities_Inclusive = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
     Era_2018: [59.83, 2.5]
 }
+Luminosities_perTrigger = {
+    Era_2017: {
+        'HLT_PFJet500':                                                     [41.54, 2.3],
+        'HLT_PFHT1050':                                                     [41.54, 2.3],
+        'HLT_AK8PFHT800_TrimMass50':                                        [36.49, 2.3],
+        'HLT_AK8PFJet500':                                                  [41.54, 2.3],
+        'HLT_AK8PFJet400_TrimMass30':                                       [36.75, 2.3],
+        'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                                 [7.73, 2.3],
 
+        'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':              [36.34, 2.3],
+        'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':        [36.75, 2.3],
+
+        'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':             [7.73, 2.3],
+        'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                       [7.73, 2.3],
+
+        'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                             [36.75, 2.3],
+        'HLT_PFMET120_PFMHT120_IDTight':                                    [40.67, 2.3],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':                     [36.75, 2.3],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [40.67, 2.3],
+        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':                    [36.75, 2.3],
+        'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':                      [36.75, 2.3],
+        'HLT_PFMETTypeOne120_PFMHT120_IDTight':                             [40.67, 2.3],
+        'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [36.75, 2.3],
+
+        'HLT_IsoMu24':                                                      [38.06, 2.3],
+        'HLT_IsoMu27':                                                      [41.54, 2.3],
+        'HLT_Mu50':                                                         [41.54, 2.3],
+        
+    },
+    Era_2018: {
+        'HLT_PFHT1050':                                                     [59.827, 2.5],
+        'HLT_PFJet500':                                                     [59.827, 2.5],
+        'HLT_AK8PFHT800_TrimMass50':                                        [59.827, 2.5],
+        'HLT_AK8PFJet500':                                                  [59.827, 2.5],
+        'HLT_AK8PFJet400_TrimMass30':                                       [59.827, 2.5],
+        'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':               [54.536, 2.5],
+
+        'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':          [54.537, 2.5],
+        'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5':    [59.828, 2.5],
+
+        'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':       [54.537, 2.5],
+        'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':                 [54.537, 2.5],
+
+        'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                             [59.820, 2.5],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [59.828, 2.5],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':                     [59.82, 2.5],
+        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':                [54.537, 2.5],
+        'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [59.828, 2.5],
+        'HLT_PFMETTypeOne140_PFMHT140_IDTight':                             [59.828, 2.5],
+
+        'HLT_IsoMu24':                                                      [59.819, 2.5],
+        'HLT_IsoMu27':                                                      [59.827, 2.5],
+        'HLT_Mu50':                                                         [59.827, 2.5],
+
+        'HLT_Ele32_WPTight_Gsf':                                            [59.828, 2.5],
+        'HLT_Ele35_WPTight_Gsf_L1EGMT':                                     [59.828, 2.5],
+        'HLT_Ele115_CaloIdVT_GsfTrkIdT':                                    [59.828, 2.5],
+        'HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165':                            [59.828, 2.5],
+        
+    },
+}
 Luminosities_forGGFMode = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2016: [36.31, 1.2],
     Era_2017: [41.48, 2.3],
@@ -151,10 +232,10 @@ Triggers_perEra = {
             'HLT_AK8PFHT800_TrimMass50':                                     ['L1_HTT380er'], # 36.49 / 41.54
             'HLT_AK8PFJet500':                                               ['L1_SingleJet180'], # 41.54            
             'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'], # 36.75 / 41.54            
-            'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54 
+            #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54 
             #
-            'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':       ['L1_DoubleJet100er2p3_dEta_Max1p6', 'L1_DoubleJet112er2p3_dEta_Max1p6'],  # 36.34 / 41.54
-            'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0': ['L1_HTT320er', 'L1_HTT380er', 'L1_QuadJet60er3p0', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_70_55_40_40_er2p5'], # 36.75 / 41.54 
+            #'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':       ['L1_DoubleJet100er2p3_dEta_Max1p6', 'L1_DoubleJet112er2p3_dEta_Max1p6'],  # 36.34 / 41.54
+            #'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0': ['L1_HTT320er', 'L1_HTT380er', 'L1_QuadJet60er3p0', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_70_55_40_40_er2p5'], # 36.75 / 41.54             
         },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
             'HLT_PFJet500':                                                  ['L1_SingleJet180'], # 41.54  
@@ -162,7 +243,7 @@ Triggers_perEra = {
             'HLT_AK8PFHT800_TrimMass50':                                     ['L1_HTT380er'], # 36.49 / 41.54
             'HLT_AK8PFJet500':                                               ['L1_SingleJet180'], # 41.54
             'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'], # 36.75 / 41.54 
-            'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54
+            #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              ['L1_SingleJet180'], # 7.73 / 41.54
             #
             'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':       ['L1_DoubleJet100er2p3_dEta_Max1p6', 'L1_DoubleJet112er2p3_dEta_Max1p6'],  # 36.34 / 41.54
             'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0': ['L1_HTT320er', 'L1_HTT380er', 'L1_QuadJet60er3p0', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_70_55_40_40_er2p5'], # 36.75 / 41.54
@@ -345,97 +426,132 @@ sFileLumiScalesPhSpOverlapRewgt = {
     }
 }
 
-bTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
-    Era_2018: {
-        'AK4DeepJet': { # https://btv-wiki.docs.cern.ch/ScaleFactors/UL2018/
-            'L': 0.0490,
-            'M': 0.2783,
-            'T': 0.7100
-        },
-        'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
-            'L': 0.1208,
-            'M': 0.4506,
-        },
-        'DDBvL': { # not provided for UL samples
-            'M': 0.8, # taken from Si's code
-        },
-        'DDBvLV2': { # not provided for UL samples
-            'M': 0.8, # taken from Si's code
-        },
-        'ParticleNetMD_XbbvsQCD': { 
-            'VL': 0.75,
-            # BTV-22-001 
-            # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
-            # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
-            'L': 0.9172
-        },
-        'ParticleNetMD_Hto4b_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
-            # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
-            'WP-80': 0.920,
-            #'WP-60': 0.978,
-            'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
-            'WP-40': 0.992,
-            'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
-            'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
-        },
-        'PNet_Xto4bv1_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
-            # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
-            'WP-80': 0.920,
-            #'WP-60': 0.978,
-            'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
-            'WP-40': 0.992,
-            'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
-            'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
-        },
-        'PNet_Xto4bv2_Htoaa4b': {
-            # Htoaato4b channel: https://mattermost.web.cern.ch/cms-exp/pl/icc97qchspnfprkiozptnqkksy  
-            # X4b_v2 = (FatJet_PNet_X4b_v2a_Haa4b_score + FatJet_PNet_X4b_v2b_Haa4b_score) / 2.0 
-            'SRWP-40':  0.96,   'SBWP-40':  0.84,    # fake rate 0.1%
-            'SRWP-45a': 0.955,  'SBWP-45a': 0.80,    # fake rate ??%
-            'SRWP-45b': 0.950,  'SBWP-45b': 0.77,    # fake rate ??%
-            'SRWP-50':  0.945,  'SBWP-50':  0.74,    # fake rate 0.2%
-            'SRWP-60':  0.93,   'SBWP-60':  0.66,    # fake rate 0.3%
-            'SRWP-65':  0.92,   'SBWP-65':  0.60,    # fake rate 0.4%
-            'SRWP-70':  0.90,   'SBWP-70':  0.50,    # fake rate 0.5%
-            'SRWP-80':  0.84,   'SBWP-80':  0.40,    # fake rate 0.1%
-            'SRWP-95':  0.66, # 'SBWP-60'
-        },       
-        'PNet_Xto4bv2a_Htoaa4b': {
-            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
-            'SRWP-40': 0.968,  'SBWP-40': 0.84,    # fake rate 0.1%
-            'SRWP-60': 0.944,  'SBWP-60': 0.66,    # fake rate 0.3%
-            'SRWP-80': 0.868,  'SBWP-80': 0.40,    # fake rate 0.1%
-        }, 
-        'PNet_Xto4bv2b_Htoaa4b': {
-            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
-            'SRWP-40': 0.952,  'SBWP-40': 0.84,    # fake rate 0.1%
-            'SRWP-60': 0.916,  'SBWP-60': 0.66,    # fake rate 0.3%
-            'SRWP-80': 0.814,  'SBWP-80': 0.40,    # fake rate 0.1%
-        }, 
-        'PNet_Xto34bv2_Htoaa4b': {
-            # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/48j5369mdbnyf8o9anb96ebjra 
-            'SRWP-40':  0.89,   'SBWP-40':  0.55,    # fake rate 0.6%
-            'SRWP-50':  0.85,   'SBWP-50':  0.41,    # fake rate 1.1%
-            'SRWP-60':  0.78,   'SBWP-60':  0.27,    # fake rate 1.9%
-            'SRWP-65':  0.73,   'SBWP-65':  0.21,    # fake rate 2.6%
-            'SRWP-70':  0.67,   'SBWP-70':  0.14,    # fake rate 3.5%
-            'SRWP-80':  0.53,   'SBWP-80':  0.03,    # fake rate 6.3%
-        },                 
+
+bTagWPs = {}
+bTagWPs[Era_2018] = {
+    'AK4DeepJet': { # https://btv-wiki.docs.cern.ch/ScaleFactors/UL2018/
+        'L': 0.0490,
+        'M': 0.2783,
+        'T': 0.7100
     },
+    'DeepCSV': { # https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation106XUL18
+        'L': 0.1208,
+        'M': 0.4506,
+    },
+    'DDBvL': { # not provided for UL samples
+        'M': 0.8, # taken from Si's code
+    },
+    'DDBvLV2': { # not provided for UL samples
+        'M': 0.8, # taken from Si's code
+    },
+    'ParticleNetMD_XbbvsQCD': { 
+        'VL': 0.75,
+        # BTV-22-001 
+        # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
+        # https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/005
+        'L': 0.9172
+    },
+    'ParticleNetMD_Hto4b_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
+        # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
+        'WP-80': 0.920,
+        #'WP-60': 0.978,
+        'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
+        'WP-40': 0.992,
+        'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
+        'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
+    },
+    'PNet_Xto4bv1_Htoaa4bOverQCD': { # earlier ParticleNetMD_Hto4b_Htoaa4bOverQCD
+        # https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20231106_PNetSignificanceScan_Msd90to140/?match=ParticleNetMD_Hto4b_Htoaa4bOverQCD         
+        'WP-80': 0.920,
+        #'WP-60': 0.978,
+        'WP-60': 0.975, # https://indico.cern.ch/event/1348321/?note=257291#31-saswati-nandan
+        'WP-40': 0.992,
+        'WP-95': 0.80, # sideband minimum threshold for WP60 <--> Assumption
+        'WP-99': 0.50, # sideband minimum threshold for WP80 <--> Assumption
+    },
+    'PNet_Xto4bv2_Htoaa4b': {
+        # Htoaato4b channel: https://mattermost.web.cern.ch/cms-exp/pl/icc97qchspnfprkiozptnqkksy  
+        # X4b_v2 = (FatJet_PNet_X4b_v2a_Haa4b_score + FatJet_PNet_X4b_v2b_Haa4b_score) / 2.0 
+        'SRWP-40':  0.96,   'SBWP-40':  0.84,    # fake rate 0.1%
+        'SRWP-45a': 0.955,  'SBWP-45a': 0.80,    # fake rate ??%
+        'SRWP-45b': 0.950,  'SBWP-45b': 0.77,    # fake rate ??%
+        'SRWP-50':  0.945,  'SBWP-50':  0.74,    # fake rate 0.2%
+        'SRWP-60':  0.93,   'SBWP-60':  0.66,    # fake rate 0.3%
+        'SRWP-65':  0.92,   'SBWP-65':  0.60,    # fake rate 0.4%
+        'SRWP-70':  0.90,   'SBWP-70':  0.50,    # fake rate 0.5%
+        'SRWP-80':  0.84,   'SBWP-80':  0.40,    # fake rate 0.1%
+        'SRWP-95':  0.66, # 'SBWP-60'
+    },       
+    'PNet_Xto4bv2a_Htoaa4b': {
+        # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
+        'SRWP-40': 0.968,  'SBWP-40': 0.84,    # fake rate 0.1%
+        'SRWP-60': 0.944,  'SBWP-60': 0.66,    # fake rate 0.3%
+        'SRWP-80': 0.868,  'SBWP-80': 0.40,    # fake rate 0.1%
+    }, 
+    'PNet_Xto4bv2b_Htoaa4b': {
+        # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/j6dnq8aid7nadnhb1w4sypqt3r 
+        'SRWP-40': 0.952,  'SBWP-40': 0.84,    # fake rate 0.1%
+        'SRWP-60': 0.916,  'SBWP-60': 0.66,    # fake rate 0.3%
+        'SRWP-80': 0.814,  'SBWP-80': 0.40,    # fake rate 0.1%
+    }, 
+    'PNet_Xto34bv2_Htoaa4b': {
+        # Andrew, Hichem, Siddhesh chat: https://mattermost.web.cern.ch/cms-exp/pl/48j5369mdbnyf8o9anb96ebjra 
+        'SRWP-40':  0.89,   'SBWP-40':  0.55,    # fake rate 0.6%
+        'SRWP-50':  0.85,   'SBWP-50':  0.41,    # fake rate 1.1%
+        'SRWP-60':  0.78,   'SBWP-60':  0.27,    # fake rate 1.9%
+        'SRWP-65':  0.73,   'SBWP-65':  0.21,    # fake rate 2.6%
+        'SRWP-70':  0.67,   'SBWP-70':  0.14,    # fake rate 3.5%
+        'SRWP-80':  0.53,   'SBWP-80':  0.03,    # fake rate 6.3%
+    },                 
 }
 
-bTagSFEfficiencyDict = {
-    Era_2018: { # 'AK4DeepJet' WP-M
-        'inputFile':    'data/correction/mc/BtagSF/2018/jetBtagEfficiency.root',
-        'histogramName': {
-            'b-flavour':     'hJetBtagEffi_b_TT_Presel', #'hJetBtagEffi_b_QCD_TT_Presel',
-            'c-flavour':     'hJetBtagEffi_c_TT_Presel', #'hJetBtagEffi_c_QCD_TT_Presel',
-            'light-flavour': 'hJetBtagEffi_l_TT_Presel', #'hJetBtagEffi_l_QCD_TT_Presel',           
-        },
-        'pTAxisRange': [20, 1000],
-    }
+bTagWPs[Era_2017] = copy.deepcopy(bTagWPs[Era_2018])
+bTagWPs[Era_2017]['AK4DeepJet'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2017/
+    'L': 0.0532,
+    'M': 0.3040,
+    'T': 0.7476
+})
+bTagWPs[Era_2017]['DeepCSV'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2017/
+    'L': 0.1355,
+    'M': 0.4506,
+})
+
+bTagWPs[Era_2016preVFP] = copy.deepcopy(bTagWPs[Era_2018])
+bTagWPs[Era_2016preVFP]['AK4DeepJet'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2016preVFP/
+    'L': 0.0508,
+    'M': 0.2598,
+    'T': 0.6502
+})
+bTagWPs[Era_2016preVFP]['DeepCSV'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2016preVFP/
+    'L': 0.2027,
+    'M': 0.6001,
+})
+
+bTagWPs[Era_2016postVFP] = copy.deepcopy(bTagWPs[Era_2018])
+bTagWPs[Era_2016postVFP]['AK4DeepJet'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2016postVFP/
+    'L': 0.0480,
+    'M': 0.2489,
+    'T': 0.6377
+})
+bTagWPs[Era_2016postVFP]['DeepCSV'].update({ # https://btv-wiki.docs.cern.ch/ScaleFactors/Run2UL2016postVFP/
+    'L': 0.1918,
+    'M': 0.5847,
+})
+
+
+bTagSFEfficiencyDict = {}
+bTagSFEfficiencyDict[Era_2018] = { # 'AK4DeepJet' WP-M
+    'inputFile':    'data/correction/mc/BtagSF/2018/jetBtagEfficiency.root',
+    'histogramName': {
+        'b-flavour':     'hJetBtagEffi_b_TT_Presel', #'hJetBtagEffi_b_QCD_TT_Presel',
+        'c-flavour':     'hJetBtagEffi_c_TT_Presel', #'hJetBtagEffi_c_QCD_TT_Presel',
+        'light-flavour': 'hJetBtagEffi_l_TT_Presel', #'hJetBtagEffi_l_QCD_TT_Presel',           
+    },
+    'pTAxisRange': [20, 1000],
 }
 
+bTagSFEfficiencyDict[Era_2017] = copy.deepcopy( bTagSFEfficiencyDict[Era_2018] )
+bTagSFEfficiencyDict[Era_2017]['inputFile'] = 'data/correction/mc/BtagSF/2017/jetBtagEfficiency.root'
 
 Corrections = {
 
@@ -449,17 +565,50 @@ Corrections = {
         
     "HTRewgt" : { # ./data/correction/mc/HTSamplesStitch/HTSamplesStitchSF_2018.root
         "QCD_bGen": {
-            "2018": {
+            Era_2016preVFP: {
+                "FitFunctionFormat": "1",
+                "HT100to200":   "1",
+                "HT200to300":   "1",
+                "HT300to500":   "1",
+                "HT500to700":   "1",
+                "HT700to1000":  "1",
+                "HT1000to1500": "1",
+                "HT1500to2000": "1",
+                "HT2000to3000": "1"
+            },
+            Era_2016postVFP: {
+                "FitFunctionFormat": "1",
+                "HT100to200":   "1",
+                "HT200to300":   "1",
+                "HT300to500":   "1",
+                "HT500to700":   "1",
+                "HT700to1000":  "1",
+                "HT1000to1500": "1",
+                "HT1500to2000": "1",
+                "HT2000to3000": "1"
+            },
+            Era_2017: {
+                "FitFunctionFormat": "1",
+                "HT100to200":   "1",
+                "HT200to300":   "1",
+                "HT300to500":   "1",
+                "HT500to700":   "1",
+                "HT700to1000":  "1",
+                "HT1000to1500": "1",
+                "HT1500to2000": "1",
+                "HT2000to3000": "1"
+            },
+            Era_2018: {
                 "FitFunctionFormat": "{p0} + ({p1} * (x - {HTBinMin}))",
-                "HT100to200": "0.927235 + (0.001153 * (x - 100))",
-                "HT200to300": "0.936276 + (0.000820 * (x - 200))",
-                "HT300to500": "0.936325 + (0.000512 * (x - 300))",
-                "HT500to700": "0.968147 + (0.000378 * (x - 500))",
-                "HT700to1000": "0.931336 + (0.000229 * (x - 700))",
+                "HT100to200":   "0.927235 + (0.001153 * (x - 100))",
+                "HT200to300":   "0.936276 + (0.000820 * (x - 200))",
+                "HT300to500":   "0.936325 + (0.000512 * (x - 300))",
+                "HT500to700":   "0.968147 + (0.000378 * (x - 500))",
+                "HT700to1000":  "0.931336 + (0.000229 * (x - 700))",
                 "HT1000to1500": "0.956714 + (0.000122 * (x - 1000))",
                 "HT1500to2000": "0.965210 + (0.000068 * (x - 1500))",
                 "HT2000to3000": "1.006649 + (0.000030 * (x - 2000))"
-            }
+            },
         }
     }, 
 

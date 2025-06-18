@@ -902,7 +902,7 @@ def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
 
 
 def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
-    wgt_HT = None
+    wgt_HT = np.ones(len(HT_list))
     
     # 'Corrections' variable defined in htoaa_Settings
     if sFitFunctionFormat == "{p0} + ({p1} * (x - {HTBinMin}))":
@@ -924,8 +924,8 @@ def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
         )
 
     else:
-        print(f'htoaa_CommonTools.py::getHTReweight():: {Corrections["HTRewgt"]["QCD_bGen"]["FitFunctionFormat"] = } is not implemented \t\t **** ERROR **** \n')
-        exit(0)
+        print(f'htoaa_CommonTools.py::getHTReweight():: { sFitFunctionFormat = } is not implemented. Hence using wgt_HT = 1 \t\t **** Caution **** \n')
+        #exit(0)
 
     return wgt_HT
     
@@ -1320,16 +1320,15 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
     
     return btagWgt_dict
 
+
+def get_L1TPrefiringWgt(L1PreFiringWeight):
+    wgt_L1TPrefiring_dict = {}
+    wgt_L1TPrefiring_dict['Nom']  = L1PreFiringWeight.Nom
+    wgt_L1TPrefiring_dict['Up']   = L1PreFiringWeight.Up
+    wgt_L1TPrefiring_dict['Down'] = L1PreFiringWeight.Dn
+
+    return wgt_L1TPrefiring_dict
     
-
-
-
-    
-
-        
-
-
-
     
 def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
     # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags
