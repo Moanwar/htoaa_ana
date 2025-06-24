@@ -520,15 +520,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         else: ## MC
 
             # lumiScale --------------------------------------------------------------------------------------------------
-            if sTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
+            if sTrgSelection not in Luminosities_TotalPerYear[self.datasetInfo["era"]]:
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Luminosities_TotalPerYear[self.datasetInfo["era"]] = }.')
                 exit(0) 
 
             self.datasetInfo["lumiScale"] = calculate_lumiScale(
-                luminosity   = Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0], 
+                luminosity   = Luminosities_TotalPerYear[self.datasetInfo["era"]][sTrgSelection][0], 
                 crossSection = self.datasetInfo["sample_crossSection"], 
                 sumEvents    = self.datasetInfo["sample_sumEvents"])
-            print(f'luminosity: {Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0] = }, \
+            print(f'luminosity: {Luminosities_TotalPerYear[self.datasetInfo["era"]][sTrgSelection][0] = }, \
                     crossSection: {self.datasetInfo["sample_crossSection"]}, \
                     sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
                     lumiScale: {self.datasetInfo["lumiScale"] }')

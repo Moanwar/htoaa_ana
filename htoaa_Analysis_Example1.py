@@ -623,7 +623,7 @@ if __name__ == '__main__':
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
     if isMC:
-        luminosity          = Luminosities_forGGFMode[era]['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'][0]  # Luminosities_Inclusive[era][0]
+        luminosity          = Luminosities_TotalPerYear[era]['HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'][0]  # Luminosities_Inclusive[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents

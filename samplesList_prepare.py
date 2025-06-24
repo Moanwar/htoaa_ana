@@ -126,7 +126,10 @@ if __name__ == '__main__':
             isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
             if not isMC:
                 # for data sample
-                sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+                #sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+                sampleName_part2 = (datasetName_parts[2]).split('UL')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2', 'Run2016F-UL2016_MiniAODv2_NanoAODv9-v1', 'Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2', 'Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2'
+                sampleName_part2 = sampleName_part2[:-1] if sampleName_part2.endswith('-') else sampleName_part2 # in case 'Run2016F-', 
+                sampleName_part2 = sampleName_part2[:-1] if sampleName_part2.endswith('_') else sampleName_part2 # in case 'Run2016F-HIPM_',                               
                 sampleName = '%s_%s' % (sampleName, sampleName_part2)  # JetHT_Run2018A
 
             if sampleName not in samples_details: 
@@ -186,7 +189,10 @@ if __name__ == '__main__':
         sampleName_part2_forData = ''
         if not isMC:
             # for data sample
-            sampleName_part2_forData = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+            #sampleName_part2_forData = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2', 'Run2016F-UL2016_MiniAODv2_NanoAODv9-v1', 'Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2', 'Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2'
+            sampleName_part2_forData = (datasetName_parts[2]).split('UL')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2', 'Run2016F-UL2016_MiniAODv2_NanoAODv9-v1', 'Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2', 'Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2'
+            sampleName_part2_forData = sampleName_part2_forData[:-1] if sampleName_part2_forData.endswith('-') else sampleName_part2_forData # in case 'Run2016F-', 
+            sampleName_part2_forData = sampleName_part2_forData[:-1] if sampleName_part2_forData.endswith('_') else sampleName_part2_forData # in case 'Run2016F-HIPM_', 
             sampleName = '%s_%s' % (sampleName, sampleName_part2_forData)  # JetHT_Run2018A
 
         if updateCrossSections:
@@ -252,7 +258,8 @@ if __name__ == '__main__':
             # /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/$SAMPLENAME/r*/PNet_*.root            /eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v2_2024_11_22/ZZ_TuneCP5_13TeV-pythia8/r1/PNet_v1_Skim.root
             sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLENAME', sSampleNameDir_used)
             sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLETAG',  sSampleTagDir_used)
-            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used)
+            #sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used)
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used.replace('-','_')) # For era 'Run2016B-ver2_HIPM', directory name 'Run2016B_ver2_HIPM'
 
             sSkimmedNanoAODs = []
             if "*" in sPathSkimmedNanoAODs_toUse:                                                                  # if multiple directories (e.g. r1, r2) exist, use latest directory
@@ -306,7 +313,10 @@ if __name__ == '__main__':
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
         if not isMC:
             # for data sample
-            sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+            #sampleName_part2 = (datasetName_parts[2]).split('-')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2'
+            sampleName_part2 = (datasetName_parts[2]).split('UL')[0] # 'Run2018A-UL2018_MiniAODv2_NanoAODv9-v2', 'Run2016F-UL2016_MiniAODv2_NanoAODv9-v1', 'Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2', 'Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2'
+            sampleName_part2 = sampleName_part2[:-1] if sampleName_part2.endswith('-') else sampleName_part2 # in case 'Run2016F-', 
+            sampleName_part2 = sampleName_part2[:-1] if sampleName_part2.endswith('_') else sampleName_part2 # in case 'Run2016F-HIPM_',                               
             sampleName = '%s_%s' % (sampleName, sampleName_part2)  # JetHT_Run2018A
 
         samples_details_inOrder[sampleName] = samples_details[sampleName]

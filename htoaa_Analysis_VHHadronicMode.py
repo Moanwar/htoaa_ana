@@ -432,13 +432,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if not self.datasetInfo['isMC']: 
             self.sel_names_all["Presel"].insert(0, "run:ls")
 
-        else:
-            if self.datasetInfo['isQCD']: #self.sel_names_all["Presel"].append("QCDStitch")
-                self.sel_names_all["Presel"] = insertInListBeforeThisElement(
-                    list1                  = self.sel_names_all["Presel"], 
-                    sConditionToAdd        = "QCDStitch", 
-                    addBeforeThisCondition = "METFilters")                
-
         if self.datasetInfo["era"] == Era_2018:
             # 2018HEM1516Issue ----------------
             #self.sel_names_all["Presel"].append("2018HEM1516Issue")
@@ -560,21 +553,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"{dataLSSelGoldenJSON = }")
 
         else: ## MC
-
-            # lumiScale --------------------------------------------------------------------------------------------------
-            if sTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
-                exit(0) 
-
-            self.datasetInfo["lumiScale"] = calculate_lumiScale(
-                luminosity   = Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0], 
-                crossSection = self.datasetInfo["sample_crossSection"], 
-                sumEvents    = self.datasetInfo["sample_sumEvents"])
-            print(f'luminosity: {Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0] = }, \
-                    crossSection: {self.datasetInfo["sample_crossSection"]}, \
-                    sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
-                    lumiScale: {self.datasetInfo["lumiScale"] }')
-               
         
             # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement ---------------------------------------------
             self.pdgId_BHadrons = []
@@ -589,12 +567,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #self.pdgId_BHadrons = list(set(self.pdgId_BHadrons))
             #print(f" after duplicate removal --> \nself.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
             
-            ## MC QCD
-            if self.datasetInfo['isQCD'] and \
-                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                SplitQCDInGENCats:
-                # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
-                self.histosExtensions = HistogramNameExtensions_QCD 
 
         
         
@@ -744,9 +716,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ('hGenLHE_HT_SelQCDbEnrich',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_SelQCDbGen',                     {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitchCutBQuarkPt',           {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitchCutBHadron',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitch',                      {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_bEnrich_PhSp',               {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_bGen_PhSp',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_Incl_Remnant_PhSp',          {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
@@ -1570,7 +1539,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = None
         mask_QCD_stitch_CutBHadron_eventwise                          = None
         mask_QCD_stitch_CutBQuarkPt_eventwise                         = None
-        mask_QCD_stitch_eventwise                                     = None
         mask_QCD_bEnrich_PhSp                                         = None
         mask_QCD_bGen_PhSp                                            = None
         mask_QCD_Incl_Remnant_PhSp                                    = None
@@ -1770,11 +1738,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             )
                 
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
-                mask_QCD_stitch_eventwise = trues_list # select all events
-            else:
-                mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
-
             mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = (
                 (mask_genBHadrons_status2_eventwise == True) &
                 (mask_genBQuarks_hardSctred_eventwise == False)
@@ -2584,10 +2547,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
             mask_Trgs = falses_list
+            luminosity_firedTrgs = np.full_like(ones_list, 0)
             if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
                 wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
@@ -2604,6 +2568,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
                 mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+
+                # calculate maximum luminosity of triggers fired in the event
+                luminosity_firedTrg_i = Luminosities_perTrigger[self.datasetInfo["era"]][HLTName][0]
+                luminosity_firedTrgs = np.where(
+                    (mask_Trg_i & (luminosity_firedTrg_i > luminosity_firedTrgs)),
+                    np.full_like(luminosity_firedTrgs, luminosity_firedTrg_i),
+                    luminosity_firedTrgs
+                )
 
                 # calculate 2018HEM1516Issue weight for current HLT trigger
                 if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
@@ -2655,13 +2627,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-
-        if "QCDStitch" in self.sel_conditions_all_list:
-            selection.add(
-                "QCDStitch",
-                #mask_QCD_stitch_eventwise == True
-                mask_QCD_stitch_eventwise
-            )
             
         if CrossCheckEvtYieldsWithAndrew:
             print(f"{self.objectSelector.FatJetPt_Vjj_MinThsh = }, {self.objectSelector.NonHto4bFatJetPNet_WZvsQCD_Thsh = }, {self.objectSelector.METPt_ZvvIncl_MinThsh = }, ")
@@ -2793,21 +2758,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if self.datasetInfo["isMC"]:
             # lumiScale ------------------------------------
-            lumiScale_toUse = None
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-               self.datasetInfo['isQCD']:
-                mask_PhSp_dict_ = {
-                    "QCD_bEnrich": mask_QCD_bEnrich_PhSp,
-                    "QCD_bGen": mask_QCD_bGen_PhSp,
-                    "QCD_Incl_Remnant": mask_QCD_Incl_Remnant_PhSp,
-                }
-                lumiScale_toUse = getLumiScaleForPhSpOverlapRewgtMode(
-                    hLumiScale      = self.datasetInfo["hMCSamplesStitch"],
-                    sample_category = dataset,
-                    sample_HT_value = self.datasetInfo['sample_HT_Min'],
-                    mask_PhSp_dict  = mask_PhSp_dict_ )
-            else:
-                lumiScale_toUse = np.full(len(events), self.datasetInfo["lumiScale"])
+            lumiScale_toUse = calculate_lumiScale(
+                luminosity   = luminosity_firedTrgs, 
+                crossSection = self.datasetInfo["sample_crossSection"], 
+                sumEvents    = self.datasetInfo["sample_sumEvents"]
+            )
 
             # MC wgt for HEM1516Issue --------------------- 
             wgt_HEM1516Issue = None
@@ -3653,19 +3608,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight[mask_genBQuarks_hardSctred_eventwise]
                 )
 
-                # QCD_stitch events
-                iBin = 3
-                output['hCutFlow'].fill(
-                    dataset=dataset,
-                    CutFlow=(ones_list[mask_QCD_stitch_eventwise] * iBin),
-                    systematic=syst
-                )
-                output['hCutFlowWeighted'].fill(
-                    dataset=dataset,
-                    CutFlow=(ones_list[mask_QCD_stitch_eventwise] * iBin),
-                    systematic=syst,
-                    weight=evtWeight[mask_QCD_stitch_eventwise]
-                )
                 
                 # NEvents in QCD HT samples
                 QCDSamplesHTBins_LowEdge = [50, 100, 200, 300, 500, 700, 1000, 1500, 2000]
@@ -3748,24 +3690,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
                 )
                 
-                output['hGenLHE_HT_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_CutBQuarkPt_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBQuarkPt_eventwise]
-                )
-                output['hGenLHE_HT_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_CutBHadron_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBHadron_eventwise]
-                )
-                output['hGenLHE_HT_QCDStitch'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_eventwise]
-                )
                 output['hGenLHE_HT_QCD_bEnrich_PhSp'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_bEnrich_PhSp]),
@@ -5902,29 +5826,6 @@ if __name__ == '__main__':
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
         systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
 
-        
-        MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt if ("MCSamplesStitchOption" in config and \
-                                                                            config["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt.value) \
-            else MCSamplesStitchOptions.PhSpOverlapRemove
-        
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            if "MCSamplesStitchInputs" not in config:
-                print(frameinfo.filename, frameinfo.lineno, ' ERROR: "MCSamplesStitchInputs" not in config') # https://stackoverflow.com/questions/3056048/filename-and-line-number-of-python-script
-                
-            MCSamplesStitchInputFileName      = config["MCSamplesStitchInputs"]["inputFile"]
-            MCSamplesStitchInputHistogramName = config["MCSamplesStitchInputs"]["histogramName"]
-            MCSamplesStitchInputHistogramName = MCSamplesStitchInputHistogramName.replace(
-                '$SAMPLECATEGORY', sample_category.split('_')[0]
-            )
-            print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
-            if not os.path.exists(MCSamplesStitchInputFileName):
-                logging.critical(f'htoaa_Analysis_VHHadronicMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
-                print(f'htoaa_Analysis_VHHadronicMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
-                exit(0)
-            print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
-            with uproot.open(MCSamplesStitchInputFileName) as f_:
-                print(f"{f_.keys() = }"); sys.stdout.flush() 
-                hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
 
     print(f"htoaa_Analysis_VHHadronicMode:: here16 {datetime.now() = }")    
         
@@ -6003,9 +5904,6 @@ if __name__ == '__main__':
     if isMC:
         sampleInfo["sample_crossSection"]   = sample_crossSection
         sampleInfo["sample_sumEvents"]      = sample_sumEvents
-        sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
         sampleInfo["systematicsToRun"] = systematicsToRun
     print(f"htoaa_Analysis_VHHadronicMode:: here19 {datetime.now() = }", flush=flushStdout)
         
@@ -6052,14 +5950,7 @@ if __name__ == '__main__':
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        sample_category_toUse = sample_category
-        
-        if isMC and \
-            MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-            SplitQCDInGENCats and \
-            "QCD" in sample_category:
-            sample_category_toUse = "QCD"
-        
+        sample_category_toUse = sample_category        
         sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
@@ -6068,16 +5959,6 @@ if __name__ == '__main__':
                 #print(f"key: {key},  value ({type(value)}): {value}")
                 sHistoName_toUse = key
                 sHExt_toUse = ''
-                if isMC and \
-                    MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                    SplitQCDInGENCats and \
-                    "QCD" in sample_category:                    
-                    for sHExt in HistogramNameExtensions_QCD:
-                        if sHExt in key:
-                            sHExt_toUse = '_%s' % (sHExt)
-                            sHistoName_toUse = sHistoName_toUse.replace(sHExt_toUse, '')
-                            break
-
                 sDir1_toUse = '%s%s' % (sDir1, sHExt_toUse)
 
                 #if not (key.startswith('h') or key != 'cutflow'): continue

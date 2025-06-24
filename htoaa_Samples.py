@@ -109,12 +109,12 @@ SamplesMC = OD([
     ("STbar_tW_Incl", [
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
     ]),    
-    ("STop_tW_12l", [
-        "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    ("STbar_tW_12l", [
-        "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
-    ]),
+    #("STop_tW_12l", [
+    #    "ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
+    #]),
+    #("STbar_tW_12l", [
+    #    "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
+    #]),
 
 #    ("ttZ", [
 #        "ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8",
@@ -261,12 +261,12 @@ SamplesMC = OD([
     ('GluGluHToBB_Pt-200ToInf', [
         "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
     ]),
-    ('VBFHToBB_powheg', [
-        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
-    ]),
-    #('VBFHToBB_herwig', [
-    #    "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
+    #('VBFHToBB_powheg', [
+    #    "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
     #]),
+    ('VBFHToBB_herwig', [
+        "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
+    ]),
     ('VBFH_dipoleRecoilOn', [
         "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
     ]),
@@ -637,6 +637,64 @@ elif QCDInclMode == 2: # "QCDIncl_PSWeight"
     SamplesMC.pop("QCD_Incl_PSWeight", None)
     SamplesMC[kQCDIncl] = list_tmp_
     #del list_tmp_
+
+
+Samples2016preVFP = SamplesMC.copy() 
+Samples2016preVFP.update(OD([
+
+    ## JetHT data
+    ("JetHT_Run2016B-ver2_HIPM", ["JetHT_Run2016B-ver2_HIPM"]),
+    ("JetHT_Run2016C-HIPM", ["JetHT_Run2016C-HIPM"]),
+    ("JetHT_Run2016D-HIPM", ["JetHT_Run2016D-HIPM"]),
+    ("JetHT_Run2016E-HIPM", ["JetHT_Run2016E-HIPM"]),
+    ("JetHT_Run2016F-HIPM", ["JetHT_Run2016F-HIPM"]),    
+
+    ## MET data
+    ("MET_Run2016B-ver2_HIPM", ["MET_Run2016B-ver2_HIPM"]),
+    ("MET_Run2016C-HIPM", ["MET_Run2016C-HIPM"]),
+    ("MET_Run2016D-HIPM", ["MET_Run2016D-HIPM"]),
+    ("MET_Run2016E-HIPM", ["MET_Run2016E-HIPM"]),
+    ("MET_Run2016F-HIPM", ["MET_Run2016F-HIPM"]),
+
+    ## SingleMuon data
+    ("SingleMuon_Run2016B-ver2_HIPM", ["SingleMuon_Run2016B-ver2_HIPM"]),
+    ("SingleMuon_Run2016C-HIPM", ["SingleMuon_Run2016C-HIPM"]),
+    ("SingleMuon_Run2016D-HIPM", ["SingleMuon_Run2016D-HIPM"]),
+    ("SingleMuon_Run2016E-HIPM", ["SingleMuon_Run2016E-HIPM"]),
+    ("SingleMuon_Run2016F-HIPM", ["SingleMuon_Run2016F-HIPM"]),  
+
+    ## EGamma data
+    ("SingleElectron_Run2016B-ver2_HIPM", ["SingleElectron_Run2016B-ver2_HIPM"]),
+    ("SingleElectron_Run2016C-HIPM", ["SingleElectron_Run2016C-HIPM"]),
+    ("SingleElectron_Run2016D-HIPM", ["SingleElectron_Run2016D-HIPM"]),
+    ("SingleElectron_Run2016E-HIPM", ["SingleElectron_Run2016E-HIPM"]),
+    ("SingleElectron_Run2016F-HIPM", ["SingleElectron_Run2016F-HIPM"]), 
+]))
+
+Samples2016postVFP = SamplesMC.copy() 
+Samples2016postVFP.update(OD([
+
+    ## JetHT data
+    ("JetHT_Run2016F", ["JetHT_Run2016F"]),
+    ("JetHT_Run2016G", ["JetHT_Run2016G"]),
+    ("JetHT_Run2016H", ["JetHT_Run2016H"]),    
+
+    ## MET data
+    ("MET_Run2016F", ["MET_Run2016F"]),
+    ("MET_Run2016G", ["MET_Run2016G"]),
+    ("MET_Run2016H", ["MET_Run2016H"]),
+
+    ## SingleMuon data
+    ("SingleMuon_Run2016F", ["SingleMuon_Run2016F"]),
+    ("SingleMuon_Run2016G", ["SingleMuon_Run2016G"]),
+    ("SingleMuon_Run2016H", ["SingleMuon_Run2016H"]),  
+
+    ## EGamma data
+    ("SingleElectron_Run2016F", ["SingleElectron_Run2016F"]),
+    ("SingleElectron_Run2016G", ["SingleElectron_Run2016G"]),
+    ("SingleElectron_Run2016H", ["SingleElectron_Run2016H"]), 
+]))
+Samples2016postVFP.pop('ZHToTauTau', None)
 
 
 

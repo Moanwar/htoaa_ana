@@ -24,7 +24,7 @@ ExpData_dict = {
 MCBkg_list = [
     "QCD_bEnr", "QCD_BGen", "QCD_Incl", 
     "TT0l", "TT1l", "TT2l", 
-    "STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl", "STop_tW_12l", "STbar_tW_12l", 
+    "STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl", #"STop_tW_12l", "STbar_tW_12l", 
     "ttZ", "ttW", "tZq", 
     "Zqq", "Zvv", "Zll", "Wqq", "Wlv", 
     "ZZ", "WZ", "WW", #"ZZZ", "WZZ", "WWZ", "WWW", 
@@ -38,7 +38,7 @@ MCBkg_list = [
 MCBkg_dict = {
     'QCD': ["QCD_bEnr", "QCD_BGen", "QCD_Incl"],
     r't$\bar{t}$+X': ["TT0l", "TT1l", "TT2l"],
-    'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl", "STop_tW_12l", "STbar_tW_12l"],
+    'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl"], #"STop_tW_12l", "STbar_tW_12l"],
     'V+X': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv"],
     'Diboson': ["ZZ", "WZ", "WW"],
     #'': [],

@@ -23,7 +23,7 @@ print(f"htoaa_Wraper:: here1 {datetime.now() = }")
 from htoaa_Settings import *
 print(f"htoaa_Wraper:: here2 {datetime.now() = }")
 from htoaa_Samples import (
-    Samples2017, Samples2018,
+    Samples2016preVFP, Samples2016postVFP, Samples2017, Samples2018,
     kData, kQCDIncl, kQCD_bGen, kQCD_bEnrich
 )
 print(f"htoaa_Wraper:: here3 {datetime.now() = }")
@@ -119,8 +119,8 @@ def writeCondorExecFile(
 
             f.write("printf \"After execution pwd: \\n\" \n")
             f.write("pwd \n")
-            f.write("printf \"ls: \\n\" \n")
-            f.write("ls \n")
+            f.write("printf \"ls -lh: \\n\" \n")
+            f.write("ls -lh \n")
             
             cp_commandToUse = ''
             if server in ['lxplus']:
@@ -247,7 +247,7 @@ if __name__ == '__main__':
         "htoaa_Analysis_Ak4BtagEffi.py",
         "htoaa_Analysis_HiggsPtRewgt.py",
         "htoaa_Analysis_Example.py"], required=True)
-    parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016, Era_2017, Era_2018], required=False)
+    parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018], required=False)
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
@@ -260,6 +260,7 @@ if __name__ == '__main__':
     parser.add_argument('-xrdcpIpAftNResub',  type=int, default=0,                           help='Download input files after n job failures')
     parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
     parser.add_argument('-systematics',       type=str, default='No',                        help='No,Full,PU,JES etc') 
+    parser.add_argument('-triggers',          type=str, default='',                          help='Trg_Combo_AK4AK8Jet_HT, HLT_PFJet500 etc to use selective trigger combinations for studies') 
     parser.add_argument('-jumpToHaddOutput',  action='store_true', default=False,            help="When running on earlier jobs, skip checking failed jobs and jump to hadd produced output.root files.")         
     parser.add_argument('-dryRun',            action='store_true', default=False,            help="Produce jpbs' config files without submiting jobs to HT condor server.")    
     args=parser.parse_args()
@@ -280,6 +281,7 @@ if __name__ == '__main__':
     xrdcpIpAftNResub        = args.xrdcpIpAftNResub
     server                  = args.server
     systematics             = args.systematics
+    triggers                = args.triggers
     jumpToHaddOutput        = args.jumpToHaddOutput
     dryRun                  = args.dryRun 
 
@@ -300,7 +302,11 @@ if __name__ == '__main__':
     os.chdir( SourceCodeDir )
     samplesList = None
     samplesInfo = None
-    if era == Era_2017:
+    if  era == Era_2016preVFP:
+        samplesList = Samples2016preVFP # htoaa_Samples.py
+    elif era == Era_2016postVFP:
+        samplesList = Samples2016postVFP # htoaa_Samples.py
+    elif era == Era_2017:
         samplesList = Samples2017 # htoaa_Samples.py
     elif era == Era_2018:
         samplesList = Samples2018 # htoaa_Samples.py
@@ -314,13 +320,6 @@ if __name__ == '__main__':
         selSamplesToExclude_list = selSamplesToExclude.split(',')
 
     ## Settings ---------------------------------------------------------------------------------
-
-    ## MCSamplesStitchOptions.PhSpOverlapRewgt
-    MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove # MCSamplesStitchOptions.PhSpOverlapRewgt 
-    samples_wMCSamplesStitch_PhSpOverlapRewgt = [ kQCDIncl, kQCD_bGen, kQCD_bEnrich ]
-    ## MCSamplesStitchOptions.PhSpOverlapRemove
-    #MCSamplesStitchOption                     = MCSamplesStitchOptions.PhSpOverlapRemove 
-    #samples_wMCSamplesStitch_PhSpOverlapRewgt = []
 
     #  Settings for GGF H->aa->4b analysis
     if sAnalysis in [
@@ -534,7 +533,7 @@ if __name__ == '__main__':
 
                     # Check if job related file exist or not
                     isConfigExist           = os.path.isfile(sConfig_to_use)
-                    isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use)
+                    isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use) and (os.path.getsize(sOpRootFileFinal_to_use) > 5e4) 
                     isCondorExecExist       = os.path.isfile(sCondorExec_to_use)
                     isCondorSubmitExist     = os.path.isfile(sCondorSubmit_to_use)
                     isCondorLogExist        = os.path.isfile(sCondorLog_to_use)
@@ -662,18 +661,13 @@ if __name__ == '__main__':
                             config["crossSection"] = sample_cossSection
                             config["sumEvents"]    = sample_sumEvents
                             config["systematics"]  = systematics
-                            
-                            if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                               sample_category in samples_wMCSamplesStitch_PhSpOverlapRewgt:
-                                # MCSamplesStitch_PhSpOverlapRewgt: Read lumiScale from histogram saved in a ROOT file 
-                                config["MCSamplesStitchOption"] = MCSamplesStitchOptions.PhSpOverlapRewgt.value 
-                                config["MCSamplesStitchInputs"] = sFileLumiScalesPhSpOverlapRewgt[era]
-                                
+                                                            
                         else:
                             del config["crossSection"]
                             del config["sumEvents"]
                         config["downloadIpFiles"] = True if jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub else False
                         config["server"] = server
+                        config["triggers"] = triggers
 
                         if printLevel >= 4:
                             print("config {}: {}".format(sConfig_to_use, config))

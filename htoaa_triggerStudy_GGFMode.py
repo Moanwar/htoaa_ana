@@ -300,15 +300,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         else: ## MC
 
             # lumiScale --------------------------------------------------------------------------------------------------
-            if self.sMuTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_triggerStudy_GGFMode.py::main():: {self.sMuTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
+            if self.sMuTrgSelection not in Luminosities_TotalPerYear[self.datasetInfo["era"]]:
+                logging.critical(f'htoaa_triggerStudy_GGFMode.py::main():: {self.sMuTrgSelection = } not in {Luminosities_TotalPerYear[self.datasetInfo["era"]] = }.')
                 exit(0)             
 
             self.datasetInfo["lumiScale"] = calculate_lumiScale(
-                luminosity   = Luminosities_forGGFMode[self.datasetInfo["era"]][self.sMuTrgSelection][0], 
+                luminosity   = Luminosities_TotalPerYear[self.datasetInfo["era"]][self.sMuTrgSelection][0], 
                 crossSection = self.datasetInfo["sample_crossSection"], 
                 sumEvents    = self.datasetInfo["sample_sumEvents"])
-            print(f'luminosity: {Luminosities_forGGFMode[self.datasetInfo["era"]][self.sMuTrgSelection][0] = }, \
+            print(f'luminosity: {Luminosities_TotalPerYear[self.datasetInfo["era"]][self.sMuTrgSelection][0] = }, \
                     crossSection: {self.datasetInfo["sample_crossSection"]}, \
                     sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
                     lumiScale: {self.datasetInfo["lumiScale"] }')
@@ -1899,7 +1899,7 @@ if __name__ == '__main__':
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
     if isMC:
-        #luminosity          = Luminosities_forGGFMode[era]['HLT_IsoMu24'][0]  # Luminosities_Inclusive[era][0]
+        #luminosity          = Luminosities_TotalPerYear[era]['HLT_IsoMu24'][0]  # Luminosities_Inclusive[era][0]
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents

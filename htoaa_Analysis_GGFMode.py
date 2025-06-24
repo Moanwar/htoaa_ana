@@ -344,7 +344,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #global HLT_AK8PFJet330_name
         #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
+        #sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
+        sTrgSelection = self.datasetInfo['triggers'] if self.datasetInfo['triggers'] else 'Trg_Combo_AK4AK8Jet_HT'
+        print(f"{sTrgSelection = }")
+        if (self.datasetInfo["era"] in Triggers_perEra) and (sTrgSelection in Triggers_perEra[self.datasetInfo["era"]]):
+            print(f'Triggers_perEra[{self.datasetInfo["era"]}][{sTrgSelection}]:')
+            print(json.dumps(Triggers_perEra[self.datasetInfo["era"]][sTrgSelection], indent=4))
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -396,12 +401,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if not self.datasetInfo['isMC']: 
             self.sel_names_all["Presel"].insert(0, "run:ls")
 
-        else:
-            if self.datasetInfo['isQCD']: #self.sel_names_all["Presel"].append("QCDStitch")
-                self.sel_names_all["Presel"] = insertInListBeforeThisElement(
-                    list1                  = self.sel_names_all["Presel"], 
-                    sConditionToAdd        = "QCDStitch", 
-                    addBeforeThisCondition = "METFilters")                
+               
 
         if self.datasetInfo["era"] == Era_2018:
             # 2018HEM1516Issue ----------------
@@ -526,24 +526,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"{dataLSSelGoldenJSON = }")
 
         else: ## MC
-
-            # lumiScale --------------------------------------------------------------------------------------------------
-            if sTrgSelection not in Luminosities_forGGFMode[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Luminosities_forGGFMode[self.datasetInfo["era"]] = }.')
-                exit(0) 
-
-            luminosity_toUse = 0
-            #for trg_i in Luminosities_perTrigger[self.datasetInfo["era"]][sTrgSelection]:
-
-            self.datasetInfo["lumiScale"] = calculate_lumiScale(
-                luminosity   = #Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0], 
-                crossSection = self.datasetInfo["sample_crossSection"], 
-                sumEvents    = self.datasetInfo["sample_sumEvents"])
-            print(f'luminosity: {Luminosities_forGGFMode[self.datasetInfo["era"]][sTrgSelection][0] = }, \
-                    crossSection: {self.datasetInfo["sample_crossSection"]}, \
-                    sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
-                    lumiScale: {self.datasetInfo["lumiScale"] }')
-               
         
             # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement ---------------------------------------------
             self.pdgId_BHadrons = []
@@ -558,13 +540,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #self.pdgId_BHadrons = list(set(self.pdgId_BHadrons))
             #print(f" after duplicate removal --> \nself.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
             
-            ## MC QCD
-            if self.datasetInfo['isQCD'] and \
-                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                SplitQCDInGENCats:
-                # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
-                self.histosExtensions = HistogramNameExtensions_QCD 
-
             print(f"{bTagSFEfficiencyDict[self.datasetInfo['era']]['inputFile'] = }")
 
         
@@ -716,9 +691,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 ('hGenLHE_HT_SelQCDbEnrich',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_SelQCDbGen',                     {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_SelQCDbHadron',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitchCutBQuarkPt',           {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitchCutBHadron',            {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
-                ('hGenLHE_HT_QCDStitch',                      {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_bEnrich_PhSp',               {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_bGen_PhSp',                  {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
                 ('hGenLHE_HT_QCD_Incl_Remnant_PhSp',          {sXaxis: HT_axis,         sXaxisLabel: r"LHE HT [GeV]"}),
@@ -1522,7 +1494,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = None
         mask_QCD_stitch_CutBHadron_eventwise                          = None
         mask_QCD_stitch_CutBQuarkPt_eventwise                         = None
-        mask_QCD_stitch_eventwise                                     = None
         mask_QCD_bEnrich_PhSp                                         = None
         mask_QCD_bGen_PhSp                                            = None
         mask_QCD_Incl_Remnant_PhSp                                    = None
@@ -1722,10 +1693,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             )
                 
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
-                mask_QCD_stitch_eventwise = trues_list # select all events
-            else:
-                mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 
             mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = (
                 (mask_genBHadrons_status2_eventwise == True) &
@@ -2515,6 +2482,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 exit(0)  
 
             mask_Trgs = falses_list
+            luminosity_firedTrgs = np.full_like(ones_list, 0)
             if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
                 wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
@@ -2522,7 +2490,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 if HLTName_toUse not in events.HLT.fields: continue
                 mask_HLT = events.HLT[HLTName_toUse] == True
 
-                mask_L1Ts = falses_list
+                mask_L1Ts = falses_list if len(L1TList) > 0 else trues_list # skip L1T requirement if empty L1TList
                 for L1TName in L1TList:
                     L1TName_toUse = L1TName.replace('L1_', '')
                     if L1TName_toUse not in events.L1.fields: continue
@@ -2531,6 +2499,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
                 mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+
+                # calculate maximum luminosity of triggers fired in the event
+                luminosity_firedTrg_i = Luminosities_perTrigger[self.datasetInfo["era"]][HLTName][0]
+                luminosity_firedTrgs = np.where(
+                    (mask_Trg_i & (luminosity_firedTrg_i > luminosity_firedTrgs)),
+                    np.full_like(luminosity_firedTrgs, luminosity_firedTrg_i),
+                    luminosity_firedTrgs
+                )
 
                 # calculate 2018HEM1516Issue weight for current HLT trigger
                 if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
@@ -2583,12 +2559,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-        if "QCDStitch" in self.sel_conditions_all_list:
-            selection.add(
-                "QCDStitch",
-                #mask_QCD_stitch_eventwise == True
-                mask_QCD_stitch_eventwise
-            )
             
         
         #print(f'{self.sel_names_all["Presel"] = }')
@@ -2665,21 +2635,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if self.datasetInfo["isMC"]:
             # lumiScale ------------------------------------
-            lumiScale_toUse = None
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-               self.datasetInfo['isQCD']:
-                mask_PhSp_dict_ = {
-                    "QCD_bEnrich":      mask_QCD_bEnrich_PhSp,
-                    "QCD_bGen":         mask_QCD_bGen_PhSp,
-                    "QCD_Incl_Remnant": mask_QCD_Incl_Remnant_PhSp,
-                }
-                lumiScale_toUse = getLumiScaleForPhSpOverlapRewgtMode(
-                    hLumiScale      = self.datasetInfo["hMCSamplesStitch"],
-                    sample_category = dataset,
-                    sample_HT_value = self.datasetInfo['sample_HT_Min'],
-                    mask_PhSp_dict  = mask_PhSp_dict_ )
-            else:
-                lumiScale_toUse = np.full(len(events), self.datasetInfo["lumiScale"])
+            lumiScale_toUse = calculate_lumiScale(
+                luminosity   = luminosity_firedTrgs, 
+                crossSection = self.datasetInfo["sample_crossSection"], 
+                sumEvents    = self.datasetInfo["sample_sumEvents"]
+            )
+                
 
             # MC wgt for HEM1516Issue --------------------- 
             wgt_HEM1516Issue = None
@@ -3556,19 +3517,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight[mask_genBQuarks_hardSctred_eventwise]
                 )
 
-                # QCD_stitch events
-                iBin = 3
-                output['hCutFlow'].fill(
-                    dataset=dataset,
-                    CutFlow=(ones_list[mask_QCD_stitch_eventwise] * iBin),
-                    systematic=syst
-                )
-                output['hCutFlowWeighted'].fill(
-                    dataset=dataset,
-                    CutFlow=(ones_list[mask_QCD_stitch_eventwise] * iBin),
-                    systematic=syst,
-                    weight=evtWeight[mask_QCD_stitch_eventwise]
-                )
                 
                 # NEvents in QCD HT samples
                 QCDSamplesHTBins_LowEdge = [50, 100, 200, 300, 500, 700, 1000, 1500, 2000]
@@ -3651,24 +3599,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen[mask_genBQuarks_hardSctred_eventwise]
                 )
                 
-                output['hGenLHE_HT_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_CutBQuarkPt_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBQuarkPt_eventwise]
-                )
-                output['hGenLHE_HT_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_CutBHadron_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_CutBHadron_eventwise]
-                )
-                output['hGenLHE_HT_QCDStitch'].fill(
-                    dataset=dataset,
-                    HT=(events.LHE.HT[mask_QCD_stitch_eventwise]),
-                    systematic=syst,
-                    weight=evtWeight_gen[mask_QCD_stitch_eventwise]
-                )
                 output['hGenLHE_HT_QCD_bEnrich_PhSp'].fill(
                     dataset=dataset,
                     HT=(events.LHE.HT[mask_QCD_bEnrich_PhSp]),
@@ -3750,64 +3680,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
 
 
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 1)
-                output['hGenBquark_leadingPt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 2)
-                output['hGenBquark_subleadingPt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 3)
-                output['hGenBquark_thirdLeadingPt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
-                output['hGenBquark_forthLeadingPt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 1)
-                output['hGenBquark_leadingPt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 2)
-                output['hGenBquark_subleadingPt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 3)
-                output['hGenBquark_thirdLeadingPt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                mask_tmp = (ak.count(genBQuarks_pT, axis=-1) >= 4)
-                output['hGenBquark_forthLeadingPt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_pT[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3]),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
 
 
                 mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 1)
@@ -3869,122 +3741,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
 
 
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBquark_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
 
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBHadron_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBHadronStatus2_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBquark_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBHadron_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 1)
-                output['hLeadingPtGenBHadronStatus2_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 0].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
 
 
                 # subleading pT ----------------------------------------------------------------------------------------------------------------------------
@@ -4044,124 +3801,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 1].eta),
                     systematic=syst,
                     weight=evtWeight_gen[mask_tmp]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBquark_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hSubleadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBquarkHardSctred_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hSubleadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBHadron_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hSubleadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBHadronStatus2_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hSubleadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBquark_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hSubleadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBquarkHardSctred_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hSubleadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBHadron_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hSubleadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 2)
-                output['hSubleadingPtGenBHadronStatus2_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hSubleadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 1].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4223,124 +3862,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 2].eta),
                     systematic=syst,
                     weight=evtWeight_gen[mask_tmp]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBquark_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hThirdLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hThirdLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBHadron_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hThirdLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBHadronStatus2_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hThirdLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBquark_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hThirdLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hThirdLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBHadron_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hThirdLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 3)
-                output['hThirdLeadingPtGenBHadronStatus2_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hThirdLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 2].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
                 )              
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4402,125 +3923,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][mask_tmp][:, 3].eta),
                     systematic=syst,
                     weight=evtWeight_gen[mask_tmp]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBquark_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hFourthLeadingPtGenBquark_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hFourthLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBHadron_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hFourthLeadingPtGenBHadron_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBHadronStatus2_pt_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-                output['hFourthLeadingPtGenBHadronStatus2_eta_QCDStitchCutBQuarkPt'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBQuarkPt_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBquark_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hFourthLeadingPtGenBquark_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks[idx_genBQuarks_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBQuarks_hardSctred.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBquarkHardSctred_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hFourthLeadingPtGenBquarkHardSctred_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBQuarks_hardSctred[idx_genBQuarks_hardSctred_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-
-
-                mask_tmp = (ak.count(genBHadrons.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBHadron_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hFourthLeadingPtGenBHadron_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons[idx_genBHadrons_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                
-                mask_tmp = (ak.count(genBHadrons_status2.pt, axis=-1) >= 4)
-                output['hFourthLeadingPtGenBHadronStatus2_pt_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    PtLow=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].pt),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )
-                output['hFourthLeadingPtGenBHadronStatus2_eta_QCDStitchCutBHadron'].fill(
-                    dataset=dataset,
-                    Eta=(genBHadrons_status2[idx_genBHadrons_status2_pTsort][(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)][:, 3].eta),
-                    systematic=syst,
-                    weight=evtWeight_gen[(mask_tmp & mask_QCD_stitch_CutBHadron_eventwise)]
-                )                
+                )               
                 # ------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -6466,36 +5869,13 @@ if __name__ == '__main__':
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
+    triggers            = config['triggers'] if 'triggers' in config else ''
     if isMC:
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
         systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
-
-        
-        MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt if ("MCSamplesStitchOption" in config and \
-                                                                            config["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt.value) \
-            else MCSamplesStitchOptions.PhSpOverlapRemove
-        
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            if "MCSamplesStitchInputs" not in config:
-                print(frameinfo.filename, frameinfo.lineno, ' ERROR: "MCSamplesStitchInputs" not in config') # https://stackoverflow.com/questions/3056048/filename-and-line-number-of-python-script
-                
-            MCSamplesStitchInputFileName      = config["MCSamplesStitchInputs"]["inputFile"]
-            MCSamplesStitchInputHistogramName = config["MCSamplesStitchInputs"]["histogramName"]
-            MCSamplesStitchInputHistogramName = MCSamplesStitchInputHistogramName.replace(
-                '$SAMPLECATEGORY', sample_category.split('_')[0]
-            )
-            print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
-            if not os.path.exists(MCSamplesStitchInputFileName):
-                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {MCSamplesStitchInputFileName = } does not exists')
-                print(f'htoaa_Analysis_GGFMode.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
-                exit(0)
-            print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
-            with uproot.open(MCSamplesStitchInputFileName) as f_:
-                print(f"{f_.keys() = }"); sys.stdout.flush() 
-                hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
 
     print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
         
@@ -6570,13 +5950,11 @@ if __name__ == '__main__':
         "isMC":            isMC,
         "sample_category": sample_category,        
         "datasetNameFull": sample_dataset,
+        "triggers":        triggers,
     }
     if isMC:
         sampleInfo["sample_crossSection"]   = sample_crossSection
         sampleInfo["sample_sumEvents"]      = sample_sumEvents
-        sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
         sampleInfo["systematicsToRun"] = systematicsToRun
     print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }", flush=flushStdout)
         
@@ -6624,14 +6002,7 @@ if __name__ == '__main__':
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        sample_category_toUse = sample_category
-        
-        if isMC and \
-            MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-            SplitQCDInGENCats and \
-            "QCD" in sample_category:
-            sample_category_toUse = "QCD"
-        
+        sample_category_toUse = sample_category        
         sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
@@ -6640,16 +6011,6 @@ if __name__ == '__main__':
                 #print(f"key: {key},  value ({type(value)}): {value}")
                 sHistoName_toUse = key
                 sHExt_toUse = ''
-                if isMC and \
-                    MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                    SplitQCDInGENCats and \
-                    "QCD" in sample_category:                    
-                    for sHExt in HistogramNameExtensions_QCD:
-                        if sHExt in key:
-                            sHExt_toUse = '_%s' % (sHExt)
-                            sHistoName_toUse = sHistoName_toUse.replace(sHExt_toUse, '')
-                            break
-
                 sDir1_toUse = '%s%s' % (sDir1, sHExt_toUse)
 
                 #if not (key.startswith('h') or key != 'cutflow'): continue

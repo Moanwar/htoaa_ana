@@ -148,7 +148,7 @@ list_XSs = OD([
     #("WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8",               {sXS13TeV: }), # NLO sample
     #("WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8",               {sXS13TeV: }), # NLO sample
     #("WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8",               {sXS13TeV: }), # NLO sample    
-    #("WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",                    {sXS13TeV: 61526.7      }),
+    ("WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8",                    {sXS13TeV: 61526.7      }),
     ("WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8",         {sXS13TeV:  1440.0     ,  }),
     ("WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8",        {sXS13TeV:  1431.0     ,  }),
     ("WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",        {sXS13TeV:   382.1     ,  }),

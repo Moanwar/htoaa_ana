@@ -67,7 +67,7 @@ if 'tt0l'   in CAT: from HistogramListForPlottingDataVsMC_Analysis_ttHHadronicMo
 
 cmsWorkStatus                  = 'Work in Progress'
 era                            = '2018'
-luminosity_total               = Luminosities_forGGFMode[era][HLT_toUse][0] # 54.54  #59.83
+luminosity_total               = Luminosities_TotalPerYear[era][HLT_toUse][0] # 54.54  #59.83
 dataBlindOption                = DataBlindingOptions.BlindPartially # DataBlindingOptions.BlindPartially , DataBlindingOptions.BlindFully , DataBlindingOptions.Unblind
 #significantThshForDataBlinding = 4 # 0.125 # blind data in bins with S/sqrt(B) > significantThshForDataBlinding while running with dataBlindOption = DataBlindingOptions.BlindPartially
 significantThshForDataBlinding = 10 # for significance Z
@@ -226,7 +226,7 @@ for sData, ExpData_list in ExpData_dict.items():
     luminosity_toUse = 0
     for ExpData_component in ExpData_list:
         DatasetEra_         = ExpData_component.split(era)[1][0] # 'JetHT_Run2018A'.split('2018')[1][0]
-        luminosity_forEra_  = Luminosities_forGGFMode_perEra[era][HLT_toUse][DatasetEra_]
+        luminosity_forEra_  = Luminosities_TotalPerYear_perEra[era][HLT_toUse][DatasetEra_]
         luminosity_toUse   += luminosity_forEra_
         print(f"{ExpData_list = }, {DatasetEra_ = }, {luminosity_forEra_ = } ")
     luminosity_Scaling_toUse = round(luminosity_toUse, 2) / round(luminosity_total, 2)
