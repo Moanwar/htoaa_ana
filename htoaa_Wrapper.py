@@ -41,7 +41,7 @@ sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
 sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 
-printLevel = 6 #2
+printLevel = 2 #2, 6
 
 #UserHomePath = os.path.expanduser("~")
 UserHomePath = str(Path.home()) # Python 3.5+
@@ -665,7 +665,7 @@ if __name__ == '__main__':
                         else:
                             del config["crossSection"]
                             del config["sumEvents"]
-                        config["downloadIpFiles"] = True if jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub else False
+                        config["downloadIpFiles"] = True if ((jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub) and ( not dryRun)) else False
                         config["server"] = server
                         config["triggers"] = triggers
 
@@ -757,7 +757,7 @@ if __name__ == '__main__':
         
         
         jobStatus_list = [ (jobStatus.value, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
-        print('\n\n\n%s \t %s: iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
+        print('\n\n\n%s \t %s %s: iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era, iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
         print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()
         
             
@@ -777,20 +777,28 @@ if __name__ == '__main__':
     fJobSubLog.write('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
     print('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
 
-    if allJobsSuccessful:
-        print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
-        os.chdir( EosDestinationDir )
+    ## hadd output root files
+    os.chdir( EosDestinationDir )
 
-        sOpRootFile_stage0 = sOpRootFile
-        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$SAMPLE',  '')
-        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$STAGE',   '')
-        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$IJOB',    '')
-        sOpRootFile_stage0 = sOpRootFile_stage0.replace('.root',     '*.root')
-        
-        sOpRootFile_stage1 = sOpRootFile
-        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
-        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
-        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
+    sOpRootFile_stage0 = sOpRootFile
+    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$SAMPLE',  '')
+    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$STAGE',   '')
+    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$IJOB',    '')
+    sOpRootFile_stage0 = sOpRootFile_stage0.replace('.root',     '*.root')
+    
+    sOpRootFile_stage1 = sOpRootFile
+    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
+    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
+    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
+
+    isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+
+    if isOpRootFileExist:
+        print('%s %s already exists. \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1))
+    
+    if allJobsSuccessful and (not isOpRootFileExist):
+        print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
+
 
         nFilesPerBatchForHadd              = 100
         nBatchesForHadd                    = int(len(OpRootFilesAbsPath_Target) / nFilesPerBatchForHadd) + 1 if len(OpRootFilesAbsPath_Target) != nFilesPerBatchForHadd else 1
@@ -831,5 +839,5 @@ if __name__ == '__main__':
 
     fJobSubLog.close()
 
-    print('\n\n%s \t Finished running %s ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion))
+    print('\n\n%s \t Finished running %s %s' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era))
         

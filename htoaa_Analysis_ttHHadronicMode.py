@@ -149,7 +149,7 @@ class ObjectSelection:
         self.NNonHo4bFatJetPNet_WZvsQCD_MaxThsh = 0
 
         # ttHad : nonHto4bFatJet
-        self.NonHto4bFatJetPNet_TvsQCD_Thsh = 0.8 # 0.94
+        self.NonHto4bFatJetPNet_TvsQCD_Thsh = topTagWPs[self.era]['PNetTvsQCD']['T'] # 0.8 # 0.94
         self.NNonHo4bFatJetPNet_TvsQCD_MaxThsh = 0        
         self.NonHto4bFatJetPNet_TvsQCD_Thsh_WP25 = 0.98
         self.NonHto4bFatJetPNet_TvsQCD_Thsh_WP40 = 0.80
