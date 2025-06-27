@@ -89,7 +89,7 @@ print(f"htoaa_Analysis_ttHHadronicMode:: here13 {datetime.now() = }"); sys.stdou
 
  
 printLevel = 0
-histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 0 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -270,7 +270,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         datasetName_part1 = self.datasetInfo['datasetNameFull'].split('/')[1]
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
-
         # Identify and lable samples --------------------------------------------------
         self.datasetInfo['isSignal'       ]  = False
         self.datasetInfo['isSignalGGH'    ]  = False
@@ -414,6 +413,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if not self.datasetInfo['isMC']: 
             self.sel_names_all["Presel"].insert(0, "run:ls")
+
+        else:
+            if self.datasetInfo['isQCD']: #self.sel_names_all["Presel"].append("QCDStitch")
+                self.sel_names_all["Presel"] = insertInListBeforeThisElement(
+                    list1                  = self.sel_names_all["Presel"], 
+                    sConditionToAdd        = "QCDStitch", 
+                    addBeforeThisCondition = "METFilters")                
               
 
         if self.datasetInfo["era"] == Era_2018:
@@ -427,89 +433,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
 
-        cuts_nonHFatJet_ = [
-            #"leadingNonHto4bFatJetPt", 
-            #"leadingNonHto4bFatJetEta",
-            #"leadingNonHto4bFatJetJetID",
-            #"leadingNonHto4bFatMSoftDrop", 
-            "ge1NonHto4bFatJet"
-        ]
-        categories_dict = OD()  
-        '''
-        categories_dict["tt0l_ge1NonHFatJet_0BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "0BNonoverlappingSelFatJets"
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_1BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "1BNonoverlappingSelFatJets"
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_ge2BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "ge2BNonoverlappingSelFatJets"
-        ]
-        categories_dict["tt0l_0NonHFatJet_ge2B"] = self.sel_names_all["Presel"]                      + [
-            "0NonHto4bFatJet",
-            "ge2BNonoverlappingSelFatJets"
-        ]
-        '''
-        '''
-        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Hi"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "1BNonoverlappingSelFatJets",
-            "NonHto4bFatJetPNetTvsQCD_WP25",
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Med"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "1BNonoverlappingSelFatJets",
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_1BExtra_Lo"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "1BNonoverlappingSelFatJets",
-            "NonHto4bFatJetPNetTvsQCD_WP60",
-        ]
-        '''
-        '''
-        categories_dict["tt0l_ge1NonHFatJet_Med_0BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-            "0BNonoverlappingSelFatJets",            
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_Med_1BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-            "1BNonoverlappingSelFatJets",            
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_Med_ge2BExtra"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-            "ge2BNonoverlappingSelFatJets",            
-        ]
-        '''
-        '''
-        categories_dict["tt0l_ge1NonHFatJet_Med_1BAK4"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-            "1BNonoverlappingCandHFatJet",            
-        ]
-        categories_dict["tt0l_ge1NonHFatJet_Med_ge2BAK4"] = self.sel_names_all["Presel"] + cuts_nonHFatJet_ + [
-            "NonHto4bFatJetPNetTvsQCD_WP40",
-            "ge2BNonoverlappingCandHFatJet",            
-        ]
-        '''
        
 
         categories_dict = OD()
-        '''
-        categories_dict["tt0l"] = self.sel_names_all["Presel"]
-        categories_dict["tt0l_1TFJ_0B0JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
-            "0BNonoverlappingSelFatJets",
-            "0JetNonoverlappingSelFatJets",
-        ]
-        categories_dict["tt0l_1TFJ_0Bge1JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
-            "0BNonoverlappingSelFatJets",
-            "ge1JetNonoverlappingSelFatJets",
-        ]
-        categories_dict["tt0l_1TFJ_1B1JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
-            "1BNonoverlappingSelFatJets",
-            "1JetNonoverlappingSelFatJets",
-        ]
-        categories_dict["tt0l_1TFJ_1Bge2JOutsideSelFJ"] = self.sel_names_all["Presel"] + [
-            "1BNonoverlappingSelFatJets",
-            "ge2JetNonoverlappingSelFatJets",
-        ]
-        '''
         categories_dict["tt0l_1TFJ_0BOutsideSelFJ"] = self.sel_names_all["Presel"] + [
             "0BNonoverlappingSelFatJets",
         ]
@@ -525,7 +451,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         for sCatName, catSels in categories_dict.items():
-            #self.sel_names_all["%s" % (sCatName)] = catSels
+            self.sel_names_all["%s" % (sCatName)] = catSels
             
             if CrossCheckEvtYieldsWithAndrew:
                 self.sel_names_all["%s_SRWP60" % (sCatName)] = catSels + [
@@ -568,7 +494,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             for LumiSecSelThsh in LumiSecSelThsh_list:
                 self.sel_names_all["%s_LSlt%d" % (selCat_, LumiSecSelThsh)] = self.sel_names_all[selCat_] + ["LSlt%d"%(LumiSecSelThsh)]
             
-
+        #self.sel_names_all.pop("Presel", None)
+                
         self.sel_conditions_all_list = set()
         for sel_conditions_ in self.sel_names_all.values():
             self.sel_conditions_all_list.update( sel_conditions_ )
@@ -729,8 +656,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if self.datasetInfo['isSignal'] and runMode_SignalGenChecks:
             histos.update(OD([
                 ('hGenHiggsPt_GenHToAATo4B',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
-                ('hGenHiggsPt_sel',                           {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
-                ('hGenHiggsPt_sel_wGenCuts',                  {sXaxis: pt_axis,         sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
 
                 ('hGenHiggsMass_all_0',                         {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN H) [GeV]"}),
                 ('hMass_GenA_all_0',                            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A) [GeV]"}),
@@ -1414,8 +1339,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         output = self.accumulator.identity()
         dataset = events.metadata["dataset"] # dataset label
-        #print(f"process_shift():: {shift_syst = } dataset: {dataset}", flush=flushStdout)
-
+        print(f"process_shift():: {shift_syst = } dataset: {dataset}", flush=flushStdout)
         
 
         ones_list  = np.ones(len(events))
@@ -1631,6 +1555,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = None
         mask_QCD_stitch_CutBHadron_eventwise                          = None
         mask_QCD_stitch_CutBQuarkPt_eventwise                         = None
+        mask_QCD_stitch_eventwise                                     = None
         mask_QCD_bEnrich_PhSp                                         = None
         mask_QCD_bGen_PhSp                                            = None
         mask_QCD_Incl_Remnant_PhSp                                    = None
@@ -1813,6 +1738,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('\n genBQuarks_pT[mask_tmp2_]', genBQuarks_pT[mask_tmp2_]); sys.stdout.flush()
                 printVariable('\n genBQuarks[mask_tmp2_]', genBQuarks[mask_tmp2_]); sys.stdout.flush()
 
+            # QCDStick mask
+            mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 
             # Phase space_ QCD_bEnrich, QCD_bGen, QCD_Incl_Remnant
             mask_QCD_bEnrich_PhSp = (mask_genBQuarks_hardSctred_eventwise == True)
@@ -2356,7 +2283,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #####################
         
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
-        cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + self.sel_names_all["Presel"] #.copy()
+        #cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + self.sel_names_all["Presel"] #.copy()
 
        
         # create a PackedSelection object
@@ -2690,7 +2617,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # Trigger selection
-        if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # 2018HEM1516Issue weight set to 1 as default
+        if "2018HEM1516Issue" in self.sel_conditions_all_list: # 2018HEM1516Issue weight set to 1 as default
             wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
@@ -2699,7 +2626,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             mask_Trgs = falses_list
             luminosity_firedTrgs = np.full_like(ones_list, 0)
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: # set 2018HEM1516Issue weight to zero at the beginning
+            if "2018HEM1516Issue" in self.sel_conditions_all_list: # set 2018HEM1516Issue weight to zero at the beginning
                 wgt_HEM1516Issue_Trgwise = zeros_list             
             for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
                 HLTName_toUse = HLTName.replace('HLT_', '')
@@ -2725,7 +2652,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
 
                 # calculate 2018HEM1516Issue weight for current HLT trigger
-                if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+                if "2018HEM1516Issue" in self.sel_conditions_all_list:
                     wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
                     wgt_HEM1516Issue_Trgwise = np.where(
                         (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
@@ -2733,7 +2660,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         wgt_HEM1516Issue_Trgwise
                     )
 
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]: 
+            if "2018HEM1516Issue" in self.sel_conditions_all_list: 
                 # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
                 # Those events will be rejected anyway.
                 wgt_HEM1516Issue_Trgwise = np.where(
@@ -2772,14 +2699,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable("\n ~ mask_HEM1516Issue",~ mask_HEM1516Issue ); sys.stdout.flush()
 
 
+        if "QCDStitch" in self.sel_conditions_all_list:
+            selection.add(
+                "QCDStitch",
+                #mask_QCD_stitch_eventwise == True
+                mask_QCD_stitch_eventwise
+            )
+
 
 
 
             
         
-        print(f'{self.sel_names_all["Presel"] = }')
+        print(f'{self.sel_conditions_all_list = }')
         #sel_SR          = selection.all("nPV", "FatJetGet")
-        sel_SR           = selection.all(* self.sel_names_all["Presel"])
+        sel_SR           = None # selection.all(* self.sel_names_all["Presel"])
         sel_GenHToAATo4B = None
 
         if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] and 0==1:
@@ -2858,7 +2792,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # MC wgt for HEM1516Issue --------------------- 
             wgt_HEM1516Issue = None
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+            if "2018HEM1516Issue" in self.sel_conditions_all_list:
                 wgt_HEM1516Issue = ak.where(
                     mask_HEM1516Issue, # events w/ jets in HEM15/16 affected phase space 
                     wgt_HEM1516Issue_Trgwise, #np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
@@ -2909,7 +2843,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('wgt_TopPt: ', ak.zip([wgt_TopPt, wgt_TopPtUp, wgt_TopPtDown]))
 
             # MC ParticleNetMD_XbbvsQCD SFs      SFs_ParticleNetMD_XbbvsQCD
-            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_conditions_all_list:
             if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 mask_ParticleNetMD_XbbvsQCD_SFRegion = (
                     (n_leadingFatJat_matched_genB >= 2) &
@@ -2951,7 +2885,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
             # L1 prefiring
-            wgt_L1TPrefiring_dict = get_L1TPrefiringWgt(events.L1PreFiringWeight)
+            if self.datasetInfo["era"] != Era_2018:
+                wgt_L1TPrefiring_dict = get_L1TPrefiringWgt(events.L1PreFiringWeight)
 
             weights.add(
                 "lumiWeight",
@@ -2962,7 +2897,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
             
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+            if "2018HEM1516Issue" in self.sel_conditions_all_list:
                 weights.add(
                     "2018HEM1516IssueWeight",
                     weight = wgt_HEM1516Issue
@@ -2979,12 +2914,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #    weightUp   = wgt_TrgEffUp,
             #    weightDown = wgt_TrgEffDown
             #)
-            weights.add(
-                "L1Prefire",
-                weight     = wgt_L1TPrefiring_dict['Nom'],
-                weightUp   = wgt_L1TPrefiring_dict['Up'],
-                weightDown = wgt_L1TPrefiring_dict['Down']
-            )
+            if self.datasetInfo["era"] != Era_2018:
+                weights.add(
+                    "L1Prefire",
+                    weight     = wgt_L1TPrefiring_dict['Nom'],
+                    weightUp   = wgt_L1TPrefiring_dict['Up'],
+                    weightDown = wgt_L1TPrefiring_dict['Down']
+                )
             
             if self.datasetInfo['isSignal']:
                 weights.add(
@@ -3012,7 +2948,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightUp   = wgt_TopPtUp,
                     weightDown = wgt_TopPtDown                    
                 )         
-            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_conditions_all_list:
             if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 weights.add(
                     "SF_ParticleNetMD_XbbvsQCD",
@@ -3083,7 +3019,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
-            #if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+            #if "2018HEM1516Issue" in self.sel_conditions_all_list:
             #    weights.add(
             #        "2018HEM1516IssueWeight",
             #        weight = wgt_HEM1516Issue
@@ -3100,12 +3036,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #    weightUp   = wgt_TrgEffUp,
             #    weightDown = wgt_TrgEffDown
             #)
-            weights_woHEM1516Fix.add(
-                "L1Prefire",
-                weight     = wgt_L1TPrefiring_dict['Nom'],
-                weightUp   = wgt_L1TPrefiring_dict['Up'],
-                weightDown = wgt_L1TPrefiring_dict['Down']
-            )
+            if self.datasetInfo["era"] != Era_2018:
+                weights_woHEM1516Fix.add(
+                    "L1Prefire",
+                    weight     = wgt_L1TPrefiring_dict['Nom'],
+                    weightUp   = wgt_L1TPrefiring_dict['Up'],
+                    weightDown = wgt_L1TPrefiring_dict['Down']
+                )
             if self.datasetInfo['isSignal']:
                 weights_woHEM1516Fix.add(
                     "LPRewgt",
@@ -3132,7 +3069,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightUp   = wgt_TopPtUp,
                     weightDown = wgt_TopPtDown                    
                 )         
-            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
+            #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_conditions_all_list:
             if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 weights_woHEM1516Fix.add(
                     "SF_ParticleNetMD_XbbvsQCD",
@@ -3300,7 +3237,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 "BtagCorrUp",
                                 "BtagCorrDown",                                
                             ] )                                           
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['l1prefire', 'full'] ):
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['l1prefire', 'full'] ) and (self.datasetInfo["era"] != Era_2018):
                         systList.extend( [
                             "L1PrefireUp",
                             "L1PrefireDown",
@@ -3468,18 +3405,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             if self.datasetInfo['isSignal'] and runMode_SignalGenChecks and syst == "Nom": 
                 output['hGenHiggsPt_GenHToAATo4B'].fill(
-                    dataset=dataset,
-                    Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
-                    systematic=syst,
-                    weight=evtWeight_gen[sel_GenHToAATo4B]
-                )
-                output['hGenHiggsPt_sel'].fill(
-                    dataset=dataset,
-                    Pt=(ak.firsts(genHiggs.pt[sel_SR])),
-                    systematic=syst,
-                    weight=evtWeight_gen[sel_SR]
-                )
-                output['hGenHiggsPt_sel_wGenCuts'].fill(
                     dataset=dataset,
                     Pt=(ak.firsts(genHiggs.pt[sel_GenHToAATo4B])),
                     systematic=syst,

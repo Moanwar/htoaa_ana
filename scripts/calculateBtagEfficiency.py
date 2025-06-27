@@ -6,8 +6,15 @@ import ctypes
 #sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/analyze_htoaa_stage1.root"
 #sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250402_BtagEffi_QCDTT/2018/jetBtagEfficiency.root"
 # 2017
-sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/analyze_htoaa_stage1.root"
-sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/jetBtagEfficiency.root"
+#sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/analyze_htoaa_stage1.root"
+#sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250612_BtagEffi_QCDTT/2017/jetBtagEfficiency.root"
+# 2016preVFP
+#sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250625_BtagEffi/2016preVFP/analyze_htoaa_stage1.root"
+#sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250625_BtagEffi/2016preVFP/jetBtagEfficiency.root"
+# 2016postVFP
+sIpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250625_BtagEffi/2016postVFP/analyze_htoaa_stage1.root"
+sOpFile = "/eos/cms/store/user/ssawant/htoaa/analysis/20250625_BtagEffi/2016postVFP/jetBtagEfficiency.root"
+
 samples = {
     'TT':     ['TT0l','TT1l'],
     'QCD':    ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl'],

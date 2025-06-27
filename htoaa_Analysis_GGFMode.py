@@ -88,9 +88,9 @@ print(f"htoaa_Analysis_GGFMode:: here13 {datetime.now() = }"); sys.stdout.flush(
 
 # use GOldenJSON
 
- 
+
 printLevel = 0
-histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 1; # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -261,8 +261,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = False
         global runMode_SignalGenCuts;         runMode_SignalGenCuts = True; # set False for final round. True for optimization studies.
         
-        
-
         ak.behavior.update(nanoaod.behavior)
 
         self.datasetInfo = datasetInfo
@@ -270,6 +268,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         datasetName_part1               = self.datasetInfo['datasetNameFull'].split('/')[1]
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
+
 
         # Identify and lable samples --------------------------------------------------
         self.datasetInfo['isSignal'       ]  = False
@@ -1283,6 +1282,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         output = self.accumulator.identity()
         dataset = events.metadata["dataset"] # dataset label
         print(f"process_shift():: {shift_syst = } dataset: {dataset}", flush=flushStdout)
+
 
         
 

@@ -83,11 +83,11 @@ sPathSkimmedNanoAODs = {
 
 
 sFilesGoldenJSON = {
-    Era_2016:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt',
+    Era_2016:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt',   # /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt
     Era_2016preVFP:  'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt',
     Era_2016postVFP: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt',
-    Era_2017:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt',    
-    Era_2018:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt',    
+    Era_2017:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt', # /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt   
+    Era_2018:        'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt',   # /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt
 }
 
 YearsAndEras_dict = {
@@ -105,38 +105,116 @@ Luminosities_Inclusive = { # [<lumi>, <uncertainty in percent> ] in fb^-1
     Era_2018:        [59.83, 2.5]
 }
 Luminosities_perTrigger = {
+    Era_2016preVFP: {
+        'HLT_PFJet450':                                                     [19.498, 1.2],
+        'HLT_DiCentralPFJet430':                                            [16.710, 1.2],
+        'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':                               [19.498, 1.2],
+        'HLT_PFHT750_4JetPt50':                                             [19.498, 1.2],
+        'HLT_PFHT800':                                                      [19.498, 1.2],
+        'HLT_PFHT900':                                                      [19.498, 1.2],
+
+        'HLT_AK8PFJet360_TrimMass30':                                       [19.498, 1.2],
+        'HLT_AK8PFJet450':                                                  [16.710, 1.2],
+        'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':                              [13.941, 1.2],
+        'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':                              [19.498, 1.2],
+
+        'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':                     [13.941, 1.2],
+        'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':                     [19.498, 1.2],
+        'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':                          [19.498, 1.2],
+        'HLT_PFHT450_SixJet40_BTagCSV_p056':                                [19.498, 1.2],
+        'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20':                  [13.941, 1.2],
+
+        'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [19.498, 1.2],
+        'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160':           [19.498, 1.2],
+        'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [19.498, 1.2],
+        'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172':           [19.498, 1.2],
+        'HLT_DoubleJet90_Double30_TripleBTagCSV_p08':                       [19.498, 1.2], # 2016:36.47. Got error with brilcalc. Hence guess
+        'HLT_QuadJet45_TripleBTagCSV_p087':                                 [19.498, 1.2],
+
+        'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460':                            [16.721, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500':                            [19.498, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200':                        [16.721, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240':                        [19.498, 1.2],
+
+        'HLT_MET200':                                                       [19.498, 1.2],
+        'HLT_PFMET110_PFMHT110_IDTight':                                    [19.498, 1.2],
+        'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                            [19.498, 1.2],
+        'HLT_PFMET120_PFMHT120_IDTight':                                    [19.498, 1.2],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [19.498, 1.2],
+        'HLT_PFMET170_HBHECleaned':                                         [19.498, 1.2],
+        'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight':         [19.498, 1.2],
+    },
+    Era_2016postVFP: {
+        'HLT_PFJet450':                                                     [16.812, 1.2],
+        'HLT_DiCentralPFJet430':                                            [16.812, 1.2],
+        'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':                               [16.812, 1.2],
+        'HLT_PFHT750_4JetPt50':                                             [ 8.072, 1.2],
+        'HLT_PFHT800':                                                      [ 8.072, 1.2],
+        'HLT_PFHT900':                                                      [16.812, 1.2],
+
+        'HLT_AK8PFJet360_TrimMass30':                                       [16.812, 1.2],
+        'HLT_AK8PFJet450':                                                  [16.812, 1.2],
+        'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':                              [ 6.159, 1.2],
+        'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':                              [16.812, 1.2],
+
+        'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':                     [ 6.159, 1.2],
+        'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':                     [16.812, 1.2],
+        'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':                          [16.812, 1.2],
+        'HLT_PFHT450_SixJet40_BTagCSV_p056':                                [16.812, 1.2],
+        'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20':                  [ 6.159, 1.2],
+
+        'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [16.617, 1.2],
+        'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160':           [16.617, 1.2],
+        'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [16.812, 1.2],
+        'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172':           [16.812, 1.2],
+        'HLT_DoubleJet90_Double30_TripleBTagCSV_p08':                       [16.812, 1.2], # 2016:36.47. Got error with brilcalc. Hence guess
+        'HLT_QuadJet45_TripleBTagCSV_p087':                                 [16.812, 1.2],
+
+        'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460':                            [ 8.527, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500':                            [16.812, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200':                        [ 8.527, 1.2],
+        'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240':                        [16.812, 1.2],
+
+        'HLT_MET200':                                                       [16.812, 1.2],
+        'HLT_PFMET110_PFMHT110_IDTight':                                    [16.190, 1.2],
+        'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                            [16.190, 1.2],
+        'HLT_PFMET120_PFMHT120_IDTight':                                    [16.812, 1.2],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [16.812, 1.2],
+        'HLT_PFMET170_HBHECleaned':                                         [16.812, 1.2],
+        'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight':         [16.812, 1.2],
+    },
     Era_2017: {
-        'HLT_PFJet500':                                                     [41.54, 2.3],
-        'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                       [36.75, 2.3],
-        'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                   [27.13, 2.3],
-        'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                             [32.13, 2.3],
-        'HLT_PFHT1050':                                                     [41.54, 2.3],
-        'HLT_AK8PFHT750_TrimMass50':                                        [30.96, 2.3],
-        'HLT_AK8PFHT800_TrimMass50':                                        [36.49, 2.3],
-        'HLT_AK8PFJet500':                                                  [41.54, 2.3],
-        'HLT_AK8PFJet360_TrimMass30':                                       [28.3 , 2.3],
-        'HLT_AK8PFJet380_TrimMass30':                                       [31.22, 2.3],
-        'HLT_AK8PFJet400_TrimMass30':                                       [36.75, 2.3],
-        'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                                 [ 7.73, 2.3],
+        'HLT_PFJet500':                                                     [41.478, 2.3], #[41.54, 2.3],
+        'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                       [36.675, 2.3], #[36.75, 2.3],
+        'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                   [27.122, 2.3], #[27.13, 2.3],
+        'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                             [32.112, 2.3], #[32.13, 2.3],
+        'HLT_PFHT1050':                                                     [41.478, 2.3], #[41.54, 2.3],
+        'HLT_AK8PFHT750_TrimMass50':                                        [30.897, 2.3], #[30.96, 2.3],
+        'HLT_AK8PFHT800_TrimMass50':                                        [36.421, 2.3], #[36.49, 2.3],
+        'HLT_AK8PFJet500':                                                  [41.478, 2.3], #[41.54, 2.3],
+        'HLT_AK8PFJet360_TrimMass30':                                       [28.230, 2.3], #[28.3 , 2.3],
+        'HLT_AK8PFJet380_TrimMass30':                                       [31.150, 2.3], #[31.22, 2.3],
+        'HLT_AK8PFJet400_TrimMass30':                                       [36.675, 2.3], #[36.75, 2.3],
+        'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                                 [ 7.728, 2.3], #[ 7.73, 2.3],
 
-        'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':              [36.34, 2.3],
-        'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':        [36.75, 2.3],
+        'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':              [36.264, 2.3], #[36.34, 2.3],
+        'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':        [36.675, 2.3], #[36.75, 2.3],
 
-        'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':             [7.73, 2.3],
-        'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                       [7.73, 2.3],
+        'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':             [ 7.728, 2.3], #[7.73, 2.3],
+        'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                       [ 7.728, 2.3], #[7.73, 2.3],
 
-        'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                             [36.75, 2.3],
-        'HLT_PFMET120_PFMHT120_IDTight':                                    [40.67, 2.3],
-        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':                     [36.75, 2.3],
-        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [40.67, 2.3],
-        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':                    [36.75, 2.3],
-        'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':                      [36.75, 2.3],
-        'HLT_PFMETTypeOne120_PFMHT120_IDTight':                             [40.67, 2.3],
-        'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [36.75, 2.3],
+        'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                             [36.675, 2.3], #[36.75, 2.3],
+        'HLT_PFMET120_PFMHT120_IDTight':                                    [40.610, 2.3], #[40.67, 2.3],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':                     [36.675, 2.3], #[36.75, 2.3],
+        'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [40.610, 2.3], #[40.67, 2.3],
+        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':                    [36.675, 2.3], #[36.75, 2.3],
+        'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':                      [36.675, 2.3], #[36.75, 2.3],
+        'HLT_PFMETTypeOne120_PFMHT120_IDTight':                             [40.610, 2.3], #[40.67, 2.3],
+        'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [36.675, 2.3], #[36.75, 2.3],
 
-        'HLT_IsoMu24':                                                      [38.06, 2.3],
-        'HLT_IsoMu27':                                                      [41.54, 2.3],
-        'HLT_Mu50':                                                         [41.54, 2.3],
+        'HLT_IsoMu24':                                                      [37.997, 2.3], #[38.06, 2.3],
+        'HLT_IsoMu27':                                                      [41.478, 2.3], #[41.54, 2.3],
+        'HLT_Mu50':                                                         [41.478, 2.3], #[41.54, 2.3],
         
     },
     Era_2018: {
@@ -288,7 +366,7 @@ Triggers_perEra = {
             #'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
             #'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
             #'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
-            #'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47
+            #'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47 # brilcalc error: no hltpath to l1bit mapping found
             #'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
         },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
@@ -442,7 +520,7 @@ Triggers_perEra = {
             #'HLT_PFMET200_HBHE_BeamHaloCleaned': [],
             'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
             #'HLT_PFMET140_PFMHT140_IDTight': [],
-            'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
+            #'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
         },        
         'Trg_Combo_Mu': {
             'HLT_IsoMu24': ['L1_SingleMu22'],
@@ -451,6 +529,8 @@ Triggers_perEra = {
         },
     }
 }
+Triggers_perEra[Era_2016preVFP ] = Triggers_perEra[Era_2016]
+Triggers_perEra[Era_2016postVFP] = Triggers_perEra[Era_2016]
 '''
 ## Andrew's slides on triggers https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=11
 trigFat :
@@ -701,7 +781,7 @@ topTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
 }
 
 
-
+## b-tag efficiency in MC for b-tag SF application
 bTagSFEfficiencyDict = {}
 bTagSFEfficiencyDict[Era_2018] = { # 'AK4DeepJet' WP-M
     'inputFile':    'data/correction/mc/BtagSF/2018/jetBtagEfficiency.root',
@@ -712,9 +792,14 @@ bTagSFEfficiencyDict[Era_2018] = { # 'AK4DeepJet' WP-M
     },
     'pTAxisRange': [20, 1000],
 }
+#
+bTagSFEfficiencyDict[Era_2017       ] = copy.deepcopy( bTagSFEfficiencyDict[Era_2018] )
+bTagSFEfficiencyDict[Era_2016preVFP ] = copy.deepcopy( bTagSFEfficiencyDict[Era_2018] )
+bTagSFEfficiencyDict[Era_2016postVFP] = copy.deepcopy( bTagSFEfficiencyDict[Era_2018] )
+bTagSFEfficiencyDict[Era_2017       ]['inputFile'] = 'data/correction/mc/BtagSF/2017/jetBtagEfficiency.root'
+bTagSFEfficiencyDict[Era_2016preVFP ]['inputFile'] = 'data/correction/mc/BtagSF/2016preVFP/jetBtagEfficiency.root'
+bTagSFEfficiencyDict[Era_2016postVFP]['inputFile'] = 'data/correction/mc/BtagSF/2016postVFP/jetBtagEfficiency.root'
 
-bTagSFEfficiencyDict[Era_2017] = copy.deepcopy( bTagSFEfficiencyDict[Era_2018] )
-bTagSFEfficiencyDict[Era_2017]['inputFile'] = 'data/correction/mc/BtagSF/2017/jetBtagEfficiency.root'
 
 Corrections = {
 
