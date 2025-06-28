@@ -447,6 +447,13 @@ list_datasets_2017 = OD([
     ("/MET/Run2017E-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
     ("/MET/Run2017F-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}),
     
+    ## BTagCSV
+    # dasgoclient --query="dataset=/BTagCSV/Run2017*UL2017_MiniAODv2_NanoAODv9*/NANOAOD"
+    ("/BTagCSV/Run2017B-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2017C-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2017D-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2017E-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2017F-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD", {}),
 
     #("", {}),    
 ])

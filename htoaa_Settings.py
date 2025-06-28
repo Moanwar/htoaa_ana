@@ -344,188 +344,201 @@ Luminosities_TotalPerYear_perEra = {
 Triggers_perEra = {
     Era_2016: {
         'Trg_Combo_AK4AK8Jet_HT': {
-            'HLT_PFJet450':                                    [], # 36.47 / 36.47
-            'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
-            'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
-            'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
-            'HLT_PFHT800':                                     [], # 27.71 / 36.47
-            'HLT_PFHT900':                                     [], # 36.47 / 36.47
-            #
-            'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
-            'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
-            'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
-            'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
-            #
-            'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
-            'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
-            'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
-            'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
-            'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
-            ## BTagCSV dataset
-            #'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
-            #'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
-            #'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
-            #'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
-            #'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47 # brilcalc error: no hltpath to l1bit mapping found
-            #'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet450':                                    [], # 36.47 / 36.47
+                'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
+                'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
+                'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
+                'HLT_PFHT800':                                     [], # 27.71 / 36.47
+                'HLT_PFHT900':                                     [], # 36.47 / 36.47
+                #
+                'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
+                'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
+                'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
+                'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
+                #
+                'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
+                'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
+                'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
+                'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
+                'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
+            },  
+            'BTagCSV': { # BTagCSV primary dataset
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
+                'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47 # brilcalc error: no hltpath to l1bit mapping found
+                'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
+            },
         },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
-            'HLT_PFJet450':                                    [], # 36.47 / 36.47
-            'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
-            'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
-            'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
-            'HLT_PFHT800':                                     [], # 27.71 / 36.47
-            'HLT_PFHT900':                                     [], # 36.47 / 36.47
-            #
-            'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
-            'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
-            'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
-            'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
-            #
-            'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
-            'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
-            'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
-            'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
-            'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
-            ## BTagCSV dataset
-            #'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
-            #'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
-            #'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
-            #'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
-            #'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47
-            #'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
-            # VBF triggers
-            #'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460': [], # 25.36 / 36.47
-            #'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500': [], # 36.47 / 36.47
-            #'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200': [], # 25.36 / 36.47
-            #'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240': [], # 36.47 / 36.47
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet450':                                    [], # 36.47 / 36.47
+                'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
+                'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
+                'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
+                'HLT_PFHT800':                                     [], # 27.71 / 36.47
+                'HLT_PFHT900':                                     [], # 36.47 / 36.47
+                #
+                'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
+                'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
+                'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
+                'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
+                #
+                'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
+                'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
+                'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
+                'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
+                'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
+            },
+            'BTagCSV': { # BTagCSV primary dataset
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
+                'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47
+                'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
+                # VBF triggers
+                'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500': [], # 36.47 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240': [], # 36.47 / 36.47
+            },
         },
         'Trg_Combo_MET': {
-            'HLT_MET200':                                               [], # 36.47 / 36.47
-            'HLT_PFMET110_PFMHT110_IDTight':                            [], # 35.83 / 36.47
-            'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                    [], # 35.83 / 36.47
-            'HLT_PFMET120_PFMHT120_IDTight':                            [], # 36.47 / 36.47
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 36.47 / 36.47
-            'HLT_PFMET170_HBHECleaned':                                 [], # 36.47 / 36.47
-            'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight': [], # 36.47 / 36.47
-            
+            'MET': { # MET primary dataset
+                'HLT_MET200':                                               [], # 36.47 / 36.47
+                'HLT_PFMET110_PFMHT110_IDTight':                            [], # 35.83 / 36.47
+                'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                    [], # 35.83 / 36.47
+                'HLT_PFMET120_PFMHT120_IDTight':                            [], # 36.47 / 36.47
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 36.47 / 36.47
+                'HLT_PFMET170_HBHECleaned':                                 [], # 36.47 / 36.47
+                'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight': [], # 36.47 / 36.47
+            },
         },
 
     },
     Era_2017: {
         'Trg_Combo_AK4AK8Jet_HT': {
-            'HLT_PFJet500':                                                  [], # 41.54 
-            'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
-            'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
-            'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
-            'HLT_PFHT1050':                                                  [], # 41.54           
-            'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
-            'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
-            'HLT_AK8PFJet500':                                               [], # 41.54            
-            'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
-            'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
-            'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%          
-            #
-            #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                             [], # 7.73 / 41.54  BTagCSV dataset
-            #
-            #'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':          [], # 36.34 / 41.54  BTagCSV dataset
-            #'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':    [], # 36.75 / 41.54   BTagCSV dataset           
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  [], # 41.54 
+                'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
+                'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
+                'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
+                'HLT_PFHT1050':                                                  [], # 41.54           
+                'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
+                'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
+                'HLT_AK8PFJet500':                                               [], # 41.54            
+                'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
+                'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
+                'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%  
+            },        
+            'BTagCSV': { # BTagCSV primary dataset
+                #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              [], # 7.73 / 41.54  BTagCSV dataset
+                
+                'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':           [], # 36.34 / 41.54  BTagCSV dataset
+                'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':     [], # 36.75 / 41.54   BTagCSV dataset   
+            },        
         },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
-            'HLT_PFJet500':                                                  [], # 41.54 
-            'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
-            'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
-            'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
-            'HLT_PFHT1050':                                                  [], # 41.54           
-            'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
-            'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
-            'HLT_AK8PFJet500':                                               [], # 41.54            
-            'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
-            'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
-            'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%          
-            ## BTagCSV primary dataset: --------
-            #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                             [], # 7.73 / 41.54  BTagCSV dataset
-            #
-            #'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':          [], # 36.34 / 41.54  BTagCSV dataset
-            #'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':    [], # 36.75 / 41.54   BTagCSV dataset           
-            # VBF triggers:
-            #'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':          [], # 7.73 / 41.54  BTagCSV dataset
-            #'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                    [], # 7.73 / 41.54  BTagCSV dataset
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  [], # 41.54 
+                'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
+                'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
+                'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
+                'HLT_PFHT1050':                                                  [], # 41.54           
+                'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
+                'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
+                'HLT_AK8PFJet500':                                               [], # 41.54            
+                'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
+                'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
+                'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%     
+            },     
+            'BTagCSV': { # BTagCSV primary dataset
+                #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                             [], # 7.73 / 41.54  BTagCSV dataset
+                #
+                'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':          [], # 36.34 / 41.54  BTagCSV dataset
+                'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':    [], # 36.75 / 41.54   BTagCSV dataset           
+                # VBF triggers:
+                #'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':          [], # 7.73 / 41.54  BTagCSV dataset
+                #'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                    [], # 7.73 / 41.54  BTagCSV dataset
+            },
         },       
-        'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
-            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':            [], # 36.75 / 41.54     
-            'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                     [], # 36.75 / 41.54   
-            'HLT_PFMET120_PFMHT120_IDTight':                            [], # 40.67 / 41.54 
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':             [], # 36.75 / 41.54 
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 40.67 / 41.54 
-            'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':              [], # 36.75 / 41.54    
-            'HLT_PFMETTypeOne120_PFMHT120_IDTight':                     [], # 40.67 / 41.54 
-            'HLT_PFMET140_PFMHT140_IDTight': [], # 41.54 / 41.54 
-            'HLT_PFMETTypeOne140_PFMHT140_IDTight': [], # 41.54 / 41.54 
-            'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                 [], # 36.75 / 41.54 
-            'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # 41.54 / 41.54 
-            
+        'Trg_Combo_MET': { 
+            'MET': { # MET primary dataset
+                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':            [], # 36.75 / 41.54     
+                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                     [], # 36.75 / 41.54   
+                'HLT_PFMET120_PFMHT120_IDTight':                            [], # 40.67 / 41.54 
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':             [], # 36.75 / 41.54 
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 40.67 / 41.54 
+                'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':              [], # 36.75 / 41.54    
+                'HLT_PFMETTypeOne120_PFMHT120_IDTight':                     [], # 40.67 / 41.54 
+                'HLT_PFMET140_PFMHT140_IDTight': [], # 41.54 / 41.54 
+                'HLT_PFMETTypeOne140_PFMHT140_IDTight': [], # 41.54 / 41.54 
+                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                 [], # 36.75 / 41.54 
+                'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # 41.54 / 41.54 
+            },            
         },        
         'Trg_Combo_Mu': {
-            'HLT_IsoMu24': ['L1_SingleMu22'], # 38.06 / 41.54
-            'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
-            'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24': ['L1_SingleMu22'], # 38.06 / 41.54
+                'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+            },
         },
-
         
     },
     Era_2018: {
         'Trg_Combo_AK4AK8Jet_HT': {
-            'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
-            'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
-            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
-            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
-            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
-            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
-            #
-            'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
-            'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],            
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  [], # ['L1_SingleJet180'], 
+                'HLT_PFHT1050':                                                  [], # ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFHT800_TrimMass50':                                     [], # ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFJet500':                                               [], # ['L1_SingleJet180'],
+                'HLT_AK8PFJet400_TrimMass30':                                    [], # ['L1_SingleJet180'],
+                'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            [], # ['L1_SingleJet180'],
+                #
+                'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       [], # ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
+                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': [], # ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],            
+            },
         },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
-            'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
-            'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
-            'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
-            'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
-            'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
-            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
-            #
-            'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
-            'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
-            #
-            'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
-            'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],            
-        },
-        'Trg_Combo_AK4AK8Jet_HT_MET': {
-            'HLT_PFJet500':                                       ['L1_SingleJet180'], 
-            'HLT_PFHT1050':                                       ['L1_HTT360er'],
-            'HLT_AK8PFHT800_TrimMass50':                          ['L1_HTT360er'],
-            'HLT_AK8PFJet500':                                    ['L1_SingleJet180'],
-            'HLT_AK8PFJet400_TrimMass30':                         ['L1_SingleJet180'],
-            'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4': ['L1_SingleJet180'],
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':              ['L1_ETMHF100', 'L1_ETM150'],
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er'],
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
+                'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
+                'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
+                'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
+                #
+                'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
+                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
+                #
+                'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
+                'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],      
+            },      
         },
         'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
-            'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
-            #'HLT_PFMET120_PFMHT120_IDTight': [],
-            'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'],
-            #'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight': [],
-            'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-            'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-            #'HLT_PFMET200_HBHE_BeamHaloCleaned': [],
-            'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-            #'HLT_PFMET140_PFMHT140_IDTight': [],
-            #'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
+            'MET': { # MET primary dataset
+                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
+                #'HLT_PFMET120_PFMHT120_IDTight': [],
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'],
+                #'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight': [],
+                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                #'HLT_PFMET200_HBHE_BeamHaloCleaned': [],
+                'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                #'HLT_PFMET140_PFMHT140_IDTight': [],
+                #'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
+            },
         },        
         'Trg_Combo_Mu': {
-            'HLT_IsoMu24': ['L1_SingleMu22'],
-            'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],
-            'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'],
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24': ['L1_SingleMu22'],
+                'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'],
+            },
         },
     }
 }
@@ -551,13 +564,15 @@ trigMET :
 || 
 ((HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1 || HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned || HLT_PFMETTypeOne140_PFMHT140_IDTight) && (L1_ETMHF100 || L1_ETMHF110 || L1_ETMHF120 || L1_ETMHF130))
 '''
-## add individual HLT+L1 paths into Triggers_perEra to check Data-MC for individual HLT+L1 triggers.
+'''
+## add individual HLT+L1 paths into Triggers_perEra to check Data-MC for individual HLT+L1 triggers. ^^^^ Its broken now
 for era_ in Triggers_perEra:
     triggerCombs_0 = list(Triggers_perEra[era_].keys())
     for trg_ in triggerCombs_0:
         for hlt_, l1t_list in Triggers_perEra[era_][trg_].items():
             if hlt_ not in Triggers_perEra[era_]:
                 Triggers_perEra[era_][hlt_] = { hlt_: l1t_list }
+'''
 
 ## 2018 HEM1516 issue
 HEM1516Issue2018_AffectedRunRange = [319077, 325175]

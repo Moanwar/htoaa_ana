@@ -261,6 +261,7 @@ if __name__ == '__main__':
     parser.add_argument('-server',            type=str, default='lxplus',                    choices=['lxplus', 'tifr'])
     parser.add_argument('-systematics',       type=str, default='No',                        help='No,Full,PU,JES etc') 
     parser.add_argument('-triggers',          type=str, default='',                          help='Trg_Combo_AK4AK8Jet_HT, HLT_PFJet500 etc to use selective trigger combinations for studies') 
+    parser.add_argument('-primaryDatasets',   type=str, default='',                          help='PrimaryDatasets to use for the analysis. For e.g. JetHT,BTagCSV') 
     parser.add_argument('-jumpToHaddOutput',  action='store_true', default=False,            help="When running on earlier jobs, skip checking failed jobs and jump to hadd produced output.root files.")         
     parser.add_argument('-dryRun',            action='store_true', default=False,            help="Produce jpbs' config files without submiting jobs to HT condor server.")    
     args=parser.parse_args()
@@ -282,6 +283,7 @@ if __name__ == '__main__':
     server                  = args.server
     systematics             = args.systematics
     triggers                = args.triggers
+    primaryDatasets         = args.primaryDatasets
     jumpToHaddOutput        = args.jumpToHaddOutput
     dryRun                  = args.dryRun 
 
@@ -320,6 +322,17 @@ if __name__ == '__main__':
         selSamplesToExclude_list = selSamplesToExclude.split(',')
 
     ## Settings ---------------------------------------------------------------------------------
+    
+    # Primaru dataset for analyses
+    if primaryDatasets == '':
+        if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py"]:
+            primaryDatasets = ['JetHT']
+            if era in [Era_2016preVFP, Era_2016postVFP, Era_2017]: primaryDatasets.append('BTagCSV')
+        if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
+            primaryDatasets = ['MET']
+    for PD in ['JetHT', 'BTagCSV', 'MET']:
+        if PD not in primaryDatasets: 
+            selSamplesToExclude_list.append( PD )
 
     #  Settings for GGF H->aa->4b analysis
     if sAnalysis in [
@@ -667,6 +680,7 @@ if __name__ == '__main__':
                             del config["sumEvents"]
                         config["downloadIpFiles"] = True if ((jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub) and ( not dryRun)) else False
                         config["server"] = server
+                        config["primaryDatasets"] = primaryDatasets
                         config["triggers"] = triggers
 
                         if printLevel >= 4:

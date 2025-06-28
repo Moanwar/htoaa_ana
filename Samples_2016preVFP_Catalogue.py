@@ -442,6 +442,13 @@ list_datasets_2016preVFP = OD([
     ("/MET/Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}), 
     ("/MET/Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}),
     
+    ## BTagCSV
+    # dasgoclient --query="dataset=/BTagCSV/Run2016*UL2016*NanoAODv9-v*/NANOAOD"
+    ("/BTagCSV/Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}), 
+    ("/BTagCSV/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}), 
+    ("/BTagCSV/Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}), 
+    ("/BTagCSV/Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}), 
+    ("/BTagCSV/Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD", {}),
 
     #("", {}),    
 ])

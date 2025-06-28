@@ -433,6 +433,11 @@ list_datasets_2016postVFP = OD([
     ("/MET/Run2016G-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
     ("/MET/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
      
+    ## BTagCSV
+    # dasgoclient --query="dataset=/BTagCSV/Run2016*UL2016*NanoAODv9-v*/NANOAOD"
+    ("/BTagCSV/Run2016F-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2016G-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
+    ("/BTagCSV/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD", {}), 
 
     #("", {}),    
 ])

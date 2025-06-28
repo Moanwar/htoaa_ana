@@ -706,7 +706,15 @@ Samples2017.update(OD([
     ("JetHT_Run2017C", ["JetHT_Run2017C"]),
     ("JetHT_Run2017D", ["JetHT_Run2017D"]),
     ("JetHT_Run2017E", ["JetHT_Run2017E"]),
-    ("JetHT_Run2017F", ["JetHT_Run2017F"]),    
+    ("JetHT_Run2017F", ["JetHT_Run2017F"]),  
+
+    ## BTagCSV data
+    ("BTagCSV_Run2017B", ["BTagCSV_Run2017B"]),
+    ("BTagCSV_Run2017C", ["BTagCSV_Run2017C"]),
+    ("BTagCSV_Run2017D", ["BTagCSV_Run2017D"]),
+    ("BTagCSV_Run2017E", ["BTagCSV_Run2017E"]),
+    ("BTagCSV_Run2017F", ["BTagCSV_Run2017F"]),    
+
 
     ## MET data
     ("MET_Run2017B", ["MET_Run2017B"]),

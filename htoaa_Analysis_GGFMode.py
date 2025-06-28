@@ -335,6 +335,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"{self.datasetInfo['isTTbar'        ] = }")
             print(f"{self.datasetInfo['isHToBB'        ] = }")
             print(f"{self.datasetInfo['isPythiaTuneCP5'] = }")
+
+        else:
+            for PD in self.datasetInfo["primaryDatasets"]: # ['JetHT', 'BTagCSV'] or ['MET']
+                self.datasetInfo['is%sDataset'%(PD)]        = True if PD in datasetName_part1 else False
+                print(f"self.datasetInfo[is{PD}Dataset] = {self.datasetInfo['is%sDataset'%(PD)]}")
+
+            
+
             
 
         ## List of all analysis selection condition ---------------------------------------------
@@ -347,6 +355,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         if (self.datasetInfo["era"] in Triggers_perEra) and (sTrgSelection in Triggers_perEra[self.datasetInfo["era"]]):
             print(f'Triggers_perEra[{self.datasetInfo["era"]}][{sTrgSelection}]:')
             print(json.dumps(Triggers_perEra[self.datasetInfo["era"]][sTrgSelection], indent=4))
+        print("self.datasetInfo[primaryDatasets]: ", self.datasetInfo["primaryDatasets"])
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -2488,41 +2497,98 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
-            mask_Trgs = falses_list
-            luminosity_firedTrgs = np.full_like(ones_list, 0)
+            mask_Trgs                  = falses_list
+            mask_PrimaryDatasetsStitch = falses_list
+            luminosity_firedTrgs       = np.full_like(ones_list, 0)
+            mask_Trgs_perPD            = {}
             if "2018HEM1516Issue" in self.sel_conditions_all_list: # set 2018HEM1516Issue weight to zero at the beginning
-                wgt_HEM1516Issue_Trgwise = zeros_list             
-            for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
-                HLTName_toUse = HLTName.replace('HLT_', '')
-                if HLTName_toUse not in events.HLT.fields: continue
-                mask_HLT = events.HLT[HLTName_toUse] == True
+                wgt_HEM1516Issue_Trgwise = zeros_list            
+            for PD in  self.datasetInfo["primaryDatasets"]: # ['JetHT', 'BTagCSV'] or ['MET']
+                # While analyzing index-0 dataset (JetHT), no need to check higher-index PD (BTagCSV) triggers, 
+                # as no double-count event removal when analyzing index-0 PD
+                PD_index0 = self.datasetInfo["primaryDatasets"][0]
+                if ((not self.datasetInfo['isMC']) and \
+                    (self.datasetInfo['is%sDataset'%(PD_index0)]) and \
+                    (PD != PD_index0) ): continue
 
-                mask_L1Ts = falses_list if len(L1TList) > 0 else trues_list # skip L1T requirement if empty L1TList
-                for L1TName in L1TList:
-                    L1TName_toUse = L1TName.replace('L1_', '')
-                    if L1TName_toUse not in events.L1.fields: continue
-                    mask_L1T_i = events.L1[L1TName_toUse] == True
-                    mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired
+                mask_Trgs_perPD[PD] = falses_list
+                if printLevel >= 10:
+                    print(f"\n\n{PD = }")                
+                for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection][PD].items():
+                    HLTName_toUse = HLTName.replace('HLT_', '')
+                    if HLTName_toUse not in events.HLT.fields: continue
+                    mask_HLT = events.HLT[HLTName_toUse] == True
 
-                mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
-                mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+                    mask_L1Ts = falses_list if len(L1TList) > 0 else trues_list # skip L1T requirement if empty L1TList
+                    for L1TName in L1TList:
+                        L1TName_toUse = L1TName.replace('L1_', '')
+                        if L1TName_toUse not in events.L1.fields: continue
+                        mask_L1T_i = events.L1[L1TName_toUse] == True
+                        mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired 
 
-                # calculate maximum luminosity of triggers fired in the event
-                luminosity_firedTrg_i = Luminosities_perTrigger[self.datasetInfo["era"]][HLTName][0]
-                luminosity_firedTrgs = np.where(
-                    (mask_Trg_i & (luminosity_firedTrg_i > luminosity_firedTrgs)),
-                    np.full_like(luminosity_firedTrgs, luminosity_firedTrg_i),
-                    luminosity_firedTrgs
-                )
+                    mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
+                    mask_Trgs_perPD[PD] = (mask_Trgs_perPD[PD] | mask_Trg_i) # Any of the HLT trigger, from list of triggers for PD, should be fired
 
-                # calculate 2018HEM1516Issue weight for current HLT trigger
-                if "2018HEM1516Issue" in self.sel_conditions_all_list:
-                    wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
-                    wgt_HEM1516Issue_Trgwise = np.where(
-                        (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
-                        np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
-                        wgt_HEM1516Issue_Trgwise
+                    if printLevel >= 10:
+                        printVariable('mask_Trg_i %s'%(HLTName), mask_Trg_i)
+                        printVariable('mask_Trgs_perPD[%s] %s'%(PD, HLTName), mask_Trgs_perPD[PD])
+                        
+                    # For MC: consider all triggers.
+                    # For Data: Consider triggers allocated to that PD. For e.g. consider JetHT triggers only when analyzing JetHT dataset
+                    if ((not self.datasetInfo['isMC']) and (not self.datasetInfo['is%sDataset'%(PD)])): continue
+                    mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+
+                    if printLevel >= 10:
+                        printVariable('mask_Trgs %s'%(HLTName), mask_Trgs)
+                        print("") 
+                        
+                    # luminosity and HEMissue weights for MC
+                    if (not self.datasetInfo['isMC']): continue
+                        
+                    # calculate maximum luminosity of triggers fired in the event
+                    luminosity_firedTrg_i = Luminosities_perTrigger[self.datasetInfo["era"]][HLTName][0]
+                    luminosity_firedTrgs = np.where(
+                        (mask_Trg_i & (luminosity_firedTrg_i > luminosity_firedTrgs)),
+                        np.full_like(luminosity_firedTrgs, luminosity_firedTrg_i),
+                        luminosity_firedTrgs
                     )
+
+                    # calculate 2018HEM1516Issue weight for current HLT trigger
+                    if "2018HEM1516Issue" in self.sel_conditions_all_list:
+                        wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
+                        wgt_HEM1516Issue_Trgwise = np.where(
+                            (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
+                            np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
+                            wgt_HEM1516Issue_Trgwise
+                        )
+
+            nPDs = len(self.datasetInfo["primaryDatasets"])
+            if ( (not self.datasetInfo['isMC']) and \
+                 (nPDs > 1) ): # Avoid double counting of events when using >1 primary datasets ['JetHT', 'BTagCSV']
+                # self.datasetInfo["primaryDatasets"]: ['JetHT', 'BTagCSV']
+                # JetHT: lower-index dataset, BTagCSV: higher-index dataset.
+                # To avoid double counting of events,
+                #   when analyzing higher index dataset (BTagCSV), remove events fired by higher- and lower-index trigger (JetHT and BTagCSV)
+                for i in range(1, nPDs): # Loop on higher-index dataset
+                    PD_i = self.datasetInfo["primaryDatasets"][i]
+                    if (not self.datasetInfo['is%sDataset'%(PD_i)]): continue # double-couting removal when running higher index dataset (BtagCSV)
+                    mask_PrimaryDatasetsStitch = trues_list
+                    for j in range(i): # Loop on lower-index dataset to check both dataset-triggers are fire, and if so, reject those events from higher rank dataset
+                        PD_j = self.datasetInfo["primaryDatasets"][j]
+                        mask_PrimaryDatasetsStitch = np.where(
+                            (mask_Trgs_perPD[PD_j] & mask_Trgs_perPD[PD_i]), # Events fired by both lower- and higher-rank dataset triggers
+                            falses_list,
+                            mask_PrimaryDatasetsStitch
+                        )
+                    mask_Trgs = (mask_Trgs & mask_PrimaryDatasetsStitch) 
+                    if printLevel >= 10:
+                        printVariable('mask_PrimaryDatasetsStitch %s '%(PD_i), mask_PrimaryDatasetsStitch)
+                        printVariable('mask_Trgs %s '%(PD_i), mask_Trgs)
+                        print("")
+
+            if printLevel >= 10:
+                printVariable('mask_Trgs final', mask_Trgs)
+
 
             if "2018HEM1516Issue" in self.sel_conditions_all_list: 
                 # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
@@ -5874,6 +5940,7 @@ if __name__ == '__main__':
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
     triggers            = config['triggers'] if 'triggers' in config else ''
+    primaryDatasets     = config['primaryDatasets'] if 'primaryDatasets' in config else ['JetHT']
     if isMC:
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
@@ -5954,6 +6021,7 @@ if __name__ == '__main__':
         "isMC":            isMC,
         "sample_category": sample_category,        
         "datasetNameFull": sample_dataset,
+        "primaryDatasets": primaryDatasets,
         "triggers":        triggers,
     }
     if isMC:
