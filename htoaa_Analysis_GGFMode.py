@@ -105,8 +105,6 @@ sWeighted = "Wtd: "
 
 
 
-
-    
 # -----------------------------------------------------------------------------------
 def get_GenPartDaughters(awkArray, index_GenPart):
     if printLevel >= 9:
