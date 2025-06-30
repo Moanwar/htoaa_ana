@@ -330,9 +330,18 @@ if __name__ == '__main__':
             if era in [Era_2016preVFP, Era_2016postVFP, Era_2017]: primaryDatasets.append('BTagCSV')
         if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
             primaryDatasets = ['MET']
+    else:
+        primaryDatasets = primaryDatasets.split(",")
+        for PD in primaryDatasets:
+            primaryDatasets_available = ['JetHT', 'BTagCSV', 'MET', 'SingleMuon', 'SingleElectron', 'EGamma']
+            if PD not in primaryDatasets_available:
+                print(f'Selected primaryDataset {PD} is not in available list {primaryDatasets_available}. \t Terminating...')
+                exit(0)
+
+
     for PD in ['JetHT', 'BTagCSV', 'MET']:
         if PD not in primaryDatasets: 
-            selSamplesToExclude_list.append( PD )
+            selSamplesToExclude_list.append( '%s*' %(PD) )
 
     #  Settings for GGF H->aa->4b analysis
     if sAnalysis in [
