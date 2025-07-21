@@ -1,6 +1,9 @@
 
 '''
 
+Issues: 
+    1) VVV NanoAODv2 samples did not get updated in Samples_<year>.json for 2016-pre and -post
+
 '''
 
 
@@ -18,19 +21,15 @@ from datetime import datetime
 import copy
 import enum
 
-print(f"htoaa_Wraper:: here1 {datetime.now() = }")
 
 from htoaa_Settings import *
-print(f"htoaa_Wraper:: here2 {datetime.now() = }")
 from htoaa_Samples import (
     Samples2016preVFP, Samples2016postVFP, Samples2017, Samples2018,
     kData, kQCDIncl, kQCD_bGen, kQCD_bEnrich
 )
-print(f"htoaa_Wraper:: here3 {datetime.now() = }")
 from htoaa_CommonTools import (
     executeBashCommand
 )
-print(f"htoaa_Wraper:: here4 {datetime.now() = }")
 
 
 
@@ -61,10 +60,11 @@ class JobStatus(enum.Enum):
 def writeCondorExecFile(
         condor_exec_file,
         sConfig_to_use,
-        sOpFile_to_use,
+        sOpFileList_to_use,
         EosDestinationDir_to_use,
         inpurFiles_to_use,
-        server
+        server,
+        saveRunLsEvt
 ):
     if not os.path.isfile(condor_exec_file):    
         with open(condor_exec_file, 'w') as f:
@@ -127,7 +127,8 @@ def writeCondorExecFile(
                 cp_commandToUse = 'eos cp' # works on lxplus
             else:
                 cp_commandToUse = 'cp'
-            f.write("time %s %s %s   \n" % (cp_commandToUse, sOpFile_to_use, EosDestinationDir_to_use) )
+            for sOpFile_to_use in sOpFileList_to_use:
+                f.write("time %s %s %s   \n" % (cp_commandToUse, sOpFile_to_use, EosDestinationDir_to_use) )
             #f.write("rm -rf ./inputFiles \n")
             for sInputFile in inpurFiles_to_use:
                 sFileLocal = './inputFiles/%s' %(os.path.basename(sInputFile))
@@ -237,22 +238,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='htoaa analysis wrapper')
     parser.add_argument('-analyze',           type=str, default="htoaa_Analysis_GGFMode.py", choices=[
         "htoaa_Analysis_GGFMode.py", 
-        "countSumEventsInSample.py", 
-        "htoaa_triggerStudy_GGFMode.py", 
+        "htoaa_Analysis_VBFMode.py", 
         "htoaa_Analysis_VHHadronicMode.py", 
         "htoaa_Analysis_ZH_4b2nu.py", 
-        "htoaa_Analysis_VBFMode.py", 
         "htoaa_Analysis_ttHHadronicMode.py",
         "htoaa_Analysis_CR_QCD4b.py",
         "htoaa_Analysis_Ak4BtagEffi.py",
         "htoaa_Analysis_HiggsPtRewgt.py",
+        "htoaa_Analysis_triggerEffi.py",
+        "countSumEventsInSample.py", 
+        "htoaa_triggerStudy_GGFMode.py", 
         "htoaa_Analysis_Example.py"], required=True)
-    parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    choices=[Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018], required=False)
+    parser.add_argument('-era', dest='era',   type=str, default=Era_2018,                    help=f'Years (separated by comma) to run:{Era_2016preVFP}, {Era_2016postVFP}, {Era_2017}, {Era_2018}, {Era_Run2}')
     parser.add_argument('-run_mode',          type=str, default='condor',                    choices=['local', 'condor'])
     parser.add_argument('-v', '--version',    type=str, default=None,                        required=True)
     parser.add_argument('-samples',           type=str, default=None,                        help='samples to run seperated by comma')
     parser.add_argument('-excludeSamples',    type=str, default=None,                        help='samples to exclude seperated by comma')
-    parser.add_argument('-ntuples',           type=str, default="SkimmedNanoAOD_v2", choices=["CentralNanoAOD", "SkimmedNanoAOD_v1", "SkimmedNanoAOD_v2"], required=False)
+    parser.add_argument('-ntuples',           type=str, default="SkimmedNanoAOD_v2",         choices=["CentralNanoAOD", "SkimmedNanoAOD_v1", "SkimmedNanoAOD_v2"], required=False)
     parser.add_argument('-nFilesPerJob',      type=int, default=1)
     parser.add_argument('-nResubMax',         type=int, default=80)
     parser.add_argument('-ResubWaitingTime',  type=int, default=15,                          help='Resubmit failed jobs after every xx minutes')
@@ -262,14 +264,14 @@ if __name__ == '__main__':
     parser.add_argument('-systematics',       type=str, default='No',                        help='No,Full,PU,JES etc') 
     parser.add_argument('-triggers',          type=str, default='',                          help='Trg_Combo_AK4AK8Jet_HT, HLT_PFJet500 etc to use selective trigger combinations for studies') 
     parser.add_argument('-primaryDatasets',   type=str, default='',                          help='PrimaryDatasets to use for the analysis. For e.g. JetHT,BTagCSV') 
+    parser.add_argument('-saveRunLsEvt',      action='store_true', default=False,            help="Save Run:Ls:EventNumber for data.") 
     parser.add_argument('-jumpToHaddOutput',  action='store_true', default=False,            help="When running on earlier jobs, skip checking failed jobs and jump to hadd produced output.root files.")         
     parser.add_argument('-dryRun',            action='store_true', default=False,            help="Produce jpbs' config files without submiting jobs to HT condor server.")    
     args=parser.parse_args()
     print("args: {}".format(args))
-    print(f"htoaa_Wraper:: here7 {datetime.now() = }"); sys.stdout.flush()
-
+    
     sAnalysis               = args.analyze
-    era                     = args.era
+    eras                    = args.era
     run_mode                = args.run_mode
     sNTuples                = args.ntuples
     nFilesPerJob            = args.nFilesPerJob if args.nFilesPerJob >=1 else 1
@@ -278,589 +280,642 @@ if __name__ == '__main__':
     anaVersion              = args.version
     nResubmissionMax        = args.nResubMax
     ResubWaitingTime        = args.ResubWaitingTime
-    iJobSubmission          = args.iJobSubmission
+    iJobSubmission_0          = args.iJobSubmission
     xrdcpIpAftNResub        = args.xrdcpIpAftNResub
     server                  = args.server
     systematics             = args.systematics
     triggers                = args.triggers
-    primaryDatasets         = args.primaryDatasets
+    primaryDatasets_0       = args.primaryDatasets
+    saveRunLsEvt            = args.saveRunLsEvt
     jumpToHaddOutput        = args.jumpToHaddOutput
     dryRun                  = args.dryRun 
 
-    SourceCodeDir     = os.getcwd()
-    DestinationDir    = "../analysis/%s/%s" % (anaVersion, era)
-    EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s/%s" % (UserName, anaVersion, era) 
+    era_list = [Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018] if Era_Run2 in eras else eras.split(',')
 
-    os.chdir( SourceCodeDir )
-    os.makedirs( DestinationDir, exist_ok=True )
-    os.chdir( DestinationDir )
-    DestinationDirAbsolute = os.getcwd() # save absolute path
-    #os.makedirs( DestinationDirAbsolute, exist_ok=True )
-    try:
-        os.makedirs( EosDestinationDir, exist_ok=True )
-    except:
-        EosDestinationDir = DestinationDirAbsolute # if /eos area for user is not available then save histograms in DestinationDir
+    SourceCodeBaseDir     = os.getcwd()
 
-    os.chdir( SourceCodeDir )
-    samplesList = None
-    samplesInfo = None
-    if  era == Era_2016preVFP:
-        samplesList = Samples2016preVFP # htoaa_Samples.py
-    elif era == Era_2016postVFP:
-        samplesList = Samples2016postVFP # htoaa_Samples.py
-    elif era == Era_2017:
-        samplesList = Samples2017 # htoaa_Samples.py
-    elif era == Era_2018:
-        samplesList = Samples2018 # htoaa_Samples.py
-    with open(sFileSamplesInfo[era]) as fSamplesInfo:
-        samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
-    selSamplesToRun_list = []
-    if selSamplesToRun:
-        selSamplesToRun_list = selSamplesToRun.split(',')
-    selSamplesToExclude_list = []
-    if selSamplesToExclude:
-        selSamplesToExclude_list = selSamplesToExclude.split(',')
-
-    ## Settings ---------------------------------------------------------------------------------
-    
-    # Primaru dataset for analyses
-    if primaryDatasets == '':
-        if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py"]:
-            primaryDatasets = ['JetHT']
-            if era in [Era_2016preVFP, Era_2016postVFP, Era_2017]: primaryDatasets.append('BTagCSV')
-        if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
-            primaryDatasets = ['MET']
-    else:
-        primaryDatasets = primaryDatasets.split(",")
-        for PD in primaryDatasets:
-            primaryDatasets_available = ['JetHT', 'BTagCSV', 'MET', 'SingleMuon', 'SingleElectron', 'EGamma']
-            if PD not in primaryDatasets_available:
-                print(f'Selected primaryDataset {PD} is not in available list {primaryDatasets_available}. \t Terminating...')
-                exit(0)
-
-
-    for PD in ['JetHT', 'BTagCSV', 'MET']:
-        if PD not in primaryDatasets: 
-            selSamplesToExclude_list.append( '%s*' %(PD) )
-
-    #  Settings for GGF H->aa->4b analysis
-    if sAnalysis in [
-        "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py", "htoaa_Analysis_CR_QCD4b.py",
-        ]:
-        # exclude irrelevant samples from running
-        selSamplesToExclude_list.extend( [
-            "SingleMuon_Run2016*", "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-            "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
-            "MET_Run2016*", "MET_Run2017*", "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",          
-            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA",  
-            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All',      
-        ] )
-
-    #  Settings for GGF H->aa->4b trigger study
-    if sAnalysis in ["htoaa_triggerStudy_GGFMode.py"]:
-        # exclude irrelevant samples from running
-        selSamplesToExclude_list.extend( [
-            "JetHT_Run2016*", "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
-            "MET_Run2016*", "MET_Run2017*", "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
-            "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
-            "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
-            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
-            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
-        ] )  
-
-    if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
-        # exclude irrelevant samples from running
-        selSamplesToExclude_list.extend( [
-            "JetHT_Run2016*", "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
-            "SingleMuon_Run2016*", "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
-            "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
-            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
-            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
-        ] )
-
-    if sAnalysis in ["htoaa_Analysis_HiggsPtRewgt.py"]:
-        selSamplesToRun_list.extend( [
-            'GluGluHToBB_Incl', 'GluGluHToBB_Pt-200ToInf', 
-            'VBFHToBB_powheg', 'VBFH_dipoleRecoilOn', 'VBFHToTauTau_powheg', #'VBFHToBB_herwig', 
-            'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'WHToMuMuG', 'WplusHToTauTau', 'WminusHToTauTau', 
-            'ZHToBBX', 'ZHToMuMuG', 'ZHToTauTau', 
-            'ttHToBB', 'ttHToTauTau', 
-            "ggHtoaato4b_mA",      "VBFHtoaato4b_mA",      "WHtoaato4b_mA",      "ZHtoaato4b_mA",      "ttHtoaato4b_mA", 
-            "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
-            #
-            'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
-        ] )
-
-    ## ------------------------------------------------------------------------------------------
-
-    #  Settings for countSumEventsInSample.py
-    if sAnalysis in ["countSumEventsInSample.py"]:
-        # Change samplesList to run on all samples from samplesInfo
-        samplesList = OD()
-        for sampleName in samplesInfo.keys():
-            samplesList[sampleName] = [ sampleName ]
-        print(f"\n\n\n\nChanged samplesList to run on all samples from {sFileSamplesInfo[era]} ({len(samplesList)}): {samplesList}")
-
-
-    print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
-    #print("\n\nsamplesInfo: {}".format(samplesInfo))
-    print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
-    print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
-    
-        
-    sFileRunCommand = "%s/%s" % (DestinationDirAbsolute, sRunCommandFile)
-    sFileJobSubLog  = "%s/%s" % (DestinationDirAbsolute, sJobSubLogFile)
-    
-    # save run command into a .txt tile
-    with open(sFileRunCommand, 'a') as fRunCommand:
-        datatime_now = datetime.now()
-        sCommand = ' '.join(sys.argv)
-        fRunCommand.write('%s    %s \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sCommand))    
-
-    
-    jobSubmissionInfo_dict = {}
-
-    allJobsSuccessful          = False
-    OpRootFiles_Target         = None
-    OpRootFilesAbsPath_Target  = None
-    os.chdir( DestinationDirAbsolute )
-
-    while iJobSubmission <= nResubmissionMax:
-
-        print('\n\n%s \t Starting iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
-
-        OpRootFilesAbsPath_Target  = []
-        OpRootFiles_Target         = []
-        OpRootFiles_Exist          = []
-        OpRootFiles_iJobSubmission = []
-        jobStatus_dict             = {} # OD([])
-        
-        for sample_category, samples in samplesList.items():
-            if printLevel >=6:
-                print("sample_category {}, samples {}".format(sample_category, samples))
-            sample_isMC = True
-            for sampleSubString_toCheck in [kData, 'Run2016','Run2017', 'Run2018']:
-                if sampleSubString_toCheck in sample_category:
-                    sample_isMC = False
-                    break
-
-            for sample in samples:
-                if printLevel >=6:
-                    print("\t sample {} _0".format(sample))
-                if len(selSamplesToRun_list) > 0:
-                    skipThisSample = True
-                    for selSample in selSamplesToRun_list:
-                        selSample = selSample.replace('*','')
-                        if ( (selSample in sample         ) or
-                             (selSample in sample_category) ):
-                            skipThisSample = False
-                    if printLevel >=6:
-                        print(f"\t\t _0p1 {sample = }, {skipThisSample = }")
-                    if skipThisSample:
-                        continue
-                if printLevel >=6:
-                    print("\t sample {} _1".format(sample))
-                
-                if len(selSamplesToExclude_list) > 0:
-                    skipThisSample = False
-                    for selSample in selSamplesToExclude_list:
-                        selSample = selSample.replace('*','')
-                        if ( (selSample in sample         ) or
-                             (selSample in sample_category) ):
-                            skipThisSample = True
-                    if skipThisSample:
-                        continue
-                if printLevel >=6:
-                    print("\t sample {} _2".format(sample))
-                
-                    
-                #
-                OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
-                JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)
-                if not os.path.exists(OpRootFileFinalDir): os.makedirs( OpRootFileFinalDir, exist_ok=True )
-                if not os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )
-                os.chdir( JobLogsDir )
-                    
-                print(f"sample_category: {sample_category}, sample: {sample}", flush=True)
-
-                sNTuples_toUse = "CentralNanoAOD"
-                if   sNTuples == "SkimmedNanoAOD_v1":              sNTuples_toUse = "skim_v1"
-                elif sNTuples == "SkimmedNanoAOD_v2":              sNTuples_toUse = "skim_v2"
-
-                sampleInfo = samplesInfo[sample] # Samples_Era.json      
-                fileList   = None
-                if   sNTuples == "CentralNanoAOD":                 fileList = sampleInfo[sampleFormat]
-                else:                                              fileList = sampleInfo["skimmedNanoAOD"][sNTuples_toUse]
-                
-                files = []
-                for iEntry in fileList:
-                    # file name with wildcard charecter *
-                    if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
-                    #else:              files.append( iEntry )
-                    else:
-                        if not iEntry.startswith('/eos/'): # central NanoAOD
-                            files.append( iEntry )
-                        else: # File stored on /eos/ space, check if the file exist or not
-                            if os.path.exists(iEntry):
-                                files.append( iEntry )
-                            else:
-                                print(f"Input file {iEntry} does not exists **** ERROR **** \n")
-
-                if len(files) == 0: continue # no inputfile
-                
-                sample_dataset     = sampleInfo["dataset"]
-                sample_cossSection = sampleInfo["cross_section"] if sample_isMC else None
-                sample_nEvents     = sampleInfo["nEvents"]
-                sample_sumEvents   = sampleInfo["sumEvents"] if sample_isMC else None
-                if   not (sNTuples == "CentralNanoAOD"): 
-                    sample_nEvents     = sampleInfo["skimmedNanoAOD"]["%s_nEvents"   % (sNTuples_toUse)]
-                    sample_sumEvents   = sampleInfo["skimmedNanoAOD"]["%s_sumEvents" % (sNTuples_toUse)] if sample_isMC else None
-                
-
-
-                if printLevel >= 6:
-                    print("\nsample: {}".format(sample))
-                    print("samplesInfo[{}]: {}".format(sample, samplesInfo[sample]))
-                    print("files ({}): {}".format(len(files), files))
-
-
-                nSplits = int(len(files) / nFilesPerJob) + 1 if (nFilesPerJob > 0) and (len(files) != nFilesPerJob) else 1
-
-
-                files_splitted = np.array_split(files, nSplits)
-                if printLevel >= 6:
-                    print("files_splitted: {}".format(files_splitted))
-
-                for iJob in range(len(files_splitted)):
-                    if len(list( files_splitted[iJob] )) == 0: continue
-
-                    JobStage = 0
-                    
-                    config = copy.deepcopy(config_Template)
-
-                    # Job related files
-                    #sOpRootFile_to_use      = '%s/%s' % (DestinationDir, sOpRootFile)
-                    sOpRootFile_to_use      = '%s' % (sOpRootFile)
-                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$SAMPLE', sample)
-                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$STAGE', str(JobStage))
-                    sOpRootFile_to_use      = sOpRootFile_to_use.replace('$IJOB', str(iJob))
-                    sOpRootFileFinal_to_use = '%s/%s' % (OpRootFileFinalDir, sOpRootFile_to_use)
-                    
-                    sConfig_to_use          = sOpRootFile_to_use.replace('.root', '_config.json')
-                    sCondorExec_to_use      = sOpRootFile_to_use.replace('.root', '_condor_exec.sh')
-                    sCondorSubmit_to_use    = sOpRootFile_to_use.replace('.root', '_condor_submit.sh')
-                    sCondorLog_to_use       = sOpRootFile_to_use.replace('.root', '_condor.log')
-                    sCondorOutput_to_use    = sOpRootFile_to_use.replace('.root', '_condor.out')
-                    sCondorError_to_use     = sOpRootFile_to_use.replace('.root', '_condor.error')
-
-                    # Check if job related file exist or not
-                    isConfigExist           = os.path.isfile(sConfig_to_use)
-                    isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use) and (os.path.getsize(sOpRootFileFinal_to_use) > 5e4) 
-                    isCondorExecExist       = os.path.isfile(sCondorExec_to_use)
-                    isCondorSubmitExist     = os.path.isfile(sCondorSubmit_to_use)
-                    isCondorLogExist        = os.path.isfile(sCondorLog_to_use)
-                    isCondorOutputExist     = os.path.isfile(sCondorOutput_to_use)
-                    isCondorErrorExist      = os.path.isfile(sCondorError_to_use)
-
-                    if printLevel >= 3:
-                        print(f"sOpRootFile_to_use: {sOpRootFile_to_use}, {JobLogsDir = }, {os.getcwd() = } ")
-                        #print(f" {sConfig_to_use = }: {isConfigExist = } ")
-                        #print(f" {sOpRootFileFinal_to_use = }: {isOpRootFileExist = } ")
-                        #print(f" {sCondorExec_to_use = }: {isCondorExecExist = } ")
-                        #print(f" {sCondorSubmit_to_use = }: {isCondorSubmitExist = } ")
-                        #print(f" {sCondorLog_to_use = }: {isCondorLogExist = } ")
-                        #print(f" {sCondorOutput_to_use = }: {isCondorOutputExist = } ")
-                        #print(f" {sCondorError_to_use = }: {isCondorErrorExist = } ")
-                    
-                    # JobStatus
-                    jobStatus = JobStatus.NotSubmitted # -1
-                    #jobStatusForJobSubmission = [0, 3, 4, 5]
-                    jobStatusForJobSubmission = [
-                        JobStatus.NotSubmitted, #0
-                        #JobStatus.Finished, #1
-                        #JobStatus.Running, #2
-                        JobStatus.Failed_Misc, #3
-                        JobStatus.Failed_Abort, #4
-                        JobStatus.Failed_XRootD, #5
-                    ]
-
-                    if not isConfigExist:
-                        jobStatus = JobStatus.NotSubmitted #0 # job not yet submitted
-                        if printLevel >= 3:
-                            print(f"  jobStatus = 0")
-
-                    elif isOpRootFileExist:
-                        jobStatus = JobStatus.Finished #1 # job ran successfully
-                        OpRootFiles_Exist.append(sOpRootFile_to_use)
-                        if printLevel >= 3:
-                            print(f"  jobStatus = 1")
-                            
-                    else:
-                        if isCondorLogExist:
-                            
-                            if (searchStringInFile(                                    
-                                    sFileName       = sCondorLog_to_use,
-                                    searchString    = 'Job terminated',
-                                    nLinesToSearch  = 3,
-                                    SearchFromEnd   = True)):
-                                # check wheter the job was terminated or not
-                                jobStatus = JobStatus.Failed_Misc #3 # job failed due to some other error
-                                if printLevel >= 3:
-                                    print(f"  jobStatus = 3")
-                                    
-                                    
-                                # check if job failed due to XRootD error
-                                if (searchStringInFile(                                        
-                                        sFileName       = sCondorError_to_use,
-                                        searchString    = 'OSError: XRootD error: [ERROR]', 
-                                        nLinesToSearch  = 150,
-                                        SearchFromEnd   = True) or \
-                                    searchStringInFile(
-                                        sFileName       = sCondorError_to_use,
-                                        searchString    = '[ERROR] Invalid redirect URL', 
-                                        nLinesToSearch  = 150,
-                                        SearchFromEnd   = True) ):
-                                    jobStatus = JobStatus.Failed_XRootD #5 # job failed due to XRootD error
-                                    if printLevel >= 3:
-                                        print(f"  jobStatus = 5")
-                                        
-
-                            elif (searchStringInFile(
-                                    sFileName       = sCondorLog_to_use,
-                                    searchString    = 'Job was aborted',
-                                    nLinesToSearch  = 3,
-                                    SearchFromEnd   = True)):
-                                # check wheter sCondorError does not exist due to Job was aborted
-                                jobStatus = JobStatus.Failed_Abort #4 # job aborted
-                                if printLevel >= 3:
-                                    print(f"  jobStatus = 4")
-                                    
-                                    
-                            else:
-                                jobStatus = JobStatus.Running #2 # job is running
-                                if printLevel >= 3:
-                                    print(f"  jobStatus = 2")
-                                
-                                
-                    OpRootFiles_Target.append(sOpRootFile_to_use)
-                    OpRootFilesAbsPath_Target.append(sOpRootFileFinal_to_use)
-                    if jobStatus in jobStatusForJobSubmission : # [0, 3, 4]:
-                        OpRootFiles_iJobSubmission.append(sOpRootFile_to_use)
-
-                    if jobStatus not in jobStatus_dict.keys():
-                        jobStatus_dict[jobStatus] = [sOpRootFile_to_use]
-                    else:
-                        jobStatus_dict[jobStatus].append(sOpRootFile_to_use)
-                    
-                    if sOpRootFile_to_use not in jobSubmissionInfo_dict:
-                        jobSubmissionInfo_dict[sOpRootFile_to_use] = {}
-                        jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = 0
-                    else:
-                        if jobStatus in jobStatusForJobSubmission :
-                            jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] + 1
-                    jobSubmissionInfo_dict[sOpRootFile_to_use]['JobStatusLast'] = jobStatus
-                        
-                    
-                    
-                        
-                    if printLevel >= 0:
-                        #print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist}, CondorExec: {isCondorExecExist}, CondorSubmit: {isCondorSubmitExist}, CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
-                        print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist},  CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
-                        
-
-                    #if iJobSubmission == 0:
-                    #if jobStatus == 0 or 1==1:
-                    if jobStatus in jobStatusForJobSubmission:
-                        config["era"] = era
-                        config["dataset"]    = sample_dataset
-                        #config["dataset"]    = list( sample_dataset )
-                        config["inputFiles"] = list( files_splitted[iJob] )
-                        config["outputFile"] = sOpRootFile_to_use 
-                        config["sampleCategory"] = sample_category
-                        config["isMC"] = sample_isMC 
-                        config["nEvents"] = sample_nEvents
-                        if sample_isMC:
-                            config["crossSection"] = sample_cossSection
-                            config["sumEvents"]    = sample_sumEvents
-                            config["systematics"]  = systematics
-                                                            
-                        else:
-                            del config["crossSection"]
-                            del config["sumEvents"]
-                        config["downloadIpFiles"] = True if ((jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub) and ( not dryRun)) else False
-                        config["server"] = server
-                        config["primaryDatasets"] = primaryDatasets
-                        config["triggers"] = triggers
-
-                        if printLevel >= 4:
-                            print("config {}: {}".format(sConfig_to_use, config))
-                        with open(sConfig_to_use, "w") as fConfig:
-                            json.dump( config,  fConfig, indent=4)
-
-
-                        writeCondorExecFile(
-                            sCondorExec_to_use,
-                            sConfig_to_use,
-                            sOpRootFile_to_use,
-                            OpRootFileFinalDir,
-                            config["inputFiles"],
-                            server 
-                        )
-
-
-                    if jobStatus in jobStatusForJobSubmission: #[0, 3, 4]:
-                        if jobStatus == [JobStatus.Failed_Misc, JobStatus.Failed_XRootD]: #[3, 5]:
-                            # save previos .out and .error files with another names
-                            sCondorOutput_vPrevious = sCondorOutput_to_use.replace('.out', '_v%d.out' % (iJobSubmission-1))
-                            sCondorError_vPrevious  = sCondorError_to_use.replace('.error', '_v%d.error' % (iJobSubmission-1))
-                            os.rename(sCondorOutput_to_use, sCondorOutput_vPrevious)
-                            os.rename(sCondorError_to_use,  sCondorError_vPrevious)
-
-                        increaseJobFlavour = False
-                        #if jobStatus == 4 or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
-                        if jobStatus == JobStatus.Failed_Abort or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
-                            increaseJobFlavour = True
-                            
-                        writeCondorSumitFile(
-                            sCondorSubmit_to_use,
-                            sCondorExec_to_use,
-                            sCondorLog_to_use,
-                            sCondorOutput_to_use,
-                            sCondorError_to_use,
-                            sConfig_to_use,
-                            increaseJobFlavour)
-
-
-
-                    if jobStatus in [JobStatus.Finished, JobStatus.Running]: #[1, 2]:
-                        # job is either running or succeeded
-                        continue
-
-                    '''
-                    if jobStatus in [3]:
-                        # job failed, but failure reason needs investigation
-                        continue
-                    '''
-                    
-                    if run_mode == 'condor':
-                        cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
-                        
-                        if not (dryRun or jumpToHaddOutput):
-                            if printLevel >= 5:
-                                print("Now:  %s " % cmd1)
-                            os.system(cmd1)
-                    else:
-                        pass
-
-                    
-
-
-        # write JobSubmission status report in JobSubLog file
-        with open(sFileJobSubLog, 'a') as fJobSubLog:
-            fJobSubLog.write('%s \t iJobSubmission %d \t OpRootFiles_Target (%d):  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Target)))
-            if iJobSubmission == 0:
-                for f in OpRootFiles_Target:
-                    fJobSubLog.write('\t %s \n' % (f))
-            else:
-                fJobSubLog.write('OpRootFiles_Exist %d out of %d. \n' % (len(OpRootFiles_Exist), len(OpRootFiles_Target)))
-                fJobSubLog.write('OpRootFiles_iJobSubmission (%d): ' % (len(OpRootFiles_iJobSubmission)))
-                for f in OpRootFiles_iJobSubmission:
-                    fJobSubLog.write('\t %s \n' % (f))
-
-                fJobSubLog.write('\n\nJob status wise output files: \n')
-                for jobStatus in jobStatus_dict.keys():
-                    fJobSubLog.write('\t jobStatus %s (%d) \n' % (str(jobStatus.value), len(jobStatus_dict[jobStatus])))
-                    #if jobStatus in [0, 1]: continue
-                    if jobStatus in [JobStatus.NotSubmitted, JobStatus.Finished]: continue
-                    
-                    for f in jobStatus_dict[jobStatus]:
-                        fJobSubLog.write('\t\t %s \n' % (f))
-                
-            fJobSubLog.write('%s\n\n\n' % ('-'*10))
-        
-        
-        jobStatus_list = [ (jobStatus.value, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
-        print('\n\n\n%s \t %s %s: iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era, iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
-        print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()
-        
-            
-        if dryRun:
-            print('%s \t druRun with iJobSubmission: %d  \nTerminating...\n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+    for era in era_list:
+        if era not in [Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018]:
+            print(f"{era = } in {eras = } is invalid...\nTerminating...")
             exit(0)
-            
-        if (len(OpRootFiles_Target) == len(OpRootFiles_Exist)) or jumpToHaddOutput:
-            allJobsSuccessful = True
-            break
+
+
+        AnaOpDirName = "%s/%s" % (anaVersion, era)
+        sAnaCat = ''
+        if sAnalysis == "htoaa_Analysis_GGFMode.py":         sAnaCat = "gg0l"
+        if sAnalysis == "htoaa_Analysis_VBFMode.py":         sAnaCat = "VBFjj"
+        if sAnalysis == "htoaa_Analysis_VHHadronicMode.py":  sAnaCat = "Vjj"
+        if sAnalysis == "htoaa_Analysis_ZH_4b2nu.py":        sAnaCat = "Zvv"
+        if sAnalysis == "htoaa_Analysis_ttHHadronicMode.py": sAnaCat = "tt0l"
+        if sAnalysis == "htoaa_Analysis_triggerEffi.py": sAnaCat = "trigEffi"
+        if sAnaCat: AnaOpDirName += "/%s" %(sAnaCat)
+
+        os.chdir( SourceCodeBaseDir )
+        SourceCodeDir     = os.getcwd()
+        DestinationDir    = "../analysis/%s" % (AnaOpDirName)
+        EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s" % (UserName, AnaOpDirName) 
+        
+
+        os.chdir( SourceCodeDir )
+        os.makedirs( DestinationDir, exist_ok=True )
+        os.chdir( DestinationDir )
+        DestinationDirAbsolute = os.getcwd() # save absolute path
+        #os.makedirs( DestinationDirAbsolute, exist_ok=True )
+        try:
+            os.makedirs( EosDestinationDir, exist_ok=True )
+        except:
+            EosDestinationDir = DestinationDirAbsolute # if /eos area for user is not available then save histograms in DestinationDir
+
+        os.chdir( SourceCodeDir )
+        samplesList = None
+        samplesInfo = None
+        if  era == Era_2016preVFP:
+            samplesList = Samples2016preVFP # htoaa_Samples.py
+        elif era == Era_2016postVFP:
+            samplesList = Samples2016postVFP # htoaa_Samples.py
+        elif era == Era_2017:
+            samplesList = Samples2017 # htoaa_Samples.py
+        elif era == Era_2018:
+            samplesList = Samples2018 # htoaa_Samples.py
+        with open(sFileSamplesInfo[era]) as fSamplesInfo:
+            samplesInfo = json.load(fSamplesInfo) # Samples_Era.json
+        selSamplesToRun_list = []
+        if selSamplesToRun:
+            selSamplesToRun_list = selSamplesToRun.split(',')
+        selSamplesToExclude_list = []
+        if selSamplesToExclude:
+            selSamplesToExclude_list = selSamplesToExclude.split(',')
+
+        ## Settings ---------------------------------------------------------------------------------
+        
+        # Primaru dataset for analyses
+        if primaryDatasets_0 == '':
+            if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py"]:
+                primaryDatasets = ['JetHT']
+                if era in [Era_2016preVFP, Era_2016postVFP, Era_2017]: primaryDatasets.append('BTagCSV')
+            if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
+                primaryDatasets = ['MET']
         else:
-            time.sleep( ResubWaitingTime * 60 )
-            iJobSubmission += 1
+            primaryDatasets = primaryDatasets_0.split(",")
+            for PD in primaryDatasets:
+                primaryDatasets_available = ['JetHT', 'BTagCSV', 'MET', 'SingleMuon', 'SingleElectron', 'EGamma']
+                if PD not in primaryDatasets_available:
+                    print(f'Selected primaryDataset {PD} is not in available list {primaryDatasets_available}. \t Terminating...')
+                    exit(0)
 
 
-    fJobSubLog = open(sFileJobSubLog, 'a')
-    fJobSubLog.write('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
-    print('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+        for PD in ['JetHT', 'BTagCSV', 'MET']:
+            if PD not in primaryDatasets: 
+                selSamplesToExclude_list.append( '%s*' %(PD) )
 
-    ## hadd output root files
-    os.chdir( EosDestinationDir )
+        #  Settings for GGF H->aa->4b analysis
+        if sAnalysis in [
+            "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py", "htoaa_Analysis_CR_QCD4b.py",
+            ]:
+            # exclude irrelevant samples from running
+            selSamplesToExclude_list.extend( [
+                "SingleMuon_Run2016*", "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+                "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+                "MET_Run2016*", "MET_Run2017*", "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",          
+                "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA",  
+                'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All',      
+            ] )
 
-    sOpRootFile_stage0 = sOpRootFile
-    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$SAMPLE',  '')
-    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$STAGE',   '')
-    sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$IJOB',    '')
-    sOpRootFile_stage0 = sOpRootFile_stage0.replace('.root',     '*.root')
-    
-    sOpRootFile_stage1 = sOpRootFile
-    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
-    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
-    sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
+        #  Settings for GGF H->aa->4b trigger study
+        if sAnalysis in ["htoaa_triggerStudy_GGFMode.py", "htoaa_Analysis_triggerEffi.py"]:
+            # exclude irrelevant samples from running
+            selSamplesToExclude_list.extend( [
+                "JetHT_Run2016*", "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D",
+                "MET_Run2016*", "MET_Run2017*", "MET_Run2018*", #"MET_Run2018A", "MET_Run2018B", "MET_Run2018C", "MET_Run2018D",                 
+                "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+                "ggHtoaato4b_mA", "VBFHtoaato4b_mA", "WHtoaato4b_mA", "ZHtoaato4b_mA", "ttHtoaato4b_mA",
+                "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+                'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
+            ] )  
 
-    isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:
+            # exclude irrelevant samples from running
+            selSamplesToExclude_list.extend( [
+                "JetHT_Run2016*", "JetHT_Run2017*", "JetHT_Run2018*", #"JetHT_Run2018A", "JetHT_Run2018B", "JetHT_Run2018C", "JetHT_Run2018D", 
+                "SingleMuon_Run2016*", "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
+                "SingleElectron_Run2016*", "SingleElectron_Run2017*", "EGamma_Run2018*",  #"EGamma_Run2018A", "EGamma_Run2018B", "EGamma_Run2018C", "EGamma_Run2018D", 
+                "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+                'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
+            ] )
 
-    if isOpRootFileExist:
-        print('%s %s already exists. \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1))
-    
-    if allJobsSuccessful and (not isOpRootFileExist):
-        print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
+        if sAnalysis in ["htoaa_Analysis_HiggsPtRewgt.py"]:
+            selSamplesToRun_list.extend( [
+                'GluGluHToBB_Incl', 'GluGluHToBB_Pt-200ToInf', 
+                'VBFHToBB_powheg', 'VBFH_dipoleRecoilOn', 'VBFHToTauTau_powheg', #'VBFHToBB_herwig', 
+                'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'WHToMuMuG', 'WplusHToTauTau', 'WminusHToTauTau', 
+                'ZHToBBX', 'ZHToMuMuG', 'ZHToTauTau', 
+                'ttHToBB', 'ttHToTauTau', 
+                "ggHtoaato4b_mA",      "VBFHtoaato4b_mA",      "WHtoaato4b_mA",      "ZHtoaato4b_mA",      "ttHtoaato4b_mA", 
+                "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+                #
+                'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
+            ] )
+
+        ## ------------------------------------------------------------------------------------------
+
+        #  Settings for countSumEventsInSample.py
+        if sAnalysis in ["countSumEventsInSample.py"]:
+            # Change samplesList to run on all samples from samplesInfo
+            samplesList = OD()
+            for sampleName in samplesInfo.keys():
+                samplesList[sampleName] = [ sampleName ]
+            print(f"\n\n\n\nChanged samplesList to run on all samples from {sFileSamplesInfo[era]} ({len(samplesList)}): {samplesList}")
 
 
-        nFilesPerBatchForHadd              = 100
-        nBatchesForHadd                    = int(len(OpRootFilesAbsPath_Target) / nFilesPerBatchForHadd) + 1 if len(OpRootFilesAbsPath_Target) != nFilesPerBatchForHadd else 1
-        OpRootFilesAbsPath_Target_splitted = np.array_split(OpRootFilesAbsPath_Target, nBatchesForHadd)
-        sOpRootFile_stage1_batches         = []
-        #print(f"\n\nNo. of {nFilesPerBatchForHadd} files splits in OpRootFilesAbsPath_Target_splitted: {len(OpRootFilesAbsPath_Target_splitted)}")
-        print(f"\n\n{nFilesPerBatchForHadd = }. {len(OpRootFilesAbsPath_Target)} files split into {nBatchesForHadd} batches as {[len(iL) for iL in OpRootFilesAbsPath_Target_splitted]}")
-        #print(f"{OpRootFilesAbsPath_Target_splitted = }")
-        for iHadd in range(len(OpRootFilesAbsPath_Target_splitted)):
-            sOpRootFile_stage1_toUse        = sOpRootFile_stage1.replace('.root', '_batch%d.root' % (iHadd))
-            OpRootFilesAbsPath_Target_toUse = OpRootFilesAbsPath_Target_splitted[iHadd]
-            sOpRootFile_stage1_batches.append(sOpRootFile_stage1_toUse)
-            print(f"\n\n{iHadd = }, No. of files to hadd: {len(OpRootFilesAbsPath_Target_toUse)}")
+        print("\nsamplesList: {}".format(json.dumps(samplesList, indent=4)))
+        #print("\n\nsamplesInfo: {}".format(samplesInfo))
+        print(f"\n\nselSamplesToRun_list: {selSamplesToRun_list}")
+        print(f"selSamplesToExclude_list: {selSamplesToExclude_list}")
+        
+            
+        sFileRunCommand = "%s/%s" % (DestinationDirAbsolute, sRunCommandFile)
+        sFileJobSubLog  = "%s/%s" % (DestinationDirAbsolute, sJobSubLogFile)
+        
+        # save run command into a .txt tile
+        with open(sFileRunCommand, 'a') as fRunCommand:
+            datatime_now = datetime.now()
+            sCommand = ' '.join(sys.argv)
+            fRunCommand.write('%s    %s \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sCommand))    
 
-            cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1_toUse)
-            for opFileName in OpRootFilesAbsPath_Target_toUse:
+        
+        jobSubmissionInfo_dict = {}
+
+        allJobsSuccessful          = False
+        OpRootFiles_Target         = None
+        OpRootFilesAbsPath_Target  = None
+        os.chdir( DestinationDirAbsolute )
+
+        iJobSubmission = iJobSubmission_0 
+
+        while iJobSubmission <= nResubmissionMax:
+
+            print('\n\n%s \t Starting iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+
+            OpRootFilesAbsPath_Target  = []
+            OpRootFiles_Target         = []
+            OpRootFiles_Exist          = []
+            OpRootFiles_iJobSubmission = []
+            jobStatus_dict             = {} # OD([])
+            
+            for sample_category, samples in samplesList.items():
+                if printLevel >=6:
+                    print("sample_category {}, samples {}".format(sample_category, samples))
+                sample_isMC = True
+                for sampleSubString_toCheck in [kData, 'Run2016','Run2017', 'Run2018']:
+                    if sampleSubString_toCheck in sample_category:
+                        sample_isMC = False
+                        break
+
+                for sample in samples:
+                    if printLevel >=6:
+                        print("\t sample {} _0".format(sample))
+                    if len(selSamplesToRun_list) > 0:
+                        skipThisSample = True
+                        for selSample in selSamplesToRun_list:
+                            selSample = selSample.replace('*','')
+                            if ( (selSample in sample         ) or
+                                (selSample in sample_category) ):
+                                skipThisSample = False
+                        if printLevel >=6:
+                            print(f"\t\t _0p1 {sample = }, {skipThisSample = }")
+                        if skipThisSample:
+                            continue
+                    if printLevel >=6:
+                        print("\t sample {} _1".format(sample))
+                    
+                    if len(selSamplesToExclude_list) > 0:
+                        skipThisSample = False
+                        for selSample in selSamplesToExclude_list:
+                            selSample = selSample.replace('*','')
+                            if ( (selSample in sample         ) or
+                                (selSample in sample_category) ):
+                                skipThisSample = True
+                        if skipThisSample:
+                            continue
+                    if printLevel >=6:
+                        print("\t sample {} _2".format(sample))
+                    
+                        
+                    #
+                    OpRootFileFinalDir = '%s/%s' % (EosDestinationDir, sample)
+                    JobLogsDir         = '%s/%s' % (DestinationDirAbsolute, sample)
+                    if not os.path.exists(OpRootFileFinalDir): os.makedirs( OpRootFileFinalDir, exist_ok=True )
+                    if not os.path.exists(JobLogsDir):         os.makedirs( JobLogsDir, exist_ok=True )
+                    os.chdir( JobLogsDir )
+                        
+                    print(f"sample_category: {sample_category}, sample: {sample}", flush=True)
+
+                    sNTuples_toUse = "CentralNanoAOD"
+                    if   sNTuples == "SkimmedNanoAOD_v1":              sNTuples_toUse = "skim_v1"
+                    elif sNTuples == "SkimmedNanoAOD_v2":              sNTuples_toUse = "skim_v2"
+
+                    sampleInfo = samplesInfo[sample] # Samples_Era.json      
+                    fileList   = None
+                    if   sNTuples == "CentralNanoAOD":                 fileList = sampleInfo[sampleFormat]
+                    else:                                              fileList = sampleInfo["skimmedNanoAOD"][sNTuples_toUse]
+                    
+                    files = []
+                    for iEntry in fileList:
+                        # file name with wildcard charecter *
+                        if "*" in iEntry:  files.extend( glob.glob( iEntry ) )
+                        #else:              files.append( iEntry )
+                        else:
+                            if not iEntry.startswith('/eos/'): # central NanoAOD
+                                files.append( iEntry )
+                            else: # File stored on /eos/ space, check if the file exist or not
+                                if os.path.exists(iEntry):
+                                    files.append( iEntry )
+                                else:
+                                    print(f"Input file {iEntry} does not exists **** ERROR **** \n")
+
+                    if len(files) == 0: continue # no inputfile
+                    
+                    sample_dataset     = sampleInfo["dataset"]
+                    sample_cossSection = sampleInfo["cross_section"] if sample_isMC else None
+                    sample_nEvents     = sampleInfo["nEvents"]
+                    sample_sumEvents   = sampleInfo["sumEvents"] if sample_isMC else None
+                    if   not (sNTuples == "CentralNanoAOD"): 
+                        sample_nEvents     = sampleInfo["skimmedNanoAOD"]["%s_nEvents"   % (sNTuples_toUse)]
+                        sample_sumEvents   = sampleInfo["skimmedNanoAOD"]["%s_sumEvents" % (sNTuples_toUse)] if sample_isMC else None
+                    
+
+
+                    if printLevel >= 6:
+                        print("\nsample: {}".format(sample))
+                        print("samplesInfo[{}]: {}".format(sample, samplesInfo[sample]))
+                        print("files ({}): {}".format(len(files), files))
+
+
+                    nSplits = int(len(files) / nFilesPerJob) + 1 if (nFilesPerJob > 0) and (len(files) != nFilesPerJob) else 1
+
+
+                    files_splitted = np.array_split(files, nSplits)
+                    if printLevel >= 6:
+                        print("files_splitted: {}".format(files_splitted))
+
+                    for iJob in range(len(files_splitted)):
+                        if len(list( files_splitted[iJob] )) == 0: continue
+
+                        JobStage = 0
+                        
+                        config = copy.deepcopy(config_Template)
+
+                        # Job related files
+                        #sOpRootFile_to_use      = '%s/%s' % (DestinationDir, sOpRootFile)
+                        sOpRootFile_to_use      = '%s' % (sOpRootFile)
+                        sOpRootFile_to_use      = sOpRootFile_to_use.replace('$SAMPLE', sample)
+                        sOpRootFile_to_use      = sOpRootFile_to_use.replace('$STAGE', str(JobStage))
+                        sOpRootFile_to_use      = sOpRootFile_to_use.replace('$IJOB', str(iJob))
+                        sOpRootFileFinal_to_use = '%s/%s' % (OpRootFileFinalDir, sOpRootFile_to_use)
+                        
+                        sConfig_to_use          = sOpRootFile_to_use.replace('.root', '_config.json')
+                        sCondorExec_to_use      = sOpRootFile_to_use.replace('.root', '_condor_exec.sh')
+                        sCondorSubmit_to_use    = sOpRootFile_to_use.replace('.root', '_condor_submit.sh')
+                        sCondorLog_to_use       = sOpRootFile_to_use.replace('.root', '_condor.log')
+                        sCondorOutput_to_use    = sOpRootFile_to_use.replace('.root', '_condor.out')
+                        sCondorError_to_use     = sOpRootFile_to_use.replace('.root', '_condor.error')
+
+                        # Check if job related file exist or not
+                        isConfigExist           = os.path.isfile(sConfig_to_use)
+                        isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use) and (os.path.getsize(sOpRootFileFinal_to_use) > 5e4) 
+                        isCondorExecExist       = os.path.isfile(sCondorExec_to_use)
+                        isCondorSubmitExist     = os.path.isfile(sCondorSubmit_to_use)
+                        isCondorLogExist        = os.path.isfile(sCondorLog_to_use)
+                        isCondorOutputExist     = os.path.isfile(sCondorOutput_to_use)
+                        isCondorErrorExist      = os.path.isfile(sCondorError_to_use)
+
+                        if printLevel >= 3:
+                            print(f"sOpRootFile_to_use: {sOpRootFile_to_use}, {JobLogsDir = }, {os.getcwd() = } ")
+                            #print(f" {sConfig_to_use = }: {isConfigExist = } ")
+                            #print(f" {sOpRootFileFinal_to_use = }: {isOpRootFileExist = } ")
+                            #print(f" {sCondorExec_to_use = }: {isCondorExecExist = } ")
+                            #print(f" {sCondorSubmit_to_use = }: {isCondorSubmitExist = } ")
+                            #print(f" {sCondorLog_to_use = }: {isCondorLogExist = } ")
+                            #print(f" {sCondorOutput_to_use = }: {isCondorOutputExist = } ")
+                            #print(f" {sCondorError_to_use = }: {isCondorErrorExist = } ")
+                        
+                        # JobStatus
+                        jobStatus = JobStatus.NotSubmitted # -1
+                        #jobStatusForJobSubmission = [0, 3, 4, 5]
+                        jobStatusForJobSubmission = [
+                            JobStatus.NotSubmitted, #0
+                            #JobStatus.Finished, #1
+                            #JobStatus.Running, #2
+                            JobStatus.Failed_Misc, #3
+                            JobStatus.Failed_Abort, #4
+                            JobStatus.Failed_XRootD, #5
+                        ]
+
+                        if not isConfigExist:
+                            jobStatus = JobStatus.NotSubmitted #0 # job not yet submitted
+                            if printLevel >= 3:
+                                print(f"  jobStatus = 0")
+
+                        elif isOpRootFileExist:
+                            jobStatus = JobStatus.Finished #1 # job ran successfully
+                            OpRootFiles_Exist.append(sOpRootFile_to_use)
+                            if printLevel >= 3:
+                                print(f"  jobStatus = 1")
+                                
+                        else:
+                            if isCondorLogExist:
+                                
+                                if (searchStringInFile(                                    
+                                        sFileName       = sCondorLog_to_use,
+                                        searchString    = 'Job terminated',
+                                        nLinesToSearch  = 3,
+                                        SearchFromEnd   = True)):
+                                    # check wheter the job was terminated or not
+                                    jobStatus = JobStatus.Failed_Misc #3 # job failed due to some other error
+                                    if printLevel >= 3:
+                                        print(f"  jobStatus = 3")
+                                        
+                                        
+                                    # check if job failed due to XRootD error
+                                    if (searchStringInFile(                                        
+                                            sFileName       = sCondorError_to_use,
+                                            searchString    = 'OSError: XRootD error: [ERROR]', 
+                                            nLinesToSearch  = 150,
+                                            SearchFromEnd   = True) or \
+                                        searchStringInFile(
+                                            sFileName       = sCondorError_to_use,
+                                            searchString    = '[ERROR] Invalid redirect URL', 
+                                            nLinesToSearch  = 150,
+                                            SearchFromEnd   = True) ):
+                                        jobStatus = JobStatus.Failed_XRootD #5 # job failed due to XRootD error
+                                        if printLevel >= 3:
+                                            print(f"  jobStatus = 5")
+                                            
+
+                                elif (searchStringInFile(
+                                        sFileName       = sCondorLog_to_use,
+                                        searchString    = 'Job was aborted',
+                                        nLinesToSearch  = 3,
+                                        SearchFromEnd   = True)):
+                                    # check wheter sCondorError does not exist due to Job was aborted
+                                    jobStatus = JobStatus.Failed_Abort #4 # job aborted
+                                    if printLevel >= 3:
+                                        print(f"  jobStatus = 4")
+                                        
+                                        
+                                else:
+                                    jobStatus = JobStatus.Running #2 # job is running
+                                    if printLevel >= 3:
+                                        print(f"  jobStatus = 2")
+                                    
+                                    
+                        OpRootFiles_Target.append(sOpRootFile_to_use)
+                        OpRootFilesAbsPath_Target.append(sOpRootFileFinal_to_use)
+                        if jobStatus in jobStatusForJobSubmission : # [0, 3, 4]:
+                            OpRootFiles_iJobSubmission.append(sOpRootFile_to_use)
+
+                        if jobStatus not in jobStatus_dict.keys():
+                            jobStatus_dict[jobStatus] = [sOpRootFile_to_use]
+                        else:
+                            jobStatus_dict[jobStatus].append(sOpRootFile_to_use)
+                        
+                        if sOpRootFile_to_use not in jobSubmissionInfo_dict:
+                            jobSubmissionInfo_dict[sOpRootFile_to_use] = {}
+                            jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = 0
+                        else:
+                            if jobStatus in jobStatusForJobSubmission :
+                                jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] = jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] + 1
+                        jobSubmissionInfo_dict[sOpRootFile_to_use]['JobStatusLast'] = jobStatus
+                            
+                        
+                        
+                            
+                        if printLevel >= 0:
+                            #print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist}, CondorExec: {isCondorExecExist}, CondorSubmit: {isCondorSubmitExist}, CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
+                            print(f"\t {sOpRootFile_to_use}:: {jobStatus}, Config: {isConfigExist}, OpRootFile: {isOpRootFileExist},  CondorLog: {isCondorLogExist}, CondorOutput: {isCondorOutputExist}, CondorError: {isCondorErrorExist}"); sys.stdout.flush()
+                            
+
+                        #if iJobSubmission == 0:
+                        #if jobStatus == 0 or 1==1:
+                        if jobStatus in jobStatusForJobSubmission:
+                            config["era"] = era
+                            config["dataset"]    = sample_dataset
+                            #config["dataset"]    = list( sample_dataset )
+                            config["inputFiles"] = list( files_splitted[iJob] )
+                            config["outputFile"] = sOpRootFile_to_use 
+                            config["sampleCategory"] = sample_category
+                            config["isMC"] = sample_isMC 
+                            config["nEvents"] = sample_nEvents
+                            if sample_isMC:
+                                config["crossSection"] = sample_cossSection
+                                config["sumEvents"]    = sample_sumEvents
+                                config["systematics"]  = systematics
+                                                                
+                            else:
+                                config["saveRunLsEvt"]  = saveRunLsEvt
+                                del config["crossSection"]
+                                del config["sumEvents"]
+                            config["downloadIpFiles"] = True if ((jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub) and ( not dryRun)) else False
+                            config["server"] = server
+                            config["primaryDatasets"] = primaryDatasets
+                            config["triggers"] = triggers
+
+                            sOpFileList_to_use = [sOpRootFile_to_use]
+                            if (not sample_isMC) and saveRunLsEvt:
+                                sOpFileList_to_use.append( sOpRootFile_to_use.replace('.root', '_*.txt') )
+
+                            if printLevel >= 4:
+                                print("config {}: {}".format(sConfig_to_use, config))
+                            with open(sConfig_to_use, "w") as fConfig:
+                                json.dump( config,  fConfig, indent=4)
+
+
+                            writeCondorExecFile(
+                                sCondorExec_to_use,
+                                sConfig_to_use,
+                                sOpFileList_to_use,
+                                OpRootFileFinalDir,
+                                config["inputFiles"],
+                                server,
+                                saveRunLsEvt 
+                            )
+
+
+                        if jobStatus in jobStatusForJobSubmission: #[0, 3, 4]:
+                            if jobStatus == [JobStatus.Failed_Misc, JobStatus.Failed_XRootD]: #[3, 5]:
+                                # save previos .out and .error files with another names
+                                sCondorOutput_vPrevious = sCondorOutput_to_use.replace('.out', '_v%d.out' % (iJobSubmission-1))
+                                sCondorError_vPrevious  = sCondorError_to_use.replace('.error', '_v%d.error' % (iJobSubmission-1))
+                                os.rename(sCondorOutput_to_use, sCondorOutput_vPrevious)
+                                os.rename(sCondorError_to_use,  sCondorError_vPrevious)
+
+                            increaseJobFlavour = False
+                            #if jobStatus == 4 or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
+                            if jobStatus == JobStatus.Failed_Abort or jobSubmissionInfo_dict[sOpRootFile_to_use]['nResubmissions'] >= xrdcpIpAftNResub:
+                                increaseJobFlavour = True
+                                
+                            writeCondorSumitFile(
+                                sCondorSubmit_to_use,
+                                sCondorExec_to_use,
+                                sCondorLog_to_use,
+                                sCondorOutput_to_use,
+                                sCondorError_to_use,
+                                sConfig_to_use,
+                                increaseJobFlavour)
+
+
+
+                        if jobStatus in [JobStatus.Finished, JobStatus.Running]: #[1, 2]:
+                            # job is either running or succeeded
+                            continue
+
+                        '''
+                        if jobStatus in [3]:
+                            # job failed, but failure reason needs investigation
+                            continue
+                        '''
+                        
+                        if run_mode == 'condor':
+                            cmd1 = "condor_submit %s" % sCondorSubmit_to_use 
+                            
+                            if not (dryRun or jumpToHaddOutput):
+                                if printLevel >= 5:
+                                    print("Now:  %s " % cmd1)
+                                os.system(cmd1)
+                        else:
+                            pass
+
+                        
+
+
+            # write JobSubmission status report in JobSubLog file
+            with open(sFileJobSubLog, 'a') as fJobSubLog:
+                fJobSubLog.write('%s \t iJobSubmission %d \t OpRootFiles_Target (%d):  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission, len(OpRootFiles_Target)))
+                if iJobSubmission == 0:
+                    for f in OpRootFiles_Target:
+                        fJobSubLog.write('\t %s \n' % (f))
+                else:
+                    fJobSubLog.write('OpRootFiles_Exist %d out of %d. \n' % (len(OpRootFiles_Exist), len(OpRootFiles_Target)))
+                    fJobSubLog.write('OpRootFiles_iJobSubmission (%d): ' % (len(OpRootFiles_iJobSubmission)))
+                    for f in OpRootFiles_iJobSubmission:
+                        fJobSubLog.write('\t %s \n' % (f))
+
+                    fJobSubLog.write('\n\nJob status wise output files: \n')
+                    for jobStatus in jobStatus_dict.keys():
+                        fJobSubLog.write('\t jobStatus %s (%d) \n' % (str(jobStatus.value), len(jobStatus_dict[jobStatus])))
+                        #if jobStatus in [0, 1]: continue
+                        if jobStatus in [JobStatus.NotSubmitted, JobStatus.Finished]: continue
+                        
+                        for f in jobStatus_dict[jobStatus]:
+                            fJobSubLog.write('\t\t %s \n' % (f))
+                    
+                fJobSubLog.write('%s\n\n\n' % ('-'*10))
+            
+            
+            jobStatus_list = [ (jobStatus.value, len(jobStatus_dict[jobStatus])) for jobStatus in jobStatus_dict.keys() ]
+            print('\n\n\n%s \t %s %s (out of %s) %s: iJobSubmission %d \t OpRootFiles_Exist %d out of %d. No. of jobs submitted in this resubmission: %d:  ' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era,eras, sAnaCat, iJobSubmission, len(OpRootFiles_Exist), len(OpRootFiles_Target), len(OpRootFiles_iJobSubmission)))
+            print(f"jobStatus_list: {jobStatus_list} \n"); sys.stdout.flush()
+            
+                
+            if dryRun:
+                print('%s \t druRun with iJobSubmission: %d  \nTerminating...\n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+                break #exit(0)
+                
+            if (len(OpRootFiles_Target) == len(OpRootFiles_Exist)) or jumpToHaddOutput:
+                allJobsSuccessful = True
+                break
+            else:
+                time.sleep( ResubWaitingTime * 60 )
+                iJobSubmission += 1
+
+
+        fJobSubLog = open(sFileJobSubLog, 'a')
+        fJobSubLog.write('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+        print('%s \t Jobs are done. iJobSubmission: %d  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), iJobSubmission))
+
+        ## hadd output root files
+        os.chdir( EosDestinationDir )
+
+        sOpRootFile_stage0 = sOpRootFile
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$SAMPLE',  '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$STAGE',   '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('_$IJOB',    '')
+        sOpRootFile_stage0 = sOpRootFile_stage0.replace('.root',     '*.root')
+        
+        sOpRootFile_stage1 = sOpRootFile
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$SAMPLE',  '')
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
+        sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
+
+        isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+
+        if isOpRootFileExist:
+            print('%s %s already exists. \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1))
+        
+        if allJobsSuccessful and (not isOpRootFileExist):
+            print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
+
+
+            nFilesPerBatchForHadd              = 100
+            nBatchesForHadd                    = int(len(OpRootFilesAbsPath_Target) / nFilesPerBatchForHadd) + 1 if len(OpRootFilesAbsPath_Target) != nFilesPerBatchForHadd else 1
+            OpRootFilesAbsPath_Target_splitted = np.array_split(OpRootFilesAbsPath_Target, nBatchesForHadd)
+            sOpRootFile_stage1_batches         = []
+            #print(f"\n\nNo. of {nFilesPerBatchForHadd} files splits in OpRootFilesAbsPath_Target_splitted: {len(OpRootFilesAbsPath_Target_splitted)}")
+            print(f"\n\n{nFilesPerBatchForHadd = }. {len(OpRootFilesAbsPath_Target)} files split into {nBatchesForHadd} batches as {[len(iL) for iL in OpRootFilesAbsPath_Target_splitted]}")
+            #print(f"{OpRootFilesAbsPath_Target_splitted = }")
+            for iHadd in range(len(OpRootFilesAbsPath_Target_splitted)):
+                sOpRootFile_stage1_toUse        = sOpRootFile_stage1.replace('.root', '_batch%d.root' % (iHadd))
+                OpRootFilesAbsPath_Target_toUse = OpRootFilesAbsPath_Target_splitted[iHadd]
+                sOpRootFile_stage1_batches.append(sOpRootFile_stage1_toUse)
+                print(f"\n\n{iHadd = }, No. of files to hadd: {len(OpRootFilesAbsPath_Target_toUse)}")
+
+                cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1_toUse)
+                for opFileName in OpRootFilesAbsPath_Target_toUse:
+                    cmd_hadd += " %s" % (opFileName)
+                
+                cmd_hadd_stdout = executeBashCommand(cmd_hadd)
+                fJobSubLog.write('\n\n{iHadd = } \t %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
+                fJobSubLog.write('\n\n{iHadd = } \t %s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1_toUse))
+
+            # Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1
+            print(f"\n\n\n Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1 ")
+
+            cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
+            for opFileName in sOpRootFile_stage1_batches:
                 cmd_hadd += " %s" % (opFileName)
             
             cmd_hadd_stdout = executeBashCommand(cmd_hadd)
-            fJobSubLog.write('\n\n{iHadd = } \t %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
-            fJobSubLog.write('\n\n{iHadd = } \t %s: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1_toUse))
+            fJobSubLog.write('\n\nHadd stage1_batches %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
+            fJobSubLog.write('\n\n%s:add stage1_batches: hadd %s is done.\n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
 
-        # Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1
-        print(f"\n\n\n Now hadd sOpRootFile_stage1_batches to sOpRootFile_stage1 ")
+            executeBashCommand("pwd")
+            executeBashCommand("ls -lh *.root")
 
-        cmd_hadd = "time hadd -f %s" % (sOpRootFile_stage1)
-        for opFileName in sOpRootFile_stage1_batches:
-            cmd_hadd += " %s" % (opFileName)
-        
-        cmd_hadd_stdout = executeBashCommand(cmd_hadd)
-        fJobSubLog.write('\n\nHadd stage1_batches %s: \n%s \n' % (cmd_hadd, cmd_hadd_stdout))
-        fJobSubLog.write('\n\n%s:add stage1_batches: hadd %s is done.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage0))
+            # Delete sOpRootFile_stage1_batches to save disk space
+            isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+            if isOpRootFileExist:
+                for opFileName in sOpRootFile_stage1_batches:
+                    cmd_rm = 'rm %s' % (opFileName)
+                    cmd_rm_stdout = executeBashCommand(cmd_rm)
+                    fJobSubLog.write('\n %s: \n%s \n' % (cmd_rm, cmd_rm_stdout))
+                fJobSubLog.write('\n\n%s: Deleted stage1_batches: %s.' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), str(sOpRootFile_stage1_batches)))
+
+                executeBashCommand("pwd")
+                executeBashCommand("ls -lh *.root")
+
+        isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        # Make input histograqms for 2DAlphabet
+        if ((systematics.lower() == 'full') and (isOpRootFileExist)):
+            cmd_2DAlphabetInputs = 'python3 scripts/makeHistogramsFor2DAlphabetMthod.py %s %s %s' % (anaVersion, eras, sAnaCat)
+            cmd_2DAlphabetInputs_stdout = executeBashCommand(cmd_2DAlphabetInputs)
+            fJobSubLog.write('\n %s: \n%s \n' % (cmd_2DAlphabetInputs, cmd_2DAlphabetInputs_stdout))
+
+            executeBashCommand("pwd")
+            executeBashCommand("ls -lh 2DAlphabet*")
 
 
+        fJobSubLog.close()
 
-        executeBashCommand("pwd")
-        executeBashCommand("ls")
-
-    fJobSubLog.close()
-
-    print('\n\n%s \t Finished running %s %s' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era))
-        
+        print('\n\n%s \t Finished running %s %s %s' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era, sAnaCat))
+            
+    print(f'\n\n{datetime.now().strftime("%Y/%m/%d %H:%M:%S")} \t Finished running all eras: {eras}, {anaVersion}, {sAnaCat}')

@@ -29,7 +29,7 @@ ExpData_dict = {
     #'Data D': ['JetHT_Run2018D']
 }
 #ExpDatasetName = 'JetHT'
-ExpDatasetNames = ['JetHT', 'BTagCSV']
+#ExpDatasetNames = ['JetHT', 'BTagCSV']
 ExpData_dict = {}
 #MCBkg_list = [
 #    'QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', 'QCD_3bCat', 'QCD_4bCat', 'QCD_5bAndMoreCat',  
@@ -53,7 +53,10 @@ MCBkg_list_1 = [
 ]
 MCBkg_dict = {
     'QCD': ["QCD_bEnr", "QCD_BGen", "QCD_Incl"],
-    r't$\bar{t}$+X': ["TT0l", "TT1l", "TT2l"],
+    #r't$\bar{t}$+X': ["TT0l", "TT1l", "TT2l"],
+    r't$\bar{t}$+X (0l)': ["TT0l"],
+    r't$\bar{t}$+X (1l)': ["TT1l"],
+    r't$\bar{t}$+X (2l)': ["TT2l"],
     'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl"], #"STop_tW_12l", "STbar_tW_12l"],
     'V+X': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv"],
     'Diboson': ["ZZ", "WZ", "WW"],
@@ -100,6 +103,9 @@ logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to n
 
 
 histograms_dict = OD([
+    ("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events (unweighted)', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
+    ("hCutFlowPerCatWeighted", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
+
     #("hLeadingFatJetMass", {sXLabel: 'Leading FatJet mass [GeV]', sYLabel: 'Events', sXRange: [50, 250], sYRange: [1e-2, 1e8]})
     #("hLeadingFatJetMass", {sXLabel: 'Leading FatJet mass [GeV]', sYLabel: 'Events', sXRange: [50, 250]}),
     
@@ -238,7 +244,9 @@ histograms_dict = OD([
     #("hLeadingFatJetMSoftDrop_H34bCat", {sXLabel: 'm(Leading AK8 jet (m-soft-drop) + nearest AK4 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5}),
     #("hLeadingFatJetMassH_H34bCat", {sXLabel: 'm(Leading AK8 jet (m-PNet) + nearest AK4 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5}),
     
-    
+    ("hnleadingNonHto4bFatJet_WZvsQCD", {sXLabel: 'No. of V fat jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
+    ("hnAk4JetsCentral_nonoverlaping_leadingFatJet", {sXLabel: 'No. of central AK4 jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
+    ("hnAk4JetsCentral_nonbTag_nonoverlaping_leadingFatJet", {sXLabel: 'No. of non-b central AK4 jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
 
     #("", {sXLabel: '', sYLabel: 'Events'}),
 
@@ -350,9 +358,9 @@ histograms_dict = OD([
     
 ])
 '''
-
 '''
 histograms_dict = OD([
-    ("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    #("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    ("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
 ])
 '''

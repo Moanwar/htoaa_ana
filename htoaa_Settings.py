@@ -27,6 +27,7 @@ Era_2016preVFP  = '2016preVFP'
 Era_2016postVFP = '2016postVFP'
 Era_2017        = '2017'
 Era_2018        = '2018'
+Era_Run2        = 'Run2'
 
 class DatasetToAnalyze(enum.Enum):
     FullRun2 = 'FullRun2'
@@ -34,7 +35,7 @@ class DatasetToAnalyze(enum.Enum):
 
 ### Set DatasetToAnalyze.SingleYear: to analyze a single year, DatasetToAnalyze.FullRun2: to analyse full Run2 data
 # This is important for co-related/de-correlated systematic uncertainties.
-kDatasetToAnalyze = DatasetToAnalyze.SingleYear # DatasetToAnalyze.SingleYear, DatasetToAnalyze.FullRun2
+kDatasetToAnalyze = DatasetToAnalyze.FullRun2 # DatasetToAnalyze.SingleYear, DatasetToAnalyze.FullRun2
 
 sFileSamplesInfo = {
     #Era_2016: "Samples_2016UL.json",
@@ -143,6 +144,13 @@ Luminosities_perTrigger = {
         'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [19.498, 1.2],
         'HLT_PFMET170_HBHECleaned':                                         [19.498, 1.2],
         'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight':         [19.498, 1.2],
+
+        'HLT_IsoMu24':                                                      [19.498, 1.2],
+        'HLT_IsoTkMu24':                                                    [19.498, 1.2],
+        'HLT_IsoMu27':                                                      [19.498, 1.2],
+        'HLT_Mu50':                                                         [19.498, 1.2],
+        'HLT_TkMu50':                                                       [16.710, 1.2],
+        
     },
     Era_2016postVFP: {
         'HLT_PFJet450':                                                     [16.812, 1.2],
@@ -182,6 +190,13 @@ Luminosities_perTrigger = {
         'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [16.812, 1.2],
         'HLT_PFMET170_HBHECleaned':                                         [16.812, 1.2],
         'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight':         [16.812, 1.2],
+
+        'HLT_IsoMu24':                                                      [16.812, 1.2],
+        'HLT_IsoTkMu24':                                                    [16.812, 1.2],
+        'HLT_IsoMu27':                                                      [16.812, 1.2],
+        'HLT_Mu50':                                                         [16.812, 1.2],
+        'HLT_TkMu50':                                                       [16.812, 1.2],
+
     },
     Era_2017: {
         'HLT_PFJet500':                                                     [41.478, 2.3], #[41.54, 2.3],
@@ -203,19 +218,23 @@ Luminosities_perTrigger = {
         'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':             [ 7.728, 2.3], #[7.73, 2.3],
         'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                       [ 7.728, 2.3], #[7.73, 2.3],
 
+        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':                    [36.675, 2.3], #[36.75, 2.3],
         'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                             [36.675, 2.3], #[36.75, 2.3],
         'HLT_PFMET120_PFMHT120_IDTight':                                    [40.610, 2.3], #[40.67, 2.3],
         'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':                     [36.675, 2.3], #[36.75, 2.3],
         'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                            [40.610, 2.3], #[40.67, 2.3],
-        'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':                    [36.675, 2.3], #[36.75, 2.3],
         'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':                      [36.675, 2.3], #[36.75, 2.3],
         'HLT_PFMETTypeOne120_PFMHT120_IDTight':                             [40.610, 2.3], #[40.67, 2.3],
+        'HLT_PFMET140_PFMHT140_IDTight':                                    [41.478, 2.3], 
+        'HLT_PFMETTypeOne140_PFMHT140_IDTight':                             [41.478, 2.3], #[40.67, 2.3],
         'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [36.675, 2.3], #[36.75, 2.3],
-
+        'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight':         [41.478, 2.3], 
+        
         'HLT_IsoMu24':                                                      [37.997, 2.3], #[38.06, 2.3],
         'HLT_IsoMu27':                                                      [41.478, 2.3], #[41.54, 2.3],
         'HLT_Mu50':                                                         [41.478, 2.3], #[41.54, 2.3],
-        
+        'HLT_OldMu100':                                                     [36.675, 2.3],
+        'HLT_TkMu100':                                                      [36.675, 2.3],
     },
     Era_2018: {
         'HLT_PFHT1050':                                                     [59.827, 2.5],
@@ -238,9 +257,11 @@ Luminosities_perTrigger = {
         'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                         [59.828, 2.5],
         'HLT_PFMETTypeOne140_PFMHT140_IDTight':                             [59.828, 2.5],
 
-        'HLT_IsoMu24':                                                      [59.819, 2.5],
+        'HLT_IsoMu24':                                                      [59.820, 2.5],
         'HLT_IsoMu27':                                                      [59.827, 2.5],
         'HLT_Mu50':                                                         [59.827, 2.5],
+        'HLT_OldMu100':                                                     [59.827, 2.5],
+        'HLT_TkMu100':                                                      [59.827, 2.5],
 
         'HLT_Ele32_WPTight_Gsf':                                            [59.828, 2.5],
         'HLT_Ele35_WPTight_Gsf_L1EGMT':                                     [59.828, 2.5],
@@ -343,35 +364,6 @@ Luminosities_TotalPerYear_perEra = {
 }
 Triggers_perEra = {
     Era_2016: {
-        'Trg_Combo_AK4AK8Jet_HT': {
-            'JetHT': { # JetHT primary dataset
-                'HLT_PFJet450':                                    [], # 36.47 / 36.47
-                'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
-                'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
-                'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
-                'HLT_PFHT800':                                     [], # 27.71 / 36.47
-                'HLT_PFHT900':                                     [], # 36.47 / 36.47
-                #
-                'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
-                'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
-                'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
-                'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
-                #
-                'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
-                'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
-                'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
-                'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
-                'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
-            },  
-            'BTagCSV': { # BTagCSV primary dataset
-                'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
-                'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
-                'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
-                'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
-                'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47 # brilcalc error: no hltpath to l1bit mapping found
-                'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
-            },
-        },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
             'JetHT': { # JetHT primary dataset
                 'HLT_PFJet450':                                    [], # 36.47 / 36.47
@@ -417,30 +409,17 @@ Triggers_perEra = {
                 'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight': [], # 36.47 / 36.47
             },
         },
-
+        'Trg_Combo_Mu': {
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24':   [], # ['L1_SingleMu22'], # 36.47
+                'HLT_IsoTkMu24': [], 
+                'HLT_IsoMu27':   [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_Mu50':      [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_TkMu50':    [],
+            },
+        },
     },
     Era_2017: {
-        'Trg_Combo_AK4AK8Jet_HT': {
-            'JetHT': { # JetHT primary dataset
-                'HLT_PFJet500':                                                  [], # 41.54 
-                'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
-                'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
-                'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
-                'HLT_PFHT1050':                                                  [], # 41.54           
-                'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
-                'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
-                'HLT_AK8PFJet500':                                               [], # 41.54            
-                'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
-                'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
-                'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%  
-            },        
-            'BTagCSV': { # BTagCSV primary dataset
-                #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                              [], # 7.73 / 41.54  BTagCSV dataset
-                
-                'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':           [], # 36.34 / 41.54  BTagCSV dataset
-                'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':     [], # 36.75 / 41.54   BTagCSV dataset   
-            },        
-        },
         'Trg_Combo_AK4AK8Jet_HT_VBF': {
             'JetHT': { # JetHT primary dataset
                 'HLT_PFJet500':                                                  [], # 41.54 
@@ -482,15 +461,16 @@ Triggers_perEra = {
         },        
         'Trg_Combo_Mu': {
             'SingleMuon': { # SingleMuon primary dataset
-                'HLT_IsoMu24': ['L1_SingleMu22'], # 38.06 / 41.54
-                'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
-                'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_IsoMu24': [], # ['L1_SingleMu22'], # 38.06 / 41.54
+                'HLT_IsoMu27': [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_Mu50':    [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_OldMu100': [],
+                'HLT_TkMu100': [],  
             },
-        },
-        
+        },        
     },
     Era_2018: {
-        'Trg_Combo_AK4AK8Jet_HT': {
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
             'JetHT': { # JetHT primary dataset
                 'HLT_PFJet500':                                                  [], # ['L1_SingleJet180'], 
                 'HLT_PFHT1050':                                                  [], # ['L1_SingleJet180', 'L1_HTT360er'],
@@ -500,44 +480,33 @@ Triggers_perEra = {
                 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            [], # ['L1_SingleJet180'],
                 #
                 'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       [], # ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
-                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': [], # ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],            
-            },
-        },
-        'Trg_Combo_AK4AK8Jet_HT_VBF': {
-            'JetHT': { # JetHT primary dataset
-                'HLT_PFJet500':                                                  ['L1_SingleJet180'], 
-                'HLT_PFHT1050':                                                  ['L1_SingleJet180', 'L1_HTT360er'],
-                'HLT_AK8PFHT800_TrimMass50':                                     ['L1_SingleJet180', 'L1_HTT360er'],
-                'HLT_AK8PFJet500':                                               ['L1_SingleJet180'],
-                'HLT_AK8PFJet400_TrimMass30':                                    ['L1_SingleJet180'],
-                'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            ['L1_SingleJet180'],
+                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': [], # ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
                 #
-                'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
-                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
-                #
-                'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
-                'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],      
+                'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    [], # ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
+                'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              [], # ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],      
             },      
         },
         'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
             'MET': { # MET primary dataset
-                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
+                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               [], # ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
                 #'HLT_PFMET120_PFMHT120_IDTight': [],
-                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'],
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       [], # ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'],
                 #'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight': [],
-                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
-                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
                 #'HLT_PFMET200_HBHE_BeamHaloCleaned': [],
-                'HLT_PFMETTypeOne140_PFMHT140_IDTight':               ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                'HLT_PFMETTypeOne140_PFMHT140_IDTight':               [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
                 #'HLT_PFMET140_PFMHT140_IDTight': [],
                 #'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
             },
         },        
         'Trg_Combo_Mu': {
             'SingleMuon': { # SingleMuon primary dataset
-                'HLT_IsoMu24': ['L1_SingleMu22'],
-                'HLT_IsoMu27': ['L1_SingleMu22', 'L1_SingleMu25'],
-                'HLT_Mu50':    ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_IsoMu24': [], # ['L1_SingleMu22'],
+                'HLT_IsoMu27': [], # ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_Mu50':    [], # ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_OldMu100': [],
+                'HLT_TkMu100': [],                
             },
         },
     }
@@ -598,6 +567,13 @@ Weight_HEM1516Issue2018_perTrigger = {
     'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':	         0.2895,
     'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':	                     0.3523,
     'HLT_PFMETTypeOne140_PFMHT140_IDTight':	                         0.3523,    
+
+    'HLT_IsoMu24':                                                   0.3522, # 1 - (38.750 / 59.820)
+    'HLT_IsoMu27':                                                   0.3523, # 1 - (38.750 / 59.827)
+    'HLT_Mu50':                                                      0.3523, # 1 - (38.750 / 59.827)
+    'HLT_OldMu100':                                                  0.3523, # 1 - ( 38.750 / 59.827)
+    'HLT_TkMu100':                                                   0.3523, # 1 - ( 38.750 / 59.827)    
+    
 }
 
 
@@ -887,6 +863,85 @@ Corrections = {
             "FitRange": [0, 3000],
         }
     },
+
+    "HiggsPtRewgt": {
+        "GGH_HToAATo4B": {
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/ggHHiggsPtRewgt_HToAATo4B_TH1D.root', #'/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/ggHHiggsPtRewgt_HToAATo4B.root', 
+            'histogramName': 'hGenHiggsPt_Nom_Wgt_Hqt',
+            'xAxisRange': [20, 800], # pT(GenHiggs)
+        },
+        "VBFH_HToAATo4B": {
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/VBFHHiggsPtRewgt_HToAATo4B_TH1D.root', # /eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/VBFHHiggsPtRewgt_HToAATo4B.root
+            'histogramName': 'hGenHiggsPt_Nom_Wgt_NLO',
+            'xAxisRange': [20, 650], # pT(GenHiggs)
+        },
+        "WH_HToAATo4B": {
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/WH_2D_weight_18.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
+            'histogramName': 'WH_weights_histo',
+            'xAxisRange': [-1.10, 1.10], # log2( (2*pT_H) / (pT_H + pT_W) )
+            'yAxisRange': [ 7.0 , 9.6 ], # log2( pT_H )
+        },
+        "ZH_HToAATo4B": {
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/ZH_2D_weight_18.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
+            'histogramName': 'ZH_weights_histo',
+            'xAxisRange': [-1.10, 1.10], # log2( (2*pT_H) / (pT_H + pT_W) )
+            'yAxisRange': [ 7.0 , 9.6 ], # log2( pT_H )
+        },
+        "TTH_HToAATo4B": {
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/ttHHiggsPtRewgt_HToAATo4B_TH1D.root', # /eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/ttHHiggsPtRewgt_HToAATo4B.root.
+            'histogramName': 'hGenHiggsPt_Nom_Wgt_NLO',
+            'xAxisRange': [20, 650], # pT(GenHiggs)
+        },
+
+    },
+
+    "TrigEffi": {
+        'Hadronic': { # SF as a fuction of (pT, msoft-drop)
+            Era_2016preVFP: {
+                'inputFile': {
+                    'pTIncl': 'data/correction/mc/TrgEffSF/Hadronic/GGF_triggerSF_soup_1D_Inc_pT_Pre2016.json'
+                },  
+                'corrSetName': 'gg0l_triggerSF2016',
+            },
+            Era_2016postVFP: {
+                'inputFile':   {
+                    'pTIncl': 'data/correction/mc/TrgEffSF/Hadronic/GGF_triggerSF_soup_1D_Inc_pT_Post2016.json'
+                },
+                'corrSetName': 'gg0l_triggerSF2016',
+            },
+            Era_2017: {
+                'inputFile':   {
+                    'pTIncl': 'data/correction/mc/TrgEffSF/Hadronic/GGF_triggerSF_soup_1D_Inc_pT_2017.json'
+                },
+                'corrSetName': 'gg0l_triggerSF2017',
+            },
+            Era_2018: {
+                'inputFile':   {
+                    'pTIncl': 'data/correction/mc/TrgEffSF/Hadronic/GGF_triggerSF_soup_1D_Inc_pT_2018.json'
+                },
+                'corrSetName': 'gg0l_triggerSF2018',
+            },             
+        },
+        'MET': { # SF as a fuction of (pT, msoft-drop)
+            Era_2016preVFP: {
+                'inputFile':   'data/correction/mc/TrgEffSF/MET/met_triggerSF_Pre2016.json',
+                'corrSetName': 'met_triggerSF2016',
+            },
+            Era_2016postVFP: {
+                'inputFile':   'data/correction/mc/TrgEffSF/MET/met_triggerSF_Post2016.json',
+                'corrSetName': 'met_triggerSF2016',
+            },
+            Era_2017: {
+                'inputFile':   'data/correction/mc/TrgEffSF/MET/met_triggerSF_2017.json',
+                'corrSetName': 'met_triggerSF2017',
+            },
+            Era_2018: {
+                'inputFile':   'data/correction/mc/TrgEffSF/MET/met_triggerSF_2018.json',
+                'corrSetName': 'met_triggerSF2018',
+            },             
+        },
+        
+    },
     
     'ParticleNetMD_XbbvsQCD': { # Data-to-MC SFs for ParticleNetMD_XbbvsQCD:  BTV-22-001 
         # https://cms.cern.ch/iCMS/analysisadmin/cadilines?line=BTV-22-001&tp=an&id=2622&ancode=BTV-22-001
@@ -902,6 +957,49 @@ Corrections = {
 
 }
 
+SystNameConvUp   = 'Up'
+SystNameConvDown = 'Down'
+# 'PU':                 'CMS_pileup_$YEAR',
+SystNameConvs = {
+    ## Experimental 
+    'PU':                 'CMS_pileup_$YEAR',
+    'JetTrigEffi':        'CMS_eff_j_trigger_$YEAR',
+    'MetTrigEffi':        'CMS_eff_met_trigger_$YEAR',
+    'EleTrigEffi':        'CMS_eff_e_trigger_$YEAR',
+    'MuTrigEffi':         'CMS_eff_m_trigger_$YEAR',
+    'L1Prefire':          'CMS_l1_ecal_prefiring_$YEAR',
+
+    '2018HEM1516Issue':   'CMS_HEM_2018',
+
+    'Btag':               'CMS_btag_fixedWP_comb_bc_$YEAR',    
+    'BtagCorr':           'CMS_btag_fixedWP_comb_bc_correlated',
+    'BtagUncorr':         'CMS_btag_fixedWP_comb_bc_uncorrelated_$YEAR',
+
+    'AK8JetJES':          'CMS_scale_fj_$YEAR', 
+    'AK8JetJER':          'CMS_res_fj_$YEAR',
+    'AK4JetJES':          'CMS_scale_j_$YEAR', 
+    'AK4JetJER':          'CMS_res_j_$YEAR', 
+    'METJES':             'CMS_scale_met_$YEAR', 
+    'METJER':             'CMS_res_met_$YEAR', 
+    'METUnclE':           'CMS_scale_met_unclustered_energy_$YEAR', 
+
+    ## Theoretical 
+    'ggHPtRewgt':         'higgs_pt_reweighting_ggH',
+    'VBFHPtRewgt':        'higgs_pt_reweighting_qqH',
+    'WHPtRewgt':          'higgs_pt_reweighting_WH',
+    'ZHPtRewgt':          'higgs_pt_reweighting_ZH',
+    'ttHPtRewgt':         'higgs_pt_reweighting_ttH',
+    'LPRewgt':            'CMS_eff_j_LundPlan_reweighting',
+
+    'TopPtReWeight':      'top_pt_reweighting',
+    
+    'ISR':                'ps_isr',
+    'FSR':                'ps_fsr',
+    'QCDFactr':           'QCDscale_fac',
+    'QCDRenorm':          'QCDscale_ren',
+    'PDF':                'pdf_99',
+    
+}
 
 massPseudoscalarA_windows_dict = OD([
     ('mA15Window', [14.2, 15.6]),

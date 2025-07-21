@@ -11,3 +11,6 @@ pickles/
 corrections/*.root
 *~
 .__*
+.vscode/settings.json
+test.py
+test.root

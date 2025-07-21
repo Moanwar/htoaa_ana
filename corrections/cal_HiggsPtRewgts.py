@@ -4,7 +4,7 @@ import sys
 #sys.argv.append( '-b-' )
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = False
-from ROOT import TCanvas, TFile, TProfile, TNtuple, TH1F, TH2F, TH1, TF1, TEfficiency, TLegend
+from ROOT import TCanvas, TFile, TProfile, TNtuple, TH1D, TH2D, TH1, TF1, TEfficiency, TLegend
 from ROOT import gROOT, gBenchmark, gRandom, gSystem
 import ctypes
 import re
@@ -159,10 +159,10 @@ def stitchInclAndExclHistogramsAlongXaxis(hInclusive, hExclusive, X_toStitchHist
 
 
 def makeHqt_HiggsPt_Hist(sFInHqtHiggsSpectrum, sFOutHqtHiggsHist):
-    hHiggsCrosssecStitchedInPt     = TH1F('hGenHiggsPt_Nom_HqtStitched',     'Calculated with Hqt - stitched',  2000,            0,               2000)
-    hHiggsCrosssecStitchedInLog2Pt = TH1F('hGenHiggsLog2Pt_Nom_HqtStitched', 'Calculated with Hqt- stitched',   200,  math.log2(1),    math.log2(2000))
-    hHiggsCrosssecMatchedInPt      = TH1F('hGenHiggsPt_Nom_HqtMatched',      'Calculated with Hqt - matched',  2000,            0,               2000)
-    hHiggsCrosssecMatchedInLog2Pt  = TH1F('hGenHiggsLog2Pt_Nom_HqtMatched',  'Calculated with Hqt - matched',   200,  math.log2(1),    math.log2(2000))
+    hHiggsCrosssecStitchedInPt     = TH1D('hGenHiggsPt_Nom_HqtStitched',     'Calculated with Hqt - stitched',  2000,            0,               2000)
+    hHiggsCrosssecStitchedInLog2Pt = TH1D('hGenHiggsLog2Pt_Nom_HqtStitched', 'Calculated with Hqt- stitched',   200,  math.log2(1),    math.log2(2000))
+    hHiggsCrosssecMatchedInPt      = TH1D('hGenHiggsPt_Nom_HqtMatched',      'Calculated with Hqt - matched',  2000,            0,               2000)
+    hHiggsCrosssecMatchedInLog2Pt  = TH1D('hGenHiggsLog2Pt_Nom_HqtMatched',  'Calculated with Hqt - matched',   200,  math.log2(1),    math.log2(2000))
     
     ## Read Hqt Higgs Pt spectrum and store it into histogram
     HiggsCrosssection_dict = {}
@@ -508,6 +508,7 @@ if __name__ == "__main__":
             hDenom     = hHToAATo4B_Stitch, 
             sRatioName = '%s_Wgt_NLO'%(sHistNameShort)
             )
+        hGGFHiggsPtReweights_NLO_fit = hGGFHiggsPtReweights_NLO.Clone('%s_fit'%(hGGFHiggsPtReweights_NLO.GetName()))
         
         if productionMode == 'ggH':
             ## Higgs Pt reweights: w/ Hqt
@@ -516,25 +517,35 @@ if __name__ == "__main__":
                 hDenom     = hHToAATo4B_Stitch, 
                 sRatioName = '%s_Wgt_Hqt'%(sHistNameShort)
                 )
+            hGGFHiggsPtReweights_Hqt_stitched_fit = hGGFHiggsPtReweights_Hqt_stitched.Clone('%s_fit'%(hGGFHiggsPtReweights_Hqt_stitched.GetName()))
         
 
         
         
         cFitWeights = fitHistogram(
-            h = hGGFHiggsPtReweights_NLO, 
+            h = hGGFHiggsPtReweights_NLO_fit, 
             sFitFuncLocal = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
             FitRangeLocal = HiggsPt_fitRange_toUse, 
             sFitFull = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
             FitRangeFull = HiggsPt_fullRange_toUse, 
             sCanvasName = 'c%s_FitWeights'%(sHistNameShort))
         
+        if productionMode == 'ggH':
+            cFitWeights_Hqt = fitHistogram(
+                h = hGGFHiggsPtReweights_Hqt_stitched_fit, 
+                sFitFuncLocal = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
+                FitRangeLocal = HiggsPt_fitRange_toUse, 
+                sFitFull = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
+                FitRangeFull = HiggsPt_fullRange_toUse, 
+                sCanvasName = 'c%s_FitWeights_Hqt'%(sHistNameShort))            
+        
 
         
         
 
         
         
-        fOutHiggsPtRewgt_GGF = TFile(sFOutHiggsPtRewgt, 'update')
+        fOutHiggsPtRewgt_GGF = TFile(sFOutHiggsPtRewgt, 'RECREATE')
         fOutHiggsPtRewgt_GGF.cd()
         hHToAATo4B_Incl.Write()
         hHToAATo4B_Excl.Write()
@@ -548,15 +559,17 @@ if __name__ == "__main__":
         hHiggsNLO.Write()
 
         hGGFHiggsPtReweights_NLO.Write()
+        hGGFHiggsPtReweights_NLO_fit.Write()
         if productionMode == 'ggH': 
             hGGFH_Hqt_stitched_mTopInfinite.Write()
             hGGFH_Hqt_stitched.Write()
             hGGFHiggsPtReweights_Hqt_stitched.Write()
-            cCompareSamplesXSNorm.Write()
-            cCompareSamplesXSCumul.Write()
+            hGGFHiggsPtReweights_Hqt_stitched_fit.Write()
+            #cCompareSamplesXSNorm.Write()
+            #cCompareSamplesXSCumul.Write()
             #cCompareSamplesXSCumul_1.Write()
         
-        cCompareSamples.Write()
+        #cCompareSamples.Write()
 
         fOutHiggsPtRewgt_GGF.Close()
         print(f"\nWrote Higgs pT reweights histograms ({sHistNameShort}) into {sFOutHiggsPtRewgt}.") 

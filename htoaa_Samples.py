@@ -116,15 +116,15 @@ SamplesMC = OD([
     #    "ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8",
     #]),
 
-#    ("ttZ", [
-#        "ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8",
-#    ]),
-#    ("ttW", [
-#        "ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8",
-#    ]),
-#    ("tZq", [
-#        "tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8",
-#    ]),
+    ("ttZ", [
+        "ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8",
+    ]),
+    ("ttW", [
+        "ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8",
+    ]),
+    ("tZq", [
+        "tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8",
+    ]),
     
     
 
@@ -335,6 +335,9 @@ SamplesMC = OD([
         "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8",
         "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
     ]),
+#    ('ttHToNonBB', [
+#        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8"
+#    ]),
     ('ttHToTauTau', [
         "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8",
     ]),
@@ -649,6 +652,13 @@ Samples2016preVFP.update(OD([
     ("JetHT_Run2016E-HIPM", ["JetHT_Run2016E-HIPM"]),
     ("JetHT_Run2016F-HIPM", ["JetHT_Run2016F-HIPM"]),    
 
+    ## BTagCSV data
+    ("BTagCSV_Run2016B-ver2_HIPM", ["BTagCSV_Run2016B-ver2_HIPM"]),
+    ("BTagCSV_Run2016C-HIPM", ["BTagCSV_Run2016C-HIPM"]),
+    ("BTagCSV_Run2016D-HIPM", ["BTagCSV_Run2016D-HIPM"]),
+    ("BTagCSV_Run2016E-HIPM", ["BTagCSV_Run2016E-HIPM"]),
+    ("BTagCSV_Run2016F-HIPM", ["BTagCSV_Run2016F-HIPM"]),
+
     ## MET data
     ("MET_Run2016B-ver2_HIPM", ["MET_Run2016B-ver2_HIPM"]),
     ("MET_Run2016C-HIPM", ["MET_Run2016C-HIPM"]),
@@ -679,6 +689,11 @@ Samples2016postVFP.update(OD([
     ("JetHT_Run2016G", ["JetHT_Run2016G"]),
     ("JetHT_Run2016H", ["JetHT_Run2016H"]),    
 
+    ## BTagCSV data
+    ("BTagCSV_Run2016F", ["BTagCSV_Run2016F"]),
+    ("BTagCSV_Run2016G", ["BTagCSV_Run2016G"]),
+    ("BTagCSV_Run2016H", ["BTagCSV_Run2016H"]), 
+    
     ## MET data
     ("MET_Run2016F", ["MET_Run2016F"]),
     ("MET_Run2016G", ["MET_Run2016G"]),

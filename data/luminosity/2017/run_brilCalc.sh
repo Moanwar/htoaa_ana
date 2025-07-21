@@ -2,7 +2,7 @@
 
 Year="UL17"
 GoldenJSON="/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
-
+: '
 HLTPaths=(
     "HLT_PFJet500"
     "HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2"
@@ -39,6 +39,17 @@ HLTPaths=(
     "HLT_IsoMu27"
     "HLT_Mu50"
 )
+'
+
+HLTPaths=(
+    "HLT_IsoMu24"
+    "HLT_IsoMu27"
+    "HLT_Mu50"
+    "HLT_OldMu100"
+    "HLT_TkMu100"
+    
+)
+
 
 source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
 

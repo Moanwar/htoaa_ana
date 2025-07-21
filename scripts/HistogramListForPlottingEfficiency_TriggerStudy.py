@@ -21,9 +21,11 @@ sPlotTag = 'plotTag'
 
 sIpFiles = OD([
     # (<file name to refer>, <file path+name>)
-    ("fIp1", '/eos/cms/store/user/ssawant/htoaa/analysis/20231123_TrgEffiSF_PNetMD_Hto4b_Htoaa4bOverQCDWP80/2018/analyze_htoaa_stage1.root')
+    #("fIp1", '/eos/cms/store/user/ssawant/htoaa/analysis/20231123_TrgEffiSF_PNetMD_Hto4b_Htoaa4bOverQCDWP80/2018/analyze_htoaa_stage1.root')
+    ("fIp1", '/eos/cms/store/user/ssawant/htoaa/analysis/20250717_DataMC/2018/trigEffi/analyze_htoaa_stage1.root')
 ])
-sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20231123_TrgEffiSF_PNetMD_Hto4b_Htoaa4bOverQCDWP80/2018/plots_effi'
+#sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20231123_TrgEffiSF_PNetMD_Hto4b_Htoaa4bOverQCDWP80/2018/plots_effi'
+sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/20250717_DataMC/2018/trigEffi/plots_effi'
 
 sampleCategory_dict = OD([
     ('SingleMuon_Run2018ABCD', ['SingleMuon_Run2018A', 'SingleMuon_Run2018B', 'SingleMuon_Run2018C', 'SingleMuon_Run2018D', ]),
@@ -39,43 +41,51 @@ sampleCategory_dict = OD([
     ]),
     #('TT_W', ['TTToSemiLeptonic_powheg', 'WJetsToLNu_HT_LO', ])
 ])
-#sampleCategory_dict = OD([
-#    ('TTToSemiLeptonic_powheg', ['TTToSemiLeptonic_powheg']),
-#])
+sampleCategory_dict = OD([
+    ('SingleMuon_Run2018ABCD', ['SingleMuon_Run2018A', 'SingleMuon_Run2018B', 'SingleMuon_Run2018C', 'SingleMuon_Run2018D', ]),
+    ('TT1l', ['TT1l']),
+    ('TT', ["TT0l", "TT1l", "TT2l"]),
+    ('QCD', ["QCD_bEnr", "QCD_BGen", "QCD_Incl"]),
+    ('MC', [
+        "TT0l", "TT1l", "TT2l",
+        "QCD_bEnr", "QCD_BGen", "QCD_Incl",
+        "STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl",
+        "Zqq", "Zvv", "Zll", "Wqq", "Wlv",
+        "ZZ", "WZ", "WW",
+    ]),
+
+])
 sampleCategory_Data_forEffiSF = 'SingleMuon_Run2018ABCD'
 #sampleCategory_MC_forEffiSF   = 'TTToSemiLeptonic_powheg'
-sampleCategory_MC_forEffiSF_list   = ['TTToSemiLeptonic_powheg', 'MC'] #['TTToSemiLeptonic_powheg', 'MC', 'TT_W']
+sampleCategory_MC_forEffiSF_list   = ['TT1l', 'TT', 'QCD', 'MC'] #['TTToSemiLeptonic_powheg', 'MC'] #['TTToSemiLeptonic_powheg', 'MC', 'TT_W']
 
 efficiencyHistogramNameNice_dict = OD([
     ('hLeadingFatJetPt', {sXLabel: 'hLeadingFatJetPt', sXRange: [180, 1000],  sNRebinX: 4,}),
-    ('hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp1', {sXLabel: 'LeadingFatJetPt_msoftdropGt60_btagHbbGtnp1 [GeV]', sXRange: [180, 1000],  sNRebinX: 4,}),
-    ('hLeadingFatJetPt_msoftdropGt60_PNetMD_Hto4b_Htoaa4bOverQCDWP80', {sXLabel: 'LeadingFatJetPt_msoftdropGt60_PNetMD_Hto4b_Htoaa4bOverQCDWP80 [GeV]', sXRange: [180, 1000],  sNRebinX: 4,}),
     ('hLeadingFatJetEta', {sXLabel: 'hLeadingFatJetEta', sXRange: [-3.5, 3.5],  sNRebinX: 2,}),
     ('hLeadingFatJetPhi', {sXLabel: 'hLeadingFatJetPhi', sXRange: [-3.14, 3.14],  sNRebinX: 2,}),
     ('hLeadingFatJetMass', {sXLabel: 'hLeadingFatJetMass', sXRange: [0, 300],  sNRebinX: 5,}),
     ('hLeadingFatJetMSoftDrop', {sXLabel: 'hLeadingFatJetMSoftDrop', sXRange: [0, 300],  sNRebinX: 5,}),
-    ('hLeadingFatJetMass_pTGt400_btagHbbGtnp1', {sXLabel: 'hLeadingFatJetMass_pTGt400_btagHbbGtnp1', sXRange: [0, 300],  sNRebinX: 5,}),
-    ('hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp1', {sXLabel: 'hLeadingFatJetMSoftDrop_pTGt400_btagHbbGtnp1', sXRange: [0, 300],  sNRebinX: 5,}),
-    ('hLeadingFatJetMSoftDrop_pTGt400_PNetMD_Hto4b_Htoaa4bOverQCDWP80', {sXLabel: 'hLeadingFatJetMSoftDrop_pTGt400_PNetMD_Hto4b_Htoaa4bOverQCDWP80', sXRange: [0, 300],  sNRebinX: 5,}),
-    ('hLeadingFatJetBtagCSVV2', {sXLabel: 'hLeadingFatJetBtagCSVV2', sXRange: [0, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetBtagDDBvLV2', {sXLabel: 'hLeadingFatJetBtagDDBvLV2', sXRange: [0, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetBtagDeepB', {sXLabel: 'hLeadingFatJetBtagDeepB', sXRange: [0, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetBtagHbb', {sXLabel: 'hLeadingFatJetBtagHbb', sXRange: [-1, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetParticleNetMD_XbbOverQCD', {sXLabel: 'hLeadingFatJetParticleNetMD_XbbOverQCD', sXRange: [0, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetBtagHbb_pTGt400_msoftdropGt60', {sXLabel: 'hLeadingFatJetBtagHbb_pTGt400_msoftdropGt60', sXRange: [-1, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetParticleNetMD_XbbOverQCD_pTGt400_msoftdropGt60', {sXLabel: 'hLeadingFatJetParticleNetMD_XbbOverQCD_pTGt400_msoftdropGt60', sXRange: [0, 1],  sNRebinX: 2,}),
-    ('hLeadingFatJetPNetMD_Hto4b_Htoaa4bOverQCD_pTGt400_msoftdropGt60', {sXLabel: 'hLeadingFatJetPNetMD_Hto4b_Htoaa4bOverQCD_pTGt400_msoftdropGt60', sXRange: [0, 1],  sNRebinX: 4,}),
+    ('hLeadingFatJetMassH_v2b', {sXLabel: 'hLeadingFatJetMassH_v2b', sXRange: [0, 300],  sNRebinX: 5,}),
+    ('hLeadingFatJetPNet_34massAd', {sXLabel: 'hLeadingFatJetPNet_34massAd', sXRange: [0, 70],  sNRebinX: 20,}),
+    
+    ('hLeadingFatJetParticleNetMD_XbbOverQCD', {sXLabel: 'hLeadingFatJetParticleNetMD_XbbOverQCD', sXRange: [0.75, 1],  sNRebinX: 1,}),
+    ('hLeadingFatJetPNet_X4b_v2ab_Haa34b_score', {sXLabel: 'hLeadingFatJetPNet_X4b_v2ab_Haa34b_score', sXRange: [0, 1],  sNRebinX: 30,}),
     #('', {sXLabel: '',  sNRebinX: ,}),
 
+    ('hMET_pT', {sXLabel: 'hMET_pT', sXRange: [180, 1000],  sNRebinX: 10,}),
+    ('hHTtrig', {sXLabel: 'hHTtrig', sXRange: [180, 2000],  sNRebinX: 50,}),
+    
     
 ])
 
+'''
 efficiencyHistogramNameNice_dict = OD([
 #    ('hLeadingFatJetPt_msoftdropGt60_btagHbbGtnp1', {sXLabel: 'LeadingFatJetPt_msoftdropGt60_btagHbbGtnp1 [GeV]', sXRange: [180, 1000],  sNRebinX: 4,}),
 #    ('hdR_leadingMuon_leadingFatJet', {sXLabel: 'hdR_leadingMuon_leadingFatJet',  sNRebinX: 2,}),
-    ('hLeadingFatJetPt_msoftdropGt60_PNetMD_Hto4b_Htoaa4bOverQCDWP80', {sXLabel: 'LeadingFatJetPt_msoftdropGt60_PNetMD_Hto4b_Htoaa4bOverQCDWP80 [GeV]', sXRange: [180, 1000],  sNRebinX: 4,}),
+    ('hLeadingFatJetPt', {sXLabel: 'LeadingFatJetPt [GeV]', sXRange: [170, 1000],  sNRebinX: 4,}),
     
 ])
+'''
 
 #selectionConditionTag_forNumerator_list   = ['SR_TrgAK8330_M30_BDBnp4', 'SR_Trg2AK4116_DCSVp71', 'SR_TrgAK8400_M30', 'SR_TrgAK8500', 'SR_TrgComb2', 'SR_TrgComb4' ]
 #selectionConditionTag_forDenominator = 'SR'
@@ -86,13 +96,15 @@ selectionConditionTags_forEffiRatio_dict = OD([
     #('SR_TrgAK8500', {sHistDenominator: 'SR', sHistNumerator: 'SR_TrgAK8500', sSelTagNameNice: 'HLT_AK8PFJet500 (D)'}),
     #('SR_TrgComb2', {sHistDenominator: 'SR', sHistNumerator: 'SR_TrgComb2', sSelTagNameNice: 'A + B'}),
     #('SR_TrgComb4', {sHistDenominator: 'SR', sHistNumerator: 'SR_TrgComb4', sSelTagNameNice: 'A + B + C + D'}),
-    ('SR_Trg_PFJet500', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_PFJet500', sSelTagNameNice: 'HLT_PFJet500'}),
-    ('SR_Trg_PFHT1050', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_PFHT1050', sSelTagNameNice: 'HLT_PFHT1050'}),
-    ('SR_Trg_AK8PFHT800_TrimMass50', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFHT800_TrimMass50', sSelTagNameNice: 'HLT_AK8PFHT800_TrimMass50'}),
-    ('SR_Trg_AK8PFJet500', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet500', sSelTagNameNice: 'HLT_AK8PFJet500'}),
-    ('SR_Trg_AK8PFJet400_TrimMass30', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet400_TrimMass30', sSelTagNameNice: 'HLT_AK8PFJet400_TrimMass30'}),
-    ('SR_Trg_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', sSelTagNameNice: 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'}),
-    ('SR_Trg_Combo_AK4AK8Jet_HT', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_Combo_AK4AK8Jet_HT', sSelTagNameNice: 'All'}),
+    #('SR_Trg_PFJet500', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_PFJet500', sSelTagNameNice: 'HLT_PFJet500'}),
+    #('SR_Trg_PFHT1050', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_PFHT1050', sSelTagNameNice: 'HLT_PFHT1050'}),
+    #('SR_Trg_AK8PFHT800_TrimMass50', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFHT800_TrimMass50', sSelTagNameNice: 'HLT_AK8PFHT800_TrimMass50'}),
+    #('SR_Trg_AK8PFJet500', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet500', sSelTagNameNice: 'HLT_AK8PFJet500'}),
+    #('SR_Trg_AK8PFJet400_TrimMass30', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet400_TrimMass30', sSelTagNameNice: 'HLT_AK8PFJet400_TrimMass30'}),
+    #('SR_Trg_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4', sSelTagNameNice: 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'}),
+    #('SR_Trg_Combo_AK4AK8Jet_HT', {sHistDenominator: 'SR', sHistNumerator: 'SR_Trg_Combo_AK4AK8Jet_HT', sSelTagNameNice: 'All'}),
+
+    ('SR_Trg_Combo_AK4AK8Jet_HT', {sHistDenominator: 'JetTrgEffiDenom', sHistNumerator: 'JetTrgEffiNume_Trg_Combo_AK4AK8Jet_HT_VBF', sSelTagNameNice: 'All'}),
 ])
 
 
@@ -133,7 +145,7 @@ for efficiencyHistogramNameNice, histoDetails_dict in efficiencyHistogramNameNic
             isMC = True
             for sDataStr in ['SingleMuon', 'JetHT']:
                 if sDataStr in sampleCategoryNameNice: isMC = False
-            sSystematics = 'central' if isMC else 'noweight'
+            sSystematics = 'Nom' if isMC else 'noweight'
 
             # append histogroms from the same category, which needs to be hadded, into a list
             efficiencyHistograms_dict[efficiencyHistogramNameNice][sampleCategoryNameNice][sSelTagName][sHistNumerator]   = []

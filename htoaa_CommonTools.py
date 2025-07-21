@@ -876,11 +876,15 @@ def getHToAATo4BLundPlaneRewgt(events):
     return [wgt_LundPlane_Nom, wgt_LundPlane_Up, wgt_LundPlane_Down]
         
         
-def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+def getHiggsPtRewgtForGGH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+
+    ## v0: Used in Brook's analysis
     # Used in Brook's analysis
     #wgt_HiggsPt = (3.9 - (0.4 * np.log2(pT)))
     #wgt_HiggsPt = np.maximum(wgt_HiggsPt, np.full(len(pT), 0.1) )
 
+    '''
+    ## v1: Higgs pT reweighting w.r.t. NLO sample
     # https://indico.cern.ch/event/1348321/#19-siddhesh-sawant
     # min(max(1.45849 + -0.00400668*x + 4.02577e-06*pow(x, 2) + -1.38804e-09*pow(x, 3), 0.09), 1.02)
     wgt_HiggsPt = 1.45849 - 0.00400668*GenHiggsPt_list + 4.02577e-06*GenHiggsPt_list**2 - 1.38804e-09*GenHiggsPt_list**3 
@@ -897,8 +901,239 @@ def getHiggsPtRewgtForGGToHToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
         wgt_HiggsPtSystVarDown > 1,
         np.ones_like(wgt_HiggsPtSystVarDown),
         wgt_HiggsPtSystVarDown)
-                                      
+    '''
+    
+    ## v2: Higgs pT reweighting w.r.t. HqTv2.0. Reweights are stored in histogram
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['inputFile']
+            )
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['xAxisRange'][1]
+
+    Higgs_pt_toUse = GenHiggsPt_list
+    # Cap jet_pt in [xRangeMin, xRangeMax]
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse < xRangeMin),
+        ak.full_like(Higgs_pt_toUse, xRangeMin),
+        Higgs_pt_toUse
+    )
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse > xRangeMax),
+        ak.full_like(Higgs_pt_toUse, xRangeMax),
+        Higgs_pt_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](Higgs_pt_toUse)
+
+    # Up: wgt^2
+    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+
+    #printVariable('htoaa_CommonTools::getHiggsPtRewgtForGGH_HToAATo4B(): ', ak.zip([GenHiggsPt_list, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
+
     return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
+    
+        
+def getHiggsPtRewgtForVBFH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+    
+    ## v0: Higgs pT reweighting w.r.t. HqTv2.0. Reweights are stored in histogram
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['VBFH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['VBFH_HToAATo4B']['inputFile']
+            )
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['VBFH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['VBFH_HToAATo4B']['xAxisRange'][1]
+
+    Higgs_pt_toUse = GenHiggsPt_list
+    # Cap jet_pt in [xRangeMin, xRangeMax]
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse < xRangeMin),
+        ak.full_like(Higgs_pt_toUse, xRangeMin),
+        Higgs_pt_toUse
+    )
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse > xRangeMax),
+        ak.full_like(Higgs_pt_toUse, xRangeMax),
+        Higgs_pt_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](Higgs_pt_toUse)
+
+    # Up: wgt^2
+    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+
+    #printVariable('htoaa_CommonTools::getHiggsPtRewgtForGGH_HToAATo4B(): ', ak.zip([GenHiggsPt_list, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
+
+    return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
+    
+
+def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW):
+    # v0: Higgs pT reweights calculated by Hichem
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['WH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
+            )
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['xAxisRange'][1]
+    yRangeMin = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['yAxisRange'][0]
+    yRangeMax = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['yAxisRange'][1]
+
+    HiggsPt = genHiggs.pt
+    WPt     = genW.pt
+
+    x_toUse = np.log2( (2*HiggsPt) / (HiggsPt + WPt))
+    y_toUse = np.log2( HiggsPt )
+
+    # Cap x in [xRangeMin, xRangeMax]
+    x_toUse = ak.where(
+        (x_toUse < xRangeMin),
+        ak.full_like(x_toUse, xRangeMin),
+        x_toUse
+    )
+    x_toUse = ak.where(
+        (x_toUse > xRangeMax),
+        ak.full_like(x_toUse, xRangeMax),
+        x_toUse
+    ) 
+    # Cap y in [yRangeMin, yRangeMax]
+    y_toUse = ak.where(
+        (y_toUse < yRangeMin),
+        ak.full_like(y_toUse, yRangeMin),
+        y_toUse
+    )
+    y_toUse = ak.where(
+        (y_toUse > yRangeMax),
+        ak.full_like(y_toUse, yRangeMax),
+        y_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse)
+
+    # Up: wgt^2
+    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+
+    #printVariable('htoaa_CommonTools::getHiggsPtRewgtForWH_HToAATo4B(): ', ak.zip([HiggsPt,WPt, x_toUse,y_toUse, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
+
+    return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]    
+    
+
+def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ):
+    # v0: Higgs pT reweights calculated by Hichem
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['inputFile']
+            )
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['xAxisRange'][1]
+    yRangeMin = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['yAxisRange'][0]
+    yRangeMax = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['yAxisRange'][1]
+
+    HiggsPt = genHiggs.pt
+    ZPt     = genZ.pt
+
+    x_toUse = np.log2( (2*HiggsPt) / (HiggsPt + ZPt))
+    y_toUse = np.log2( HiggsPt )
+
+    # Cap x in [xRangeMin, xRangeMax]
+    x_toUse = ak.where(
+        (x_toUse < xRangeMin),
+        ak.full_like(x_toUse, xRangeMin),
+        x_toUse
+    )
+    x_toUse = ak.where(
+        (x_toUse > xRangeMax),
+        ak.full_like(x_toUse, xRangeMax),
+        x_toUse
+    ) 
+    # Cap y in [yRangeMin, yRangeMax]
+    y_toUse = ak.where(
+        (y_toUse < yRangeMin),
+        ak.full_like(y_toUse, yRangeMin),
+        y_toUse
+    )
+    y_toUse = ak.where(
+        (y_toUse > yRangeMax),
+        ak.full_like(y_toUse, yRangeMax),
+        y_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse)
+
+    # Up: wgt^2
+    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+
+    #printVariable('htoaa_CommonTools::getHiggsPtRewgtForZH_HToAATo4B(): ', ak.zip([HiggsPt,ZPt, x_toUse,y_toUse, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
+
+    return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]    
+
+
+def getHiggsPtRewgtForTTH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
+    
+    ## v0: Higgs pT reweighting w.r.t. HqTv2.0. Reweights are stored in histogram
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['TTH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['TTH_HToAATo4B']['inputFile']
+            )
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['TTH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['TTH_HToAATo4B']['xAxisRange'][1]
+
+    Higgs_pt_toUse = GenHiggsPt_list
+    # Cap jet_pt in [xRangeMin, xRangeMax]
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse < xRangeMin),
+        ak.full_like(Higgs_pt_toUse, xRangeMin),
+        Higgs_pt_toUse
+    )
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse > xRangeMax),
+        ak.full_like(Higgs_pt_toUse, xRangeMax),
+        Higgs_pt_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](Higgs_pt_toUse)
+
+    # Up: wgt^2
+    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+
+    #printVariable('htoaa_CommonTools::getHiggsPtRewgtForGGH_HToAATo4B(): ', ak.zip([GenHiggsPt_list, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
+
+    return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
+    
 
 
 def getHTReweight(HT_list, sFitFunctionFormat, sFitFunction, sFitFunctionRange):
@@ -1183,8 +1418,10 @@ def get_JMR_JMS(Jet, year, shift_syst=""):
 
 
 
-def get_jetTriggerSF(events, year, selection):
-
+def get_jetTriggerSF(pt, year): # msd, HT, 
+    '''
+    # v0: 
+    # get_jetTriggerSF(events, year, selection):
     leadingjet = ak.firsts(events.FatJet)
     jet_triggerSF = correctionlib.CorrectionSet.from_file("data/correction/mc/TrgEffSF/fatjet_triggerSF.json") # correctionlib.CorrectionSet.from_file("data/trigger/fatjet_triggerSF.json")
 
@@ -1200,6 +1437,78 @@ def get_jetTriggerSF(events, year, selection):
     nom_trg  = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("nominal", jet_pt, jet_msd))
     up_trg   = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_up", jet_pt, jet_msd))
     down_trg = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_dn", jet_pt, jet_msd))
+    '''
+
+    #return [np.ones_like(pt), np.ones_like(pt), np.ones_like(pt)] ## not using jetTrig SFs for now
+
+
+
+    jet_pt   = np.array(ak.fill_none(pt,  0.))
+    #jet_msd  = np.array(ak.fill_none(msd, 0.))  # note: uncorrected
+    #HT       = np.array(ak.fill_none(HT,  0.))
+
+    sFIpSf             = Corrections["TrigEffi"]['Hadronic'][year]['inputFile']['pTIncl']
+    sCorrectionSetName = Corrections["TrigEffi"]['Hadronic'][year]['corrSetName']
+    print(f"{sFIpSf = }, {sCorrectionSetName = }", flush=True)
+    jet_triggerSF      = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName]        
+
+    nom_trg  = jet_triggerSF.evaluate("nominal", jet_pt)
+    up_trg   = jet_triggerSF.evaluate("stat_up", jet_pt)
+    down_trg = jet_triggerSF.evaluate("stat_dn", jet_pt)
+
+
+    # when trgSF=0 (due to no statistic in TrgSF computation region), set trgSF=1 and apply 50% uncertainty
+    up_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 1.5),
+        up_trg
+    )
+    down_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 0.5),
+        down_trg
+    )
+    nom_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 1.0),
+        nom_trg
+    )
+    
+    #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, msd, nom_trg, up_trg, down_trg]))
+    printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
+
+    return [nom_trg, up_trg, down_trg]
+
+
+def get_metTriggerSF(pt, year):
+
+    sFIpSf             = Corrections["TrigEffi"]['MET'][year]['inputFile']
+    sCorrectionSetName = Corrections["TrigEffi"]['MET'][year]['corrSetName']
+    met_triggerSF = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName] 
+
+    met_pt   = np.array(ak.fill_none(pt,  0.))
+    nom_trg  = met_triggerSF.evaluate("nominal", met_pt)
+    up_trg   = met_triggerSF.evaluate("stat_up", met_pt)
+    down_trg = met_triggerSF.evaluate("stat_dn", met_pt)
+
+    # when trgSF=0 (due to no statistic in TrgSF computation region), set trgSF=1 and apply 50% uncertainty
+    up_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 1.5),
+        up_trg
+    )
+    down_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 0.5),
+        down_trg
+    )
+    nom_trg = np.where(
+        (nom_trg < 1e-6),
+        np.full_like(nom_trg, 1.0),
+        nom_trg
+    )
+    
+    #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, msd, nom_trg, up_trg, down_trg]))
 
     return [nom_trg, up_trg, down_trg]
 
@@ -1304,7 +1613,7 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
             btagWgt_perJet
         )
         
-        btagWgt_dict[syst_type] = ak.prod(btagWgt_perJet, axis=-1)
+        btagWgt_dict[syst_type] = ak.fill_none( ak.prod(btagWgt_perJet, axis=-1), 1)
 
         '''
         printVariable('jets %s '%syst_type, ak.zip([
@@ -1982,14 +2291,17 @@ def array_PutUpperBound(array_list, k):
 def stringHasSubstring(string, substringList):
     hasSubstring = False
     for s_ in substringList:
-        if s_ in string: hasSubstring = True
+        if s_.lower() in string.lower(): 
+            hasSubstring = True
+            break
     return hasSubstring
 
 
 def printVariable(sName, var):
     printInDetail=True
     #if nEventsToAnalyze == -1: printInDetail = False
-    if str(type(var)) in ['numpy.ndarray', "<class 'numpy.ndarray'>", "<class 'numpy.ma.core.MaskedArray'>"]: printInDetail = False # as gave error
+    #print(f"{sName = } {type(var) = }, {var = }", flush=True)
+    if str(type(var)) in ['numpy.ndarray', 'numpy.float64', "<class 'numpy.float64'>", "<class 'numpy.ndarray'>", "<class 'numpy.ma.core.MaskedArray'>"]: printInDetail = False # as gave error
     #print(f"printInDetail: {printInDetail} {sName} ({type(var)}) ({len(var)}): {var}")
     if not printInDetail:
         #print(f"{sName} ({type(var)}) ({len(var)}): {var}")

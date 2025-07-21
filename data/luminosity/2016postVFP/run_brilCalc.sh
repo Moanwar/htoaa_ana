@@ -3,6 +3,7 @@
 Year="UL16postVFP"
 GoldenJSON="/afs/cern.ch/work/s/ssawant/private/htoaa/htoaa_b_ana_SS/data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016postVFP_Collisions16_JSON.txt"
 
+: '
 HLTPaths=(
     "HLT_PFJet450"
     "HLT_DiCentralPFJet430"
@@ -43,6 +44,17 @@ HLTPaths=(
     "HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight"
     
 )
+'
+
+HLTPaths=(
+    "HLT_IsoMu24"
+    "HLT_IsoTkMu24"
+    "HLT_IsoMu27"
+    "HLT_Mu50"
+    "HLT_TkMu50"
+    
+)
+
 
 source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
 
