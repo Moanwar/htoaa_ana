@@ -1449,7 +1449,6 @@ def get_jetTriggerSF(pt, year): # msd, HT,
 
     sFIpSf             = Corrections["TrigEffi"]['Hadronic'][year]['inputFile']['pTIncl']
     sCorrectionSetName = Corrections["TrigEffi"]['Hadronic'][year]['corrSetName']
-    print(f"{sFIpSf = }, {sCorrectionSetName = }", flush=True)
     jet_triggerSF      = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName]        
 
     nom_trg  = jet_triggerSF.evaluate("nominal", jet_pt)
@@ -1475,7 +1474,7 @@ def get_jetTriggerSF(pt, year): # msd, HT,
     )
     
     #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, msd, nom_trg, up_trg, down_trg]))
-    printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
+    #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
 
     return [nom_trg, up_trg, down_trg]
 
