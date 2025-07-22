@@ -989,7 +989,7 @@ SystNameConvs = {
     'WHPtRewgt':          'higgs_pt_reweighting_WH',
     'ZHPtRewgt':          'higgs_pt_reweighting_ZH',
     'ttHPtRewgt':         'higgs_pt_reweighting_ttH',
-    'LPRewgt':            'CMS_eff_j_LundPlan_reweighting',
+    'LPRewgt':            'CMS_eff_fj_LundPlan_reweighting',
 
     'TopPtReWeight':      'top_pt_reweighting',
     
