@@ -3037,8 +3037,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # MC TrgEff ------------------------------------
             wgt_TrgEff, wgt_TrgEffUp, wgt_TrgEffDown  = get_jetTriggerSF(
                 pt   = leadingFatJet.pt_toUse, 
-                msd  = leadingFatJet.msoftdrop_toUse, 
-                HT   = HTtrig,
+                #msd  = leadingFatJet.msoftdrop_toUse, 
+                #HT   = HTtrig,
                 year = self.datasetInfo["era"]
             )
 
