@@ -28,7 +28,8 @@ from htoaa_Samples import (
     kData, kQCDIncl, kQCD_bGen, kQCD_bEnrich
 )
 from htoaa_CommonTools import (
-    executeBashCommand
+    executeBashCommand,
+    get_directory_size
 )
 
 
@@ -39,6 +40,7 @@ sConfig           = "config_htoaa.json"
 sRunCommandFile   = "1_RunCommand.txt"
 sJobSubLogFile    = "1_JobSubmission.log"
 sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
+sOp2DAlphabetIpDir = "2DAlphabet_inputFiles"
 
 printLevel = 2 #2, 6
 
@@ -904,15 +906,21 @@ if __name__ == '__main__':
                 executeBashCommand("pwd")
                 executeBashCommand("ls -lh *.root")
 
-        isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        isOpRootFileExist     = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        size2DAlphabetIpDir   = get_directory_size("%s" % (sOp2DAlphabetIpDir))
+        isOp2DAlphabetIpExist = (size2DAlphabetIpDir > 5e4)
+        fJobSubLog.write(f"\n{isOpRootFileExist = }, {size2DAlphabetIpDir = }, {isOp2DAlphabetIpExist = }, {sOp2DAlphabetIpDir = } \n")
+        print(f"\n{isOpRootFileExist = }, {size2DAlphabetIpDir = }, {isOp2DAlphabetIpExist = }, {sOp2DAlphabetIpDir = } \n")
         # Make input histograqms for 2DAlphabet
-        if ((systematics.lower() == 'full') and (isOpRootFileExist)):
-            cmd_2DAlphabetInputs = 'python3 scripts/makeHistogramsFor2DAlphabetMthod.py %s %s %s' % (anaVersion, eras, sAnaCat)
+        if ((systematics.lower() == 'full') and (isOpRootFileExist)) and (not isOp2DAlphabetIpExist):
+            os.chdir( SourceCodeDir )
+            cmd_2DAlphabetInputs = 'python3 scripts/makeHistogramsFor2DAlphabetMthod.py %s %s %s' % (anaVersion, era, sAnaCat)
             cmd_2DAlphabetInputs_stdout = executeBashCommand(cmd_2DAlphabetInputs)
             fJobSubLog.write('\n %s: \n%s \n' % (cmd_2DAlphabetInputs, cmd_2DAlphabetInputs_stdout))
 
+            os.chdir( EosDestinationDir )
             executeBashCommand("pwd")
-            executeBashCommand("ls -lh 2DAlphabet*")
+            executeBashCommand("ls -lh %s" % (sOp2DAlphabetIpDir))
 
 
         fJobSubLog.close()

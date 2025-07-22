@@ -4315,12 +4315,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hCutFlow'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list * iBin),
-                            systematic=syst
+                            #systematic=syst
                         )
                         output['hCutFlowWeighted'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list * iBin),
-                            systematic=syst,
+                            #systematic=syst,
                             weight=evtWeight
                         )
 
@@ -4329,17 +4329,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hCutFlow'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list[sel_SR_forHExt] * iBin),
-                            systematic=syst
+                            #systematic=syst
                         )
                         output['hCutFlowWeighted'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list[sel_SR_forHExt] * iBin),
-                            systematic=syst,
+                            #systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
                     if histogramSaveLevel >= 0:
                         # 2DAlphabetFit histograms --------------------------------
+                        '''
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
                             output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
                                 dataset=dataset,
@@ -4361,7 +4362,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 Mass2=(leadingFatJet_PNet_massA_Hto4b_avg[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
-                            )    
+                            ) 
+                        '''   
                         ## PNetMD Hto4b NanoAOD_v2
                         if 'PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields:
                             # mH vs mAa for different mH versions
@@ -4410,7 +4412,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 weight=evtWeight[sel_SR_forHExt]
                             )
 
-                            # mass vs mA for different mA versions                            
+                            # mass vs mA for different mA versions   
+                            '''                         
                             output['hLeadingFatJetMass_vs_massA34b'+sHExt].fill(
                                 dataset=dataset,
                                 Mass=(leadingFatJet.mass_toUse[sel_SR_forHExt]),
@@ -4432,6 +4435,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             )
+                            '''
 
                             # mH vs mA34d for different mH versions                                                
                             output['hLeadingFatJetMass_vs_massA34d'+sHExt].fill(
@@ -6342,12 +6346,13 @@ if __name__ == '__main__':
     triggers            = config['triggers'] if 'triggers' in config else ''
     primaryDatasets     = config['primaryDatasets'] if 'primaryDatasets' in config else ['JetHT', 'BTagCSV']
     saveRunLsEvt        = config['saveRunLsEvt']    if 'saveRunLsEvt'    in config else False
+    systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
     if isMC:
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
-        systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
+        
 
 
     print(f"htoaa_Analysis_VHHadronicMode:: here16 {datetime.now() = }")    
