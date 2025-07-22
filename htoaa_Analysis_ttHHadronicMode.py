@@ -95,7 +95,7 @@ print(f"htoaa_Analysis_ttHHadronicMode:: here13 {datetime.now() = }"); sys.stdou
 
  
 printLevel = 0
-histogramSaveLevel = 0 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 storeIndividualEvtWgts = False # True: Store individual event weight components for debugging.  False: otherwise
@@ -279,6 +279,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         datasetName_part1               = self.datasetInfo['datasetNameFull'].split('/')[1]
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
+        if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ): 
+            histogramSaveLevel = 0
+        print(f"{histogramSaveLevel = }")
         
 
         # Identify and lable samples --------------------------------------------------
@@ -480,7 +483,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         for sCatName, catSels in categories_dict.items():
-            self.sel_names_all["%s" % (sCatName)] = catSels
+            if histogramSaveLevel >= 1:
+                self.sel_names_all["%s" % (sCatName)] = catSels
             
             if CrossCheckEvtYieldsWithAndrew:
                 self.sel_names_all["%s_SRWP60" % (sCatName)] = catSels + [
@@ -923,17 +927,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
                         ('hCutFlowWeighted'+sHExt,                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
 
-                        ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
+                        #('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),     
 
-                        ('hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),
+                        #('hLeadingFatJetMass_vs_massA_Hto4b_avg'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),
 
-                        ('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),        
+                        #('hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetParticleNet_massA_Hto4b_avg"}),        
 
                         ## PNetMD Hto4b NanoAOD_v2
                         ('hLeadingFatJetPNet_massH_v2b_vs_massAa'+sHExt,     
@@ -957,15 +961,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hLeadingFatJetMSoftDrop_vs_massA34a'+sHExt,     
                         {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMSoftDrop",
                         sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34a"}),
-                        ('hLeadingFatJetMass_vs_massA34b'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34b"}),
-                        ('hLeadingFatJetMass_vs_massA34d'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34d"}),
-                        ('hLeadingFatJetMass_vs_massA34ad'+sHExt,     
-                        {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
-                        sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34ad"}),
+                        #('hLeadingFatJetMass_vs_massA34b'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34b"}),
+                        #('hLeadingFatJetMass_vs_massA34d'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34d"}),
+                        #('hLeadingFatJetMass_vs_massA34ad'+sHExt,     
+                        #{sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
+                        #sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34ad"}),
                         ('hLeadingFatJetMass_vs_massA34d'+sHExt,     
                         {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetMass",
                         sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34d"}),                        
@@ -977,6 +981,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         sYaxis: mass_axis2,       sYaxisLabel: r"hLeadingFatJetPNet_massA34d"}),                        
                          
                     ]))
+
 
                 if histogramSaveLevel >= 1:
                     histos.update(OD([
@@ -1333,8 +1338,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             hXaxis = deepcopy(histAttributes[sXaxis])
             hXaxis.label = histAttributes[sXaxisLabel]
 
-            if histName.startswith('hEventWeight_'): 
-                # TH1 w/o syst
+            if (histName.startswith('hEventWeight_') or \
+                histName.startswith('hCutFlow')): 
+                 # TH1 w/o syst
                 self._accumulator.add({
                     histName: hist.Hist(
                         "Counts",
@@ -1478,6 +1484,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         output = self.accumulator.identity()
         dataset = events.metadata["dataset"] # dataset label
         print(f"process_shift():: {shift_syst = } dataset: {dataset}", flush=flushStdout)
+        if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ): 
+            histogramSaveLevel = 0
         
 
         ones_list  = np.ones(len(events))
@@ -4303,7 +4311,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     sel_SR_forHExt = ak.fill_none(sel_SR_forHExt, False) 
 
 
-                    if histogramSaveLevel >= 0:
+                    if (( histogramSaveLevel >= 0) and ((syst == "Nom") or (syst == "noweight")) ):
                         # Cut flow table ------------------------------------------                    
                         # all events
                         iBin = 0
@@ -4333,6 +4341,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
+                    if histogramSaveLevel >= 0:
                         # 2DAlphabetFit histograms --------------------------------
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
                             output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
@@ -6456,10 +6465,10 @@ if __name__ == '__main__':
         "triggers":        triggers,
         "saveRunLsEvt":    saveRunLsEvt,
     }
+    sampleInfo["systematicsToRun"] = systematicsToRun
     if isMC:
         sampleInfo["sample_crossSection"]   = sample_crossSection
-        sampleInfo["sample_sumEvents"]      = sample_sumEvents
-        sampleInfo["systematicsToRun"] = systematicsToRun
+        sampleInfo["sample_sumEvents"]      = sample_sumEvents        
     print(f"htoaa_Analysis_ttHHadronicMode:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()

@@ -706,10 +706,11 @@ if __name__ == '__main__':
                             config["sampleCategory"] = sample_category
                             config["isMC"] = sample_isMC 
                             config["nEvents"] = sample_nEvents
+                            config["systematics"]  = systematics
                             if sample_isMC:
                                 config["crossSection"] = sample_cossSection
                                 config["sumEvents"]    = sample_sumEvents
-                                config["systematics"]  = systematics
+                                
                                                                 
                             else:
                                 config["saveRunLsEvt"]  = saveRunLsEvt

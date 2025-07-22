@@ -6426,12 +6426,12 @@ if __name__ == '__main__':
     triggers            = config['triggers'] if 'triggers' in config else ''
     primaryDatasets     = config['primaryDatasets'] if 'primaryDatasets' in config else ['JetHT', 'BTagCSV']
     saveRunLsEvt        = config['saveRunLsEvt']    if 'saveRunLsEvt'    in config else False
+    systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
     if isMC:
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
-        systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
 
     print(f"htoaa_Analysis_GGFMode:: here16 {datetime.now() = }")    
         
@@ -6510,10 +6510,11 @@ if __name__ == '__main__':
         "triggers":        triggers,
         "saveRunLsEvt":    saveRunLsEvt,
     }
+    sampleInfo["systematicsToRun"] = systematicsToRun
     if isMC:
         sampleInfo["sample_crossSection"]   = sample_crossSection
         sampleInfo["sample_sumEvents"]      = sample_sumEvents
-        sampleInfo["systematicsToRun"] = systematicsToRun
+        
     print(f"htoaa_Analysis_GGFMode:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()
