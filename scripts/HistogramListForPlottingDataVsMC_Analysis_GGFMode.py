@@ -53,10 +53,10 @@ MCBkg_list_1 = [
 ]
 MCBkg_dict = {
     'QCD': ["QCD_bEnr", "QCD_BGen", "QCD_Incl"],
-    #r't$\bar{t}$+X': ["TT0l", "TT1l", "TT2l"],
-    r't$\bar{t}$+X (0l)': ["TT0l"],
-    r't$\bar{t}$+X (1l)': ["TT1l"],
-    r't$\bar{t}$+X (2l)': ["TT2l"],
+    r't$\bar{t}$+X': ["TT0l", "TT1l", "TT2l"],
+    #r't$\bar{t}$+X (0l)': ["TT0l"],
+    #r't$\bar{t}$+X (1l)': ["TT1l"],
+    #r't$\bar{t}$+X (2l)': ["TT2l"],
     'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl"], #"STop_tW_12l", "STbar_tW_12l"],
     'V+X': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv"],
     'Diboson': ["ZZ", "WZ", "WW"],
