@@ -10,6 +10,8 @@ To run:
 
 # %%
 import os, sys
+import psutil
+import time
 import numpy as np
 from collections import OrderedDict as OD
 import math
@@ -34,6 +36,9 @@ from htoaa_CommonTools import (
     rebinTH1, rebinTH2, variableRebinTH1,
 )
 
+def getAllocatedMomory():
+    return "Memory: %g MB" % ((psutil.Process().memory_info().rss / (1024 * 1024))) 
+
 global Year;
 #sAnaVersion = '20250713_DatacardsFullSyst';    Year         = '2016preVFP';
 #CAT0 = 'gg0l'  # 'gg0l', 'VBFjj', 'Vjj', 'ttHad'/'tt0l', 'Zvv'
@@ -41,7 +46,10 @@ sAnaVersion = sys.argv[1]
 Year        = sys.argv[2]
 CAT0        = sys.argv[3]
 print(f"\n{sAnaVersion = }, {Year = }, {CAT0} \n")
+#print(f"{psutil.Process().memory_info().rss / (1024 * 1024) = }", flush=True)
+print(f"here1 {getAllocatedMomory()}", flush=True)
 
+printLevel = 0
 
 
 anaSuperCat = ''
@@ -115,6 +123,10 @@ CATAGORIES_gg0l = {
     "gg0lHi" :   "gg0lHi_Xto4bv2",
     "gg0lLo" :   "gg0lLo_Xto4bv2",    
 }
+CATAGORIES_VBFjj = {
+    "VBFTight" :   "VBFTight_Xto4bv2",
+    "VBFLoose" :   "VBFLoose_Xto4bv2",    
+}
 CATAGORIES_Vjj = {
     "VjjIncl" : "VjjIncl_Xto4bv2", 
     "VjjHi"   : "VjjHi_Xto4bv2", 
@@ -140,7 +152,14 @@ WPs_perCategory = {
     'Zvv':   ['WP60'],        
 }
 
+if printLevel >= 6:
+    print(f"here2 {getAllocatedMomory()}", flush=True)
+
 fIpFile = uproot.open(sIpFile)
+list_fIpFile_keys = list(fIpFile.keys())
+if printLevel >= 6:
+    print(f"here3 ipfile {getAllocatedMomory()}", flush=True)
+
 
 # %%
 
@@ -263,42 +282,6 @@ processes_dict = {
 
 }
 systematics_forData_dict = {'noweight': 'Nom'}
-systematics_dict = {
-    'Nom': 'Nom',
-    'PUUp': 'PUUp',
-    'PUDown': 'PUDown',  
-    'LPRewgtUp': 'LPRewgtUp',
-    'LPRewgtDown': 'LPRewgtDown',
-    'GGHPtRewgtUp': 'GGHPtRewgtUp',
-    'GGHPtRewgtDown': 'GGHPtRewgtDown',
-    'TopPtReWeightUp': 'TopPtReWeightUp',
-    'TopPtReWeightDown': 'TopPtReWeightDown',
-    'ISRUp':'ISRUp',
-    'ISRDown':'ISRDown',
-    'FSRUp':'FSRUp',
-    'FSRDown':'FSRDown',
-    'QCDRenormUp':'QCDRenormUp',
-    'QCDRenormDown':'QCDRenormDown',
-    'QCDFactrUp':'QCDFactrUp',
-    'QCDFactrDown':'QCDFactrDown',
-    'PDFUp':'PDFUp',
-    'PDFDown':'PDFDown',
-    'BtagUp': 'BtagUp',
-    'BtagDown': 'BtagDown',
-    'BtagUncorrUp': 'BtagUncorrUp',
-    'BtagUncorrDown': 'BtagUncorrDown',
-    'BtagCorrUp': 'BtagCorrUp',
-    'BtagCorrDown': 'BtagCorrDown', 
-
-    'JERUp': 'JERUp',
-    'JERDown': 'JERDown',
-    'JESUp': 'JESUp',
-    'JESDown': 'JESDown',
-    'JESHEMIssueUp': 'JESHEMIssueUp',
-    'JESHEMIssueDown': 'JESHEMIssueDown',   
-     
-}
-
 systematics_dict = {'Nom': 'Nom',}
 for systNameShort, systName0  in SystNameConvs.items(): 
     #systName_ = systName0.replace('$YEAR', Year_4Letters)
@@ -451,6 +434,7 @@ print(f"{systematics_perProcess = }")
 #    'hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg',
 #    'hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg',
 #]
+'''
 histograms_dict_v1 = {
     'hLeadingFatJetMass_vs_massA_Hto4b_avg':                        'mass',
     'hLeadingFatJetMSoftDrop_vs_massA_Hto4b_avg':                   'msoft',
@@ -461,6 +445,7 @@ histograms_dict_v0 = {
     'hLeadingFatJetMSoftDrop_vs_massAa':                   'msoft',
     'hLeadingFatJetPNet_massH_v2b_vs_massAa': 'pnet',    
 }
+'''
 histograms_dict = {
     'hLeadingFatJetMass_vs_massAa':                        'mass_4a',
     'hLeadingFatJetMSoftDrop_vs_massAa':                   'msoft_4a',
@@ -482,7 +467,7 @@ histograms_dict = {
 nRebinsX = 1 # 10
 nRebinsY = 1 #  4
 
-
+'''
 selectionTags_dict_v1 = {
     'WP40': {
         'Pass': 'SRWP40',
@@ -496,36 +481,37 @@ selectionTags_dict_v1 = {
         'Pass': 'SRWP80',
         'Fail': 'SBWP99to80'
     },        
-}  
+}
+'''  
 selectionTags_dict = {
     'WP40': {
         'Pass': 'SRWP40',
         'Fail': 'SBWP40'
     },
-    'WP45a': {
-        'Pass': 'SRWP45a',
-        'Fail': 'SBWP45a'
-    },
-    'WP45b': {
-        'Pass': 'SRWP45b',
-        'Fail': 'SBWP45b'
-    },
-    'WP50': {
-        'Pass': 'SRWP50',
-        'Fail': 'SBWP50'
-    },
+    #'WP45a': {
+    #    'Pass': 'SRWP45a',
+    #    'Fail': 'SBWP45a'
+    #},
+    #'WP45b': {
+    #    'Pass': 'SRWP45b',
+    #    'Fail': 'SBWP45b'
+    #},
+    #'WP50': {
+    #    'Pass': 'SRWP50',
+    #    'Fail': 'SBWP50'
+    #},
     'WP60': {
         'Pass': 'SRWP60',
         'Fail': 'SBWP60'
     },
-    'WP65': {
-        'Pass': 'SRWP65',
-        'Fail': 'SBWP65'
-    },
-    'WP70': {
-        'Pass': 'SRWP70',
-        'Fail': 'SBWP70'
-    },
+    #'WP65': {
+    #    'Pass': 'SRWP65',
+    #    'Fail': 'SBWP65'
+    #},
+    #'WP70': {
+    #    'Pass': 'SRWP70',
+    #    'Fail': 'SBWP70'
+    #},
     'WP80': {
         'Pass': 'SRWP80',
         'Fail': 'SBWP80'
@@ -536,6 +522,8 @@ selectionTags_dict = {
 
 if 'gg0l' in CAT0:
     CATAGORIES = CATAGORIES_gg0l
+elif 'VBFjj' in CAT0:
+    CATAGORIES = CATAGORIES_VBFjj
 elif 'tt0l' in CAT0:
     CATAGORIES = CATAGORIES_tt0l
 elif 'Vjj' in CAT0:
@@ -543,6 +531,10 @@ elif 'Vjj' in CAT0:
 elif 'Zvv' in CAT0:
     CATAGORIES = CATAGORIES_Zvv   
 
+if printLevel >= 6:
+    print(f"here4 setting all dict {getAllocatedMomory()}", flush=True)
+    #print(f"\n\n\n {list_fIpFile_keys = } \n\n\n")
+    lastTimeStamp = time.time()
 
 
 # %%
@@ -584,6 +576,12 @@ for CAT, CAT_original in CATAGORIES.items():
                         systematic_woUpDown = systematic_woUpDown.replace(SystNameConvDown, '')
                         # Read systematics relavant to a given process
                         if systematic_woUpDown not in systematics_perProcess[processNameToUse]: continue
+
+                        if printLevel >= 6:
+                            lapTime       = time.time() - lastTimeStamp
+                            lastTimeStamp = time.time()
+                            print(f"here10 {getAllocatedMomory()}, {lapTime} sec, {CAT}, {processNameToUse}, {histo_name}, {selectionWP}, {selectionRegion}, {systematic}", flush=True)
+
                     
                         hAdded = None
                         for processName in processNameList:
@@ -594,6 +592,9 @@ for CAT, CAT_original in CATAGORIES.items():
                                 systematicNameToUse          = systematics_forData_original
                             histo_name_toUse_full = 'evt/%s/%s_%s_%s' % (processName, histo_name, selectionRegionNameOriginal, systematicNameToUse)
                             #print(f"{histo_name_toUse_full = }")
+                            '''
+                            # try except 
+                            print(f"\t\t\t\t {histo_name_toUse_full}:  {(histo_name_toUse_full in list_fIpFile_keys) = }, \t {('%s;1'%(histo_name_toUse_full) in list_fIpFile_keys) = }")
                             try:
                                 h = fIpFile[histo_name_toUse_full].to_hist()
                             except:
@@ -604,9 +605,22 @@ for CAT, CAT_original in CATAGORIES.items():
                                     sProcessNames_NotRead[processNameToUse] = []
                                 if processName not in sProcessNames_NotRead[processNameToUse]:
                                     sProcessNames_NotRead[processNameToUse].append( processName )
-
                                 continue
-                            h = h[::hist.rebin(nRebinsX), ::hist.rebin(nRebinsY)]
+                            '''
+                            if ((histo_name_toUse_full in list_fIpFile_keys) or ('%s;1'%(histo_name_toUse_full) in list_fIpFile_keys)):
+                                h = fIpFile[histo_name_toUse_full].to_hist()
+                            else:
+                                # histogram could not read
+                                print(f"{histo_name_toUse_full = } could not read")
+                                sHistoNames_NotRead.append(histo_name_toUse_full)
+                                if processNameToUse not in sProcessNames_NotRead.keys():
+                                    sProcessNames_NotRead[processNameToUse] = []
+                                if processName not in sProcessNames_NotRead[processNameToUse]:
+                                    sProcessNames_NotRead[processNameToUse].append( processName )
+                                continue
+
+                            if ((nRebinsX != 1) or (nRebinsY != 1)):
+                                h = h[::hist.rebin(nRebinsX), ::hist.rebin(nRebinsY)]
                             #print(f"After {h.axes = }, {h.axes[0] =  }")
                             if hAdded == None: hAdded = h
                             else:              hAdded = hAdded + h
@@ -631,15 +645,20 @@ for CAT, CAT_original in CATAGORIES.items():
                         '''
 
                         #histoNameToSave = '%s_%s' % (histo_name,selectionTagNameToUse)
-                        MASS = histo_name_toSave
-                        WP = selectionWP
+                        MASS       = histo_name_toSave
+                        WP         = selectionWP
                         PassOrFail = selectionRegion
-                        SYST = systematic_toSave
+                        SYST       = systematic_toSave
                         histoNameToSave = '%s_%s_%s_%s_%s_%s_%s' % (CAT, PROC, YEAR, MASS, WP, PassOrFail, SYST)
                         fOpFile[histoNameToSave] = hAdded
 
         fOpFile.close()
+        del fOpFile
     
+if printLevel >= 6:
+    print(f"here100 Saved histograms {getAllocatedMomory()}", flush=True)
+
+
 
 
 
@@ -654,4 +673,7 @@ for sHistoName_NotRead in sHistoNames_NotRead:
 print("sProcessNames_NotRead: ")
 print(json.dumps(sProcessNames_NotRead, indent=4))
 
+
+if printLevel >= 6:
+    print(f"here1000 End {getAllocatedMomory()}", flush=True)
 

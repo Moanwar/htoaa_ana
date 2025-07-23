@@ -7349,7 +7349,9 @@
             "skim_v2_nEvents": 0,
             "skim_v2_sumEvents": 0,
             "skim_v2_nFiles": 0,
-            "skim_v2": []
+            "skim_v2": [
+                "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2016/MC/PNet_v2_2024_11_22/SUSY_VBFH_HToAATo4B_Pt150_M-55_TuneCP5_13TeV_madgraph_pythia8/r1/PNet_v1_Skim_Lp_weight.root"
+            ]
         }
     },
     "SUSY_VBFH_HToAATo4B_Pt150_M-60_TuneCP5_13TeV_madgraph_pythia8": {
