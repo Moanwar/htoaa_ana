@@ -95,7 +95,7 @@ print(f"htoaa_Analysis_ttHHadronicMode:: here13 {datetime.now() = }"); sys.stdou
 
  
 printLevel = 0
-histogramSaveLevel = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel_0 = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 storeIndividualEvtWgts = False # True: Store individual event weight components for debugging.  False: otherwise
@@ -280,8 +280,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
         if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ): 
-            histogramSaveLevel = 0
-        print(f"{histogramSaveLevel = }")
+            self.datasetInfo['histogramSaveLevel'] = 0
+        else:   
+            self.datasetInfo['histogramSaveLevel'] = histogramSaveLevel_0
+        print(f"{self.datasetInfo['histogramSaveLevel'] = }")
         
 
         # Identify and lable samples --------------------------------------------------
@@ -483,7 +485,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         for sCatName, catSels in categories_dict.items():
-            if histogramSaveLevel >= 1:
+            if self.datasetInfo['histogramSaveLevel'] >= 1:
                 self.sel_names_all["%s" % (sCatName)] = catSels
             
             if CrossCheckEvtYieldsWithAndrew:
@@ -707,7 +709,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         histos = OD()
 
-        if histogramSaveLevel >= 1: 
+        if self.datasetInfo['histogramSaveLevel'] >= 1: 
             for iSelection in self.sel_names_all.keys():
                 histos.update(OD([
                     ('hCutFlowPerCat_'+iSelection,     
@@ -720,7 +722,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # General or GEN-level histograms ---------------------------------------------------------------------------------------------
-        if histogramSaveLevel >= 10:
+        if self.datasetInfo['histogramSaveLevel'] >= 10:
             histos.update( OD([
                 # ('histogram_name',  {sXaxis: hist.Bin() axis,  sXaxisLabel: "histogram axis label"})
 
@@ -817,7 +819,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         # RECO-level histograms --------------------------------------------------------------------------------------------------------------
-        if self.datasetInfo['isSignal'] and histogramSaveLevel >= 12:
+        if self.datasetInfo['isSignal'] and self.datasetInfo['histogramSaveLevel'] >= 12:
             histos.update(OD([
                 ('hIdxFatJetMatchedToGenBFromHToAATo4B',                   {sXaxis: nObject_axis,    sXaxisLabel: r"IdxFatJetMatchedToGenBFromHToAATo4B"}),
                 ('hIdxFatJetMaxPNetMD_Hto4b_Haa4bOverQCD',                 {sXaxis: nObject_axis,    sXaxisLabel: r"IdxFatJetMaxPNetMD_Hto4b_Haa4bOverQCD"}),
@@ -836,7 +838,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 if sHExt_0 != '':
                     sHExt += "_%s" % (sHExt_0)
 
-                if histogramSaveLevel >= 1:
+                if self.datasetInfo['histogramSaveLevel'] >= 1:
                     histos.update(OD([
                         ('hEventWeight_PU'+sHExt,                              {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PU'}),
                         ('hEventWeight_PUUp'+sHExt,                            {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PUUp'}),
@@ -922,7 +924,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ]))
 
 
-                if histogramSaveLevel >= 0:
+                if self.datasetInfo['histogramSaveLevel'] >= 0:
                     histos.update(OD([
                         ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
                         ('hCutFlowWeighted'+sHExt,                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
@@ -983,7 +985,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
 
-                if histogramSaveLevel >= 1:
+                if self.datasetInfo['histogramSaveLevel'] >= 1:
                     histos.update(OD([
                         ('hPV_npvsGood'+sHExt,                           {sXaxis: PU_axis,                sXaxisLabel: r"No. of good primary vertices - signal region"}),
 
@@ -1046,7 +1048,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                     ]) )
 
-                if histogramSaveLevel >= 2:
+                if self.datasetInfo['histogramSaveLevel'] >= 2:
                     histos.update(OD([
 
                         ('hPV_npvs'+sHExt,                               {sXaxis: PU_axis,                sXaxisLabel: r"No. of primary vertices - signal region"}),
@@ -1251,7 +1253,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
                 ### 2-D distribution --------------------------------------------------------------------------------------------------------
-                if histogramSaveLevel >= 2:
+                if self.datasetInfo['histogramSaveLevel'] >= 2:
                     histos.update(OD([
                         ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
@@ -1485,7 +1487,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         dataset = events.metadata["dataset"] # dataset label
         print(f"process_shift():: {shift_syst = } dataset: {dataset}", flush=flushStdout)
         if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ): 
-            histogramSaveLevel = 0
+            self.datasetInfo['histogramSaveLevel'] = 0
         
 
         ones_list  = np.ones(len(events))
@@ -3731,7 +3733,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     evtWeight_gen            = weights_gen.weight(weightSyst)
 
 
-            if histogramSaveLevel >= 1: # hCutFlowPerCat
+            if self.datasetInfo['histogramSaveLevel'] >= 1: # hCutFlowPerCat
                 # For each selection, yields after every cut
                 for iSelection in self.sel_names_all.keys():
                     for iCut in range(0, len(self.sel_names_all[iSelection])+1):
@@ -3743,12 +3745,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hCutFlowPerCat_'+iSelection].fill(
                             dataset=dataset,
                             CutFlow50=np.full_like(ones_list, iCut)[sel_i],
-                            systematic=syst
+                            #systematic=syst
                         )  
                         output['hCutFlowPerCatWeighted_'+iSelection].fill(
                             dataset=dataset,
                             CutFlow50=np.full_like(ones_list, iCut)[sel_i],
-                            systematic=syst,
+                            #systematic=syst,
                             weight=evtWeight[sel_i]
                         )                  
 
@@ -3756,7 +3758,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ### General or GEN-level histograms ========================================================================================
 
             # PU
-            if histogramSaveLevel >= 10:
+            if self.datasetInfo['histogramSaveLevel'] >= 10:
                 output['hPV_npvs_beforeSel'].fill(
                     dataset=dataset,
                     PU=(events.PV.npvs),
@@ -4202,7 +4204,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ### RECO-level histograms ============================================================================================
             
-            if self.datasetInfo['isSignal'] and histogramSaveLevel >= 12:
+            if self.datasetInfo['isSignal'] and self.datasetInfo['histogramSaveLevel'] >= 12:
                 output['hIdxFatJetMatchedToGenBFromHToAATo4B'].fill(
                     dataset=dataset,
                     nObject=(idx_FatJet_matched_genB_HToAATo4B[mask_events_FatJet_matched_genB_HToAATo4B]),
@@ -4311,7 +4313,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     sel_SR_forHExt = ak.fill_none(sel_SR_forHExt, False) 
 
 
-                    if (( histogramSaveLevel >= 0) and ((syst == "Nom") or (syst == "noweight")) ):
+                    if (( self.datasetInfo['histogramSaveLevel'] >= 0) and ((syst == "Nom") or (syst == "noweight")) ):
                         # Cut flow table ------------------------------------------                    
                         # all events
                         iBin = 0
@@ -4341,7 +4343,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
-                    if histogramSaveLevel >= 0:
+                    if self.datasetInfo['histogramSaveLevel'] >= 0:
                         # 2DAlphabetFit histograms --------------------------------
                         '''
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
@@ -4465,7 +4467,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             
 
                     # Event weights histograms ------------------------------------------------------
-                    if histogramSaveLevel >= 1 and self.datasetInfo['isMC'] and syst == "Nom":
+                    if self.datasetInfo['histogramSaveLevel'] >= 1 and self.datasetInfo['isMC'] and syst == "Nom":
                         output['hEventWeight_PU'+sHExt].fill(
                             dataset=dataset,
                             Weight=wgt_PU[sel_SR_forHExt]
@@ -4661,7 +4663,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                    if histogramSaveLevel >= 1:
+                    if self.datasetInfo['histogramSaveLevel'] >= 1:
                         output['hPV_npvsGood'+sHExt].fill(
                             dataset=dataset,
                             PU=(events.PV.npvsGood[sel_SR_forHExt]),
@@ -4987,7 +4989,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                    if histogramSaveLevel >= 2:
+                    if self.datasetInfo['histogramSaveLevel'] >= 2:
                         output['hPV_npvs'+sHExt].fill(
                             dataset=dataset,
                             PU=(events.PV.npvs[sel_SR_forHExt]),

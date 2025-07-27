@@ -262,7 +262,7 @@ processes_dict = {
     'WWW': ['WWW'],
 
     'ggH':  ['GluGluHToBB_Pt-200ToInf'], #['ggH'],
-    'VBFH': ['VBFHToBB_herwig'], #['VBFHToBB_powheg'],
+    'VBFH': ['VBFH_dipoleRecoilOn'], #['VBFHToBB_herwig'], #['VBFHToBB_powheg'],
     'WH':   ['WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu'],
     'ZH':   ['ZHToBBX'],
     'ttH':  ['ttHToBB'], # ['ttHToBB', 'ttHToNonBB'],

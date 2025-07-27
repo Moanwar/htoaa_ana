@@ -92,10 +92,18 @@ systematics_forData = 'noweight'
 #selectionTags = ['SRWP40', 'SBWP80to40'] # ['SRWP40_mA30Window'] ['SRWP40'] ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
-HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
+HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT_VBF'
 
 scale_MCSig = 5 #20 # 1# #15 # 2 #5 #50 #1000
-yRatioLimit = [0.4, 1.6]
+scale_MCSig_dict = {
+    'gg0lIncl': 20,
+    'gg0lIncl_Xto4bv2_SBplusSRWP40': 5,
+    'gg0lLo': 20,
+    'gg0lLo_Xto4bv2_SBplusSRWP40': 5,
+    'gg0lHi': 20,
+    'gg0lHi_Xto4bv2_SBplusSRWP40': 5,       
+}
+yRatioLimit = [0., 2.] #[0.4, 1.6]
 ySignfLimit = [1e-1, 5e2]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
@@ -358,8 +366,9 @@ histograms_dict = OD([
     
 ])
 '''
-
+'''
 histograms_dict = OD([
     ("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
     #("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
 ])
+'''

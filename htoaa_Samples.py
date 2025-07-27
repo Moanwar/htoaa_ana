@@ -264,9 +264,9 @@ SamplesMC = OD([
     #('VBFHToBB_powheg', [
     #    "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
     #]),
-    ('VBFHToBB_herwig', [
-        "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
-    ]),
+    #('VBFHToBB_herwig', [
+    #    "VBFHToBB_M-125_TuneCH3_13TeV-powheg-herwig",
+    #]),
     ('VBFH_dipoleRecoilOn', [
         "VBFHToBB_M-125_dipoleRecoilOn_TuneCP5_13TeV-powheg-pythia8",
     ]),

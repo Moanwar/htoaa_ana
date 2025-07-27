@@ -74,10 +74,19 @@ systematics_forData = 'noweight'
 #selectionTags = ['SRWP80'] # ['SRWP40_mA30Window'] #['SRWP40'] # ['SRWP40_mA55Window']  ['sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'SR'] #['SR', 'sel_leadingFatJetMSoftDrop', 'sel_leadingFatJetParticleNetMD_XbbvsQCD', 'sel_2018HEM1516Issue']
 
 #HLT_toUse = 'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4'
-HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT'
+HLT_toUse = 'Trg_Combo_AK4AK8Jet_HT_VBF'
 
 scale_MCSig = 5 #80 # 20 #50 #1000
-yRatioLimit = [0, 2] # [0.4, 1.6]
+scale_MCSig_dict = {
+    'tt0l_1TFJ_0BOutsideSelFJ': 20,
+    'tt0l_1TFJ_0BOutsideSelFJ_Xto4bv2_SBplusSRWP60': 5,
+    'tt0l_1TFJ_ge1BOutsideSelFJ': 20,
+    'tt0l_1TFJ_ge1BOutsideSelFJ_Xto4bv2_SBplusSRWP60': 5,
+    'tt0l_1TFJ_ge0BOutsideSelFJ': 20,
+    'tt0l_1TFJ_ge0BOutsideSelFJ_Xto4bv2_SBplusSRWP60': 5,       
+}
+yRatioLimit = [0., 2.] #[0.4, 1.6]
+ySignfLimit = [1e-1, 5e2]
 
 logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to not concentrate lowest stats background processes
 
@@ -132,8 +141,8 @@ histograms_dict = OD([
     #("hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.5, 3.5] }),
     #("hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
 
-    ("hLeadingFatJetMass", {sXLabel: r'Mass(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5}),
-    ("hLeadingFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5 }),
+    ("hLeadingFatJetMass", {sXLabel: r'Mass(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
+    ("hLeadingFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2 }),
     #("hLeadingFatJetBtagDeepB", {sXLabel: 'hLeadingFatJetBtagDeepB', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     #("hLeadingFatJetBtagDDBvLV2", {sXLabel: 'hLeadingFatJetBtagDDBvLV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     #("hLeadingFatJetBtagDDCvBV2", {sXLabel: 'hLeadingFatJetBtagDDCvBV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
@@ -204,7 +213,7 @@ histograms_dict = OD([
     ("hLeadingFatJetPNet_X4b_v2b_Haa34b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2b_Haa34b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
     ("hLeadingFatJetPNet_X4b_v2ab_Haa34b_score", {sXLabel: r'$X\to 3,4b$ tagger score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
     
-    ("hLeadingFatJetMassH_v2b", {sXLabel: r'Mass$_{PNet\, X\to 4b}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5}),
+    ("hLeadingFatJetMassH_v2b", {sXLabel: r'Mass$_{PNet\, X\to 4b}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
     
     ("hLeadingFatJetPNet_massAa", {sXLabel: 'hLeadingFatJetPNet_massAa', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
     ("hLeadingFatJetPNet_34massAa", {sXLabel: r'Mass$_{version\, a}$(a)  [GeV]', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
@@ -224,8 +233,8 @@ histograms_dict = OD([
     ("hLeadingNonHto4bFatJetPt", {sXLabel: r'$p_{T}$(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
     ("hLeadingNonHto4bFatJetEta", {sXLabel: r'$\eta$(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
     ("hLeadingNonHto4bFatJetPhi", {sXLabel: r'$\phi$(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
-    ("hLeadingNonHto4bFatJetMass", {sXLabel: r'Mass(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5}),
-    ("hLeadingNonHto4bFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 5 }),
+    ("hLeadingNonHto4bFatJetMass", {sXLabel: r'Mass(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
+    ("hLeadingNonHto4bFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2 }),
     ("hLeadingNonHto4bFatJetPNet_TvsQCD", {sXLabel: r'TvsQCD tagger score(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.75, 1], sNRebinX: 25 }),
     
     ("hnAK4JetsCentral_NonoverlapSelFatJets", {sXLabel: 'No. of AK4 jets outside selected AK8 jets', sYLabel: 'Events', sXRange: [-0.5, 6.5],  }),

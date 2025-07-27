@@ -35,7 +35,7 @@ from Samples_2017_Catalogue         import list_datasets_2017
 from Samples_2018_Catalogue         import list_datasets_2018
 
 
-printLevel = 0
+printLevel = 5
 sXS     = "xs"
 sNameSp = "nameSp"
 
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     list_datasets = None
     sFileSamplesInfo_toUse = None
     if era in [Era_2016, Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018]:    sXS = sXS13TeV
-    if era == Era_2016postVFP:   list_datasets = list_datasets_2016postVFP
     if era == Era_2016preVFP:    list_datasets = list_datasets_2016preVFP
+    if era == Era_2016postVFP:   list_datasets = list_datasets_2016postVFP
     if era == Era_2017:          list_datasets = list_datasets_2017
     if era == Era_2018:          list_datasets = list_datasets_2018
 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
         datasetName_parts            = datasetName.split('/')
         sampleName                   = datasetName_parts[1]
         isMC                         = datasetName_parts[-1] == 'NANOAODSIM'
-        #print(f"{datasetName = },  {isMC = }")
+        if printLevel >= 3:    print(f"{datasetName = },  {isMC = }")
 
         sampleName_part2_forData = ''
         if not isMC:
@@ -260,18 +260,24 @@ if __name__ == '__main__':
             sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$SAMPLETAG',  sSampleTagDir_used)
             #sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used)
             sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('$ERATAG',     sSampleEraTagDir_used.replace('-','_')) # For era 'Run2016B-ver2_HIPM', directory name 'Run2016B_ver2_HIPM'
+            sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace('_ext1', '') # Only one of the available samples are used for custome nanoAODv2. Hence, despite 'ext1' samples, their 1st part of dataset-name do hot have '_ext1' substring.  
+
+            if printLevel >= 3:
+                print(f"{skimName_ = }, {sDataType = }, {sPathSkimmedNanoAODs_toUse = }")
 
             sSkimmedNanoAODs = []
             if "*" in sPathSkimmedNanoAODs_toUse:                                                                  # if multiple directories (e.g. r1, r2) exist, use latest directory
                 sDir0      = os.path.dirname( sPathSkimmedNanoAODs_toUse )
                 sDir_list  = glob.glob( sDir0 )                                                                    # list of directories, for e.g. r1, r2
                 sDir_list.sort(key=os.path.getctime)                                                               # sort directories
+                if printLevel >= 5:  print(f"{sDir_list = }")
                 if len(sDir_list) == 0: continue
                 sDir_toUse = sDir_list[-1]                                                                         # use latested created directory
                 sPathSkimmedNanoAODs_toUse = sPathSkimmedNanoAODs_toUse.replace(sDir0, sDir_toUse)                 # update path to use latest created directory              
             if "*" in sPathSkimmedNanoAODs_toUse: sSkimmedNanoAODs.extend( glob.glob(sPathSkimmedNanoAODs_toUse) ) # use all files present in the latest directory
             else:                                 sSkimmedNanoAODs.append( sPathSkimmedNanoAODs_toUse )
-            print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
+            if printLevel >= 2:
+                print(f"{sPathSkimmedNanoAODs_toUse = }, {sSkimmedNanoAODs = }")
             
             '''if sSkimmedNanoAOD_nFiles not in samples_details[sampleName]:
                 samples_details[sampleName][sSkimmedNanoAOD_nFiles]  = len(sSkimmedNanoAODs)
