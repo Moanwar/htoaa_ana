@@ -62,13 +62,18 @@ from htoaa_CommonTools import (
     selectRunLuminosityBlock,
     calculate_lumiScale, getLumiScaleForPhSpOverlapRewgtMode, getSampleHTRange, # update_crosssection, 
     getNanoAODFile, setXRootDRedirector,  xrdcpFile,
+    selectGenHiggs, selectGenZBoson, selectGenWBoson, selectGenWplusBoson, selectGenWminusBoson, 
+    selectGenTop, selectGenAntiTop, selectGenQuarksFromHardScattering,
     selectMETFilters, selectFatJets, getCandidateHiggs, selectAK4Jets, selectMuons, selectElectrons,
     selGenPartsWithStatusFlag,
-    getHToAATo4BLundPlaneRewgt, getHiggsPtRewgtForGGToHToAATo4B, 
+    getHToAATo4BLundPlaneRewgt, 
+    getHiggsPtRewgtForGGH_HToAATo4B, getHiggsPtRewgtForVBFH_HToAATo4B, 
+    getHiggsPtRewgtForWH_HToAATo4B, getHiggsPtRewgtForZH_HToAATo4B,
+    getHiggsPtRewgtForTTH_HToAATo4B, 
     getTopPtRewgt, getPURewgts, getHTReweight,
     getPURewgts_variation, get_jetTriggerSF, get_PSWeight, add_pdf_as_weight, get_QCDScaleWeight,
     get_JER_and_JES,
-    get_Ak4BtagSF,
+    get_Ak4BtagSF, get_L1TPrefiringWgt,
     calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
     ak_drop_none,
     fillCoffeaHist, fillCoffeaHist_1,
@@ -90,7 +95,7 @@ print(f"htoaa_Analysis_CR_QCD4b:: here13 {datetime.now() = }"); sys.stdout.flush
 
  
 printLevel = 0
-histogramSaveLevel = 0 #1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
+histogramSaveLevel_0 = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
 flushStdout = True
@@ -269,35 +274,41 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ak.behavior.update(nanoaod.behavior)
 
         self.datasetInfo = datasetInfo
+        self.datasetInfo["Year"]        = self.datasetInfo["era"][:4]
         self.objectSelector             = ObjectSelection(era=self.datasetInfo["era"])
         datasetName_part1               = self.datasetInfo['datasetNameFull'].split('/')[1]
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
+        if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ): 
+            self.datasetInfo['histogramSaveLevel'] = 0
+        else:   
+            self.datasetInfo['histogramSaveLevel'] = histogramSaveLevel_0
+        print(f"{self.datasetInfo['histogramSaveLevel'] = }")
 
         # Identify and lable samples --------------------------------------------------
         self.datasetInfo['isSignal'       ]  = False
         self.datasetInfo['isSignalGGH'    ]  = False
         self.datasetInfo['isSignalVBFH'   ]  = False
         self.datasetInfo['isSignalWH'     ]  = False
-        self.datasetInfo['isSignalVH'     ]  = False
+        self.datasetInfo['isSignalZH'     ]  = False
         self.datasetInfo['isSignalTTH'    ]  = False
         self.datasetInfo['isQCD'          ]  = False
         self.datasetInfo['isQCDIncl'      ]  = False
         self.datasetInfo['isQCD_bEnrich'  ]  = False
         self.datasetInfo['isQCD_bGen'     ]  = False
         self.datasetInfo['isTTbar'        ]  = False
-        self.datasetInfo['isHToBB'        ]  = False
+        self.datasetInfo['isSMHiggs'        ]  = False
         self.datasetInfo['isPythiaTuneCP5']  = False        
         if self.datasetInfo['isMC']:
             self.datasetInfo['isSignalGGH']      = True if "SUSY_GluGluH_01J_HToAATo4B" in datasetName_part1 else False
             self.datasetInfo['isSignalVBFH']     = True if "SUSY_VBFH_HToAATo4B"        in datasetName_part1 else False
             self.datasetInfo['isSignalWH']       = True if "SUSY_WH_WToAll_HToAATo4B"   in datasetName_part1 else False
-            self.datasetInfo['isSignalVH']       = True if "SUSY_ZH_ZToAll_HToAATo4B"   in datasetName_part1 else False
+            self.datasetInfo['isSignalZH']       = True if "SUSY_ZH_ZToAll_HToAATo4B"   in datasetName_part1 else False
             self.datasetInfo['isSignalTTH']      = True if "SUSY_TTH_TTToAll_HToAATo4B" in datasetName_part1 else False
             self.datasetInfo['isSignal']         = (self.datasetInfo['isSignalGGH']   or \
                                                      self.datasetInfo['isSignalVBFH'] or \
                                                      self.datasetInfo['isSignalWH']   or \
-                                                     self.datasetInfo['isSignalVH']   or \
+                                                     self.datasetInfo['isSignalZH']   or \
                                                      self.datasetInfo['isSignalTTH'] )
             self.datasetInfo['isQCDIncl']        = True if kQCDIncl      in self.datasetInfo['sample_category'] else False
             self.datasetInfo['isQCD_bEnrich']    = True if kQCD_bEnrich  in self.datasetInfo['sample_category'] else False
@@ -309,7 +320,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             self.datasetInfo['sample_HT_Min']    = sample_HT_Min
             self.datasetInfo['sample_HT_Max']    = sample_HT_Max
             self.datasetInfo['isTTbar']          = True if datasetName_part1.startswith('TTTo') else False
-            self.datasetInfo['isHToBB']          = True if "HToBB"   in datasetName_part1 else False
+            self.datasetInfo['isSMHiggs']        = True if stringHasSubstring(datasetName_part1, ["HToBB", "HToNonbb"]) else False
             self.datasetInfo['isPythiaTuneCP5']  = True if 'TuneCP5' in datasetName_part1 else False
 
             if self.datasetInfo['isQCD_bGen']:
@@ -328,26 +339,47 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     "fitFunctionHTRange": fitFunctionHTRange_,                    
                 }
 
+            # Run systmatics for singal and SMHiggs, which will be used in 2DAlphabet fit
+            '''
+            if self.datasetInfo['isSignal'] or self.datasetInfo['isSMHiggs']:
+                self.datasetInfo['runSystematics'] = True
+            else:
+                self.datasetInfo['runSystematics'] = False
+            '''
+            self.datasetInfo['runSystematics'] = True
+
             print(f"{self.datasetInfo['isSignal'       ] = }")
             print(f"{self.datasetInfo['isSignalGGH'    ] = }")
             print(f"{self.datasetInfo['isSignalVBFH'   ] = }")
             print(f"{self.datasetInfo['isSignalWH'     ] = }")
-            print(f"{self.datasetInfo['isSignalVH'     ] = }")
+            print(f"{self.datasetInfo['isSignalZH'     ] = }")
             print(f"{self.datasetInfo['isSignalTTH'    ] = }")
             print(f"{self.datasetInfo['isQCD'          ] = }")
             print(f"{self.datasetInfo['isQCDIncl'      ] = }")
             print(f"{self.datasetInfo['isQCD_bEnrich'  ] = }")
             print(f"{self.datasetInfo['isQCD_bGen'     ] = }")
             print(f"{self.datasetInfo['isTTbar'        ] = }")
-            print(f"{self.datasetInfo['isHToBB'        ] = }")
+            print(f"{self.datasetInfo['isSMHiggs'      ] = }")
             print(f"{self.datasetInfo['isPythiaTuneCP5'] = }")
+            print(f"{self.datasetInfo['runSystematics'] = }")
+
+            if self.datasetInfo['isSignalGGH'    ]:
+                print(f"{ Corrections['HiggsPtRewgt']['GGH_HToAATo4B'] = }")
+
+        else:
+            for PD in self.datasetInfo["primaryDatasets"]: # ['JetHT', 'BTagCSV'] or ['MET']
+                self.datasetInfo['is%sDataset'%(PD)]        = True if PD in datasetName_part1 else False
+                print(f"self.datasetInfo[is{PD}Dataset] = {self.datasetInfo['is%sDataset'%(PD)]}")
             
 
         ## List of all analysis selection condition ---------------------------------------------
-        #global HLT_AK8PFJet330_name
-        #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
+        sTrgSelection = self.datasetInfo['triggers'] if self.datasetInfo['triggers'] else 'Trg_Combo_AK4AK8Jet_HT_VBF'
+        print(f"{sTrgSelection = }")
+        if (self.datasetInfo["era"] in Triggers_perEra) and (sTrgSelection in Triggers_perEra[self.datasetInfo["era"]]):
+            print(f'Triggers_perEra[{self.datasetInfo["era"]}][{sTrgSelection}]:')
+            print(json.dumps(Triggers_perEra[self.datasetInfo["era"]][sTrgSelection], indent=4))
+        print("self.datasetInfo[primaryDatasets]: ", self.datasetInfo["primaryDatasets"])
         
         # sel_names_all = dict of {"selection name" : [list of different cuts]}; for cut-flow table 
         self.sel_names_all = OD([
@@ -455,7 +487,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #    self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["Presel"][0 : (iCondition+1)]
         
 
-        #self.sel_names_all.pop('Presel'), None
+        self.sel_names_all.pop('Presel'), None
 
         print(f"self.sel_names_all: {json.dumps(self.sel_names_all, indent=4)}")
 
@@ -496,63 +528,64 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"{dataLSSelGoldenJSON = }")
 
         else: ## MC
-
-            # lumiScale --------------------------------------------------------------------------------------------------
-            if sTrgSelection not in Luminosities_TotalPerYear[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {sTrgSelection = } not in {Luminosities_TotalPerYear[self.datasetInfo["era"]] = }.')
-                exit(0) 
-
-            self.datasetInfo["lumiScale"] = calculate_lumiScale(
-                luminosity   = Luminosities_TotalPerYear[self.datasetInfo["era"]][sTrgSelection][0], 
-                crossSection = self.datasetInfo["sample_crossSection"], 
-                sumEvents    = self.datasetInfo["sample_sumEvents"])
-            print(f'luminosity: {Luminosities_TotalPerYear[self.datasetInfo["era"]][sTrgSelection][0] = }, \
-                    crossSection: {self.datasetInfo["sample_crossSection"]}, \
-                    sumEvents: {self.datasetInfo["sample_sumEvents"]}, \
-                    lumiScale: {self.datasetInfo["lumiScale"] }')
-
-            # MC PURewgt --------------------------------------------------------------------------------------------------
-            print(f'MC {self.datasetInfo["era"]} PU reweighting:: ip file: {Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]}, histogram: {Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]} ')
-            with uproot.open(Corrections["PURewgt"][self.datasetInfo["era"]]["inputFile"]) as f_:
-                #print(f"{f_.keys() = }"); sys.stdout.flush() 
-                self.hPURewgt = f_['%s' % Corrections["PURewgt"][self.datasetInfo["era"]]["histogramName"]].to_hist()
-                
         
             # set self.pdgId_BHadrons for 'QCD_bGenFilter' sample requirement ---------------------------------------------
             self.pdgId_BHadrons = []
             bHadrons_ = Particle.findall(lambda p: p.pdgid.has_bottom) # Find all bottom hadrons
-            print(f"List of B-hadrons for QCD B-GEN-filter ({len(bHadrons_)}):")
-            print("%s %-20s %15s %15s" %(" "*4, "pdg name", "pdgId", "Mass in MeV"))
+            #print(f"List of B-hadrons for QCD B-GEN-filter ({len(bHadrons_)}):")
+            #print("%s %-20s %15s %15s" %(" "*4, "pdg name", "pdgId", "Mass in MeV"))
             for bHadron in bHadrons_:
-                print("%s %-20s %15d %15s" % (" "*4, str(bHadron), bHadron.pdgid.abspid, str(bHadron.mass)))
+                #print("%s %-20s %15d %15s" % (" "*4, str(bHadron), bHadron.pdgid.abspid, str(bHadron.mass)))
                 if bHadron.pdgid.abspid not in self.pdgId_BHadrons:
                     self.pdgId_BHadrons.append(bHadron.pdgid.abspid)
-            print(f"self.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
+            #print(f"self.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
             #self.pdgId_BHadrons = list(set(self.pdgId_BHadrons))
             #print(f" after duplicate removal --> \nself.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
             
-            ## MC QCD
-            if self.datasetInfo['isQCD'] and \
-                self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-                SplitQCDInGENCats:
-                # for QCD, make histograms in category of number of GEN b quarks matching to leading fat jet (AK8) 
-                self.histosExtensions = HistogramNameExtensions_QCD 
-            elif self.datasetInfo['isQCD']:
-                self.histosExtensions = HistogramNameExtensions_QCD
-            print(f"{self.histosExtensions = }")
+            print(f"{bTagSFEfficiencyDict[self.datasetInfo['era']]['inputFile'] = }")
 
-            ## MC ParticleNetMD_XbbvsQCD SFs
-            self.SFs_ParticleNetMD_XbbvsQCD = None
-            if self.objectSelector.wp_ParticleNetMD_XbbvsQCD in Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]].keys():
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] = } "); sys.stdout.flush()
-                print(f" {Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo['era']][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges'] = } "); sys.stdout.flush()
 
-                self.SFs_ParticleNetMD_XbbvsQCD = dense_lookup(
-                    np.array( Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['SFs'] ), # list of SFs
-                    [ np.array(Corrections['ParticleNetMD_XbbvsQCD'][self.datasetInfo["era"]][self.objectSelector.wp_ParticleNetMD_XbbvsQCD]['pT_binEdges']) ] # list of bin edges for all axes of SF histogram
-                    )
-            print(f"{self.SFs_ParticleNetMD_XbbvsQCD = }")
+        ## Set Systematic names to use ----------------------------------------------------------
+        self.systNamePU = SystNameConvs['PU'].replace('$YEAR', self.datasetInfo["era"])
 
+        self.systNameJetTrigEffi = SystNameConvs['JetTrigEffi'].replace('$YEAR', self.datasetInfo["era"])
+        self.systNameMetTrigEffi = SystNameConvs['MetTrigEffi'].replace('$YEAR', self.datasetInfo["era"])
+        self.systNameL1Prefire = SystNameConvs['L1Prefire'].replace('$YEAR', self.datasetInfo["era"])
+
+        self.systName2018HEM1516Issue = SystNameConvs['2018HEM1516Issue']
+
+        self.systNameBtag = SystNameConvs['Btag'].replace('$YEAR', self.datasetInfo["era"])
+        self.systNameBtagCorr = SystNameConvs['BtagCorr'] #.replace('$YEAR', self.datasetInfo["Year"])
+        self.systNameBtagUncorr = SystNameConvs['BtagUncorr'].replace('$YEAR', self.datasetInfo["era"])
+
+        self.systNameAK8JetJES = SystNameConvs['AK8JetJES'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameAK8JetJER = SystNameConvs['AK8JetJER'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameAK4JetJES = SystNameConvs['AK4JetJES'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameAK4JetJER = SystNameConvs['AK4JetJER'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameMETJES = SystNameConvs['METJES'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameMETJER = SystNameConvs['METJER'].replace('$YEAR', self.datasetInfo["era"]) 
+        self.systNameMETUnclE = SystNameConvs['METUnclE'].replace('$YEAR', self.datasetInfo["era"]) 
+        
+
+        self.systNameLPRewgt = SystNameConvs['LPRewgt']
+        self.systNameGGHPtRewgt = SystNameConvs['ggHPtRewgt']
+        self.systNameVBFHPtRewgt = SystNameConvs['VBFHPtRewgt']
+        self.systNameWHPtRewgt = SystNameConvs['WHPtRewgt']
+        self.systNameZHPtRewgt = SystNameConvs['ZHPtRewgt']
+        self.systNameTTHPtRewgt = SystNameConvs['ttHPtRewgt']
+
+        self.systNameTopPtReWeight = SystNameConvs['TopPtReWeight']
+
+        self.systNameISR = SystNameConvs['ISR']
+        self.systNameFSR = SystNameConvs['FSR']
+        self.systNameQCDFactr = SystNameConvs['QCDFactr']
+        self.systNameQCDRenorm = SystNameConvs['QCDRenorm']
+        self.systNamePDF = SystNameConvs['PDF']
+            
+
+            
+
+        #self.systName = SystNameConvs['']  
         
         
         #dataset_axis = hist.axis.StrCategory(name="dataset", label="", categories=[], growth=True)
@@ -614,9 +647,20 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         sYaxisLabel = 'yAxisLabel'
 
         histos = OD()
+
+        if self.datasetInfo['histogramSaveLevel'] >= 1: 
+            for iSelection in self.sel_names_all.keys():
+                histos.update(OD([
+                    ('hCutFlowPerCat_'+iSelection,     
+                    {sXaxis: cutFlow50_axis,       sXaxisLabel: r"Event selection cuts"}),
+
+                    ('hCutFlowPerCatWeighted_'+iSelection,     
+                    {sXaxis: cutFlow50_axis,       sXaxisLabel: r"Event selection cuts"}),
+
+                ]))
         
         # General or GEN-level histograms ---------------------------------------------------------------------------------------------
-        if histogramSaveLevel >= 10:
+        if self.datasetInfo['histogramSaveLevel'] >= 10:
             histos.update(OD([
                 # ('histogram_name',  {sXaxis: hist.Bin() axis,  sXaxisLabel: "histogram axis label"})
 
@@ -643,7 +687,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ]))
 
-        if (self.datasetInfo['isSignal'] or self.datasetInfo['isHToBB']) and runMode_SignalGenChecks:
+        if (self.datasetInfo['isSignal'] or self.datasetInfo['isSMHiggs']) and runMode_SignalGenChecks:
             histos.update(OD([
                 ('hGenHiggsPt_all',                           {sXaxis: pt2TeV_axis,     sXaxisLabel: r"$p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
                 ('hGenHiggsLog2Pt_all',                       {sXaxis: log2Pt2TeV_axis, sXaxisLabel: r"$log2 p_{T}(GEN Higgs (pdgId: 25, status=62))$ [GeV]"}),
@@ -713,7 +757,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         # RECO-level histograms --------------------------------------------------------------------------------------------------------------
-        if self.datasetInfo['isSignal'] and histogramSaveLevel >= 12:
+        if self.datasetInfo['isSignal'] and self.datasetInfo['histogramSaveLevel'] >= 12:
             histos.update(OD([
                 ('hIdxFatJetMatchedToGenBFromHToAATo4B',                   {sXaxis: nObject_axis,    sXaxisLabel: r"IdxFatJetMatchedToGenBFromHToAATo4B"}),
                 ('hIdxFatJetMaxPNetMD_Hto4b_Haa4bOverQCD',                 {sXaxis: nObject_axis,    sXaxisLabel: r"IdxFatJetMaxPNetMD_Hto4b_Haa4bOverQCD"}),
@@ -733,7 +777,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 if sHExt_0 != '':
                     sHExt += "_%s" % (sHExt_0)
 
-                if histogramSaveLevel >= 1:
+                if self.datasetInfo['histogramSaveLevel'] >= 1:
                     histos.update(OD([
                         ('hEventWeight_PU'+sHExt,                              {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PU'}),
                         ('hEventWeight_PUUp'+sHExt,                            {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_PUUp'}),
@@ -790,13 +834,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             
                         ]))
 
-                if histogramSaveLevel >= 0:
+                if self.datasetInfo['histogramSaveLevel'] >= 0:
                     histos.update(OD([
                         ('hCutFlow'+sHExt,                                  {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
                         ('hCutFlowWeighted'+sHExt,                          {sXaxis: cutFlow_axis,    sXaxisLabel: 'Cuts'}),
                     ]))
 
-                if histogramSaveLevel >= 0:
+                if self.datasetInfo['histogramSaveLevel'] >= 0:
                     histos.update(OD([
                         ('hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD"}),
                         ('hLeadingFatJetPNet_X4b_v1_Haa4b_score'+sHExt,    {sXaxis: mlScore_axis1k,  sXaxisLabel: r"LeadingFatJetPNet_X4b_v1_Haa4b_score"}),
@@ -811,7 +855,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
 
-                if histogramSaveLevel >= 3:
+                if self.datasetInfo['histogramSaveLevel'] >= 3:
                     histos.update(OD([
                         ('hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt,     
                         {sXaxis: mass_axis,       sXaxisLabel: r"LeadingFatJetParticleNet_massH_Hto4b_avg",
@@ -869,7 +913,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
 
-                if histogramSaveLevel >= 1:
+                if self.datasetInfo['histogramSaveLevel'] >= 1:
                     histos.update(OD([
 
                         ('hPV_npvsGood'+sHExt,                           {sXaxis: PU_axis,                sXaxisLabel: r"No. of good primary vertices - signal region"}),
@@ -931,7 +975,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                if histogramSaveLevel >= 2:
+                if self.datasetInfo['histogramSaveLevel'] >= 2:
                     histos.update(OD([
                         ('hPV_npvs'+sHExt,                               {sXaxis: PU_axis,                sXaxisLabel: r"No. of primary vertices - signal region"}),
 
@@ -1107,7 +1151,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ]))
 
                 ### 2-D distribution --------------------------------------------------------------------------------------------------------
-                if histogramSaveLevel >= 2:    
+                if self.datasetInfo['histogramSaveLevel'] >= 2:    
                     histos.update(OD([
                         ('hLeadingFatJetEta_vs_Phi'+sHExt,             
                         {sXaxis: eta_axis,        sXaxisLabel: r"\eta (leading FatJet)",
@@ -1174,7 +1218,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             hXaxis = deepcopy(histAttributes[sXaxis])
             hXaxis.label = histAttributes[sXaxisLabel]
 
-            if histName.startswith('hEventWeight_'): 
+            if (histName.startswith('hEventWeight_') or \
+                histName.startswith('hCutFlow')): 
                 # TH1 w/o syst
                 self._accumulator.add({
                     histName: hist.Hist(
@@ -1269,28 +1314,40 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])); #sys.stdout.flush()     
         #printVariable('\n (run:ls:event): ', ak.zip([events.run, events.luminosityBlock, events.event])[:20]); #sys.stdout.flush()        
 
-        #if not self.datasetInfo['isMC']:
         if self.datasetInfo['isMC']:
             output = self.accumulator.identity()
             
             #systematics_shift = [None, "JERUp", "JERDown", "JESUp", "JESDown"] # [None, "JERUp", "JERDown", "JESUp", "JESDown"]
             systematics_shift = [None]
-            if not self.datasetInfo['systematicsToRun'] == 'no':
+            if (not self.datasetInfo['systematicsToRun'] == 'no') and self.datasetInfo['runSystematics']:
                 if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jer', 'full'] ): 
                     systematics_shift.extend( [
-                        "JERUp",
-                        "JERDown",
+                        self.systNameAK8JetJER+SystNameConvUp,
+                        self.systNameAK8JetJER+SystNameConvDown,
+                        self.systNameAK4JetJER+SystNameConvUp,
+                        self.systNameAK4JetJER+SystNameConvDown,
                     ] )
                 if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jes', 'full'] ): 
                     systematics_shift.extend( [
-                        "JESUp",
-                        "JESDown",
+                        self.systNameAK8JetJES+SystNameConvUp,
+                        self.systNameAK8JetJES+SystNameConvDown,
+                        self.systNameAK4JetJES+SystNameConvUp,
+                        self.systNameAK4JetJES+SystNameConvDown,
+                    ] )
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['met', 'full'] ): 
+                    systematics_shift.extend( [
+                        self.systNameMETJES+SystNameConvUp,
+                        self.systNameMETJES+SystNameConvDown,
+                        self.systNameMETJER+SystNameConvUp,
+                        self.systNameMETJER+SystNameConvDown,
+                        self.systNameMETUnclE+SystNameConvUp,
+                        self.systNameMETUnclE+SystNameConvDown,
                     ] )
                 if (stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jeshemissue', 'full'] ) and 
                    (self.datasetInfo["era"] == Era_2018) ):
                     systematics_shift.extend( [
-                        "JESHEMIssueUp",
-                        "JESHEMIssueDown",
+                        self.systName2018HEM1516Issue+SystNameConvUp,
+                        self.systName2018HEM1516Issue+SystNameConvDown,
                     ] )                
 
 
@@ -1419,7 +1476,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         genHT    = None
         idx_GenB_fromHToAA = None
         mask_SignalHToAATo4B_Boosted = None
-        if self.datasetInfo['isSignal'] or self.datasetInfo['isHToBB']: 
+        if self.datasetInfo['isSignal'] or self.datasetInfo['isSMHiggs']: 
             genHiggs  = self.objectSelector.selectGenHiggs(events)
 
         if self.datasetInfo['isSignal']: 
@@ -1711,6 +1768,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('\n genBQuarks_pT[mask_tmp2_]', genBQuarks_pT[mask_tmp2_]); sys.stdout.flush()
                 printVariable('\n genBQuarks[mask_tmp2_]', genBQuarks[mask_tmp2_]); sys.stdout.flush()
 
+            # QCDStick mask
+            mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 
             # Phase space_ QCD_bEnrich, QCD_bGen, QCD_Incl_Remnant
             mask_QCD_bEnrich_PhSp = (mask_genBQuarks_hardSctred_eventwise == True)
@@ -1728,10 +1787,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             )
                 
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt:
-                mask_QCD_stitch_eventwise = trues_list # select all events
-            else:
-                mask_QCD_stitch_eventwise = mask_QCD_stitch_CutBHadron_eventwise
 
             mask_genBHadrons_status2_and_noGenBQuarksHardSctred_eventwise = (
                 (mask_genBHadrons_status2_eventwise == True) &
@@ -2553,26 +2608,115 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         # Trigger selection
+        if "2018HEM1516Issue" in self.sel_conditions_all_list: # 2018HEM1516Issue weight set to 1 as default
+            wgt_HEM1516Issue_Trgwise = ones_list                
         if sTrgSelection in self.sel_conditions_all_list:
             if sTrgSelection not in Triggers_perEra[self.datasetInfo["era"]]:
-                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
+                logging.critical(f'htoaa_Analysis_GGFMode.py::main():: {sTrgSelection = } not in {Triggers_perEra[self.datasetInfo["era"]] = }.')
                 exit(0)  
 
-            mask_Trgs = falses_list
-            for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection].items():
-                HLTName_toUse = HLTName.replace('HLT_', '')
-                mask_HLT = events.HLT[HLTName_toUse] == True
+            mask_Trgs                  = falses_list
+            mask_PrimaryDatasetsStitch = falses_list
+            luminosity_firedTrgs       = np.full_like(ones_list, 0)
+            mask_Trgs_perPD            = {}
+            if "2018HEM1516Issue" in self.sel_conditions_all_list: # set 2018HEM1516Issue weight to zero at the beginning
+                wgt_HEM1516Issue_Trgwise = zeros_list            
+            for PD in  self.datasetInfo["primaryDatasets"]: # ['JetHT', 'BTagCSV'] or ['MET']
+                # While analyzing index-0 dataset (JetHT), no need to check higher-index PD (BTagCSV) triggers, 
+                # as no double-count event removal when analyzing index-0 PD
+                PD_index0 = self.datasetInfo["primaryDatasets"][0]
+                if ((not self.datasetInfo['isMC']) and \
+                    (self.datasetInfo['is%sDataset'%(PD_index0)]) and \
+                    (PD != PD_index0) ): continue
 
-                mask_L1Ts = falses_list
-                for L1TName in L1TList:
-                    L1TName_toUse = L1TName.replace('L1_', '')
+                mask_Trgs_perPD[PD] = falses_list
+                if printLevel >= 10:
+                    print(f"\n\n{PD = }")                
+                for HLTName, L1TList in Triggers_perEra[self.datasetInfo["era"]][sTrgSelection][PD].items():
+                    HLTName_toUse = HLTName.replace('HLT_', '')
+                    if HLTName_toUse not in events.HLT.fields: continue
+                    mask_HLT = events.HLT[HLTName_toUse] == True
 
-                    mask_L1T_i = events.L1[L1TName_toUse] == True
-                    mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired
+                    mask_L1Ts = falses_list if len(L1TList) > 0 else trues_list # skip L1T requirement if empty L1TList
+                    for L1TName in L1TList:
+                        L1TName_toUse = L1TName.replace('L1_', '')
+                        if L1TName_toUse not in events.L1.fields: continue
+                        mask_L1T_i = events.L1[L1TName_toUse] == True
+                        mask_L1Ts = (mask_L1Ts | mask_L1T_i) # any one of the L1T triggers associated to HLT path should be fired 
 
-                mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
-                mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+                    mask_Trg_i = (mask_HLT & mask_L1Ts) # HLT path and any of the associated L1T seed should be fired
+                    mask_Trgs_perPD[PD] = (mask_Trgs_perPD[PD] | mask_Trg_i) # Any of the HLT trigger, from list of triggers for PD, should be fired
 
+                    if printLevel >= 10:
+                        printVariable('mask_Trg_i %s'%(HLTName), mask_Trg_i)
+                        printVariable('mask_Trgs_perPD[%s] %s'%(PD, HLTName), mask_Trgs_perPD[PD])
+                        
+                    # For MC: consider all triggers.
+                    # For Data: Consider triggers allocated to that PD. For e.g. consider JetHT triggers only when analyzing JetHT dataset
+                    if ((not self.datasetInfo['isMC']) and (not self.datasetInfo['is%sDataset'%(PD)])): continue
+                    mask_Trgs = (mask_Trgs | mask_Trg_i) # Any of the HLT trigger should be fired
+
+                    if printLevel >= 10:
+                        printVariable('mask_Trgs %s'%(HLTName), mask_Trgs)
+                        print("") 
+                        
+                    # luminosity and HEMissue weights for MC
+                    if (not self.datasetInfo['isMC']): continue
+                        
+                    # calculate maximum luminosity of triggers fired in the event
+                    luminosity_firedTrg_i = Luminosities_perTrigger[self.datasetInfo["era"]][HLTName][0]
+                    luminosity_firedTrgs = np.where(
+                        (mask_Trg_i & (luminosity_firedTrg_i > luminosity_firedTrgs)),
+                        np.full_like(luminosity_firedTrgs, luminosity_firedTrg_i),
+                        luminosity_firedTrgs
+                    )
+
+                    # calculate 2018HEM1516Issue weight for current HLT trigger
+                    if "2018HEM1516Issue" in self.sel_conditions_all_list:
+                        wgt_HEM1516Issue_i = Weight_HEM1516Issue2018_perTrigger[HLTName]
+                        wgt_HEM1516Issue_Trgwise = np.where(
+                            (mask_Trg_i & (wgt_HEM1516Issue_i > wgt_HEM1516Issue_Trgwise)),
+                            np.full_like(wgt_HEM1516Issue_Trgwise, wgt_HEM1516Issue_i),
+                            wgt_HEM1516Issue_Trgwise
+                        )
+
+            nPDs = len(self.datasetInfo["primaryDatasets"])
+            if ( (not self.datasetInfo['isMC']) and \
+                 (nPDs > 1) ): # Avoid double counting of events when using >1 primary datasets ['JetHT', 'BTagCSV']
+                # self.datasetInfo["primaryDatasets"]: ['JetHT', 'BTagCSV']
+                # JetHT: lower-index dataset, BTagCSV: higher-index dataset.
+                # To avoid double counting of events,
+                #   when analyzing higher index dataset (BTagCSV), remove events fired by higher- and lower-index trigger (JetHT and BTagCSV)
+                for i in range(1, nPDs): # Loop on higher-index dataset
+                    PD_i = self.datasetInfo["primaryDatasets"][i]
+                    if (not self.datasetInfo['is%sDataset'%(PD_i)]): continue # double-couting removal when running higher index dataset (BtagCSV)
+                    mask_PrimaryDatasetsStitch = trues_list
+                    for j in range(i): # Loop on lower-index dataset to check both dataset-triggers are fire, and if so, reject those events from higher rank dataset
+                        PD_j = self.datasetInfo["primaryDatasets"][j]
+                        mask_PrimaryDatasetsStitch = np.where(
+                            (mask_Trgs_perPD[PD_j] & mask_Trgs_perPD[PD_i]), # Events fired by both lower- and higher-rank dataset triggers
+                            falses_list,
+                            mask_PrimaryDatasetsStitch
+                        )
+                    mask_Trgs = (mask_Trgs & mask_PrimaryDatasetsStitch) 
+                    if printLevel >= 10:
+                        printVariable('mask_PrimaryDatasetsStitch %s '%(PD_i), mask_PrimaryDatasetsStitch)
+                        printVariable('mask_Trgs %s '%(PD_i), mask_Trgs)
+                        print("")
+
+            if printLevel >= 10:
+                printVariable('mask_Trgs final', mask_Trgs)
+
+
+            if "2018HEM1516Issue" in self.sel_conditions_all_list: 
+                # set 2018HEM1516Issue weight for non-triggered events to one as a precaution. 
+                # Those events will be rejected anyway.
+                wgt_HEM1516Issue_Trgwise = np.where(
+                    (wgt_HEM1516Issue_Trgwise < 1e-6),
+                    ones_list,
+                    wgt_HEM1516Issue_Trgwise
+                )             
+            
             selection.add(
                 sTrgSelection,
                 mask_Trgs
@@ -2614,11 +2758,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             
         
-        #print(f'{self.sel_names_all["Presel"] = }')
-        #sel_SR          = selection.all("nPV", "FatJetGet")
-        #sel_SR           = selection.all(* self.sel_names_all["Presel"])
-        if self.datasetInfo['isSignal'] and runMode_SignalGenChecks and syst == "Nom":  
-            sel_SR           = selection.all(* self.sel_names_all["Presel"])
+        sel_SR           = None #selection.all(* self.sel_names_all["Presel"])
         sel_GenHToAATo4B = None
 
         if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] and 1==0:
@@ -2693,28 +2833,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         if self.datasetInfo["isMC"]:
             # lumiScale ------------------------------------
-            lumiScale_toUse = None
-            if self.datasetInfo["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt and \
-               self.datasetInfo['isQCD']:
-                mask_PhSp_dict_ = {
-                    "QCD_bEnrich":      mask_QCD_bEnrich_PhSp,
-                    "QCD_bGen":         mask_QCD_bGen_PhSp,
-                    "QCD_Incl_Remnant": mask_QCD_Incl_Remnant_PhSp,
-                }
-                lumiScale_toUse = getLumiScaleForPhSpOverlapRewgtMode(
-                    hLumiScale      = self.datasetInfo["hMCSamplesStitch"],
-                    sample_category = dataset,
-                    sample_HT_value = self.datasetInfo['sample_HT_Min'],
-                    mask_PhSp_dict  = mask_PhSp_dict_ )
-            else:
-                lumiScale_toUse = np.full(len(events), self.datasetInfo["lumiScale"])
+            lumiScale_toUse = calculate_lumiScale(
+                luminosity   = luminosity_firedTrgs, 
+                crossSection = self.datasetInfo["sample_crossSection"], 
+                sumEvents    = self.datasetInfo["sample_sumEvents"]
+            )
 
             # MC wgt for HEM1516Issue --------------------- 
             wgt_HEM1516Issue = None
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+            if "2018HEM1516Issue" in self.sel_conditions_all_list:
                 wgt_HEM1516Issue = ak.where(
                     mask_HEM1516Issue, # events w/ jets in HEM15/16 affected phase space 
-                    np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
+                    wgt_HEM1516Issue_Trgwise, #np.full(len(events), (1. - DataFractionAffectedBy2018HEM1516Issue)), 
                     ones_list
                 )
 
@@ -2729,11 +2859,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
 
             # MC TrgEff ------------------------------------
-            #wgt_TrgEff, wgt_TrgEffUp, wgt_TrgEffDown  = get_jetTriggerSF(
-            #    events = events,
-            #    year   = self.datasetInfo["era"],
-            #    selection = selection
-            #)
+            wgt_TrgEff, wgt_TrgEffUp, wgt_TrgEffDown  = get_jetTriggerSF(
+                pt   = leadingFatJet.pt_toUse, 
+                #msd  = leadingFatJet.msoftdrop_toUse, 
+                #HT   = HTtrig,
+                year = self.datasetInfo["era"]
+            )
 
             # MC HToAATo4B signal LundPlane reweighting
             wgt_LundPlane_Nom = wgt_LundPlane_Up = wgt_LundPlane_Down = None 
@@ -2744,10 +2875,27 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 #printVariable('LundPlaneWeights: ', ak.zip([wgt_LundPlane_Nom, wgt_LundPlane_Up, wgt_LundPlane_Down]))
 
             # MC GGF HToAATo4B Higgs pT reweight
-            wgt_GGH_HiggsPt = wgt_GGH_HiggsPtUp = wgt_GGH_HiggsPtDown = None
             if self.datasetInfo['isSignalGGH']:
-                wgt_GGH_HiggsPt, wgt_GGH_HiggsPtUp, wgt_GGH_HiggsPtDown = getHiggsPtRewgtForGGToHToAATo4B(
-                    GenHiggsPt_list = ak.firsts(genHiggs.pt)
+                wgt_GGHaa_HiggsPt, wgt_GGHaa_HiggsPtUp, wgt_GGHaa_HiggsPtDown = getHiggsPtRewgtForGGH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
+                )
+            if self.datasetInfo['isSignalVBFH']:
+                wgt_VBFHaa_HiggsPt, wgt_VBFHaa_HiggsPtUp, wgt_VBFHaa_HiggsPtDown = getHiggsPtRewgtForVBFH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
+                )
+            if self.datasetInfo['isSignalWH']:
+                wgt_WHaa_HiggsPt, wgt_WHaa_HiggsPtUp, wgt_WHaa_HiggsPtDown = getHiggsPtRewgtForWH_HToAATo4B(
+                    genHiggs = genHiggs,
+                    genW = genW
+                )
+            if self.datasetInfo['isSignalZH']:
+                wgt_ZHaa_HiggsPt, wgt_ZHaa_HiggsPtUp, wgt_ZHaa_HiggsPtDown = getHiggsPtRewgtForZH_HToAATo4B(
+                    genHiggs = genHiggs,
+                    genZ = genZ
+                )
+            if self.datasetInfo['isSignalTTH']:
+                wgt_TTHaa_HiggsPt, wgt_TTHaa_HiggsPtUp, wgt_TTHaa_HiggsPtDown = getHiggsPtRewgtForTTH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
                 )
 
             # MC QCD_bGen HT reweight ---------------------
@@ -2812,6 +2960,27 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 year = self.datasetInfo["era"]
             )
 
+            # L1 prefiring
+            if self.datasetInfo["era"] != Era_2018:
+                wgt_L1TPrefiring_dict = get_L1TPrefiringWgt(events.L1PreFiringWeight)
+
+            if printLevel >= 100:
+                printVariable('\n lumiScale_toUse', lumiScale_toUse)
+                printVariable('\n wgt_HEM1516Issue', wgt_HEM1516Issue)
+                printVariable('\n wgt_PU', ak.zip([wgt_PU, wgt_PUUp, wgt_PUDown]))
+                printVariable('\n wgt_LundPlane', ak.zip([wgt_LundPlane_Nom, wgt_LundPlane_Up, wgt_LundPlane_Down]))
+                if self.datasetInfo['isSignalGGH']:
+                    printVariable('\n wgt_GGHaa_HiggsPt', ak.zip([wgt_GGHaa_HiggsPt, wgt_GGHaa_HiggsPtUp, wgt_GGHaa_HiggsPtDown]))
+                if self.datasetInfo['isSignalWH']:
+                    printVariable('\n wgt_WHaa_HiggsPt', ak.zip([wgt_WHaa_HiggsPt, wgt_WHaa_HiggsPtUp, wgt_WHaa_HiggsPtDown]))
+                printVariable('\n wgt_PS', ak.zip([wgt_PS_Nom, wgt_PS_ISRUp, wgt_PS_ISRDown, wgt_PS_FSRUp, wgt_PS_FSRDown ]))
+                printVariable('\n wgt_QCDPdf', ak.zip([wgt_QCDPdfNom, wgt_QCDPdfUp, wgt_QCDPdfDown]))
+                printVariable('\n wgt_QCDScale', ak.zip([wgt_QCDScale_Nom, wgt_QCDScale_RenormUp, wgt_QCDScale_RenormDown, wgt_QCDScale_FactorizationUp, wgt_QCDScale_FactorizationDown]))
+                printVariable('\n wgt_Ak4Btag', ak.zip([wgt_Ak4Btag_dict['Nom'], wgt_Ak4Btag_dict['Up'], wgt_Ak4Btag_dict['Down'], ]))
+                if self.datasetInfo["era"] != Era_2018:
+                    printVariable('\n wgt_L1TPrefiring', ak.zip([wgt_L1TPrefiring_dict['Nom'], wgt_L1TPrefiring_dict['Up'], wgt_L1TPrefiring_dict['Down'], ]))               
+
+
             weights.add(
                 "lumiWeight",
                 weight = lumiScale_toUse
@@ -2821,38 +2990,73 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
             
-            if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
+            if "2018HEM1516Issue" in self.sel_conditions_all_list:
                 weights.add(
-                    "2018HEM1516IssueWeight",
+                    "2018HEM1516IssueWgt",
                     weight = wgt_HEM1516Issue
                 )
             weights.add(
-                "PU",
+                self.systNamePU,
                 weight     = wgt_PU,
-                weightUp   = wgt_PUUp,
-                weightDown = wgt_PUDown
+                weightUp   = copy.deepcopy(wgt_PUUp),
+                weightDown = copy.deepcopy(wgt_PUDown)
             )
-            #weights.add(
-            #    "TrgEff",
-            #    weight     = wgt_TrgEff,
-            #    weightUp   = wgt_TrgEffUp,
-            #    weightDown = wgt_TrgEffDown
-            #)
+            weights.add(
+                self.systNameJetTrigEffi,
+                weight     = wgt_TrgEff,
+                weightUp   = wgt_TrgEffUp,
+                weightDown = wgt_TrgEffDown
+            )
+            if self.datasetInfo["era"] != Era_2018:
+                weights.add(
+                    self.systNameL1Prefire,
+                    weight     = wgt_L1TPrefiring_dict['Nom'],
+                    weightUp   = copy.deepcopy(wgt_L1TPrefiring_dict['Up']),
+                    weightDown = copy.deepcopy(wgt_L1TPrefiring_dict['Down'])
+                )
             
             if self.datasetInfo['isSignal']:
                 weights.add(
-                    "LPRewgt",
+                    self.systNameLPRewgt,
                     weight     = wgt_LundPlane_Nom,
-                    weightUp   = wgt_LundPlane_Up,
-                    weightDown = wgt_LundPlane_Down
-                )
+                    weightUp   = copy.deepcopy(wgt_LundPlane_Up),
+                    weightDown = copy.deepcopy(wgt_LundPlane_Down)
+                )               
             if self.datasetInfo['isSignalGGH']:
                 weights.add(
-                    "GGHPtRewgt",
-                    weight     = wgt_GGH_HiggsPt,
-                    weightUp   = wgt_GGH_HiggsPtUp,
-                    weightDown = wgt_GGH_HiggsPtDown
-                )
+                    self.systNameGGHPtRewgt,
+                    weight     = copy.deepcopy(wgt_GGHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_GGHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalVBFH']:
+                weights.add(
+                    self.systNameVBFHPtRewgt,
+                    weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_VBFHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalWH']:
+                weights.add(
+                    self.systNameWHPtRewgt,
+                    weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_WHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalZH']:
+                weights.add(
+                    self.systNameZHPtRewgt,
+                    weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_ZHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalTTH']:
+                weights.add(
+                    self.systNameTTHPtRewgt,
+                    weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_TTHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_TTHaa_HiggsPtDown)
+                )              
             if self.datasetInfo['isQCD_bGen']:
                 weights.add(
                     "HTRewgt",
@@ -2860,74 +3064,69 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )            
             if self.datasetInfo['isTTbar']:
                 weights.add(
-                    "TopPtReWeight",
+                    self.systNameTopPtReWeight,
                     weight     = wgt_TopPt,
-                    weightUp   = wgt_TopPtUp,
-                    weightDown = wgt_TopPtDown                    
+                    weightUp   = copy.deepcopy(wgt_TopPtUp),
+                    weightDown = copy.deepcopy(wgt_TopPtDown)                    
                 )         
             #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
-            if self.SFs_ParticleNetMD_XbbvsQCD != None:
-                weights.add(
-                    "SF_ParticleNetMD_XbbvsQCD",
-                    weight = wgt_ParticleNetMD_XbbvsQCD
-                )
+            #if self.SFs_ParticleNetMD_XbbvsQCD != None:
+            #    weights.add(
+            #        "SF_ParticleNetMD_XbbvsQCD",
+            #        weight = wgt_ParticleNetMD_XbbvsQCD
+            #    )
             
             weights.add(
-                "ISR",
+                self.systNameISR,
                 weight     = wgt_PS_Nom,
-                weightUp   = wgt_PS_ISRUp,
-                weightDown = wgt_PS_ISRDown
+                weightUp   = copy.deepcopy(wgt_PS_ISRUp),
+                weightDown = copy.deepcopy(wgt_PS_ISRDown)
             )
             weights.add(
-                "FSR",
+                self.systNameFSR,
                 weight     = wgt_PS_Nom,
-                weightUp   = wgt_PS_FSRUp,
-                weightDown = wgt_PS_FSRDown
+                weightUp   = copy.deepcopy(wgt_PS_FSRUp),
+                weightDown = copy.deepcopy(wgt_PS_FSRDown)
             )
             weights.add(
-                "QCDRenorm",
+                self.systNameQCDRenorm,
                 weight     = wgt_QCDScale_Nom,
-                weightUp   = wgt_QCDScale_RenormUp,
-                weightDown = wgt_QCDScale_RenormDown
+                weightUp   = copy.deepcopy(wgt_QCDScale_RenormUp),
+                weightDown = copy.deepcopy(wgt_QCDScale_RenormDown)
             )
             weights.add(
-                "QCDFactr",
+                self.systNameQCDFactr,
                 weight     = wgt_QCDScale_Nom,
-                weightUp   = wgt_QCDScale_FactorizationUp,
-                weightDown = wgt_QCDScale_FactorizationDown
+                weightUp   = copy.deepcopy(wgt_QCDScale_FactorizationUp),
+                weightDown = copy.deepcopy(wgt_QCDScale_FactorizationDown)
             )            
             weights.add(
-                "PDF",
+                self.systNamePDF,
                 weight     = wgt_QCDPdfNom,
-                weightUp   = wgt_QCDPdfUp,
-                weightDown = wgt_QCDPdfDown
+                weightUp   = copy.deepcopy(wgt_QCDPdfUp),
+                weightDown = copy.deepcopy(wgt_QCDPdfDown)
             )
             if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
                 weights.add(
-                    "Btag",
+                    self.systNameBtag,
                     weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Up'],
-                    weightDown = wgt_Ak4Btag_dict['Down']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Up']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Down'])
                 )
             elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
                 weights.add(
-                    "BtagUncorr",
+                    self.systNameBtagUncorr,
                     weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Upuncorrelated']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Downuncorrelated'])
                 )
                 weights.add(
-                    "BtagCorr",
+                    self.systNameBtagCorr,
                     weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Upcorrelated']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Downcorrelated'])
                 )
                 
-
-
-            
-            
-            
             
     
             
@@ -2943,35 +3142,70 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             #if "2018HEM1516Issue" in self.sel_names_all["Presel"]:
             #    weights.add(
-            #        "2018HEM1516IssueWeight",
+            #        "2018HEM1516IssueWgt",
             #        weight = wgt_HEM1516Issue
             #    )
             weights_woHEM1516Fix.add(
-                "PU",
-                weight = wgt_PU,
-                weightUp = wgt_PUUp,
-                weightDown = wgt_PUDown
+                self.systNamePU,
+                weight     = wgt_PU,
+                weightUp   = copy.deepcopy(wgt_PUUp),
+                weightDown = copy.deepcopy(wgt_PUDown)
             )
-            #weights_woHEM1516Fix.add(
-            #    "TrgEff",
-            #    weight     = wgt_TrgEff,
-            #    weightUp   = wgt_TrgEffUp,
-            #    weightDown = wgt_TrgEffDown
-            #)
+            weights_woHEM1516Fix.add(
+                self.systNameJetTrigEffi,
+                weight     = wgt_TrgEff,
+                weightUp   = wgt_TrgEffUp,
+                weightDown = wgt_TrgEffDown
+            )
+            if self.datasetInfo["era"] != Era_2018:
+                weights_woHEM1516Fix.add(
+                    self.systNameL1Prefire,
+                    weight     = wgt_L1TPrefiring_dict['Nom'],
+                    weightUp   = copy.deepcopy(wgt_L1TPrefiring_dict['Up']),
+                    weightDown = copy.deepcopy(wgt_L1TPrefiring_dict['Down'])
+                )
             if self.datasetInfo['isSignal']:
                 weights_woHEM1516Fix.add(
-                    "LPRewgt",
+                    self.systNameLPRewgt,
                     weight     = wgt_LundPlane_Nom,
-                    weightUp   = wgt_LundPlane_Up,
-                    weightDown = wgt_LundPlane_Down
-                )
+                    weightUp   = copy.deepcopy(wgt_LundPlane_Up),
+                    weightDown = copy.deepcopy(wgt_LundPlane_Down)
+                )                 
             if self.datasetInfo['isSignalGGH']:
                 weights_woHEM1516Fix.add(
-                    "GGHPtRewgt",
-                    weight     = wgt_GGH_HiggsPt,
-                    weightUp   = wgt_GGH_HiggsPtUp,
-                    weightDown = wgt_GGH_HiggsPtDown
-                )
+                    self.systNameGGHPtRewgt,
+                    weight     = wgt_GGHaa_HiggsPt,
+                    weightUp   = copy.deepcopy(wgt_GGHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
+                )                  
+            if self.datasetInfo['isSignalVBFH']:
+                weights_woHEM1516Fix.add(
+                    self.systNameVBFHPtRewgt,
+                    weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_VBFHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalWH']:
+                weights_woHEM1516Fix.add(
+                    self.systNameWHPtRewgt,
+                    weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_WHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalZH']:
+                weights_woHEM1516Fix.add(
+                    self.systNameZHPtRewgt,
+                    weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_ZHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalTTH']:
+                weights_woHEM1516Fix.add(
+                    self.systNameTTHPtRewgt,
+                    weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_TTHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_TTHaa_HiggsPtDown)
+                )              
             if self.datasetInfo['isQCD_bGen']:
                 weights_woHEM1516Fix.add(
                     "HTRewgt",
@@ -2979,10 +3213,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )  
             if self.datasetInfo['isTTbar']:
                 weights_woHEM1516Fix.add(
-                    "TopPtReWeight",
+                    self.systNameTopPtReWeight,
                     weight     = wgt_TopPt,
-                    weightUp   = wgt_TopPtUp,
-                    weightDown = wgt_TopPtDown                    
+                    weightUp   = copy.deepcopy(wgt_TopPtUp),
+                    weightDown = copy.deepcopy(wgt_TopPtDown)                    
                 )         
             #if "leadingFatJetParticleNetMD_XbbvsQCD" in self.sel_names_all["Presel"]:
             if self.SFs_ParticleNetMD_XbbvsQCD != None:
@@ -2991,54 +3225,54 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight = wgt_ParticleNetMD_XbbvsQCD
                 )
             weights_woHEM1516Fix.add(
-                "ISR",
+                self.systNameISR,
                 weight     = wgt_PS_Nom,
-                weightUp   = wgt_PS_ISRUp,
-                weightDown = wgt_PS_ISRDown
+                weightUp   = copy.deepcopy(wgt_PS_ISRUp),
+                weightDown = copy.deepcopy(wgt_PS_ISRDown)
             )
             weights_woHEM1516Fix.add(
-                "FSR",
+                self.systNameFSR,
                 weight     = wgt_PS_Nom,
-                weightUp   = wgt_PS_FSRUp,
-                weightDown = wgt_PS_FSRDown
+                weightUp   = copy.deepcopy(wgt_PS_FSRUp),
+                weightDown = copy.deepcopy(wgt_PS_FSRDown)
             )
             weights_woHEM1516Fix.add(
-                "QCDRenorm",
+                self.systNameQCDRenorm,
                 weight     = wgt_QCDScale_Nom,
-                weightUp   = wgt_QCDScale_RenormUp,
-                weightDown = wgt_QCDScale_RenormDown
+                weightUp   = copy.deepcopy(wgt_QCDScale_RenormUp),
+                weightDown = copy.deepcopy(wgt_QCDScale_RenormDown)
             )
             weights_woHEM1516Fix.add(
-                "QCDFactr",
+                self.systNameQCDFactr,
                 weight     = wgt_QCDScale_Nom,
-                weightUp   = wgt_QCDScale_FactorizationUp,
-                weightDown = wgt_QCDScale_FactorizationDown
+                weightUp   = copy.deepcopy(wgt_QCDScale_FactorizationUp),
+                weightDown = copy.deepcopy(wgt_QCDScale_FactorizationDown)
             )            
             weights_woHEM1516Fix.add(
-                "PDF",
+                self.systNamePDF,
                 weight     = wgt_QCDPdfNom,
-                weightUp   = wgt_QCDPdfUp,
-                weightDown = wgt_QCDPdfDown
+                weightUp   = copy.deepcopy(wgt_QCDPdfUp),
+                weightDown = copy.deepcopy(wgt_QCDPdfDown)
             )
             if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear: ## btag 
                 weights_woHEM1516Fix.add(
-                    "Btag",
+                    self.systNameBtag,
                     weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Up'],
-                    weightDown = wgt_Ak4Btag_dict['Down']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Up']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Down'])
                 )
             elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
                 weights_woHEM1516Fix.add(
-                    "BtagUncorr",
+                    self.systNameBtagUncorr,
                     weight     = wgt_Ak4Btag_dict['Nom'],
-                    weightUp   = wgt_Ak4Btag_dict['Upuncorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downuncorrelated']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Upuncorrelated']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Downuncorrelated'])
                 )
                 weights_woHEM1516Fix.add(
-                    "BtagCorr",
+                    self.systNameBtagCorr,
                     weight     = ones_list, #wgt_Ak4Btag_dict['Nom'],  #<<<<<< use dummy weights here to avoid application of btag wgt twice
-                    weightUp   = wgt_Ak4Btag_dict['Upcorrelated'],
-                    weightDown = wgt_Ak4Btag_dict['Downcorrelated']
+                    weightUp   = copy.deepcopy(wgt_Ak4Btag_dict['Upcorrelated']),
+                    weightDown = copy.deepcopy(wgt_Ak4Btag_dict['Downcorrelated'])
                 )
             
             
@@ -3053,14 +3287,42 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             weights_gen.add(
                 "genWeight",
                 weight=np.copysign(np.ones(len(events)), events.genWeight)
-            )
+            )           
             if self.datasetInfo['isSignalGGH']:
                 weights_gen.add(
-                    "GGHPtRewgt",
-                    weight     = wgt_GGH_HiggsPt,
-                    weightUp   = wgt_GGH_HiggsPtUp,
-                    weightDown = wgt_GGH_HiggsPtDown
-                )
+                    self.systNameGGHPtRewgt,
+                    weight     = wgt_GGHaa_HiggsPt,
+                    weightUp   = copy.deepcopy(wgt_GGHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
+                )                 
+            if self.datasetInfo['isSignalVBFH']:
+                weights_gen.add(
+                    self.systNameVBFHPtRewgt,
+                    weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_VBFHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalWH']:
+                weights_gen.add(
+                    self.systNameWHPtRewgt,
+                    weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_WHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
+                )  
+            if self.datasetInfo['isSignalZH']:
+                weights_gen.add(
+                    self.systNameZHPtRewgt,
+                    weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_ZHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalTTH']:
+                weights_gen.add(
+                    self.systNameTTHPtRewgt,
+                    weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_TTHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_TTHaa_HiggsPtDown)
+                )              
             if self.datasetInfo['isQCD_bGen']:
                 weights_gen.add(
                     "HTRewgt",
@@ -3068,13 +3330,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             if self.datasetInfo['isTTbar']:
                 weights_gen.add(
-                    "TopPtReWeight",
+                    self.systNameTopPtReWeight,
                     weight     = wgt_TopPt,
-                    weightUp   = wgt_TopPtUp,
-                    weightDown = wgt_TopPtDown                    
+                    weightUp   = copy.deepcopy(wgt_TopPtUp),
+                    weightDown = copy.deepcopy(wgt_TopPtDown)                    
                 )         
-            
-
 
 
 
@@ -3092,70 +3352,95 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 systList = [
                     "Nom",
                 ]
-                if not self.datasetInfo['systematicsToRun'] == 'no':
+                if (not self.datasetInfo['systematicsToRun'] == 'no') and self.datasetInfo['runSystematics']:
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['pu', 'full'] ): 
                         systList.extend( [
-                            "PUUp",
-                            "PUDown",
+                            self.systNamePU+SystNameConvUp,
+                            self.systNamePU+SystNameConvDown,
                         ] )
-                    #if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['trg', 'full'] ):
-                    #    systList.extend( [
-                    #        "TrgEffUp",
-                    #        "TrgEffDown",
-                    #    ] )
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['trg', 'full'] ):
+                        systList.extend( [
+                            self.systNameJetTrigEffi+SystNameConvUp,
+                            self.systNameJetTrigEffi+SystNameConvDown,
+                        ] )
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['lundplane', 'full'] ) and self.datasetInfo['isSignal']:
                         systList.extend( [
-                            "LPRewgtUp",
-                            "LPRewgtDown",
+                            self.systNameLPRewgt+SystNameConvUp,
+                            self.systNameLPRewgt+SystNameConvDown,
                         ] ) 
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['gghptrewgt', 'full'] ) and self.datasetInfo['isSignalGGH']:
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['gghaaptrewgt', 'full'] ) and self.datasetInfo['isSignalGGH']:
                         systList.extend( [
-                            "GGHPtRewgtUp",
-                            "GGHPtRewgtDown",
+                            self.systNameGGHPtRewgt+SystNameConvUp,
+                            self.systNameGGHPtRewgt+SystNameConvDown,
+                        ] ) 
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['vbfhaaptrewgt', 'full'] ) and self.datasetInfo['isSignalVBFH']:
+                        systList.extend( [
+                            self.systNameVBFHPtRewgt+SystNameConvUp,
+                            self.systNameVBFHPtRewgt+SystNameConvDown,
+                        ] ) 
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['whaaptrewgt', 'full'] ) and self.datasetInfo['isSignalWH']:
+                        systList.extend( [
+                            self.systNameWHPtRewgt+SystNameConvUp,
+                            self.systNameWHPtRewgt+SystNameConvDown,
+                        ] ) 
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['zhaaptrewgt', 'full'] ) and self.datasetInfo['isSignalZH']:
+                        systList.extend( [
+                            self.systNameZHPtRewgt+SystNameConvUp,
+                            self.systNameZHPtRewgt+SystNameConvDown,
+                        ] ) 
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['tthaaptrewgt', 'full'] ) and self.datasetInfo['isSignalTTH']:
+                        systList.extend( [
+                            self.systNameTTHPtRewgt+SystNameConvUp,
+                            self.systNameTTHPtRewgt+SystNameConvDown,
                         ] ) 
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['topptrewgt', 'full'] ) and self.datasetInfo['isTTbar']:
                         systList.extend( [
-                            "TopPtReWeightUp",
-                            "TopPtReWeightDown",
+                            self.systNameTopPtReWeight+SystNameConvUp,
+                            self.systNameTopPtReWeight+SystNameConvDown,
                         ] ) 
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['isr', 'full'] ):
                         systList.extend( [
-                            "ISRUp",
-                            "ISRDown",
+                            self.systNameISR+SystNameConvUp,
+                            self.systNameISR+SystNameConvDown,
                         ] )
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['fsr', 'full'] ):
                         systList.extend( [
-                            "FSRUp",
-                            "FSRDown",
+                            self.systNameFSR+SystNameConvUp,
+                            self.systNameFSR+SystNameConvDown,
                         ] )
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['qcdrenorm', 'full'] ):
                         systList.extend( [
-                            "QCDRenormUp",
-                            "QCDRenormDown",
+                            self.systNameQCDRenorm+SystNameConvUp,
+                            self.systNameQCDRenorm+SystNameConvDown,
                         ] )
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['qcdfactr', 'full'] ):
                         systList.extend( [
-                            "QCDFactrUp",
-                            "QCDFactrDown",
+                            self.systNameQCDFactr+SystNameConvUp,
+                            self.systNameQCDFactr+SystNameConvDown,
                         ] )                        
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['pdf', 'full'] ):
                         systList.extend( [
-                            "PDFUp",
-                            "PDFDown",
+                            self.systNamePDF+SystNameConvUp,
+                            self.systNamePDF+SystNameConvDown,
                         ] )
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['btag', 'full'] ):
                         if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear:
                             systList.extend( [
-                                "BtagUp",
-                                "BtagDown",
+                                self.systNameBtag+SystNameConvUp,
+                                self.systNameBtag+SystNameConvDown,
                             ] ) 
                         elif kDatasetToAnalyze == DatasetToAnalyze.FullRun2:
                             systList.extend( [
-                                "BtagUncorrUp",
-                                "BtagUncorrDown",
-                                "BtagCorrUp",
-                                "BtagCorrDown",                                
+                                self.systNameBtagUncorr+SystNameConvUp,
+                                self.systNameBtagUncorr+SystNameConvDown,
+                                self.systNameBtagCorr+SystNameConvUp,
+                                self.systNameBtagCorr+SystNameConvDown,                                
                             ] )                                           
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['l1prefire', 'full'] ) and (self.datasetInfo["era"] != Era_2018):
+                        systList.extend( [
+                            self.systNameL1Prefire+SystNameConvUp,
+                            self.systNameL1Prefire+SystNameConvDown,
+                        ] )
                     
                     
                 
@@ -3171,18 +3456,51 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #for n in selection.names:
             #    output['cutflow'][n] += selection.all(n).sum()
 
+            # Save run:ls:events got selected events in data
+            if (not self.datasetInfo['isMC']) and (self.datasetInfo['saveRunLsEvt']):
+                sel_ = selection.all(* self.sel_names_all[ sCat_save_rle ] )
+                rle_ = ak.to_list(ak.zip([events.run, events.luminosityBlock, events.event])[sel_])
+                
+                if printLevel >= 100:
+                    printVariable('rle_: ', rle_)
+                    print(f"{type(rle_) = }", flush=True)
+
+                output['rle_%s'%(sCat_save_rle)].extend( rle_ )
+                    
+
             
             for iSelection in self.sel_names_all.keys():
                 iName = f"{iSelection}: {self.sel_names_all[iSelection]}"
                 sel_i = selection.all(* self.sel_names_all[iSelection])
-                selection.names
+                #selection.names
                 output['cutflow'][iName] += sel_i.sum()
                 output['cutflow'][sWeighted+iName] +=  weights.weight()[sel_i].sum()
 
+            # For each selection, yields after every cut
+            for iSelection in self.sel_names_all.keys():
+                for iCut in range(1, len(self.sel_names_all[iSelection])):
+                    iName = f"{iSelection} @ {self.sel_names_all[iSelection][iCut]}: {self.sel_names_all[iSelection][:iCut]}"
+                    sel_i = selection.all(* self.sel_names_all[iSelection][:iCut])
+                    output['cutflow'][iName] += sel_i.sum()
+                    output['cutflow'][sWeighted+iName] +=  weights.weight()[sel_i].sum()
 
 
-        if printLevel >= 100:
-            print(f"{weights.variations = }")
+
+
+            if printLevel >= 100 and storeIndividualEvtWgts:                
+                sWgts = list(weights._weights.keys())
+                print(f"\n{weights.variations = }")
+                print(f"\n weights[{sWgts}]:")
+                for sWgt in sWgts:
+                    print(f"{sWgt}", flush=True)
+                    wgt_list_ = [weights._weights[sWgt]]
+                    if sWgt+"Up" in list(weights._modifiers.keys()): 
+                        wgt_list_.extend([weights._modifiers[sWgt+"Up"]*weights._weights[sWgt], weights._modifiers[sWgt+"Down"]*weights._weights[sWgt]])
+                        printVariable('\n %s'%(sWgt), ak.zip(wgt_list_))
+                    else:
+                        printVariable('\n %s'%(sWgt), wgt_list_[0])
+                printVariable('\n weights.weight(None)', weights.weight(None))
+
 
 
 
@@ -3192,7 +3510,30 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             weightSyst = syst
             
             # in the case of 'central', or the jet energy systematics, no weight systematic variation is used (weightSyst=None)
-            if syst in ["Nom", "JERUp", "JERDown", "JESUp", "JESDown", "JESHEMIssueUp", "JESHEMIssueDown"]:
+            #if syst in ["Nom", "JERUp", "JERDown", "JESUp", "JESDown", "JESHEMIssueUp", "JESHEMIssueDown"]:
+            skipWgtSystVariation_list = ["Nom" ]
+            skipWgtSystVariation_list.extend([
+                self.systNameAK8JetJER+SystNameConvUp,
+                self.systNameAK8JetJER+SystNameConvDown,
+                self.systNameAK4JetJER+SystNameConvUp,
+                self.systNameAK4JetJER+SystNameConvDown,
+
+                self.systNameAK8JetJES+SystNameConvUp,
+                self.systNameAK8JetJES+SystNameConvDown,
+                self.systNameAK4JetJES+SystNameConvUp,
+                self.systNameAK4JetJES+SystNameConvDown,
+
+                self.systNameMETJES+SystNameConvUp,
+                self.systNameMETJES+SystNameConvDown,
+                self.systNameMETJER+SystNameConvUp,
+                self.systNameMETJER+SystNameConvDown,
+                self.systNameMETUnclE+SystNameConvUp,
+                self.systNameMETUnclE+SystNameConvDown,     
+
+                self.systName2018HEM1516Issue+SystNameConvUp,
+                self.systName2018HEM1516Issue+SystNameConvDown,                                                                                   
+            ])
+            if syst in skipWgtSystVariation_list:
                 weightSyst = None
 
             
@@ -3209,12 +3550,32 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             #if printLevel >=0:
             #    printVariable('\n evtWeight %s' % (syst), evtWeight)
+            if self.datasetInfo['histogramSaveLevel'] >= 1: # hCutFlowPerCat
+                # For each selection, yields after every cut
+                for iSelection in self.sel_names_all.keys():
+                    for iCut in range(0, len(self.sel_names_all[iSelection])+1):
+                        if iCut == 0:
+                            sel_i = trues_list
+                        else:
+                            sel_i = selection.all(* self.sel_names_all[iSelection][:iCut])
+
+                        output['hCutFlowPerCat_'+iSelection].fill(
+                            dataset=dataset,
+                            CutFlow50=np.full_like(ones_list, iCut)[sel_i],
+                            #systematic=syst
+                        )  
+                        output['hCutFlowPerCatWeighted_'+iSelection].fill(
+                            dataset=dataset,
+                            CutFlow50=np.full_like(ones_list, iCut)[sel_i],
+                            #systematic=syst,
+                            weight=evtWeight[sel_i]
+                        )                  
 
 
             ### General or GEN-level histograms ========================================================================================
 
             # PU
-            if histogramSaveLevel >= 10:
+            if self.datasetInfo['histogramSaveLevel'] >= 10:
                 output['hPV_npvs_beforeSel'].fill(
                     dataset=dataset,
                     PU=(events.PV.npvs),
@@ -3312,7 +3673,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
 
 
-            if (self.datasetInfo['isSignal'] or self.datasetInfo['isHToBB']) and runMode_SignalGenChecks and syst == "Nom":
+            if (self.datasetInfo['isSignal'] or self.datasetInfo['isSMHiggs']) and runMode_SignalGenChecks and syst == "Nom":
                 output['hGenHiggsPt_all'].fill(
                     dataset=dataset,
                     Pt2TeV=(ak.firsts(genHiggs.pt)),
@@ -4537,7 +4898,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ### RECO-level histograms ============================================================================================
             
-            if self.datasetInfo['isSignal'] and histogramSaveLevel >= 12:
+            if self.datasetInfo['isSignal'] and self.datasetInfo['histogramSaveLevel'] >= 12:
                 output['hIdxFatJetMatchedToGenBFromHToAATo4B'].fill(
                     dataset=dataset,
                     nObject=(idx_FatJet_matched_genB_HToAATo4B[mask_events_FatJet_matched_genB_HToAATo4B]),
@@ -4647,19 +5008,19 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     sel_SR_forHExt = ak.fill_none(sel_SR_forHExt, False) 
                     
 
-                    if histogramSaveLevel >= 0:
+                    if (( self.datasetInfo['histogramSaveLevel'] >= 0) and ((syst == "Nom") or (syst == "noweight")) ):
                         # Cut flow table ------------------------------------------                    
                         # all events
                         iBin = 0
                         output['hCutFlow'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list * iBin),
-                            systematic=syst
+                            #systematic=syst
                         )
                         output['hCutFlowWeighted'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list * iBin),
-                            systematic=syst,
+                            #systematic=syst,
                             weight=evtWeight
                         )
 
@@ -4668,16 +5029,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         output['hCutFlow'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list[sel_SR_forHExt] * iBin),
-                            systematic=syst
+                            #systematic=syst
                         )
                         output['hCutFlowWeighted'+sHExt].fill(
                             dataset=dataset,
                             CutFlow=(ones_list[sel_SR_forHExt] * iBin),
-                            systematic=syst,
+                            #systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )
 
-                    if histogramSaveLevel >= 0:
+                    if self.datasetInfo['histogramSaveLevel'] >= 0:
                         ## PNetMD Hto4b NanoAOD_v2
                         if 'PNet_X4b_v2a_Haa4b_score' in FatJetsToUse.fields:
                             output['hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD'+sHExt].fill(
@@ -4733,7 +5094,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
 
-                    if histogramSaveLevel >= 3:
+                    if self.datasetInfo['histogramSaveLevel'] >= 3:
                         # 2DAlphabetFit histograms --------------------------------
                         if 'particleNetMD_Hto4b_Haa4b' in FatJetsToUse.fields:
                             output['hLeadingFatJetParticleNet_massH_Hto4b_avg_vs_massA_Hto4b_avg'+sHExt].fill(
@@ -4853,7 +5214,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             
 
                     # Event weights histograms ------------------------------------------------------
-                    if histogramSaveLevel >= 1 and self.datasetInfo['isMC'] and syst == "Nom":
+                    if self.datasetInfo['histogramSaveLevel'] >= 1 and self.datasetInfo['isMC'] and syst == "Nom":
                         output['hEventWeight_PU'+sHExt].fill(
                             dataset=dataset,
                             Weight=wgt_PU[sel_SR_forHExt]
@@ -5010,7 +5371,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         
                         
 
-                    if histogramSaveLevel >= 1: 
+                    if self.datasetInfo['histogramSaveLevel'] >= 1: 
                         output['hPV_npvsGood'+sHExt].fill(
                             dataset=dataset,
                             PU=(events.PV.npvsGood[sel_SR_forHExt]),
@@ -5280,7 +5641,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             
 
 
-                    if histogramSaveLevel >= 2:
+                    if self.datasetInfo['histogramSaveLevel'] >= 2:
                         output['hPV_npvs'+sHExt].fill(
                             dataset=dataset,
                             PU=(events.PV.npvs[sel_SR_forHExt]),
@@ -6386,7 +6747,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
                     ### 2-D distribution ----------------------------------------------------------
-                    if histogramSaveLevel >= 2: 
+                    if self.datasetInfo['histogramSaveLevel'] >= 2: 
                         output['hMET_pT_vs_dPhi_MET_leadingFatJet'+sHExt].fill(
                             dataset=dataset,
                             Pt=(METToUse.pt_toUse[sel_SR_forHExt]),
@@ -6520,36 +6881,15 @@ if __name__ == '__main__':
     era                 = config['era']
     downloadIpFiles     = config['downloadIpFiles'] if 'downloadIpFiles' in config else False
     server              = config["server"]
+    triggers            = config['triggers'] if 'triggers' in config else ''
+    primaryDatasets     = config['primaryDatasets'] if 'primaryDatasets' in config else ['JetHT', 'BTagCSV']
+    saveRunLsEvt        = config['saveRunLsEvt']    if 'saveRunLsEvt'    in config else False
+    systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
     if isMC:
         sample_crossSection = config["crossSection"]
         sample_nEvents      = config["nEvents"]
         sample_sumEvents    = config["sumEvents"] if config["sumEvents"] > 0 else sample_nEvents
         if sample_sumEvents == -1: sample_sumEvents = 1 # Case when sumEvents is not calculated
-        systematicsToRun    = config["systematics"].lower() if "systematics" in config else 'no'
-
-        
-        MCSamplesStitchOption = MCSamplesStitchOptions.PhSpOverlapRewgt if ("MCSamplesStitchOption" in config and \
-                                                                            config["MCSamplesStitchOption"] == MCSamplesStitchOptions.PhSpOverlapRewgt.value) \
-            else MCSamplesStitchOptions.PhSpOverlapRemove
-        
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            if "MCSamplesStitchInputs" not in config:
-                print(frameinfo.filename, frameinfo.lineno, ' ERROR: "MCSamplesStitchInputs" not in config') # https://stackoverflow.com/questions/3056048/filename-and-line-number-of-python-script
-                
-            MCSamplesStitchInputFileName      = config["MCSamplesStitchInputs"]["inputFile"]
-            MCSamplesStitchInputHistogramName = config["MCSamplesStitchInputs"]["histogramName"]
-            MCSamplesStitchInputHistogramName = MCSamplesStitchInputHistogramName.replace(
-                '$SAMPLECATEGORY', sample_category.split('_')[0]
-            )
-            print(f"{MCSamplesStitchOption = }, {MCSamplesStitchInputFileName = }, {MCSamplesStitchInputHistogramName = } ")
-            if not os.path.exists(MCSamplesStitchInputFileName):
-                logging.critical(f'htoaa_Analysis_CR_QCD4b.py::main():: {MCSamplesStitchInputFileName = } does not exists')
-                print(f'htoaa_Analysis_CR_QCD4b.py::main() 11:: {MCSamplesStitchInputFileName = } does not exists')
-                exit(0)
-            print(f"Opening {MCSamplesStitchInputFileName = } "); sys.stdout.flush() 
-            with uproot.open(MCSamplesStitchInputFileName) as f_:
-                print(f"{f_.keys() = }"); sys.stdout.flush() 
-                hMCSamplesStitch = f_[r'%s' % MCSamplesStitchInputHistogramName].to_hist()
 
     print(f"htoaa_Analysis_CR_QCD4b:: here16 {datetime.now() = }")    
         
@@ -6624,14 +6964,15 @@ if __name__ == '__main__':
         "isMC":            isMC,
         "sample_category": sample_category,        
         "datasetNameFull": sample_dataset,
+        "primaryDatasets": primaryDatasets,
+        "triggers":        triggers,
+        "saveRunLsEvt":    saveRunLsEvt,
     }
+    sampleInfo["systematicsToRun"] = systematicsToRun
     if isMC:
         sampleInfo["sample_crossSection"]   = sample_crossSection
         sampleInfo["sample_sumEvents"]      = sample_sumEvents
-        sampleInfo["MCSamplesStitchOption"] = MCSamplesStitchOption
-        if MCSamplesStitchOption == MCSamplesStitchOptions.PhSpOverlapRewgt:
-            sampleInfo["hMCSamplesStitch"] = hMCSamplesStitch
-        sampleInfo["systematicsToRun"] = systematicsToRun
+
     print(f"htoaa_Analysis_CR_QCD4b:: here19 {datetime.now() = }", flush=flushStdout)
         
     startTime = time.time()
@@ -6671,17 +7012,14 @@ if __name__ == '__main__':
             #print(key, value)
             if key.startswith(sWeighted): continue # to print weighted and unweighted events for cuts on the same line
 
-            #print("%10f\t%10d\t%s" % (output['cutflow'][sWeighted+key], output['cutflow'][key], key), flush=flushStdout)
-            print("%10d\t%s" % (output['cutflow'][key], key), flush=flushStdout)
+            print("%10f\t%10d\t%s" % (output['cutflow'][sWeighted+key], output['cutflow'][key], key), flush=flushStdout)
+            #print("%10d\t%s" % (output['cutflow'][key], key), flush=flushStdout)
     
     
     if sOutputFile is not None:
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        sample_category_toUse = sample_category
-        if isMC and \
-            "QCD" in sample_category:
-            sample_category_toUse = "QCD"        
+        sample_category_toUse = sample_category        
         sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
@@ -6690,14 +7028,6 @@ if __name__ == '__main__':
                 #print(f"key: {key},  value ({type(value)}): {value}")
                 sHistoName_toUse = key
                 sHExt_toUse = ''
-                if isMC and \
-                    "QCD" in sample_category:                    
-                    for sHExt in HistogramNameExtensions_QCD:
-                        if sHExt in key:
-                            sHExt_toUse = '_%s' % (sHExt)
-                            sHistoName_toUse = sHistoName_toUse.replace(sHExt_toUse, '')
-                            break
-
                 sDir1_toUse = '%s%s' % (sDir1, sHExt_toUse)
 
                 #if not (key.startswith('h') or key != 'cutflow'): continue

@@ -378,10 +378,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             
 
         ## List of all analysis selection condition ---------------------------------------------
-        #global HLT_AK8PFJet330_name
-        #HLT_AK8PFJet330_name = "HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4" 
         global sTrgSelection
-        #sTrgSelection = 'Trg_Combo_AK4AK8Jet_HT'
         sTrgSelection = self.datasetInfo['triggers'] if self.datasetInfo['triggers'] else 'Trg_Combo_AK4AK8Jet_HT_VBF'
         print(f"{sTrgSelection = }")
         if (self.datasetInfo["era"] in Triggers_perEra) and (sTrgSelection in Triggers_perEra[self.datasetInfo["era"]]):

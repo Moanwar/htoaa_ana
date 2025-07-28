@@ -309,7 +309,8 @@ if __name__ == '__main__':
         if sAnalysis == "htoaa_Analysis_VHHadronicMode.py":  sAnaCat = "Vjj"
         if sAnalysis == "htoaa_Analysis_ZH_4b2nu.py":        sAnaCat = "Zvv"
         if sAnalysis == "htoaa_Analysis_ttHHadronicMode.py": sAnaCat = "tt0l"
-        if sAnalysis == "htoaa_Analysis_triggerEffi.py": sAnaCat = "trigEffi"
+        if sAnalysis == "htoaa_Analysis_triggerEffi.py":     sAnaCat = "trigEffi"
+        if sAnalysis == "htoaa_Analysis_CR_QCD4b.py":        sAnaCat = "CR_QCD4b"
         if sAnaCat: AnaOpDirName += "/%s" %(sAnaCat)
 
         os.chdir( SourceCodeBaseDir )
@@ -352,7 +353,10 @@ if __name__ == '__main__':
         
         # Primaru dataset for analyses
         if primaryDatasets_0 == '':
-            if sAnalysis in ["htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py"]:
+            if sAnalysis in [
+                "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py",
+                "htoaa_Analysis_CR_QCD4b.py"
+                ]:
                 primaryDatasets = ['JetHT']
                 if era in [Era_2016preVFP, Era_2016postVFP, Era_2017]: primaryDatasets.append('BTagCSV')
             if sAnalysis in ["htoaa_Analysis_ZH_4b2nu.py"]:

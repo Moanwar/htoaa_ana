@@ -1,14 +1,13 @@
 '''
 To run:
-    python3 PlotHistos1D_DataVsMC.py <sAnaVersion> <Dataset> <CAT>
-        sAnaVersion: version name of analysis folder. E.g. 20250713_DatacardsFullSyst
+    python3 PlotHistos1D_DataVsMC.py <sAnaDir> <Dataset> <CAT>
+        sAnaDir: full path of analysis directory where output histograms are stored. E.g. /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst
         Dataset: '2016preVFP', '2016postVFP', '2017', '2018', 'Run2', 'All'
         CAT0: 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', VjjLo, VjjHi, VjjIncl, 'tt0l', 'tt0l_1TFJ_ge0BOutsideSelFJ', 'CR_QCD4b'
             'tt0l_ge1NonHFatJet_0BExtra', 'tt0l_ge1NonHFatJet_1BExtra', 'tt0l_ge1NonHFatJet_ge2BExtra', 'tt0l_0NonHFatJet_ge2B'
             tt0l_1TFJ_0BOutsideSelFJ, tt0l_1TFJ_ge1BOutsideSelFJ, tt0l_1TFJ_ge0BOutsideSelFJ
             'trigEffi
-    e.g. time python3 PlotHistos1D_DataVsMC.py 20250713_DatacardsFullSyst 2018 gg0l 2>&1 | tee cout_makeHistogramsFor2DAlphabetMthod_20250713_DatacardsFullSyst_2018_gg0l.txt
-
+    e.g. time python3 PlotHistos1D_DataVsMC.py /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst 2018 gg0l 
 '''
 
 
@@ -46,12 +45,12 @@ class DataBlindingOptions(enum.Enum):
     Unblind        = ' '
 
 
-sAnaVersion = sys.argv[1]
+sAnaDir = sys.argv[1]
 Dataset     = sys.argv[2]
 CAT         = sys.argv[3]
 
 # Set Dataset: '2016preVFP', '2016postVFP', '2017', '2018', 'Run2', 'All'
-#sAnaVersion = '20250721_DataMC';    Dataset         = 'All';
+#sAnaDir = '20250721_DataMC';    Dataset         = 'All';
 
 #CAT = 'gg0lIncl' # 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', 'tt0l', 'tt0l_1TFJ_ge0BOutsideSelFJ', 'CR_QCD4b'
 # 'tt0l_ge1NonHFatJet_0BExtra', 'tt0l_ge1NonHFatJet_1BExtra', 'tt0l_ge1NonHFatJet_ge2BExtra', 'tt0l_0NonHFatJet_ge2B'
@@ -59,11 +58,11 @@ CAT         = sys.argv[3]
 # 'trigEffi
 
 anaSuperCat = ''
-if 'gg0l' in CAT:  anaSuperCat = 'gg0l'
-if 'VBF' in CAT:  anaSuperCat = 'VBFjj'
-if 'Vjj' in CAT:  anaSuperCat = 'Vjj'
-if 'Zvv' in CAT:  anaSuperCat = 'Zvv'
-if 'tt0l' in CAT:  anaSuperCat = 'tt0l'
+if 'gg0l' in CAT:      anaSuperCat = 'gg0l'
+if 'VBF' in CAT:       anaSuperCat = 'VBFjj'
+if 'Vjj' in CAT:       anaSuperCat = 'Vjj'
+if 'Zvv' in CAT:       anaSuperCat = 'Zvv'
+if 'tt0l' in CAT:      anaSuperCat = 'tt0l'
 if 'trigEffi' in CAT:  anaSuperCat = 'trigEffi'
 
 # Year, Era are set internally to one of the following: '2016preVFP', '2016postVFP', '2017', '2018'
@@ -90,8 +89,8 @@ print(f"{YearsToRun_dict = }, \n{Years = }")
 ## Read input files
 sIpFiles = {}
 for Era in Years:
-    sIpFiles[Era] = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/analyze_htoaa_stage1.root' % (sAnaVersion, Era, anaSuperCat) # 20250612_gg0lDataMC_1, 20250613_gg0lDataMC_1, 20250617_gg0lDataMC, 20250617_gg0lDataMC_1
-sOpDirNameShort = 'plots_v1'
+    sIpFiles[Era] = '%s/%s/%s/analyze_htoaa_stage1.root' % (sAnaDir, Era, anaSuperCat) # 20250612_gg0lDataMC_1, 20250613_gg0lDataMC_1, 20250617_gg0lDataMC, 20250617_gg0lDataMC_1
+sOpDirNameShort = 'plots'
 
 
 ## Set selection tags
@@ -325,8 +324,7 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
     luminosity_toUse         = round(luminosity_toUse, 1)
     luminosity_Scaling_toUse = 1.0
 
-    sOpDir  = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/%s' % (sAnaVersion, sDatasetName, anaSuperCat, sOpDirNameShort)
-    sOpDir = '%s/%s' % (sOpDir, CAT)
+    sOpDir  = '%s/%s/%s/%s/%s' % (sAnaDir, sDatasetName, anaSuperCat, sOpDirNameShort, CAT)
     if not os.path.exists(sOpDir):
         os.makedirs(sOpDir)
 
