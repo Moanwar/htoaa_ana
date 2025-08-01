@@ -6,7 +6,7 @@ To run:
         CAT0: 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', VjjLo, VjjHi, VjjIncl, 'tt0l', 'tt0l_1TFJ_ge0BOutsideSelFJ', 'CR_QCD4b'
             'tt0l_ge1NonHFatJet_0BExtra', 'tt0l_ge1NonHFatJet_1BExtra', 'tt0l_ge1NonHFatJet_ge2BExtra', 'tt0l_0NonHFatJet_ge2B'
             tt0l_1TFJ_0BOutsideSelFJ, tt0l_1TFJ_ge1BOutsideSelFJ, tt0l_1TFJ_ge0BOutsideSelFJ
-            'trigEffi
+            'trigEffi', 'CR_QCD4b'
     e.g. time python3 PlotHistos1D_DataVsMC.py /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst 2018 gg0l 
 '''
 
@@ -64,6 +64,7 @@ if 'Vjj' in CAT:       anaSuperCat = 'Vjj'
 if 'Zvv' in CAT:       anaSuperCat = 'Zvv'
 if 'tt0l' in CAT:      anaSuperCat = 'tt0l'
 if 'trigEffi' in CAT:  anaSuperCat = 'trigEffi'
+if 'CR_QCD4b' in CAT:  anaSuperCat = 'CR_QCD4b'
 
 # Year, Era are set internally to one of the following: '2016preVFP', '2016postVFP', '2017', '2018'
 YearsAll_list = [Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018]
@@ -93,12 +94,28 @@ for Era in Years:
 sOpDirNameShort = 'plots'
 
 
+subCats = []
+if   'gg0l'     in CAT:
+    subCats = ["gg0lIncl", "gg0lHi", "gg0lLo"]
+elif 'VBF'      in CAT:    
+    subCats = ["VBFHi", "VBFLo"]
+elif 'Vjj'      in CAT:    
+    subCats = ["VjjIncl", "VjjHi", "VjjLo"]
+elif 'Zvv'      in CAT:    
+    subCats = ["ZvvHi", "ZvvLo"]
+elif 'tt0l'      in CAT:    
+    subCats = ["tt0l_1TFJ_ge0BOutsideSelFJ", "tt0l_1TFJ_0BOutsideSelFJ", "tt0l_1TFJ_ge1BOutsideSelFJ"]
+
 ## Set selection tags
-selectionTags = [CAT,] # '%sMsdLt50' % (CAT),'%sMsdGt50' % (CAT)]
-if 'gg0l' in CAT: selectionTags.extend([ '%s_Xto4bv2_SBplusSRWP40' % (CAT),] )
-else:             selectionTags.extend([ '%s_Xto4bv2_SBplusSRWP60' % (CAT), ] )
+selectionTags = []
+for subCat_ in subCats:
+    selectionTags.extend( [subCat_,] ) # '%sMsdLt50' % (CAT),'%sMsdGt50' % (CAT)]
+    if 'gg0l' in CAT: selectionTags.extend([ '%s_Xto4bv2_SBplusSRWP40' % (subCat_),] )
+    else:             selectionTags.extend([ '%s_Xto4bv2_SBplusSRWP60' % (subCat_), ] )
 if 'trigEffi' in CAT: 
     selectionTags = ['JetTrgEffiDenom', 'JetTrgEffiNume_Trg_Combo_AK4AK8Jet_HT_VBF']
+elif 'CR_QCD4b'      in CAT: 
+    selectionTags = ["CR4b_3M2T", "CR4b_3M3T", "CR4b_4M3T", "CR4b_4M4T"]
 
 
 
@@ -122,10 +139,13 @@ for DatasetName_, YearsToRun_list_ in YearsToRun_dict.items():
     for Year_ in YearsToRun_list_:
         if 'Zvv'       in CAT:
             ExpDatasetNames = ['MET']
+            HLT_toUse       = 'Trg_Combo_MET'
         elif 'trigEffi'       in CAT:
             ExpDatasetNames = ['SingleMuon']
+            HLT_toUse       = 'Trg_Combo_Mu'
         else:
             ExpDatasetNames = ['JetHT']
+            HLT_toUse       = 'Trg_Combo_AK4AK8Jet_HT_VBF'
             if Year_ != '2018':
                 ExpDatasetNames.append( 'BTagCSV' )
         DataObs_DirName_list_i_ = ['%s_Run%s%s' % (ExpDatasetName, Year_[:4],EraInYear) for ExpDatasetName in ExpDatasetNames for EraInYear in YearsAndEras_dict[Year_]]
@@ -324,15 +344,17 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
     luminosity_toUse         = round(luminosity_toUse, 1)
     luminosity_Scaling_toUse = 1.0
 
-    sOpDir  = '%s/%s/%s/%s/%s' % (sAnaDir, sDatasetName, anaSuperCat, sOpDirNameShort, CAT)
-    if not os.path.exists(sOpDir):
-        os.makedirs(sOpDir)
 
     if printLevel >= 0: 
         print(f"{sDatasetName}: {luminosity_toUse = }, {luminosity_total = },  {luminosity_Scaling_toUse = }, \n{YearsToRun_list = }, \n{sOpDir = }", flush=True)
     
 
-    for selectionTag in selectionTags:    
+    for selectionTag in selectionTags:   
+        sOpDir  = '%s/%s/%s/%s/%s' % (sAnaDir, sDatasetName, anaSuperCat, sOpDirNameShort, selectionTag)
+        if not os.path.exists(sOpDir):
+            os.makedirs(sOpDir)
+
+
         #dataBlindOption_toUse = dataBlindOption if selectionTag != 'SR' else DataBlindingOptions.BlindPartially
 
         for histo_name in histograms_dict.keys():
@@ -964,19 +986,19 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                             )
                     
                     
-                    sOpDir_toUse = '%s/%s' % (sOpDir, selectionTag)
-                    if not os.path.exists(sOpDir_toUse):
-                        os.makedirs(sOpDir_toUse)
+                    #sOpDir_toUse = '%s/%s' % (sOpDir, selectionTag)
+                    #if not os.path.exists(sOpDir_toUse):
+                    #    os.makedirs(sOpDir_toUse)
 
                     #fig.savefig('%s/%s_%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic,sData, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
-                    fig.savefig('%s/%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
+                    fig.savefig('%s/%s_%s_%s.png' % (sOpDir,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
     
 
                     if RunMode.lower() != 'test':
                         plt.close(fig)
 
-    if printLevel >= 0: 
-        print(f"\n Saved plots into {sOpDir = }", flush=True)
+        if printLevel >= 0: 
+            print(f"\n Saved plots into {sOpDir = }", flush=True)
 
                     
 

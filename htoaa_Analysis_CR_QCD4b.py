@@ -98,6 +98,7 @@ printLevel = 0
 histogramSaveLevel_0 = 1 # 0: hSignal extraction, 1: basic Data-MC validation, 2:..
 nEventToReadInBatch = 2*10**4 # 0.5*10**5 # 0.5*10**6 # 2500000 #  1000 # 2500000
 nEventsToAnalyze = -1 # 1000 # 100000 # -1
+storeIndividualEvtWgts = False # True: Store individual event weight components for debugging.  False: otherwise
 flushStdout = True
 #pd.set_option('display.max_columns', None)  
 
@@ -541,6 +542,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #print(f"self.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
             #self.pdgId_BHadrons = list(set(self.pdgId_BHadrons))
             #print(f" after duplicate removal --> \nself.pdgId_BHadrons ({len(self.pdgId_BHadrons)}): {self.pdgId_BHadrons}")
+
+            ## MC QCD
+            if self.datasetInfo['isQCD']:
+                self.histosExtensions = HistogramNameExtensions_QCD
+            print(f"{self.histosExtensions = }")
             
             print(f"{bTagSFEfficiencyDict[self.datasetInfo['era']]['inputFile'] = }")
 
@@ -1373,6 +1379,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         ones_list  = np.ones(len(events))
+        zeros_list  = np.zeros(len(events))
         trues_list = np.ones(len(events), dtype=bool)
         falses_list = np.full(len(events), False)
 
@@ -1477,7 +1484,38 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         idx_GenB_fromHToAA = None
         mask_SignalHToAATo4B_Boosted = None
         if self.datasetInfo['isSignal'] or self.datasetInfo['isSMHiggs']: 
-            genHiggs  = self.objectSelector.selectGenHiggs(events)
+            #genHiggs  = self.objectSelector.selectGenHiggs(events)
+            genHiggses                   = selectGenHiggs(events)
+            genZs                       = selectGenZBoson(events)
+            genWs                       = selectGenWBoson(events)
+            genWpluses                   = selectGenWplusBoson(events)
+            genWminuses                  = selectGenWminusBoson(events)
+            genTops                     = selectGenTop(events)
+            genAntiTops                 = selectGenAntiTop(events)
+            genTtbars                   = genTops + genAntiTops
+            genQuarksFromHardScattring = selectGenQuarksFromHardScattering(events) # Select quarks coming out of hard scattering
+
+            nGenHiggs                   = ak.fill_none(ak.count(genHiggses.pt, axis=1), 0)
+            nGenZ                       = ak.fill_none(ak.count(genZs.pt, axis=1), 0)
+            nGenW                       = ak.fill_none(ak.count(genWs.pt, axis=1), 0)
+            nGenWplus                   = ak.fill_none(ak.count(genWpluses.pt, axis=1), 0)
+            nGenWminus                  = ak.fill_none(ak.count(genWminuses.pt, axis=1), 0)
+            nGenTop                     = ak.fill_none(ak.count(genTops.pt, axis=1), 0)
+            nGenAntiTop                 = ak.fill_none(ak.count(genAntiTops.pt, axis=1), 0)
+            nGenTtbar                   = ak.fill_none(ak.count(genTtbars.pt, axis=1), 0)
+            nGenQuarksFromHardScattring = ak.fill_none(ak.count(genQuarksFromHardScattring.pt, axis=1), 0)
+            
+            # VBF: q1' q2' --> H q1 q2 : Leading two quarks coming out of hard scattering are VBF quarks
+            genLeading2QuarksFromHardScattering = ak.mask(genQuarksFromHardScattring, nGenQuarksFromHardScattring >= 2) 
+            genQQFromHardScattering = genLeading2QuarksFromHardScattering[:, 0] + genLeading2QuarksFromHardScattering[:, 1]
+
+            # 
+            genHiggs = ak.firsts(genHiggses)
+            genZ = ak.firsts(genZs)
+            genW = ak.firsts(genWs)
+            genWplus = ak.firsts(genWpluses)
+            genWminus = ak.firsts(genWminuses)
+            genTtbar = ak.firsts(genTtbars)
 
         if self.datasetInfo['isSignal']: 
             genHT     = self.objectSelector.GenHT(events)
@@ -2825,7 +2863,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ################
         
         # create a processor Weights object, with the same length as the number of events in the chunk
-        weights              = Weights(len(events), storeIndividual=True)
+        weights              = Weights(len(events), storeIndividual=storeIndividualEvtWgts)
         weights_gen          = Weights(len(events))
         weights_GenHToAATo4B = Weights(len(events))
         weights_woHEM1516Fix = Weights(len(events))
@@ -7020,6 +7058,9 @@ if __name__ == '__main__':
         if not sOutputFile.endswith('.root'): sOutputFile += '.root'
         #sOutputFile = sOutputFile.replace('.root', '_wCoffea.root') # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         sample_category_toUse = sample_category        
+        if isMC and \
+            "QCD" in sample_category:
+            sample_category_toUse = "QCD"        
         sDir1 = 'evt/%s' % (sample_category_toUse)
 
         
@@ -7028,6 +7069,13 @@ if __name__ == '__main__':
                 #print(f"key: {key},  value ({type(value)}): {value}")
                 sHistoName_toUse = key
                 sHExt_toUse = ''
+                if isMC and \
+                    "QCD" in sample_category:                    
+                    for sHExt in HistogramNameExtensions_QCD:
+                        if sHExt in key:
+                            sHExt_toUse = '_%s' % (sHExt)
+                            sHistoName_toUse = sHistoName_toUse.replace(sHExt_toUse, '')
+                            break
                 sDir1_toUse = '%s%s' % (sDir1, sHExt_toUse)
 
                 #if not (key.startswith('h') or key != 'cutflow'): continue

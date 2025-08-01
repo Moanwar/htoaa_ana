@@ -127,7 +127,7 @@ class ObjectSelection:
 
         self.FatJetsPt_Thsh  = 170 #250 # 170 # 400, 170
 
-        self.FatJetPt_Zvv_MinThsh  = 200
+        self.FatJetPt_Zvv_MinThsh  = 250
         self.FatJetPt_Zvv_MaxThsh  = 999999
         
         self.FatJetEtaThsh = 2.4

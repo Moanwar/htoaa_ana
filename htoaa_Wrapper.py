@@ -36,11 +36,12 @@ from htoaa_CommonTools import (
 
 
 #sAnalysis         = "htoaa_Analysis_wCoffea.py"  # "htoaa_Analysis.py"
-sConfig           = "config_htoaa.json"
-sRunCommandFile   = "1_RunCommand.txt"
-sJobSubLogFile    = "1_JobSubmission.log"
-sOpRootFile       = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
+sConfig            = "config_htoaa.json"
+sRunCommandFile    = "1_RunCommand.txt"
+sJobSubLogFile     = "1_JobSubmission.log"
+sOpRootFile        = "analyze_htoaa_$SAMPLE_$STAGE_$IJOB.root"
 sOp2DAlphabetIpDir = "2DAlphabet_inputFiles"
+sOpPlotsDir        = "plots"
 
 printLevel = 2 #2, 6
 
@@ -317,6 +318,7 @@ if __name__ == '__main__':
         SourceCodeDir     = os.getcwd()
         DestinationDir    = "../analysis/%s" % (AnaOpDirName)
         EosDestinationDir = "/eos/cms/store/user/%s/htoaa/analysis/%s" % (UserName, AnaOpDirName) 
+        EosAnaVersionDir  = "/eos/cms/store/user/%s/htoaa/analysis/%s" % (UserName, anaVersion)
         
 
         os.chdir( SourceCodeDir )
@@ -588,7 +590,7 @@ if __name__ == '__main__':
 
                         # Check if job related file exist or not
                         isConfigExist           = os.path.isfile(sConfig_to_use)
-                        isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use) and (os.path.getsize(sOpRootFileFinal_to_use) > 5e4) 
+                        isOpRootFileExist       = os.path.isfile(sOpRootFileFinal_to_use) and (os.path.getsize(sOpRootFileFinal_to_use) > 2e4) 
                         isCondorExecExist       = os.path.isfile(sCondorExec_to_use)
                         isCondorSubmitExist     = os.path.isfile(sCondorSubmit_to_use)
                         isCondorLogExist        = os.path.isfile(sCondorLog_to_use)
@@ -854,7 +856,7 @@ if __name__ == '__main__':
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$STAGE',   '_stage1')
         sOpRootFile_stage1 = sOpRootFile_stage1.replace('_$IJOB',    '')
 
-        isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        isOpRootFileExist = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 2e4)
 
         if isOpRootFileExist:
             print('%s %s already exists. \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1))
@@ -910,15 +912,39 @@ if __name__ == '__main__':
                 executeBashCommand("pwd")
                 executeBashCommand("ls -lh *.root")
 
-        isOpRootFileExist     = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 5e4)
+        isOpRootFileExist     = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 2e4)
+
+        ## Make event yields table
+        if isOpRootFileExist:
+            os.chdir( SourceCodeDir )
+            cmd_evtYields = 'python3 scripts/getEventYield_DataVsMC.py %s %s %s' % (EosAnaVersionDir, era, sAnaCat)
+            cmd_evtYields_stdout = executeBashCommand(cmd_evtYields)
+            fJobSubLog.write('\n %s: \n%s \n' % (cmd_evtYields, cmd_evtYields_stdout))
+
+            os.chdir( EosDestinationDir )
+            executeBashCommand("pwd")
+            executeBashCommand("ls -lh %s" % (sOpPlotsDir))
+
+        ## Make Data vs MC plots
+        if (isOpRootFileExist and (systematics.lower() != 'full')):
+            os.chdir( SourceCodeDir )
+            cmd_Plot1DDataVsMC = 'python3 scripts/PlotHistos1D_DataVsMC.py %s %s %s' % (EosAnaVersionDir, era, sAnaCat)
+            cmd_Plot1DDataVsMC_stdout = executeBashCommand(cmd_Plot1DDataVsMC)
+            fJobSubLog.write('\n %s: \n%s \n' % (cmd_Plot1DDataVsMC, cmd_Plot1DDataVsMC_stdout))
+
+            os.chdir( EosDestinationDir )
+            executeBashCommand("pwd")
+            executeBashCommand("ls -lh %s" % (sOpPlotsDir))
+
+
         size2DAlphabetIpDir   = get_directory_size("%s" % (sOp2DAlphabetIpDir))
         isOp2DAlphabetIpExist = (size2DAlphabetIpDir > 5e4)
         fJobSubLog.write(f"\n{isOpRootFileExist = }, {size2DAlphabetIpDir = }, {isOp2DAlphabetIpExist = }, {sOp2DAlphabetIpDir = } \n")
         print(f"\n{isOpRootFileExist = }, {size2DAlphabetIpDir = }, {isOp2DAlphabetIpExist = }, {sOp2DAlphabetIpDir = } \n")
-        # Make input histograqms for 2DAlphabet
+        ## Make input histograqms for 2DAlphabet
         if ((systematics.lower() == 'full') and (isOpRootFileExist)) and (not isOp2DAlphabetIpExist):
             os.chdir( SourceCodeDir )
-            cmd_2DAlphabetInputs = 'python3 scripts/makeHistogramsFor2DAlphabetMthod.py %s %s %s' % (anaVersion, era, sAnaCat)
+            cmd_2DAlphabetInputs = 'python3 scripts/makeHistogramsFor2DAlphabetMthod.py %s %s %s' % (EosAnaVersionDir, era, sAnaCat)
             cmd_2DAlphabetInputs_stdout = executeBashCommand(cmd_2DAlphabetInputs)
             fJobSubLog.write('\n %s: \n%s \n' % (cmd_2DAlphabetInputs, cmd_2DAlphabetInputs_stdout))
 

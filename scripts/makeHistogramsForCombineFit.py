@@ -1,10 +1,10 @@
 '''
 To run:
-    python3 makeHistogramsFor2DAlphabetMthod.py <sAnaVersionWithPath> <Year> <CAT0>
-        sAnaVersionWithPath: version name of analysis folder. E.g. /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst
+    python3 makeHistogramsFor2DAlphabetMthod.py <sAnaVersion> <Year> <CAT0>
+        sAnaVersion: version name of analysis folder. E.g. 20250713_DatacardsFullSyst
         Year: 2016preVPF, 2016postVFP, 2017, 2018
-        CAT0: 'gg0l', 'VBFjj', 'Vjj', 'tt0l', 'Zvv', 'CR_QCD4b' 
-    e.g. time python3 makeHistogramsFor2DAlphabetMthod.py /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst 2018 gg0l 2>&1 | tee cout_makeHistogramsFor2DAlphabetMthod_20250713_DatacardsFullSyst_2018_gg0l.txt
+        CAT0: 'CR_QCD4b' 'gg0l', 'VBFjj', 'Vjj', 'tt0l', 'Zvv'
+    e.g. time python3 makeHistogramsFor2DAlphabetMthod.py 20250713_DatacardsFullSyst 2018 gg0l 2>&1 | tee cout_makeHistogramsFor2DAlphabetMthod_20250713_DatacardsFullSyst_2018_gg0l.txt
 
 '''
 
@@ -40,12 +40,12 @@ def getAllocatedMomory():
     return "Memory: %g MB" % ((psutil.Process().memory_info().rss / (1024 * 1024))) 
 
 global Year;
-#sAnaVersionWithPath = '20250713_DatacardsFullSyst';    Year         = '2016preVFP';
+#sAnaVersion = '20250713_DatacardsFullSyst';    Year         = '2016preVFP';
 #CAT0 = 'gg0l'  # 'gg0l', 'VBFjj', 'Vjj', 'ttHad'/'tt0l', 'Zvv'
-sAnaVersionWithPath = sys.argv[1]
-Year                = sys.argv[2]
-CAT0                = sys.argv[3]
-print(f"\n{sAnaVersionWithPath = }, {Year = }, {CAT0} \n")
+sAnaVersion = sys.argv[1]
+Year        = sys.argv[2]
+CAT0        = sys.argv[3]
+print(f"\n{sAnaVersion = }, {Year = }, {CAT0} \n")
 #print(f"{psutil.Process().memory_info().rss / (1024 * 1024) = }", flush=True)
 print(f"here1 {getAllocatedMomory()}", flush=True)
 
@@ -101,10 +101,8 @@ Era = Year
 #sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/20250603_tt0lDatacardsFullSyst/2018/analyze_htoaa_stage1.root'
 #sOpDir0 = '/eos/cms/store/user/ssawant/htoaa/analysis/20250603_tt0lDatacardsFullSyst/2018/2DAlphabet_inputFiles'
 #CAT0 = 'tt0l'  # 'gg0l', 'VBFjj', 'Vjj', 'ttHad'/'tt0l', 'Zvv'
-#sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/analyze_htoaa_stage1.root' % (sAnaVersionWithPath, Year, anaSuperCat) #'/eos/cms/store/user/ssawant/htoaa/analysis/20250626_tt0lDatacardsFullSyst/2018/analyze_htoaa_stage1.root'
-#sOpDir0 = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/2DAlphabet_inputFiles' % (sAnaVersionWithPath, Year, anaSuperCat)
-sIpFile = '%s/%s/%s/analyze_htoaa_stage1.root' % (sAnaVersionWithPath, Year, anaSuperCat) #'/eos/cms/store/user/ssawant/htoaa/analysis/20250626_tt0lDatacardsFullSyst/2018/analyze_htoaa_stage1.root'
-sOpDir0 = '%s/%s/%s/2DAlphabet_inputFiles' % (sAnaVersionWithPath, Year, anaSuperCat)
+sIpFile = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/analyze_htoaa_stage1.root' % (sAnaVersion, Year, anaSuperCat) #'/eos/cms/store/user/ssawant/htoaa/analysis/20250626_tt0lDatacardsFullSyst/2018/analyze_htoaa_stage1.root'
+sOpDir0 = '/eos/cms/store/user/ssawant/htoaa/analysis/%s/%s/%s/2DAlphabet_inputFiles' % (sAnaVersion, Year, anaSuperCat)
 
 print(f"{sIpFile = }")
 if 'Zvv'       in CAT0:
@@ -127,8 +125,8 @@ CATAGORIES_gg0l = {
     "gg0lLo" :   "gg0lLo_Xto4bv2",    
 }
 CATAGORIES_VBFjj = {
-    "VBFHi" :   "VBFTight_Xto4bv2",
-    "VBFLo" :   "VBFLoose_Xto4bv2",    
+    "VBFTight" :   "VBFTight_Xto4bv2",
+    "VBFLoose" :   "VBFLoose_Xto4bv2",    
 }
 CATAGORIES_Vjj = {
     "VjjIncl" : "VjjIncl_Xto4bv2", 
@@ -158,8 +156,8 @@ WPs_perCategory = {
     'VBFjj': ['WP40'],
     'Vjj':   ['WP60'],
     'tt0l':  ['WP60'],
-    'Zvv':   ['WP60'],     
-    'CR_QCD4b':   ['NoWP'],     
+    'Zvv':   ['WP60'],  
+    'CR_QCD4b':   ['NoWP'],      
 }
 
 if printLevel >= 6:
@@ -177,85 +175,71 @@ processes_dict = {
     #'DataJetHT': ['JetHT_Run2018A', 'JetHT_Run2018B', 'JetHT_Run2018C', 'JetHT_Run2018D'],
     #'DataMET':   ['MET_Run2018A', 'MET_Run2018B', 'MET_Run2018C', 'MET_Run2018D'],
     'Data': ExpData_dict['Data'],
-}
 
-if CAT0 not in ['CR_QCD4b']:
-    processes_dict.update( {
-        'ggHtoaato4b_mA_12': ['ggHtoaato4b_mA_12'],
-        'ggHtoaato4b_mA_15': ['ggHtoaato4b_mA_15'],
-        'ggHtoaato4b_mA_20': ['ggHtoaato4b_mA_20'],
-        'ggHtoaato4b_mA_25': ['ggHtoaato4b_mA_25'],
-        'ggHtoaato4b_mA_30': ['ggHtoaato4b_mA_30'],
-        'ggHtoaato4b_mA_35': ['ggHtoaato4b_mA_35'],
-        'ggHtoaato4b_mA_40': ['ggHtoaato4b_mA_40'],
-        'ggHtoaato4b_mA_45': ['ggHtoaato4b_mA_45'],
-        'ggHtoaato4b_mA_50': ['ggHtoaato4b_mA_50'],
-        'ggHtoaato4b_mA_55': ['ggHtoaato4b_mA_55'],
-        'ggHtoaato4b_mA_60': ['ggHtoaato4b_mA_60'],
 
-        'VBFHtoaato4b_mA_12': ['VBFHtoaato4b_mA_12'],
-        'VBFHtoaato4b_mA_15': ['VBFHtoaato4b_mA_15'],
-        'VBFHtoaato4b_mA_20': ['VBFHtoaato4b_mA_20'],
-        'VBFHtoaato4b_mA_25': ['VBFHtoaato4b_mA_25'],
-        'VBFHtoaato4b_mA_30': ['VBFHtoaato4b_mA_30'],
-        'VBFHtoaato4b_mA_35': ['VBFHtoaato4b_mA_35'],
-        'VBFHtoaato4b_mA_40': ['VBFHtoaato4b_mA_40'],
-        'VBFHtoaato4b_mA_45': ['VBFHtoaato4b_mA_45'],
-        'VBFHtoaato4b_mA_50': ['VBFHtoaato4b_mA_50'],
-        'VBFHtoaato4b_mA_55': ['VBFHtoaato4b_mA_55'],
-        'VBFHtoaato4b_mA_60': ['VBFHtoaato4b_mA_60'],
+    'ggHtoaato4b_mA_12': ['ggHtoaato4b_mA_12'],
+    'ggHtoaato4b_mA_15': ['ggHtoaato4b_mA_15'],
+    'ggHtoaato4b_mA_20': ['ggHtoaato4b_mA_20'],
+    'ggHtoaato4b_mA_25': ['ggHtoaato4b_mA_25'],
+    'ggHtoaato4b_mA_30': ['ggHtoaato4b_mA_30'],
+    'ggHtoaato4b_mA_35': ['ggHtoaato4b_mA_35'],
+    'ggHtoaato4b_mA_40': ['ggHtoaato4b_mA_40'],
+    'ggHtoaato4b_mA_45': ['ggHtoaato4b_mA_45'],
+    'ggHtoaato4b_mA_50': ['ggHtoaato4b_mA_50'],
+    'ggHtoaato4b_mA_55': ['ggHtoaato4b_mA_55'],
+    'ggHtoaato4b_mA_60': ['ggHtoaato4b_mA_60'],
 
-        'WHtoaato4b_mA_12': ['WHtoaato4b_mA_12'],
-        'WHtoaato4b_mA_15': ['WHtoaato4b_mA_15'],
-        'WHtoaato4b_mA_20': ['WHtoaato4b_mA_20'],
-        'WHtoaato4b_mA_25': ['WHtoaato4b_mA_25'],
-        'WHtoaato4b_mA_30': ['WHtoaato4b_mA_30'],
-        'WHtoaato4b_mA_35': ['WHtoaato4b_mA_35'],
-        'WHtoaato4b_mA_40': ['WHtoaato4b_mA_40'],
-        'WHtoaato4b_mA_45': ['WHtoaato4b_mA_45'],
-        'WHtoaato4b_mA_50': ['WHtoaato4b_mA_50'],
-        'WHtoaato4b_mA_55': ['WHtoaato4b_mA_55'],
-        'WHtoaato4b_mA_60': ['WHtoaato4b_mA_60'],
+    'VBFHtoaato4b_mA_12': ['VBFHtoaato4b_mA_12'],
+    'VBFHtoaato4b_mA_15': ['VBFHtoaato4b_mA_15'],
+    'VBFHtoaato4b_mA_20': ['VBFHtoaato4b_mA_20'],
+    'VBFHtoaato4b_mA_25': ['VBFHtoaato4b_mA_25'],
+    'VBFHtoaato4b_mA_30': ['VBFHtoaato4b_mA_30'],
+    'VBFHtoaato4b_mA_35': ['VBFHtoaato4b_mA_35'],
+    'VBFHtoaato4b_mA_40': ['VBFHtoaato4b_mA_40'],
+    'VBFHtoaato4b_mA_45': ['VBFHtoaato4b_mA_45'],
+    'VBFHtoaato4b_mA_50': ['VBFHtoaato4b_mA_50'],
+    'VBFHtoaato4b_mA_55': ['VBFHtoaato4b_mA_55'],
+    'VBFHtoaato4b_mA_60': ['VBFHtoaato4b_mA_60'],
 
-        'ZHtoaato4b_mA_12': ['ZHtoaato4b_mA_12'],
-        'ZHtoaato4b_mA_15': ['ZHtoaato4b_mA_15'],
-        'ZHtoaato4b_mA_20': ['ZHtoaato4b_mA_20'],
-        'ZHtoaato4b_mA_25': ['ZHtoaato4b_mA_25'],
-        'ZHtoaato4b_mA_30': ['ZHtoaato4b_mA_30'],
-        'ZHtoaato4b_mA_35': ['ZHtoaato4b_mA_35'],
-        'ZHtoaato4b_mA_40': ['ZHtoaato4b_mA_40'],
-        'ZHtoaato4b_mA_45': ['ZHtoaato4b_mA_45'],
-        'ZHtoaato4b_mA_50': ['ZHtoaato4b_mA_50'],
-        'ZHtoaato4b_mA_55': ['ZHtoaato4b_mA_55'],
-        'ZHtoaato4b_mA_60': ['ZHtoaato4b_mA_60'],
+    'WHtoaato4b_mA_12': ['WHtoaato4b_mA_12'],
+    'WHtoaato4b_mA_15': ['WHtoaato4b_mA_15'],
+    'WHtoaato4b_mA_20': ['WHtoaato4b_mA_20'],
+    'WHtoaato4b_mA_25': ['WHtoaato4b_mA_25'],
+    'WHtoaato4b_mA_30': ['WHtoaato4b_mA_30'],
+    'WHtoaato4b_mA_35': ['WHtoaato4b_mA_35'],
+    'WHtoaato4b_mA_40': ['WHtoaato4b_mA_40'],
+    'WHtoaato4b_mA_45': ['WHtoaato4b_mA_45'],
+    'WHtoaato4b_mA_50': ['WHtoaato4b_mA_50'],
+    'WHtoaato4b_mA_55': ['WHtoaato4b_mA_55'],
+    'WHtoaato4b_mA_60': ['WHtoaato4b_mA_60'],
 
-        'ttHtoaato4b_mA_12': ['ttHtoaato4b_mA_12'],
-        'ttHtoaato4b_mA_15': ['ttHtoaato4b_mA_15'],
-        'ttHtoaato4b_mA_20': ['ttHtoaato4b_mA_20'],
-        'ttHtoaato4b_mA_25': ['ttHtoaato4b_mA_25'],
-        'ttHtoaato4b_mA_30': ['ttHtoaato4b_mA_30'],
-        'ttHtoaato4b_mA_35': ['ttHtoaato4b_mA_35'],
-        'ttHtoaato4b_mA_40': ['ttHtoaato4b_mA_40'],
-        'ttHtoaato4b_mA_45': ['ttHtoaato4b_mA_45'],
-        'ttHtoaato4b_mA_50': ['ttHtoaato4b_mA_50'],
-        'ttHtoaato4b_mA_55': ['ttHtoaato4b_mA_55'],
-        'ttHtoaato4b_mA_60': ['ttHtoaato4b_mA_60'],
-    } )
+    'ZHtoaato4b_mA_12': ['ZHtoaato4b_mA_12'],
+    'ZHtoaato4b_mA_15': ['ZHtoaato4b_mA_15'],
+    'ZHtoaato4b_mA_20': ['ZHtoaato4b_mA_20'],
+    'ZHtoaato4b_mA_25': ['ZHtoaato4b_mA_25'],
+    'ZHtoaato4b_mA_30': ['ZHtoaato4b_mA_30'],
+    'ZHtoaato4b_mA_35': ['ZHtoaato4b_mA_35'],
+    'ZHtoaato4b_mA_40': ['ZHtoaato4b_mA_40'],
+    'ZHtoaato4b_mA_45': ['ZHtoaato4b_mA_45'],
+    'ZHtoaato4b_mA_50': ['ZHtoaato4b_mA_50'],
+    'ZHtoaato4b_mA_55': ['ZHtoaato4b_mA_55'],
+    'ZHtoaato4b_mA_60': ['ZHtoaato4b_mA_60'],
 
-if CAT0 not in ['CR_QCD4b']:
-    processes_dict.update( {
-        'QCD_bEnr': ['QCD_bEnr'],
-        'QCD_BGen': ['QCD_BGen'],
-        'QCD_Incl': ['QCD_Incl'],
-    } )
-else: 
-    processes_dict.update( {
-        'QCD_012b':      ['QCD_0bCat', 'QCD_1bCat', 'QCD_2bCat', ],
-        'QCD_3b':        ['QCD_3bCat'],
-        'QCD_4bAndMore': ['QCD_4bAndMoreCat'],
-    } )
+    'ttHtoaato4b_mA_12': ['ttHtoaato4b_mA_12'],
+    'ttHtoaato4b_mA_15': ['ttHtoaato4b_mA_15'],
+    'ttHtoaato4b_mA_20': ['ttHtoaato4b_mA_20'],
+    'ttHtoaato4b_mA_25': ['ttHtoaato4b_mA_25'],
+    'ttHtoaato4b_mA_30': ['ttHtoaato4b_mA_30'],
+    'ttHtoaato4b_mA_35': ['ttHtoaato4b_mA_35'],
+    'ttHtoaato4b_mA_40': ['ttHtoaato4b_mA_40'],
+    'ttHtoaato4b_mA_45': ['ttHtoaato4b_mA_45'],
+    'ttHtoaato4b_mA_50': ['ttHtoaato4b_mA_50'],
+    'ttHtoaato4b_mA_55': ['ttHtoaato4b_mA_55'],
+    'ttHtoaato4b_mA_60': ['ttHtoaato4b_mA_60'],
 
-processes_dict.update( {
+    'QCD_bEnr': ['QCD_bEnr'],
+    'QCD_BGen': ['QCD_BGen'],
+    'QCD_Incl': ['QCD_Incl'],
     'TT0l': ['TT0l'],
     'TT1l': ['TT1l'],
     'TT2l': ['TT2l'],
@@ -290,27 +274,21 @@ processes_dict.update( {
     'WH':   ['WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu'],
     'ZH':   ['ZHToBBX'],
     'ttH':  ['ttHToBB'], # ['ttHToBB', 'ttHToNonBB'],
+    
+    'MC': ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl', 
+           'TT0l', 'TT1l', 'TT2l', 
+           'STop_t', 'STbar_t', 'ST_s_0l', 'ST_s_1l', 'STop_tW_Incl', 'STbar_tW_Incl', #'STop_tW_12l', 'STbar_tW_12l',
+           'Zqq', 'Zvv', 'Zll', 'Wqq', 'Wlv', 
+           'ZZ', 'WZ', 'WW', 
+           'ZZZ', 'WZZ', 'WWZ', 'WWW', 
+           'GluGluHToBB_Pt-200ToInf', 
+           'VBFHToBB_herwig', #'VBFHToBB_powheg', 
+           'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 
+           'ZHToBBX', 
+           'ttHToBB', 
+             ]
 
-    } )
-
-if CAT0 not in ['CR_QCD4b']:
-    processes_dict.update( {    
-        'MC': ['QCD_bEnr', 'QCD_BGen', 'QCD_Incl', 
-            'TT0l', 'TT1l', 'TT2l', 
-            'STop_t', 'STbar_t', 'ST_s_0l', 'ST_s_1l', 'STop_tW_Incl', 'STbar_tW_Incl', #'STop_tW_12l', 'STbar_tW_12l',
-            'Zqq', 'Zvv', 'Zll', 'Wqq', 'Wlv', 
-            'ZZ', 'WZ', 'WW', 
-            'ZZZ', 'WZZ', 'WWZ', 'WWW', 
-            'GluGluHToBB_Pt-200ToInf', 
-            'VBFHToBB_herwig', #'VBFHToBB_powheg', 
-            'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 
-            'ZHToBBX', 
-            'ttHToBB', 
-                ]
-    } )
-            
-
-
+}
 systematics_forData_dict = {'noweight': 'Nom'}
 systematics_dict = {'Nom': 'Nom',}
 for systNameShort, systName0  in SystNameConvs.items(): 
@@ -455,51 +433,6 @@ systematics_perProcess = {
     
     'MC': systNameShort_MCNom ,
 }
-if CAT0 in ['CR_QCD4b']:
-    systematics_perProcess = {
-        'Data': systNameShort_MCNom,
-
-        'QCD_012b': systNameShort_MCNom + systNameShort_MCAll,
-        'QCD_3b': systNameShort_MCNom + systNameShort_MCAll,
-        'QCD_4bAndMore': systNameShort_MCNom + systNameShort_MCAll,
-        'TT0l': systNameShort_MCNom + systNameShort_MCAll + systNameShort_MCTT,
-        'TT1l': systNameShort_MCNom + systNameShort_MCAll + systNameShort_MCTT,
-        'TT2l': systNameShort_MCNom + systNameShort_MCAll + systNameShort_MCTT,
-        'STop_t': systNameShort_MCNom + systNameShort_MCAll,
-        'STbar_t': systNameShort_MCNom + systNameShort_MCAll,
-        'ST_s_0l': systNameShort_MCNom + systNameShort_MCAll,
-        'ST_s_1l': systNameShort_MCNom + systNameShort_MCAll,
-        'STop_tW_Incl': systNameShort_MCNom + systNameShort_MCAll,
-        'STbar_tW_Incl': systNameShort_MCNom + systNameShort_MCAll,
-        #'STop_tW_12l': systNameShort_MCAll,
-        #'STbar_tW_12l': systNameShort_MCAll,
-        'ttZ': systNameShort_MCNom + systNameShort_MCAll,    
-        'ttW': systNameShort_MCNom + systNameShort_MCAll,
-        'tZq': systNameShort_MCNom + systNameShort_MCAll,
-        'Zqq': systNameShort_MCNom + systNameShort_MCAll,
-        'Zvv': systNameShort_MCNom + systNameShort_MCAll,
-        
-        'Zll': systNameShort_MCNom + systNameShort_MCAll,
-        'Wqq': systNameShort_MCNom + systNameShort_MCAll,
-        'Wlv': systNameShort_MCNom + systNameShort_MCAll,
-        
-        'ZZ': systNameShort_MCNom + systNameShort_MCAll,
-        'WZ': systNameShort_MCNom + systNameShort_MCAll,
-        'WW': systNameShort_MCNom + systNameShort_MCAll,
-        
-        'ZZZ': systNameShort_MCNom + systNameShort_MCAll,
-        'WZZ': systNameShort_MCNom + systNameShort_MCAll,
-        'WWZ': systNameShort_MCNom + systNameShort_MCAll,
-        'WWW': systNameShort_MCNom + systNameShort_MCAll,
-
-        'ggH': systNameShort_MCNom + systNameShort_MCAll,
-        'VBFH': systNameShort_MCNom + systNameShort_MCAll,
-        'WH': systNameShort_MCNom + systNameShort_MCAll,
-        'ZH': systNameShort_MCNom + systNameShort_MCAll,
-        'ttH': systNameShort_MCNom + systNameShort_MCAll,
-
-    }
-
 print(f"{systematics_perProcess = }")
 
 
@@ -537,22 +470,10 @@ histograms_dict = {
     'hLeadingFatJetPNet_massH_v2b_vs_massA34d':              'pnet_34d',  ##  'pnet_vs_massA34d' 
     
 }
+
+
 nRebinsX = 1 # 10
 nRebinsY = 1 #  4
-
-if CAT0 in ['CR_QCD4b']:
-    histograms_dict = {
-        'hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD': 'X4b_v1_Haa4b_vs_QCD',
-        'hLeadingFatJetPNet_X4b_v1_Haa4b_score': 'X4b_v1_Haa4b_score',
-        'hLeadingFatJetPNet_X4b_v2a_Haa4b_score': 'X4b_v2a_Haa4b_score',
-        'hLeadingFatJetPNet_X4b_v2b_Haa4b_score': 'X4b_v2b_Haa4b_score',
-        'hLeadingFatJetPNet_X4b_v2ab_Haa4b_score': 'X4b_v2ab_Haa4b_score',
-        'hLeadingFatJetPNet_X4b_v2a_Haa34b_score': 'X4b_v2a_Haa34b_score',
-        'hLeadingFatJetPNet_X4b_v2b_Haa34b_score': 'X4b_v2b_Haa34b_score',
-        'hLeadingFatJetPNet_X4b_v2ab_Haa34b_score': 'X4b_v2ab_Haa34b_score',
-    }
-    nRebinsX = 1
-    nRebinsY = 1
 
 '''
 selectionTags_dict_v1 = {
@@ -603,10 +524,7 @@ selectionTags_dict = {
         'Pass': 'SRWP80',
         'Fail': 'SBWP80'
     },
-    'NoWP': {
-        'NoWP': 'NoWP'
-    }
-
+            
 }  
 
 
@@ -620,8 +538,6 @@ elif 'Vjj' in CAT0:
     CATAGORIES = CATAGORIES_Vjj
 elif 'Zvv' in CAT0:
     CATAGORIES = CATAGORIES_Zvv   
-elif 'CR_QCD4b' in CAT0:
-    CATAGORIES = CATAGORIES_CR_QCD4b 
 
 if printLevel >= 6:
     print(f"here4 setting all dict {getAllocatedMomory()}", flush=True)
@@ -662,8 +578,6 @@ for CAT, CAT_original in CATAGORIES.items():
                     #if ('Zvv' in CAT) or ('gg0l' in CAT):
                     #    selectionRegionNameOriginal = '%s_%s' %(CAT, selectionRegionNameOriginal0)
                     selectionRegionNameOriginal = '%s_%s' %(CAT_original, selectionRegionNameOriginal0)
-                    if 'NoWP' in selectionWP:
-                        selectionRegionNameOriginal = CAT_original
                         
                     for systematic, systematic_toSave in systematics_dict.items():
                         systematic_woUpDown = systematic.replace(SystNameConvUp, '')
@@ -714,10 +628,7 @@ for CAT, CAT_original in CATAGORIES.items():
                                 continue
 
                             if ((nRebinsX != 1) or (nRebinsY != 1)):
-                                if   len(h.axes) == 1: h = h[::hist.rebin(nRebinsX)]
-                                elif len(h.axes) == 2: h = h[::hist.rebin(nRebinsX), ::hist.rebin(nRebinsY)]
-                                else: 
-                                    print(f"hRebin for {len(h.axes) = } not implemented")
+                                h = h[::hist.rebin(nRebinsX), ::hist.rebin(nRebinsY)]
                             #print(f"After {h.axes = }, {h.axes[0] =  }")
                             if hAdded == None: hAdded = h
                             else:              hAdded = hAdded + h
@@ -732,8 +643,7 @@ for CAT, CAT_original in CATAGORIES.items():
                             np.full_like(nEvts, 1e-6),
                             nEvts
                         )
-                        if   len(hAdded.axes) == 1: hAdded[:] = np.stack((nEvts_modified, varNEvts), axis=-1)
-                        elif len(hAdded.axes) == 2: hAdded[:, :] = np.stack((nEvts_modified, varNEvts), axis=-1)
+                        hAdded[:, :] = np.stack((nEvts_modified, varNEvts), axis=-1)
         
                         '''
                         #histoNameToSave = '%s/%s_%s_%s' % (processNameToUse, histo_name,selectionTagNameToUse,systematic)
@@ -743,13 +653,11 @@ for CAT, CAT_original in CATAGORIES.items():
                         '''
 
                         #histoNameToSave = '%s_%s' % (histo_name,selectionTagNameToUse)
-                        
-                        MASS = histo_name_toSave
-                        WP = selectionWP
+                        MASS       = histo_name_toSave
+                        WP         = selectionWP
                         PassOrFail = selectionRegion
-                        selRegion1 = '_%s_%s' % (WP, PassOrFail) if 'NoWP' not in selectionWP else ''                        
-                        SYST = systematic_toSave
-                        histoNameToSave = '%s_%s_%s_%s%s_%s' % (CAT, PROC, YEAR, MASS, selRegion1, SYST)
+                        SYST       = systematic_toSave
+                        histoNameToSave = '%s_%s_%s_%s_%s_%s_%s' % (CAT, PROC, YEAR, MASS, WP, PassOrFail, SYST)
                         fOpFile[histoNameToSave] = hAdded
 
         fOpFile.close()
