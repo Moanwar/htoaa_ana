@@ -7,6 +7,7 @@ import logging
 import json
 import numpy as np
 import math
+import random
 import awkward as ak
 import uproot as uproot
 from coffea import hist as coffea_hist
@@ -140,6 +141,10 @@ def getNanoAODFile(
     # Data:
     # DAS file: "/store/data/Run2018A/JetHT/NANOAOD/UL2018_MiniAODv2_NanoAODv9_GT36-v1/2820000/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
     # eos file: "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9_GT36-v1/97F68EC0-0E12-C04C-A5D6-2B7A7C6688F8.root"
+
+    fileNameLocal_0 = fileNameLocal
+    fileNameLocal = fileNameLocal.replace('.root', '_%d.root'%(random.randint(0, 100000000)))
+    print(f"htoaa_CommonTools::getNanoAODFile() here0 {datetime.now() = } fileNameLocal: {fileNameLocal} renamed to {fileNameLocal}"); sys.stdout.flush()
 
     if downloadFile  and  os.path.exists(fileNameLocal):
         # local copy of the i/p file exists
@@ -1627,6 +1632,102 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
         '''
     
     return btagWgt_dict
+
+
+def get_PNet_WZvsQCD_EffiSF(pt, eta, year, isGenParticleOvlpFatJet): # ParticleNet_WZvsQCD tagger efficiency SFs
+    sFIpSf              = Corrections["PNetWZvsQCD"][year]['inputFile']
+    sCorrectionSetName  = Corrections["PNetWZvsQCD"][year]['corrSetName']
+    sTaggerWorkingPoint = Corrections["PNetWZvsQCD"][year]['wp']
+    pTRangeMin          = Corrections["PNetWZvsQCD"][year]['PtRange'][0]
+    pTRangeMax          = Corrections["PNetWZvsQCD"][year]['PtRange'][1]
+    taggerSF = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName] 
+
+    pt_toUse                = ak.fill_none(pt,  0)
+    eta                     = ak.fill_none(eta, 0) 
+    isGenParticleOvlpFatJet = ak.fill_none(isGenParticleOvlpFatJet, False)    
+    pt_toUse = ak.where(
+        (pt_toUse < pTRangeMin),
+        np.full_like(pt_toUse, pTRangeMin),
+        pt_toUse
+    )
+    pt_toUse = ak.where(
+        (pt_toUse >= pTRangeMax),
+        np.full_like(pt_toUse, pTRangeMax-1),
+        pt_toUse
+    )
+
+    wgt_nom  = taggerSF.evaluate(eta, pt_toUse, 'nom', sTaggerWorkingPoint)
+    wgt_up   = taggerSF.evaluate(eta, pt_toUse, 'up', sTaggerWorkingPoint)
+    wgt_down = taggerSF.evaluate(eta, pt_toUse, 'down', sTaggerWorkingPoint)
+
+    # Apply ParticleNet tagger SFs to AK8 jets overlapping with GEN-V
+    wgt_nom = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_nom,
+        np.ones_like(wgt_nom)
+    )
+    wgt_up = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_up,
+        np.ones_like(wgt_up)
+    )
+    wgt_down = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_down,
+        np.ones_like(wgt_down)
+    )
+
+    #printVariable('\n pt, isGenParticleOvlpFatJet, WZvsQCD_SFs', ak.zip([pt, isGenParticleOvlpFatJet, wgt_nom, wgt_up, wgt_down]))
+        
+    return [wgt_nom, wgt_up, wgt_down]
+
+
+def get_PNet_TvsQCD_EffiSF(pt, eta, year, isGenParticleOvlpFatJet): # ParticleNet_WZvsQCD tagger efficiency SFs
+    sFIpSf              = Corrections["PNetTvsQCD"][year]['inputFile']
+    sCorrectionSetName  = Corrections["PNetTvsQCD"][year]['corrSetName']
+    sTaggerWorkingPoint = Corrections["PNetTvsQCD"][year]['wp']
+    pTRangeMin          = Corrections["PNetTvsQCD"][year]['PtRange'][0]
+    pTRangeMax          = Corrections["PNetTvsQCD"][year]['PtRange'][1]
+    taggerSF = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName] 
+
+    pt_toUse                = ak.fill_none(pt,  0)
+    eta                     = ak.fill_none(eta, 0) 
+    isGenParticleOvlpFatJet = ak.fill_none(isGenParticleOvlpFatJet, False)    
+    pt_toUse = ak.where(
+        (pt_toUse < pTRangeMin),
+        np.full_like(pt_toUse, pTRangeMin),
+        pt_toUse
+    )
+    pt_toUse = ak.where(
+        (pt_toUse >= pTRangeMax),
+        np.full_like(pt_toUse, pTRangeMax-1),
+        pt_toUse
+    )
+
+    wgt_nom  = taggerSF.evaluate(eta, pt_toUse, 'nom', sTaggerWorkingPoint)
+    wgt_up   = taggerSF.evaluate(eta, pt_toUse, 'up', sTaggerWorkingPoint)
+    wgt_down = taggerSF.evaluate(eta, pt_toUse, 'down', sTaggerWorkingPoint)
+
+    # Apply ParticleNet tagger SFs to AK8 jets overlapping with GEN-V
+    wgt_nom = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_nom,
+        np.ones_like(wgt_nom)
+    )
+    wgt_up = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_up,
+        np.ones_like(wgt_up)
+    )
+    wgt_down = np.where(
+        isGenParticleOvlpFatJet,
+        wgt_down,
+        np.ones_like(wgt_down)
+    )
+
+    #printVariable('\n pt, isGenParticleOvlpFatJet, TvsQCD_SFs', ak.zip([pt, isGenParticleOvlpFatJet, wgt_nom, wgt_up, wgt_down]))
+        
+    return [wgt_nom, wgt_up, wgt_down]
 
 
 def get_L1TPrefiringWgt(L1PreFiringWeight):

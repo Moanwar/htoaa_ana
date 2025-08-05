@@ -60,6 +60,8 @@ MCBkg_dict = {
     'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl"], #"STop_tW_12l", "STbar_tW_12l"],
     'V+X': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv"],
     'Diboson': ["ZZ", "WZ", "WW"],
+    'Other': ["ttZ", "ttW", "tZq",   "ZZZ", "WZZ", "WWZ", "WWW",   ],
+    'SM Higgs': ['GluGluHToBB_Pt-200ToInf', 'VBFH_dipoleRecoilOn', 'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'ZHToBBX', 'ttHToBB'],
     #'': [],
 }
 MCSig_list = [
@@ -220,6 +222,8 @@ histograms_dict = OD([
     ("hMET_pT", {sXLabel: 'hMET_pT', sYLabel: 'Events', sXRange: [0, 1000], sNRebinX: 5 }),
     ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 1000], sNRebinX: 5 }),
     #("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [1000, 4000], sNRebinX: 5 }),
+    ("hdPhi_MET_leadingFatJet", {sXLabel: r'$\Delta\phi$(H candidiate AK8 jet and $\vec{E}_{T}^{miss}$)', sYLabel: 'Events', sXRange: [0.0, 3.14], sNRebinX: 10 }),
+
 
     #("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
 
@@ -255,6 +259,8 @@ histograms_dict = OD([
     ("hnleadingNonHto4bFatJet_WZvsQCD", {sXLabel: 'No. of V fat jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
     ("hnAk4JetsCentral_nonoverlaping_leadingFatJet", {sXLabel: 'No. of central AK4 jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
     ("hnAk4JetsCentral_nonbTag_nonoverlaping_leadingFatJet", {sXLabel: 'No. of non-b central AK4 jets outside H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
+    ("hnAk4JetsCentral_bTag_awayFrom_leadingFatJet", {sXLabel: 'No. of b-tag AK4 jets, dR>1.2 from H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
+    
 
     #("", {sXLabel: '', sYLabel: 'Events'}),
 
@@ -366,9 +372,8 @@ histograms_dict = OD([
     
 ])
 '''
-'''
+
 histograms_dict = OD([
     ("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
     #("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
 ])
-'''

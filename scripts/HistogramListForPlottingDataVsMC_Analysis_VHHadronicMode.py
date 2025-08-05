@@ -221,7 +221,8 @@ histograms_dict = OD([
     ("hLeadingNonHto4bFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(W/Z candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [50, 200], sNRebinX: 2 }),
 
     ("hdPhi_LeadingFJ_LeadingNonHto4bFJ", {sXLabel: r'$\Delta\phi$(H and W/Z candidiate AK8 jets)', sYLabel: 'Events', sXRange: [2.2, 3.14], sNRebinX: 10 }),
-    ("hLeadingNonHto4bFatJetPNet_WZvsQCD", {sXLabel: r'W/Z vs QCD tagger score(W/Z candidate AK8 jet)', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    ("hLeadingNonHto4bFatJetPNet_WZvsQCD", {sXLabel: r'W/Z vs QCD tagger score(W/Z candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.80, 1], sNRebinX: 20 }),
+    ("hLeadingNonHto4bTopFatJetPNet_TvsQCD", {sXLabel: r'T vs QCD tagger score(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.80, 1], sNRebinX: 20 }),
     
 
     #("", {sXLabel: '', sYLabel: 'Events'}),

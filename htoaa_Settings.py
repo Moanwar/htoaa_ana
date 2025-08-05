@@ -750,8 +750,8 @@ bTagWPs[Era_2016postVFP]['DeepCSV'].update({ # https://btv-wiki.docs.cern.ch/Sca
 
 topTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
     Era_2016preVFP: {
-        'PNetTvsQCD': {
-            'T': 0.957,
+        'PNetTvsQCD': { 
+            'T': 0.957, # 0.1% mistag rate: 0p1
         },
     },
     Era_2016postVFP: {
@@ -767,6 +767,29 @@ topTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
     Era_2018: {
         'PNetTvsQCD': {
             'T': 0.97,
+        },
+    },    
+}
+
+WvsQCDTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
+    Era_2016preVFP: {
+        'PNetWZvsQCD': {
+            'T': 0.974, # 0.5% mistag rate: 0p5
+        },
+    },
+    Era_2016postVFP: {
+        'PNetWZvsQCD': {
+            'T': 0.974,
+        },
+    },
+    Era_2017: {
+        'PNetWZvsQCD': {
+            'T': 0.978,
+        },
+    },
+    Era_2018: {
+        'PNetWZvsQCD': {
+            'T': 0.98,
         },
     },    
 }
@@ -952,7 +975,74 @@ Corrections = {
                 'SFs':         [      1,     0.921,     1.006,     1.001      ],
             },
         },
+    },
 
+    'PNetWZvsQCD': { # Data-to-MC SFs for ParticleNetMD_WZvsQCD
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs#W_Tagger_Nominal
+        # SFs are read from recommended json files from JMET-gitlab: 
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2016preVFP_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2016postVFP_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2017_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2018_UL/jmar.json.gz
+        # c['ParticleNet_W_Nominal'].evaluate(2.0, 250., 'nom', '0p5') (<eta>, 'pt', <'syst': nom, up, down>, WP)
+        Era_2016preVFP: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2016preVFP.json.gz',
+            'corrSetName': 'ParticleNet_W_Nominal',
+            'wp':          '0p5',
+            'PtRange':     [200, 800], 
+        },
+        Era_2016postVFP: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2016postVFP.json.gz',
+            'corrSetName': 'ParticleNet_W_Nominal',
+            'wp':          '0p5',
+            'PtRange':     [200, 800],
+        },
+        Era_2017: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2017.json.gz',
+            'corrSetName': 'ParticleNet_W_Nominal',
+            'wp':          '0p5',
+            'PtRange':     [200, 800],
+        },
+        Era_2018: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2018.json.gz',
+            'corrSetName': 'ParticleNet_W_Nominal',
+            'wp':          '0p5',
+            'PtRange':     [200, 800],
+        },
+    },
+
+    'PNetTvsQCD': { # Data-to-MC SFs for ParticleNetMD_WZvsQCD
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs#Top_Tagger_Nominal
+        # SFs are read from recommended json files from JMET-gitlab: 
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2016preVFP_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2016postVFP_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2017_UL/jmar.json.gz
+        #    https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/POG/JME/2018_UL/jmar.json.gz
+        # c['ParticleNet_W_Nominal'].evaluate(2.0, 250., 'nom', '0p5') (<eta>, 'pt', 'syst': nom, up, down, WP)
+        Era_2016preVFP: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2016preVFP.json.gz',
+            'corrSetName': 'ParticleNet_Top_Nominal',
+            'wp':          '0p1',
+            'PtRange':     [300, 1200],
+        },
+        Era_2016postVFP: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2016postVFP.json.gz',
+            'corrSetName': 'ParticleNet_Top_Nominal',
+            'wp':          '0p1',
+            'PtRange':     [300, 1200],
+        },
+        Era_2017: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2017.json.gz',
+            'corrSetName': 'ParticleNet_Top_Nominal',
+            'wp':          '0p1',
+            'PtRange':     [300, 1200],
+        },
+        Era_2018: {
+            'inputFile':   'data/correction/mc/ParticleNetSF/jmar_UL2018.json.gz',
+            'corrSetName': 'ParticleNet_Top_Nominal',
+            'wp':          '0p1',
+            'PtRange':     [300, 1200],
+        },
     },
 
 }
@@ -974,6 +1064,8 @@ SystNameConvs = {
     'Btag':               'CMS_btag_fixedWP_comb_bc_$YEAR',    
     'BtagCorr':           'CMS_btag_fixedWP_comb_bc_correlated',
     'BtagUncorr':         'CMS_btag_fixedWP_comb_bc_uncorrelated_$YEAR',
+    'AK8JetPNetWZTag':    'CMS_eff_fj_ParticleNet_WZ_Nominal',
+    'AK8JetPNetTopTag':   'CMS_eff_fj_ParticleNet_Top_Nominal',    
 
     'AK8JetJES':          'CMS_scale_fj_$YEAR', 
     'AK8JetJER':          'CMS_res_fj_$YEAR',

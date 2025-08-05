@@ -4553,7 +4553,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         )
                         output['hdPhi_MET_leadingFatJet'+sHExt].fill(
                             dataset=dataset,
-                            deltaPhi=(abs(events.MET.delta_phi(leadingFatJet))[sel_SR_forHExt]),
+                            deltaPhi=(calculate_AbsDeltaPhi(METToUse.phi_toUse, leadingFatJet.phi)[sel_SR_forHExt]),
                             systematic=syst,
                             weight=evtWeight[sel_SR_forHExt]
                         )

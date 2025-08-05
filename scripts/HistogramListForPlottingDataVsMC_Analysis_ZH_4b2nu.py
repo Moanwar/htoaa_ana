@@ -210,7 +210,7 @@ histograms_dict = OD([
     ("hPuppiMET_pT", {sXLabel: 'hPuppiMET_pT', sYLabel: 'Events', sXRange: [0, 1000], sNRebinX: 5 }),
     #("hMET_sumEt", {sXLabel: 'hMET_sumEt', sYLabel: 'Events', sXRange: [1000, 4000], sNRebinX: 5 }),
     ("hMETPhi", {sXLabel: r'$\phi$($\vec{E}_{T}^{miss}$)', sYLabel: 'Events', sXRange: [-3.5, 3.5], sNRebinX: 2 }),
-    ("hdPhi_MET_leadingFatJet", {sXLabel: r'$\Delta\phi$(H candidiate AK8 jet and $\vec{E}_{T}^{miss}$)', sYLabel: 'Events', sXRange: [2.2, 3.14], sNRebinX: 10 }),
+    ("hdPhi_MET_leadingFatJet", {sXLabel: r'$\Delta\phi$(H candidiate AK8 jet and $\vec{E}_{T}^{miss}$)', sYLabel: 'Events', sXRange: [1.5, 3.14], sNRebinX: 10 }),
 
     #("hLeadingFatJet_nLeptons", {sXLabel: 'hLeadingFatJet_nLeptons', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
 

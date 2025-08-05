@@ -235,10 +235,18 @@ histograms_dict = OD([
     ("hLeadingNonHto4bFatJetPhi", {sXLabel: r'$\phi$(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
     ("hLeadingNonHto4bFatJetMass", {sXLabel: r'Mass(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
     ("hLeadingNonHto4bFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Top candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2 }),
-    ("hLeadingNonHto4bFatJetPNet_TvsQCD", {sXLabel: r'TvsQCD tagger score(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.75, 1], sNRebinX: 25 }),
+    ("hLeadingNonHto4bFatJetPNet_TvsQCD", {sXLabel: r'TvsQCD tagger score(Top candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.80, 1], sNRebinX: 20 }),
+    ("hLeadingNonHto4bVFatJetPNet_WZvsQCD", {sXLabel: r'WZvsQCD tagger score(W/Z candidate AK8 jet)', sYLabel: 'Events', sXRange: [0.80, 1], sNRebinX: 20 }),
     
     ("hnAK4JetsCentral_NonoverlapSelFatJets", {sXLabel: 'No. of AK4 jets outside selected AK8 jets', sYLabel: 'Events', sXRange: [-0.5, 6.5],  }),
     ("hnAK4JetsCentral_bTag_NonoverlapSelFatJets", {sXLabel: 'No. of b-tag AK4 jets outside selected AK8 jets', sYLabel: 'Events', sXRange: [-0.5, 6.5],  }),
+    
+    ("hHTtrig", {sXLabel: r'HT [GeV]', sYLabel: 'Events', sXRange: [0, 2000], sNRebinX: 5 }),
+    ("hHT_minus_TopHiggs", {sXLabel: r'HT (AK4 jets outside top and Higgs ) [GeV]', sYLabel: 'Events', sXRange: [0, 2000], sNRebinX: 5 }),
+    ("hHT_minus_Higgs", {sXLabel: r'HT (AK4 jets outside selFJ + top) [GeV]', sYLabel: 'Events', sXRange: [0, 2000], sNRebinX: 5 }),
+    ("hHTfull", {sXLabel: r'HT (AK4 jets outside selFJ + top + H) [GeV]', sYLabel: 'Events', sXRange: [0, 2000], sNRebinX: 5 }),
+    
+    
     
 
 
