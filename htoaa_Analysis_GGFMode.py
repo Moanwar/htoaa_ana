@@ -135,8 +135,8 @@ class ObjectSelection:
         self.FatJetPt_gg0lIncl_MinThsh  = 250
         self.FatJetPt_gg0lIncl_MaxThsh  = 999999
         self.FatJetPt_gg0lLo_MinThsh    = 250
-        self.FatJetPt_gg0lLo_MaxThsh    = 550 # 400
-        self.FatJetPt_gg0lHi_MinThsh    = 550 # 400
+        self.FatJetPt_gg0lLo_MaxThsh    = 400
+        self.FatJetPt_gg0lHi_MinThsh    = 400
         self.FatJetPt_gg0lHi_MaxThsh    = 999999        
 
         self.FatJetEtaThsh = 2.4
@@ -205,8 +205,8 @@ class ObjectSelection:
 
 
         # VBF AK4 di-jet veto
-        self.VBFDijetMass_MinThsh = 900 # VBFLo: 450, VBFHi: 900
-        self.VBFDijetEta_MinThsh  = 3.0 # VBFLo: 2.2, VBFHi: 3.0
+        self.VBFDijetMass_MinThsh = 450 # VBFLo: 450, VBFHi: 900
+        self.VBFDijetEta_MinThsh  = 2.2 # VBFLo: 2.2, VBFHi: 3.0
          
 
 
@@ -412,6 +412,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 
             ]),
         ])
+        '''
+        ## TO DO: Update b veto: https://ssawant.web.cern.ch/ssawant/HToAA/DatavsMC/20250805_DataMC/gg0l/Run2/gg0lHi_Xto4bv2_SBplusSRWP40/hnAk4JetsCentral_bTag_awayFrom_leadingFatJet_Nom_logY.png
+        In gg0l, Vjj:
+        Only veto events based on AK4 b-jet if the b-jet has 0.8 < dR < 1.2 to the Higgs candidate AK8 jet
+        This also means we also don't necessarily veto events with 2 more AK4 b-jets
+        Plot the dR(Higgs AK8, b-tagged AK4) distribution (in cases where there is a b-tagged AK4), choosing the nearest b-tag, or highest-pT b-tag, however you want to do it.
+        ''' 
 
         
         if runMode_OptimizePNetTaggerCut:
@@ -474,10 +481,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         categories_dict["gg0lHi"]   = [ "leadingFatJetPt_gg0lHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         #categories_dict["gg0lInclMsdLt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdLt50']
         #categories_dict["gg0lInclMsdGt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdGt50']
-        categories_dict["gg0l0bLo"] = categories_dict["gg0lLo"] + ['0bAwayFromH']
-        categories_dict["gg0l0bHi"] = categories_dict["gg0lHi"] + ['0bAwayFromH']
-        categories_dict["gg0l1bLo"] = categories_dict["gg0lLo"] + ['1bAwayFromH']
-        categories_dict["gg0l1bHi"] = categories_dict["gg0lHi"] + ['1bAwayFromH']
+        #categories_dict["gg0l0bLo"] = categories_dict["gg0lLo"] + ['0bAwayFromH']
+        #categories_dict["gg0l0bHi"] = categories_dict["gg0lHi"] + ['0bAwayFromH']
+        #categories_dict["gg0l1bLo"] = categories_dict["gg0lLo"] + ['1bAwayFromH']
+        #categories_dict["gg0l1bHi"] = categories_dict["gg0lHi"] + ['1bAwayFromH']
         
         
 
@@ -5265,7 +5272,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         '''                            
                                                       
                             
-                    if self.datasetInfo['histogramSaveLevel'] >= 1 and self.datasetInfo['isMC']:    
+                    if self.datasetInfo['histogramSaveLevel'] >= 1 and self.datasetInfo['isMC'] and 'LHE' in events.fields:    
                         output['hGenLHE_HT'+sHExt].fill(
                             dataset=dataset,
                             HT=(events.LHE.HT[sel_SR_forHExt]),

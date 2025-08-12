@@ -52,6 +52,9 @@
         "cal_HiggsPtRewgts.C": "cpp",
         "calTreeSumEvents.C": "cpp",
         "readTree.C": "cpp",
-        "ratioHisto.C": "cpp"
+        "ratioHisto.C": "cpp",
+        "PlotHistos1D.C": "cpp",
+        "plot_HiggsPtRewgts.C": "cpp",
+        "PlotHisto2D.C": "cpp"
     }
 }

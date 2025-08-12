@@ -60,6 +60,7 @@ MCBkg_dict = {
     'Single top': ["STop_t", "STbar_t", "ST_s_0l", "ST_s_1l", "STop_tW_Incl", "STbar_tW_Incl"], #"STop_tW_12l", "STbar_tW_12l"],
     'V+X': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv"],
     'Diboson': ["ZZ", "WZ", "WW"],
+    #'V, VV': ["Zqq", "Zvv", "Zll", "Wqq", "Wlv",  "ZZ", "WZ", "WW"],
     'Other': ["ttZ", "ttW", "tZq",   "ZZZ", "WZZ", "WWZ", "WWW",   ],
     'SM Higgs': ['GluGluHToBB_Pt-200ToInf', 'VBFH_dipoleRecoilOn', 'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'ZHToBBX', 'ttHToBB'],
     #'': [],
@@ -113,8 +114,8 @@ logYMinScaleFactor = 10 # 100 # 1 # scale yMin by factor logYMinScaleFactor to n
 
 
 histograms_dict = OD([
-    ("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events (unweighted)', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
-    ("hCutFlowPerCatWeighted", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
+    #("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events (unweighted)', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
+    #("hCutFlowPerCatWeighted", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
 
     #("hLeadingFatJetMass", {sXLabel: 'Leading FatJet mass [GeV]', sYLabel: 'Events', sXRange: [50, 250], sYRange: [1e-2, 1e8]})
     #("hLeadingFatJetMass", {sXLabel: 'Leading FatJet mass [GeV]', sYLabel: 'Events', sXRange: [50, 250]}),
@@ -164,8 +165,8 @@ histograms_dict = OD([
     #("hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.5, 3.5] }),
     #("hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue", {sXLabel: 'hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue', sYLabel: 'Events', sXRange: [-3.14, 3.14], sNRebinX: 2 }),
 
-    ("hLeadingFatJetMass", {sXLabel: r'Mass(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
-    ("hLeadingFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2 }),
+    ("hLeadingFatJetMass", {sXLabel: r'Mass(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 240], sNRebinX: 1}),
+    ("hLeadingFatJetMSoftDrop", {sXLabel: r'Mass$_{Soft\, drop}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 240], sNRebinX: 1 }),
     #("hLeadingFatJetBtagDeepB", {sXLabel: 'hLeadingFatJetBtagDeepB', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     #("hLeadingFatJetBtagDDBvLV2", {sXLabel: 'hLeadingFatJetBtagDDBvLV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
     #("hLeadingFatJetBtagDDCvBV2", {sXLabel: 'hLeadingFatJetBtagDDCvBV2', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 2 }),
@@ -231,17 +232,17 @@ histograms_dict = OD([
     #("hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123", {sXLabel: 'hLeadingFatJetParticleNet_massH_Hto4b_avg_v0123', sYLabel: 'Events', sXRange: [50, 300], sNRebinX: 5}),
 
     #("hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD", {sXLabel: 'hLeadingFatJetPNet_X4b_v1_Haa4b_vs_QCD', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v1_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v1_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v2a_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2a_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v2b_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2b_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v1_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v1_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v2a_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2a_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v2b_Haa4b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2b_Haa4b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
     ("hLeadingFatJetPNet_X4b_v2ab_Haa4b_score", {sXLabel: r'$X\to 4b$ tagger score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v2a_Haa34b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2a_Haa34b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v2b_Haa34b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2b_Haa34b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
-    ("hLeadingFatJetPNet_X4b_v2ab_Haa34b_score", {sXLabel: r'$X\to 3,4b$ tagger score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v2a_Haa34b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2a_Haa34b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v2b_Haa34b_score", {sXLabel: 'hLeadingFatJetPNet_X4b_v2b_Haa34b_score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
+    #("hLeadingFatJetPNet_X4b_v2ab_Haa34b_score", {sXLabel: r'$X\to 3,4b$ tagger score', sYLabel: 'Events', sXRange: [0, 1], sNRebinX: 50 }),
     
-    ("hLeadingFatJetMassH_v2b", {sXLabel: r'Mass$_{PNet\, X\to 4b}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 250], sNRebinX: 2}),
+    ("hLeadingFatJetMassH_v2b", {sXLabel: r'Mass$_{PNet\, X\to 4b}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 240], sNRebinX: 1}),
     
-    ("hLeadingFatJetPNet_massAa", {sXLabel: 'hLeadingFatJetPNet_massAa', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
+    #("hLeadingFatJetPNet_massAa", {sXLabel: 'hLeadingFatJetPNet_massAa', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
     ("hLeadingFatJetPNet_34massAa", {sXLabel: r'Mass$_{version\, a}$(a)  [GeV]', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
     ("hLeadingFatJetPNet_34massAb", {sXLabel: 'hLeadingFatJetPNet_34massAb', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
     ("hLeadingFatJetPNet_34massAd", {sXLabel: r'Mass$_{version\, d}$(a)  [GeV]', sYLabel: 'Events', sXRange: [5, 70], sNRebinX: 20}),
@@ -372,8 +373,12 @@ histograms_dict = OD([
     
 ])
 '''
-
+'''
 histograms_dict = OD([
-    ("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
+    #("hLeadingFatJetPt", {sXLabel: r'$p_{T}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [180, 1000], sNRebinX: 4 }),
     #("hCutFlowPerCat", {sXLabel: r'Event cut flow', sYLabel: 'Events', sXRange: [-0.5, 20.5], sNRebinX: 1 }),
+    #("hnAk4JetsCentral_bTag_awayFrom_leadingFatJet", {sXLabel: 'No. of b-tag AK4 jets, dR>1.2 from H->4b Fatjet', sYLabel: 'Events', sXRange: [-0.5, 6.5] }),
+    ("hLeadingFatJetMassH_v2b", {sXLabel: r'Mass$_{PNet\, X\to 4b}$(Higgs candidate AK8 jet) [GeV]', sYLabel: 'Events', sXRange: [0, 240], sNRebinX: 1}),
+    
 ])
+'''

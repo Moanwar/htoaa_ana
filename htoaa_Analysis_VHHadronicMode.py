@@ -136,12 +136,12 @@ class ObjectSelection:
 
         self.FatJetPt_Vjj_MinThsh  = 250
         self.FatJetPt_Vjj_MaxThsh  = 999999
-        self.FatJetPt_VjjIncl_MinThsh  = 250
-        self.FatJetPt_VjjIncl_MaxThsh  = 999999
-        self.FatJetPt_VjjLo_MinThsh    = 250
-        self.FatJetPt_VjjLo_MaxThsh    = 400
-        self.FatJetPt_VjjHi_MinThsh    = 400
-        self.FatJetPt_VjjHi_MaxThsh    = 999999        
+        #self.FatJetPt_VjjIncl_MinThsh  = 250
+        #self.FatJetPt_VjjIncl_MaxThsh  = 999999
+        #self.FatJetPt_VjjLo_MinThsh    = 250
+        #self.FatJetPt_VjjLo_MaxThsh    = 400
+        #self.FatJetPt_VjjHi_MinThsh    = 400
+        #self.FatJetPt_VjjHi_MaxThsh    = 999999        
 
 
         self.FatJetEtaThsh = 2.4
@@ -164,8 +164,12 @@ class ObjectSelection:
         # Vjj : nonHto4bFatJet
         self.NonHto4bFatJetPNet_WZvsQCD_Thsh = WvsQCDTagWPs[self.era]['PNetWZvsQCD']['T'] # 0.98 # 0.98 # 0.94
         self.NNonHo4bFatJetPNet_WZvsQCD_MaxThsh = 0
-        self.VFatJetPt_Vjj_MinThsh = 200
-        self.VFatJetPt_Vjj_MaxThsh = 999999
+        self.VFatJetPt_VjjIncl_MinThsh = 200
+        self.VFatJetPt_VjjIncl_MaxThsh = 999999
+        self.VFatJetPt_VjjLo_MinThsh   = 200
+        self.VFatJetPt_VjjLo_MaxThsh   = 300
+        self.VFatJetPt_VjjHi_MinThsh   = 300
+        self.VFatJetPt_VjjHi_MaxThsh   = 999999
         
     
         # Lepton 
@@ -393,7 +397,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "candH",
                 "leadingFatJetPt",
                 "candVjj",
-                "PNetWZvsQCDLoose"
+                "PNetWZvsQCDLoose",
                 "VFatJetPt",
                 sTrgSelection,
                 "nLeptonsTight",
@@ -457,9 +461,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         categories_dict = OD()
-        categories_dict["VjjIncl"] = [ "leadingFatJetPt_VjjIncl" if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
-        categories_dict["VjjLo"]   = [ "leadingFatJetPt_VjjLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
-        categories_dict["VjjHi"]   = [ "leadingFatJetPt_VjjHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+        categories_dict["VjjIncl"] = self.sel_names_all["Presel"] 
+        categories_dict["VjjLo"]   = [ "VFatJetPt_VjjLo"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+        categories_dict["VjjHi"]   = [ "VFatJetPt_VjjHi"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+
+        categories_dict["VjjLo350"]   = [ "VFatJetPt_VjjLo350"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+        categories_dict["VjjHi350"]   = [ "VFatJetPt_VjjHi350"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+
+        categories_dict["VjjLo400"]   = [ "VFatJetPt_VjjLo400"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
+        categories_dict["VjjHi400"]   = [ "VFatJetPt_VjjHi400"   if s_ == "VFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ] 
                  
         for sCatName, catSels in categories_dict.items():
             if self.datasetInfo['histogramSaveLevel'] >= 1:
@@ -2483,39 +2493,58 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
 
         if "leadingFatJetPt" in self.sel_conditions_all_list:
-            # >=1 FatJet
-            #selection.add("FatJetGet", ak.num(selFatJet) >= self.objectSelector.nFatJetMin)
             selection.add(
                 "leadingFatJetPt",
-                ((leadingFatJet.pt_toUse > self.objectSelector.FatJetPt_VjjIncl_MinThsh) &
-                 (leadingFatJet.pt_toUse <=  self.objectSelector.FatJetPt_VjjIncl_MaxThsh))
+                ((leadingFatJet.pt_toUse > self.objectSelector.FatJetPt_Vjj_MinThsh) &
+                 (leadingFatJet.pt_toUse <=  self.objectSelector.FatJetPt_Vjj_MaxThsh))
             )
-        if "leadingFatJetPt_VjjIncl" in self.sel_conditions_all_list:
-            selection.add(
-                "leadingFatJetPt_VjjIncl",
-                ((leadingFatJet.pt_toUse > self.objectSelector.FatJetPt_VjjIncl_MinThsh) &
-                 (leadingFatJet.pt_toUse <=  self.objectSelector.FatJetPt_VjjIncl_MaxThsh))
-            )
-        if "leadingFatJetPt_VjjLo" in self.sel_conditions_all_list:
-            selection.add(
-                "leadingFatJetPt_VjjLo",
-                ((leadingFatJet.pt_toUse > self.objectSelector.FatJetPt_VjjLo_MinThsh) &
-                 (leadingFatJet.pt_toUse <=  self.objectSelector.FatJetPt_VjjLo_MaxThsh))
-            )
-        if "leadingFatJetPt_VjjHi" in self.sel_conditions_all_list:
-            selection.add(
-                "leadingFatJetPt_VjjHi",
-                ((leadingFatJet.pt_toUse > self.objectSelector.FatJetPt_VjjHi_MinThsh) &
-                 (leadingFatJet.pt_toUse <=  self.objectSelector.FatJetPt_VjjHi_MaxThsh))
-            )
-
 
         if "VFatJetPt" in self.sel_conditions_all_list:
             selection.add(
                 "VFatJetPt",
-                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_Vjj_MinThsh) &
-                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_Vjj_MaxThsh))
+                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_VjjIncl_MinThsh) &
+                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_VjjIncl_MaxThsh))
             )
+        if "VFatJetPt_VjjLo" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjLo",
+                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_VjjLo_MinThsh) &
+                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_VjjLo_MaxThsh))
+            )
+        if "VFatJetPt_VjjHi" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjHi",
+                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_VjjHi_MinThsh) &
+                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_VjjHi_MaxThsh))
+            )
+
+        if "VFatJetPt_VjjLo350" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjLo350",
+                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_VjjLo_MinThsh) &
+                 (leadingNonHto4bFatJet.pt_toUse <= 350))
+            )
+        if "VFatJetPt_VjjHi350" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjHi350",
+                ((leadingNonHto4bFatJet.pt_toUse >  350) &
+                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_VjjHi_MaxThsh))
+            )
+
+
+        if "VFatJetPt_VjjLo400" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjLo400",
+                ((leadingNonHto4bFatJet.pt_toUse >  self.objectSelector.VFatJetPt_VjjLo_MinThsh) &
+                 (leadingNonHto4bFatJet.pt_toUse <= 400))
+            )
+        if "VFatJetPt_VjjHi400" in self.sel_conditions_all_list:
+            selection.add(
+                "VFatJetPt_VjjHi400",
+                ((leadingNonHto4bFatJet.pt_toUse >  400) &
+                 (leadingNonHto4bFatJet.pt_toUse <= self.objectSelector.VFatJetPt_VjjHi_MaxThsh))
+            )
+
 
         if "leadingFatJetEta" in self.sel_conditions_all_list:
             selection.add(

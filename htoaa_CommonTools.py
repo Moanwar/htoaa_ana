@@ -144,7 +144,7 @@ def getNanoAODFile(
 
     fileNameLocal_0 = fileNameLocal
     fileNameLocal = fileNameLocal.replace('.root', '_%d.root'%(random.randint(0, 100000000)))
-    print(f"htoaa_CommonTools::getNanoAODFile() here0 {datetime.now() = } fileNameLocal: {fileNameLocal} renamed to {fileNameLocal}"); sys.stdout.flush()
+    print(f"htoaa_CommonTools::getNanoAODFile() here0 {datetime.now() = } fileNameLocal: {fileNameLocal_0} renamed to {fileNameLocal}"); sys.stdout.flush()
 
     if downloadFile  and  os.path.exists(fileNameLocal):
         # local copy of the i/p file exists

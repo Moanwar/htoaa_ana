@@ -862,6 +862,7 @@ if __name__ == '__main__':
             print('%s %s already exists. \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), sOpRootFile_stage1))
         
         if allJobsSuccessful and (not isOpRootFileExist):
+            ## hadd root files
             print('%s \t All jobs run successfully. Now hadd root files.  \n' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
 
 
@@ -914,16 +915,6 @@ if __name__ == '__main__':
 
         isOpRootFileExist     = os.path.isfile(sOpRootFile_stage1) and (os.path.getsize(sOpRootFile_stage1) > 2e4)
 
-        ## Make event yields table
-        if isOpRootFileExist:
-            os.chdir( SourceCodeDir )
-            cmd_evtYields = 'python3 scripts/getEventYield_DataVsMC.py %s %s %s' % (EosAnaVersionDir, era, sAnaCat)
-            cmd_evtYields_stdout = executeBashCommand(cmd_evtYields)
-            fJobSubLog.write('\n %s: \n%s \n' % (cmd_evtYields, cmd_evtYields_stdout))
-
-            os.chdir( EosDestinationDir )
-            executeBashCommand("pwd")
-            executeBashCommand("ls -lh %s" % (sOpPlotsDir))
 
         ## Make Data vs MC plots
         if (isOpRootFileExist and (systematics.lower() != 'full')):
@@ -956,5 +947,31 @@ if __name__ == '__main__':
         fJobSubLog.close()
 
         print('\n\n%s \t Finished running %s %s %s' % (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), anaVersion, era, sAnaCat))
+
+        
+    ## Make event yields table
+    eras_toUse = 'All' if eras == Era_Run2 else eras
+    os.chdir( SourceCodeDir )
+    cmd_evtYields = 'python3 scripts/getEventYield_DataVsMC.py %s %s %s' % (EosAnaVersionDir, eras_toUse, sAnaCat)
+    cmd_evtYields_stdout = executeBashCommand(cmd_evtYields)
+    print('\n %s: \n%s \n' % (cmd_evtYields, cmd_evtYields_stdout))
+
+    os.chdir( EosDestinationDir )
+    executeBashCommand("pwd")
+    executeBashCommand("ls -lh %s" % (sOpPlotsDir))
+
+    if ( (eras == Era_Run2) and (systematics.lower() != 'full') ):
+        ## Make Data vs MC plots
+        os.chdir( SourceCodeDir )
+        cmd_Plot1DDataVsMC = 'python3 scripts/PlotHistos1D_DataVsMC.py %s %s %s' % (EosAnaVersionDir, Era_Run2, sAnaCat)
+        cmd_Plot1DDataVsMC_stdout = executeBashCommand(cmd_Plot1DDataVsMC)
+        print('\n %s: \n%s \n' % (cmd_Plot1DDataVsMC, cmd_Plot1DDataVsMC_stdout))
+
+        os.chdir( EosDestinationDir )
+        executeBashCommand("pwd")
+        executeBashCommand("ls -lh %s" % (sOpPlotsDir))
+
+
+        
             
     print(f'\n\n{datetime.now().strftime("%Y/%m/%d %H:%M:%S")} \t Finished running all eras: {eras}, {anaVersion}, {sAnaCat}')

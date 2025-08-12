@@ -2,7 +2,7 @@
 To run:
     python3 getEventYield_DataVsMC.py <sAnaDir> <Dataset> <CAT>
         sAnaDir: full path of analysis directory where output histograms are stored. E.g. /eos/cms/store/user/ssawant/htoaa/analysis/20250713_DatacardsFullSyst
-        Dataset: '2016preVFP', '2016postVFP', '2017', '2018', 'Run2', 'All'
+        Datasets: comman separated dataset strings . Options: '2016preVFP', '2016postVFP', '2017', '2018', 'Run2', 'All'
         CAT0: 'gg0l', 'VBFjj', 'Wlv', 'Zll', 'Zvv',  'Vjj'. 'ZvvIncl','ZvvLo', 'ZvvHi', 'gg0lIncl', 'gg0lLo', 'gg0lHi', VjjLo, VjjHi, VjjIncl, 'tt0l', 'tt0l_1TFJ_ge0BOutsideSelFJ', 'CR_QCD4b'
             'tt0l_ge1NonHFatJet_0BExtra', 'tt0l_ge1NonHFatJet_1BExtra', 'tt0l_ge1NonHFatJet_ge2BExtra', 'tt0l_0NonHFatJet_ge2B'
             tt0l_1TFJ_0BOutsideSelFJ, tt0l_1TFJ_ge1BOutsideSelFJ, tt0l_1TFJ_ge0BOutsideSelFJ
@@ -29,7 +29,7 @@ from htoaa_CommonTools import(
 )
 
 sAnaDir     = sys.argv[1]
-Dataset     = sys.argv[2]
+Datasets     = sys.argv[2]
 CAT         = sys.argv[3]
 
 #global Year;
@@ -51,13 +51,13 @@ if 'CR_QCD4b' in CAT:  anaSuperCat = 'CR_QCD4b'
 
 subCats = []
 if   'gg0l'     in CAT:
-    subCats = ["gg0lIncl", "gg0lHi", "gg0lLo"]
+    subCats = ["gg0lIncl", "gg0lHi", "gg0lLo", "gg0l0bLo", "gg0l0bHi", "gg0l1bLo", "gg0l1bHi"]
 elif 'VBF'      in CAT:    
     subCats = ["VBFHi", "VBFLo"]
 elif 'Vjj'      in CAT:    
-    subCats = ["VjjIncl", "VjjHi", "VjjLo"]
+    subCats = ["VjjIncl", "VjjHi", "VjjLo", "VjjHi350", "VjjLo350", "VjjHi400", "VjjLo400"]
 elif 'Zvv'      in CAT:    
-    subCats = ["ZvvHi", "ZvvLo"]
+    subCats = ["ZvvIncl", "ZvvHi", "ZvvLo"]
 elif 'tt0l'      in CAT:    
     subCats = ["tt0l_1TFJ_ge0BOutsideSelFJ", "tt0l_1TFJ_0BOutsideSelFJ", "tt0l_1TFJ_ge1BOutsideSelFJ"]
 
@@ -73,27 +73,33 @@ elif 'CR_QCD4b'      in CAT:
     selectionTags = ["CR4b_3M2T", "CR4b_3M3T", "CR4b_4M3T", "CR4b_4M4T"]
 
 
+# Datasets to use
+Datasets_list = Datasets.split(',')
+print(f"{Datasets_list = }")
 
 # Year, Era are set internally to one of the following: '2016preVFP', '2016postVFP', '2017', '2018'
 YearsAll_list = [Era_2016preVFP, Era_2016postVFP, Era_2017, Era_2018]
 
 YearsToRun_dict = {}
-if Dataset==Era_Run2: # make Run2 data-mc plots
-    YearsToRun_dict[Era_Run2] = YearsAll_list
-    Years = YearsAll_list
-elif Dataset=='All': # make Run2 and individual 4 years data-mc plots
-    YearsToRun_dict[Era_Run2] = YearsAll_list
-    for Year_ in YearsAll_list:
-        YearsToRun_dict[Year_] = [Year_]
-    Years = YearsAll_list
-else: # make individual year's data-mc plots
-    Years = []
-    for Year_ in YearsAll_list:
-        if Year_ != Dataset: continue
-        YearsToRun_dict[Year_] = [Year_]   
-        Years.append(Year_)
+Years = []
+for Dataset  in Datasets_list:
+    if Dataset==Era_Run2: # make Run2 data-mc plots
+        YearsToRun_dict[Era_Run2] = YearsAll_list
+        Years = YearsAll_list
+    elif Dataset=='All': # make Run2 and individual 4 years data-mc plots
+        YearsToRun_dict[Era_Run2] = YearsAll_list
+        for Year_ in YearsAll_list:
+            YearsToRun_dict[Year_] = [Year_]
+        Years = YearsAll_list
+    else: # make individual year's data-mc plots
+        for Year_ in YearsAll_list:
+            if Year_ != Dataset: continue
+            YearsToRun_dict[Year_] = [Year_]   
+            Years.append(Year_)
 
 print(f"{YearsToRun_dict = }, \n{Years = }")
+
+
 
 ## Read input files
 sIpFiles = {}
@@ -127,7 +133,7 @@ for DatasetName_, YearsToRun_list_ in YearsToRun_dict.items():
 
 
 RunMode = '' # '', 'test'
-printLevel = 6 #
+printLevel = 0 #
 
 
 print(f"{selectionTags = }")
@@ -191,8 +197,8 @@ MCSig_dict = {
 
     'VBFHtoaato4b_mA_15': ['VBFHtoaato4b_mA_15'],
     'VBFHtoaato4b_mA_30': ['VBFHtoaato4b_mA_30'],
-    #'VBFHtoaato4b_mA_55': ['VBFHtoaato4b_mA_55'],
-    'VBFHtoaato4b_mA_60': ['VBFHtoaato4b_mA_60'],
+    'VBFHtoaato4b_mA_55': ['VBFHtoaato4b_mA_55'],
+    #'VBFHtoaato4b_mA_60': ['VBFHtoaato4b_mA_60'],
 
     'WHtoaato4b_mA_15': ['WHtoaato4b_mA_15'],
     'WHtoaato4b_mA_30': ['WHtoaato4b_mA_30'],
@@ -213,28 +219,24 @@ systematics_list = ['Nom'] # ['central']
 systematics_forData = 'noweight'
 xValueForEventYield = 4
 
+sSpace     = ' & '     if runMode == 'LatexCompatible' else ' \t '
+sPlusMinus = ' $\pm$ ' if runMode == 'LatexCompatible' else ' \t '
+sEndline   = ' \\ \n ' if runMode == 'LatexCompatible' else ' \n'
+
 sProcessNames_NotRead = {}
 
+evtYields_dict = {} # dict levels: evtYields_dict[<dataset name>][<lumi used: Total or 1>][<selectionTag_syst>][<process>][<nEvt or errN or nEvtUnwgt>]
 for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
-    '''
-    luminosity_toUse = 0
-    for ExpData_component in ExpData_list:
-        #ExpData_component = ExpData_component.replace('2018', Year)
-        DatasetEra_         = ExpData_component.split(Era[:4])[1] # ExpData_component.split(Year)[1][0] # 'JetHT_Run2018A'.split('2018')[1][0]
-        luminosity_forEra_ = 0
-        if Era in Luminosities_TotalPerYear_perEra:
-            luminosity_forEra_  = Luminosities_TotalPerYear_perEra[Year][HLT_toUse][DatasetEra_]
-            luminosity_toUse   += luminosity_forEra_
-        print(f"{ExpData_list = }, {DatasetEra_ = }, {luminosity_forEra_ = } ")
-    if Era not in Luminosities_TotalPerYear_perEra: luminosity_toUse = luminosity_total
-    luminosity_Scaling_toUse = round(luminosity_toUse, 2) / round(luminosity_total, 2)
-    luminosity_toUse = round(luminosity_toUse, 1)
-    '''
     luminosity_total         = luminosity_total_dict[sDatasetName]
+    if sDatasetName not in evtYields_dict:
+        evtYields_dict[sDatasetName] = {}
 
     for luminosity_toUse in [luminosity_total, 1.0]: # make event yield table twice 1) total luminosity, 2) 1 fb-1
+        sLuminosity_toUse = 'Full' if luminosity_toUse == luminosity_total else str(luminosity_toUse)
 
         luminosity_Scaling_toUse = luminosity_toUse / luminosity_total
+        if luminosity_toUse not in evtYields_dict[sDatasetName]:
+            evtYields_dict[sDatasetName][sLuminosity_toUse] = {}
 
         sOpDir  = '%s/%s/%s/%s' % (sAnaDir, sDatasetName, anaSuperCat, sOpDirNameShort)
         if not os.path.exists(sOpDir):
@@ -244,7 +246,7 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
             print(f"{sDatasetName}: {luminosity_toUse = }, {luminosity_total = },  {luminosity_Scaling_toUse = }, \n{YearsToRun_list = }, \n{sOpDir = }\n", flush=True)
 
 
-        ExpData_dict = {} #{ 'Data': DataObs_DirName_dict[sDatasetName] }
+        ExpData_dict = {} #{ 'Year': DataObs_DirName_dict[sDatasetName] }
         for Year_ in YearsToRun_list:
             ExpData_dict[Year_] = DataObs_DirName_dict[Year_]
         samples_dict = {**MCSig_dict, **MCBkg_dict, **ExpData_dict}
@@ -256,11 +258,12 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
         MCSig_total = 0
         for selectionTag in selectionTags:   
             for systematics_name in systematics_list:
-                sSpace     = ' & '     if runMode == 'LatexCompatible' else ' \t '
-                sPlusMinus = ' $\pm$ ' if runMode == 'LatexCompatible' else ' \t '
-                sEndline   = ' \\ \n ' if runMode == 'LatexCompatible' else ' \n'
-                sEventYield += "Selection%s %s,  systematics%s %s,  %s %s" % (sSpace, selectionTag, sSpace, systematics_name, sDatasetName, sEndline)
-                sEventYield += "%-45s %s  %10s %s %10s %s %10s %s" % ('Samples', sSpace,'nEvents', sPlusMinus, 'Uncertainty', sSpace, 'nEvents_unweighted', sEndline)
+                sSelTag_Syst = '%s_%s' % (selectionTag, systematics_name)
+                if sSelTag_Syst not in evtYields_dict[sDatasetName][sLuminosity_toUse]:
+                    evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst] = {}
+
+                sEventYield += "Selection%s %s %s %s" % (sSpace, selectionTag, systematics_name, sEndline)
+                sEventYield += "%-45s %s  %10s %s %10s %s %12s %s" % ('Samples', sSpace,'nEvt', sPlusMinus, 'Uncert.', sSpace, 'nEvt unwgt', sEndline)
                 eventYields[systematics_name] = OD()
                 MCBkg_total = 0;   MCBkg_total_variance = 0
                 MCSig_total = 0;   MCSig_total_variance = 0
@@ -275,6 +278,8 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                         print(f"\t\t\t{sampleNameShort}")
                     nEvts_sum_    = 0; nEvts_unwgt_sum_ = 0
                     variance_sum_ = 0
+                    if sampleNameShort not in evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst]:
+                        evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst][sampleNameShort] = {}
                     for sample_category in sample_category_list:
                         #systematics_name_toUse = systematics_name if sampleNameShort not in ExpData_dict.keys() else systematics_forData 
                         #systematics_name_toUse = '_%s' % (systematics_name_toUse) # Previous version had systematics name for 'hCutFlow' histograqms
@@ -342,6 +347,13 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                         Data_total          += nEvts_sum_
                         Data_total_variance += variance_sum_
 
+                    if sampleNameShort not in ExpData_dict.keys():
+                        evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst][sampleNameShort] = {
+                            'nEvents': nEvts_sum_,
+                            'Uncertainty': np.sqrt(variance_sum_),
+                            'nEventsUnwgt': nEvts_unwgt_sum_
+                        }
+
                     eventYields[systematics_name][sampleNameShort] = OD([
                         ('nEvents', nEvts_sum_),
                         ('Uncertainty', np.sqrt(variance_sum_)),
@@ -356,6 +368,23 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                 sEventYield += "%-45s %s  %10g  %s" % ('Data/MCBkg', sSpace, Data_total / MCBkg_total if MCBkg_total > 0 else 0, sEndline)
 
                 sEventYield += "\n\n" 
+
+                evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst]['Bkg_total '] = {
+                    'nEvents':      MCBkg_total,
+                    'Uncertainty':  np.sqrt(MCBkg_total_variance),
+                    'nEventsUnwgt': -1
+                }
+                evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst]['Data_total'] = {
+                    'nEvents':      Data_total,
+                    'Uncertainty':  np.sqrt(Data_total_variance),
+                    'nEventsUnwgt': -1
+                }
+                evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst]['Data/MCBkg'] = {
+                    'nEvents':      Data_total / MCBkg_total if MCBkg_total > 0 else 0,
+                    'Uncertainty':  -1,
+                    'nEventsUnwgt': -1
+                }
+
                 continue
 
                 for idx_, sample_category in enumerate(MCSig_dict.keys()):
@@ -397,4 +426,49 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
             fOut.write(sEventYield)
             fOut.write(json.dumps(sProcessNames_NotRead, indent=4))
 
+if len(Years) == 1: exit(0)
 
+
+## Print event yields for all datasets side-by-side --> Innermost loop over Datasets 
+sDatasetName_0_ = list(evtYields_dict.keys())[0]
+sDatasetName_last_ = list(evtYields_dict.keys())[-1]
+for sLuminosity_toUse in evtYields_dict[sDatasetName_0_]: # Luminosity: 'Full', '1.0'
+    sOpDir  = '%s/%s/%s/%s' % (sAnaDir, 'Run2', anaSuperCat, sOpDirNameShort)
+    if not os.path.exists(sOpDir):
+        os.makedirs(sOpDir)
+    
+    sEventYield = "%s %s %s %s\n" % (sAnaDir, 'Run2', CAT, sLuminosity_toUse)
+    for selectionTag in selectionTags:   
+        for systematics_name in systematics_list:
+            sSelTag_Syst = '%s_%s' % (selectionTag, systematics_name)
+            sEventYield += "Selection%s %s %s %s" % (sSpace, selectionTag, systematics_name, sEndline)
+            sEventYield += "%-45s %s" % ('       ', sSpace )
+            for sDatasetName in YearsToRun_dict:
+                sEndline_toUse = sEndline if sDatasetName == sDatasetName_last_ else sSpace
+                sEventYield += "  %10s %s %10s %s %12s %s" % (sDatasetName, sPlusMinus, ' ', sSpace, ' ', sEndline_toUse)
+            sEventYield += "%-45s %s" % ('Samples', sSpace)
+            for sDatasetName in YearsToRun_dict:
+                sEndline_toUse = sEndline if sDatasetName == sDatasetName_last_ else sSpace
+                sEventYield += "  %10s %s %10s %s %12s %s" % ('nEvt', sPlusMinus, 'Uncert.', sSpace, 'nEvt unwgt', sEndline_toUse)
+                
+
+            for sampleNameShort in evtYields_dict[sDatasetName_0_][sLuminosity_toUse][sSelTag_Syst]:
+                if sampleNameShort in YearsToRun_dict: continue # skip sampleName==Year as 'Data' is stored separately
+                sEventYield += "%-45s %s" % (sampleNameShort, sSpace)
+
+                for sDatasetName in YearsToRun_dict:
+                    nEvents_      = evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst][sampleNameShort]['nEvents']
+                    Uncertainty_  = evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst][sampleNameShort]['Uncertainty']
+                    nEventsUnwgt_ = evtYields_dict[sDatasetName][sLuminosity_toUse][sSelTag_Syst][sampleNameShort]['nEventsUnwgt']
+                    sEndline_toUse = sEndline if sDatasetName == sDatasetName_last_ else sSpace
+                    sTemplate_ = "  %10.1f %s %10.1f %s %12d %s"
+                    if sampleNameShort == 'Data/MCBkg':
+                        sTemplate_ = "  %10g %s %10.1f %s %12d %s"
+                    sEventYield += sTemplate_ % (nEvents_, sPlusMinus, Uncertainty_, sSpace, nEventsUnwgt_, sEndline_toUse)
+            sEventYield += "\n\n" 
+
+    print("%s" % (sEventYield))
+
+    with open('%s/eventYieldTable_compare_lumi%s.txt' % (sOpDir, sLuminosity_toUse), 'w') as fOut:
+        fOut.write(sEventYield)
+        fOut.write(json.dumps(sProcessNames_NotRead, indent=4))    
