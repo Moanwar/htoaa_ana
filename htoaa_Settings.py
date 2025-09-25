@@ -1087,8 +1087,7 @@ SystNameConvs = {
     
     'ISR':                'ps_isr',
     'FSR':                'ps_fsr',
-    'QCDFactr':           'QCDscale_fac',
-    'QCDRenorm':          'QCDscale_ren',
+    'QCDScale':           'QCDScale',
     'PDF':                'pdf_99',
     
 }
