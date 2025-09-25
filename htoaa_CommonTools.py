@@ -1494,7 +1494,7 @@ def get_jetTriggerSF(pt, year): # msd, HT,
     )
     
     #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, msd, nom_trg, up_trg, down_trg]))
-    printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
+    #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
 
     return [nom_trg, up_trg, down_trg]
 

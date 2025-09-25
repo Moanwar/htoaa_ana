@@ -3237,7 +3237,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             weights.add(
                 self.systNameJetTrigEffi,
-                weight     = copy.deepcopy(wgt_TrgEff),
+                weight     = wgt_TrgEff,
                 weightUp   = copy.deepcopy(wgt_TrgEffUp),
                 weightDown = copy.deepcopy(wgt_TrgEffDown)
             )
@@ -3419,7 +3419,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             weights_woHEM1516Fix.add(
                 self.systNameJetTrigEffi,
-                weight     = copy.deepcopy(wgt_TrgEff),
+                weight     = wgt_TrgEff,
                 weightUp   = copy.deepcopy(wgt_TrgEffUp),
                 weightDown = copy.deepcopy(wgt_TrgEffDown)
             )
