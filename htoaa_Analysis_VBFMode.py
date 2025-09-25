@@ -67,6 +67,7 @@ from htoaa_CommonTools import (
     selectMETFilters, selectFatJets, getCandidateHiggs, selectAK4Jets, selectMuons, selectElectrons,
     selGenPartsWithStatusFlag,
     getHToAATo4BLundPlaneRewgt, 
+    add_HiggsEW_kFactors,
     getHiggsPtRewgtForGGH_HToAATo4B, getHiggsPtRewgtForVBFH_HToAATo4B, 
     getHiggsPtRewgtForWH_HToAATo4B, getHiggsPtRewgtForZH_HToAATo4B,
     getHiggsPtRewgtForTTH_HToAATo4B, 
@@ -625,8 +626,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
         self.systNameISR = SystNameConvs['ISR']
         self.systNameFSR = SystNameConvs['FSR']
-        self.systNameQCDFactr = SystNameConvs['QCDFactr']
-        self.systNameQCDRenorm = SystNameConvs['QCDRenorm']
+        self.systNameQCDScale = SystNameConvs['QCDScale']
+        #self.systNameQCDFactr = SystNameConvs['QCDFactr']
+        #self.systNameQCDRenorm = SystNameConvs['QCDRenorm']
         self.systNamePDF = SystNameConvs['PDF']
             
 
@@ -839,10 +841,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         ('hEventWeight_QCDPdfUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPdfUp'}),
                         ('hEventWeight_QCDPdfDown'+sHExt,                      {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPdfDown'}),
                         ('hEventWeight_QCDScale_Nom'+sHExt,                    {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_Nom'}),
-                        ('hEventWeight_QCDScale_RenormUp'+sHExt,               {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_RenormUp'}),
-                        ('hEventWeight_QCDScale_RenormDown'+sHExt,             {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_RenormDown'}),
-                        ('hEventWeight_QCDScale_FactorizationUp'+sHExt,        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_FactorizationUp'}),
-                        ('hEventWeight_QCDScale_FactorizationDown'+sHExt,      {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_FactorizationDown'}),
+                        ('hEventWeight_QCDScale_Up'+sHExt,               {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_Up'}),
+                        ('hEventWeight_QCDScale_Down'+sHExt,             {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDScale_Down'}),
                         ('hEventWeight_QCDPDFNom'+sHExt,                       {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPDFNom'}),
                         ('hEventWeight_QCDPDFUp'+sHExt,                        {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPDFUp'}),
                         ('hEventWeight_QCDPDFDown'+sHExt,                      {sXaxis: Weight_axis,    sXaxisLabel: 'hEventWeight_QCDPDFDown'}),
@@ -3181,8 +3181,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 dataset = self.datasetInfo['datasetName']
             )
 
-            # MC QCD alphaS renormalization and factorization uncertainty
-            wgt_QCDScale_Nom, wgt_QCDScale_RenormUp, wgt_QCDScale_RenormDown, wgt_QCDScale_FactorizationUp, wgt_QCDScale_FactorizationDown = get_QCDScaleWeight(
+            # MC QCD renormalization and factorization uncertainty
+            wgt_QCDScale_Nom, wgt_QCDScale_Up, wgt_QCDScale_Down  = get_QCDScaleWeight(
                 events = events,
                 dataset = self.datasetInfo['datasetName']
             )
@@ -3209,7 +3209,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     printVariable('\n wgt_WHaa_HiggsPt', ak.zip([wgt_WHaa_HiggsPt, wgt_WHaa_HiggsPtUp, wgt_WHaa_HiggsPtDown]))
                 printVariable('\n wgt_PS', ak.zip([wgt_PS_Nom, wgt_PS_ISRUp, wgt_PS_ISRDown, wgt_PS_FSRUp, wgt_PS_FSRDown ]))
                 printVariable('\n wgt_QCDPdf', ak.zip([wgt_QCDPdfNom, wgt_QCDPdfUp, wgt_QCDPdfDown]))
-                printVariable('\n wgt_QCDScale', ak.zip([wgt_QCDScale_Nom, wgt_QCDScale_RenormUp, wgt_QCDScale_RenormDown, wgt_QCDScale_FactorizationUp, wgt_QCDScale_FactorizationDown]))
+                printVariable('\n wgt_QCDScale', ak.zip([wgt_QCDScale_Nom, wgt_QCDScale_Up, wgt_QCDScale_Down]))
                 printVariable('\n wgt_Ak4Btag', ak.zip([wgt_Ak4Btag_dict['Nom'], wgt_Ak4Btag_dict['Up'], wgt_Ak4Btag_dict['Down'], ]))
                 if self.datasetInfo["era"] != Era_2018:
                     printVariable('\n wgt_L1TPrefiring', ak.zip([wgt_L1TPrefiring_dict['Nom'], wgt_L1TPrefiring_dict['Up'], wgt_L1TPrefiring_dict['Down'], ]))               
@@ -3237,9 +3237,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             weights.add(
                 self.systNameJetTrigEffi,
-                weight     = wgt_TrgEff,
-                weightUp   = wgt_TrgEffUp,
-                weightDown = wgt_TrgEffDown
+                weight     = copy.deepcopy(wgt_TrgEff),
+                weightUp   = copy.deepcopy(wgt_TrgEffUp),
+                weightDown = copy.deepcopy(wgt_TrgEffDown)
             )
             if self.datasetInfo["era"] != Era_2018:
                 weights.add(
@@ -3264,6 +3264,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalVBFH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "VBF")
+                weights.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights.add(
                     self.systNameVBFHPtRewgt,
                     weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
@@ -3271,6 +3276,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalWH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "WH")
+                weights.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights.add(
                     self.systNameWHPtRewgt,
                     weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
@@ -3278,6 +3288,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalZH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "ZH")
+                weights.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights.add(
                     self.systNameZHPtRewgt,
                     weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
@@ -3285,6 +3300,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalTTH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "TTH")
+                weights.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights.add(
                     self.systNameTTHPtRewgt,
                     weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
@@ -3323,6 +3343,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightDown = copy.deepcopy(wgt_PS_FSRDown)
             )
             weights.add(
+                self.systNameQCDScale,
+		weight     = wgt_QCDScale_Nom,
+                weightUp   = copy.deepcopy(wgt_QCDScale_Up),
+		weightDown = copy.deepcopy(wgt_QCDScale_Down)
+            )
+            '''
+            weights.add(
                 self.systNameQCDRenorm,
                 weight     = wgt_QCDScale_Nom,
                 weightUp   = copy.deepcopy(wgt_QCDScale_RenormUp),
@@ -3334,6 +3361,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = copy.deepcopy(wgt_QCDScale_FactorizationUp),
                 weightDown = copy.deepcopy(wgt_QCDScale_FactorizationDown)
             )            
+            '''
             weights.add(
                 self.systNamePDF,
                 weight     = wgt_QCDPdfNom,
@@ -3391,9 +3419,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             weights_woHEM1516Fix.add(
                 self.systNameJetTrigEffi,
-                weight     = wgt_TrgEff,
-                weightUp   = wgt_TrgEffUp,
-                weightDown = wgt_TrgEffDown
+                weight     = copy.deepcopy(wgt_TrgEff),
+                weightUp   = copy.deepcopy(wgt_TrgEffUp),
+                weightDown = copy.deepcopy(wgt_TrgEffDown)
             )
             if self.datasetInfo["era"] != Era_2018:
                 weights_woHEM1516Fix.add(
@@ -3417,6 +3445,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
                 )                  
             if self.datasetInfo['isSignalVBFH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "VBF")
+                weights_woHEM1516Fix.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_woHEM1516Fix.add(
                     self.systNameVBFHPtRewgt,
                     weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
@@ -3424,6 +3457,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalWH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "WH")
+                weights_woHEM1516Fix.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_woHEM1516Fix.add(
                     self.systNameWHPtRewgt,
                     weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
@@ -3431,6 +3469,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalZH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "ZH")
+                weights_woHEM1516Fix.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_woHEM1516Fix.add(
                     self.systNameZHPtRewgt,
                     weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
@@ -3438,6 +3481,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalTTH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "TTH")
+                weights_woHEM1516Fix.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_woHEM1516Fix.add(
                     self.systNameTTHPtRewgt,
                     weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
@@ -3475,6 +3523,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightDown = copy.deepcopy(wgt_PS_FSRDown)
             )
             weights_woHEM1516Fix.add(
+          	self.systNameQCDScale,
+                weight     = wgt_QCDScale_Nom,
+                weightUp   = copy.deepcopy(wgt_QCDScale_Up),
+                weightDown = copy.deepcopy(wgt_QCDScale_Down)
+            )
+            '''
+            weights_woHEM1516Fix.add(
                 self.systNameQCDRenorm,
                 weight     = wgt_QCDScale_Nom,
                 weightUp   = copy.deepcopy(wgt_QCDScale_RenormUp),
@@ -3486,6 +3541,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 weightUp   = copy.deepcopy(wgt_QCDScale_FactorizationUp),
                 weightDown = copy.deepcopy(wgt_QCDScale_FactorizationDown)
             )            
+            '''
             weights_woHEM1516Fix.add(
                 self.systNamePDF,
                 weight     = wgt_QCDPdfNom,
@@ -3534,6 +3590,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
                 )                 
             if self.datasetInfo['isSignalVBFH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "VBF")
+                weights_gen.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_gen.add(
                     self.systNameVBFHPtRewgt,
                     weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
@@ -3541,6 +3602,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalWH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "WH")
+                weights_gen.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_gen.add(
                     self.systNameWHPtRewgt,
                     weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
@@ -3548,6 +3614,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
                 )  
             if self.datasetInfo['isSignalZH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "ZH")
+                weights_gen.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_gen.add(
                     self.systNameZHPtRewgt,
                     weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
@@ -3555,6 +3626,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
                 )              
             if self.datasetInfo['isSignalTTH']:
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "TTH")
+                weights_gen.add(
+                    "HiggsEW_kFactors",
+                    weight = EWcorr
+                )
                 weights_gen.add(
                     self.systNameTTHPtRewgt,
                     weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
@@ -3644,16 +3720,11 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             self.systNameFSR+SystNameConvUp,
                             self.systNameFSR+SystNameConvDown,
                         ] )
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['qcdrenorm', 'full'] ):
+                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['qcdscale', 'full'] ):
                         systList.extend( [
-                            self.systNameQCDRenorm+SystNameConvUp,
-                            self.systNameQCDRenorm+SystNameConvDown,
+                            self.systNameQCDScale+SystNameConvUp,
+                            self.systNameQCDScale+SystNameConvDown,
                         ] )
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['qcdfactr', 'full'] ):
-                        systList.extend( [
-                            self.systNameQCDFactr+SystNameConvUp,
-                            self.systNameQCDFactr+SystNameConvDown,
-                        ] )                        
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['pdf', 'full'] ):
                         systList.extend( [
                             self.systNamePDF+SystNameConvUp,
@@ -4979,6 +5050,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             dataset=dataset,
                             Weight=wgt_QCDScale_Nom[sel_SR_forHExt]
                         )
+                        output['hEventWeight_QCDScale_Up'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_Up[sel_SR_forHExt]
+                        )
+                        output['hEventWeight_QCDScale_Down'+sHExt].fill(
+                            dataset=dataset,
+                            Weight=wgt_QCDScale_Down[sel_SR_forHExt]
+                        )
+                        '''
                         output['hEventWeight_QCDScale_RenormUp'+sHExt].fill(
                             dataset=dataset,
                             Weight=wgt_QCDScale_RenormUp[sel_SR_forHExt]
@@ -4995,6 +5075,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             dataset=dataset,
                             Weight=wgt_QCDScale_FactorizationDown[sel_SR_forHExt]
                         )
+                        '''
                         output['hEventWeight_QCDPDFNom'+sHExt].fill(
                             dataset=dataset,
                             Weight=wgt_QCDPdfNom[sel_SR_forHExt]

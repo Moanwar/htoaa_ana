@@ -1258,24 +1258,36 @@ def add_pdf_as_weight(events, dataset):
 
 def get_QCDScaleWeight(events, dataset):
     nEvents = len(events)
-    nom  = renorm_up = renorm_down = factr_up = factr_down = np.ones(nEvents)
+    nom  = up = down = np.ones(nEvents)
 
     if hasattr(events, 'LHEScaleWeight') and "HToAATo4B" in dataset:
         if len(events.LHEScaleWeight[0]) == 9:
             # https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2018UL/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1.html#LHEPdfWeight
-            # LHEScaleWeight	Float_t	LHE scale variation weights (w_var / w_nominal); [0] is renscfact=0.5d0 facscfact=0.5d0 ; [1] is renscfact=0.5d0 facscfact=1d0 ; [2] is renscfact=0.5d0 facscfact=2d0 ; [3] is renscfact=1d0 facscfact=0.5d0 ; [4] is renscfact=1d0 facscfact=1d0 ; [5] is renscfact=1d0 facscfact=2d0 ; [6] is renscfact=2d0 facscfact=0.5d0 ; [7] is renscfact=2d0 facscfact=1d0 ; [8] is renscfact=2d0 facscfact=2d0
-            # [1] is renscfact=0.5d0 facscfact=1d0.      [7] is renscfact=2d0 facscfact=1d0
-            # [3] is renscfact=1d0 facscfact=0.5d0.      [5] is renscfact=1d0 facscfact=2d0 ;
-            # renorm_up = 1, down = 7.   fact_up = 3, down = 5
-            renorm_up   = events.LHEScaleWeight[:, 1]
-            renorm_down = events.LHEScaleWeight[:, 7]
-            factr_up    = events.LHEScaleWeight[:, 3]
-            factr_down  = events.LHEScaleWeight[:, 5]
-        
-        elif len(events.nLHEScaleWeight[0]) > 1:
-            print("LHEScaleWeight  vector has length ", len(events.nLHEScaleWeight[0]))
-            
-    return [nom, renorm_up, renorm_down, factr_up, factr_down]
+            # LHEScaleWeight	Float_t	LHE scale variation weights (w_var / w_nominal);
+            #[0] is renscfact=0.5d0 facscfact=0.5d0 ;
+            #[1] is renscfact=0.5d0 facscfact=1d0 ;
+            #[2] is renscfact=0.5d0 facscfact=2d0 ;
+            #[3] is renscfact=1d0 facscfact=0.5d0 ;
+            #[4] is renscfact=1d0 facscfact=1d0 ;
+            #[5] is renscfact=1d0 facscfact=2d0 ;
+            #[6] is renscfact=2d0 facscfact=0.5d0 ;
+            #[7] is renscfact=2d0 facscfact=1d0 ;
+            #[8] is renscfact=2d0 facscfact=2d0
+            #[1] is renscfact=0.5d0 facscfact=1d0. 
+            #[3] is renscfact=1d0 facscfact=0.5d0. 
+            # Define relevant indices for each channel
+            vbf_vh_indices  = [0, 8]  # VBF, WH, ZH
+            ggh_tth_indices = [0, 1, 3, 5, 7, 8]  # ggH, ttH
+            if any(x in dataset for x in ["VBF", "WH", "ZH"]):
+                up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
+                down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
+            elif any(x in dataset for x in ["TTH", "GGH"]):
+                up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
+                down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
+            elif len(events.nLHEScaleWeight[0]) > 1:
+                print("LHEScaleWeight vector has length", len(events.nLHEScaleWeight[0]))
+
+    return [nom, up, down]
 
 
 def add_HiggsEW_kFactors(genHiggs, dataset):
@@ -1290,22 +1302,21 @@ def add_HiggsEW_kFactors(genHiggs, dataset):
 
     if "VBF" in dataset:
         hpt = get_hpt()
-        ewkcorr = hew_kfactors["VBF_EW"]
+        ewkcorr = hew_kfactors["VBF"]
         ewknom = ewkcorr.evaluate(hpt)
-        return  "VBF_EW", ewknom
+        return  ewknom
 
     elif "WH" in dataset or "ZH" in dataset:
         hpt = get_hpt()
-        ewkcorr = hew_kfactors["VH_EW"]
+        ewkcorr = hew_kfactors["VH"]
         ewknom = ewkcorr.evaluate(hpt)
-        return "VH_EW", ewknom
-    
+        return ewknom    
 
-    elif "ttH" in dataset:
+    elif "TTH" in dataset:
         hpt = get_hpt()
-        ewkcorr = hew_kfactors["ttH_EW"]
+        ewkcorr = hew_kfactors["ttH"]
         ewknom = ewkcorr.evaluate(hpt)
-        return "ttH_EW", ewknom
+        return ewknom
     else :
         return None
 
@@ -1460,7 +1471,6 @@ def get_jetTriggerSF(pt, year): # msd, HT,
     sFIpSf             = Corrections["TrigEffi"]['Hadronic'][year]['inputFile']['pTIncl']
     sCorrectionSetName = Corrections["TrigEffi"]['Hadronic'][year]['corrSetName']
     jet_triggerSF      = correctionlib.CorrectionSet.from_file(sFIpSf)[sCorrectionSetName]        
-
     nom_trg  = jet_triggerSF.evaluate("nominal", jet_pt)
     up_trg   = jet_triggerSF.evaluate("stat_up", jet_pt)
     down_trg = jet_triggerSF.evaluate("stat_dn", jet_pt)
@@ -1484,7 +1494,7 @@ def get_jetTriggerSF(pt, year): # msd, HT,
     )
     
     #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, msd, nom_trg, up_trg, down_trg]))
-    #printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
+    printVariable('\nhtoaa_CommonTools::get_jetTriggerSF: ', ak.zip([pt, nom_trg, up_trg, down_trg]))
 
     return [nom_trg, up_trg, down_trg]
 
