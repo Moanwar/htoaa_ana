@@ -530,7 +530,7 @@ def selectFatJets(FatJets, pT_Thsh=170, eta_Thsh=2.4, Msd_Thsh=20, JetID=6, shif
     maskJetsSelected = (
         (FatJets.pt_toUse  >  pT_Thsh)    &
         (abs(FatJets.eta)  <  eta_Thsh)   &
-        (FatJets.msoftdrop >  Msd_Thsh)   &
+        (FatJets.msoftdrop_toUse >  Msd_Thsh)   &
         (FatJets.jetId     >= int(JetID)) 
     )
     return FatJets[maskJetsSelected]
@@ -548,9 +548,13 @@ def getCandidateHiggs(FatJets, Xbb_Thsh=0):
     if 'PNet_X4b_v2a_Haa34b_score' in FatJets.fields: # NanoAOD v2
         candHs_PNet_X4b_v2_Haa34b = candHs.PNet_X4b_v2a_Haa34b_score + candHs.PNet_X4b_v2b_Haa34b_score
         idx_candHs_PNet_X4b_v2_Haa34b_max = ak.argmax(candHs_PNet_X4b_v2_Haa34b, axis=-1, keepdims=True)
-        candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa34b_max])
+        #candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa34b_max])
 
-    return candH, idx_candHs_PNet_X4b_v2_Haa34b_max
+        candHs_PNet_X4b_v2_Haa4b = 0.5*(candHs.PNet_X4b_v2a_Haa4b_score + candHs.PNet_X4b_v2b_Haa4b_score)
+        idx_candHs_PNet_X4b_v2_Haa4b_max = ak.argmax(candHs_PNet_X4b_v2_Haa4b, axis=-1, keepdims=True)
+        candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa4b_max])
+
+    return candH, idx_candHs_PNet_X4b_v2_Haa4b_max
 
 
 def selectAK4Jets(Jets, era, pT_Thsh=0):
@@ -679,15 +683,16 @@ def selectElectrons(eventsObj, pT_Thsh=10, DxyThsh=0.02, DzThsh=0.10):
         (eventsObj.pt > pT_Thsh) &
         (abs(eventsObj.eta) < 2.5) & ((abs(eventsObj.eta) < 1.44) | (abs(eventsObj.eta) > 1.57)) &
         #(eventsObj[MVAId] > 0)
-        (eventsObj.mvaFall17V2Iso_WPL  >= 1) &
-        ((eventsObj.mvaFall17V2Iso_WP90 >= 1) | ( (eventsObj.pt > 35) & (eventsObj.cutBased_HEEP >= 1) ) ) &
+        (eventsObj.mvaFall17V2Iso_WP90  >= 1) &
+        ((eventsObj.mvaFall17V2Iso_WP80 >= 1) | ( (eventsObj.pt > 35) & (eventsObj.cutBased_HEEP >= 1) ) ) &
         # trigger electron
-        (eventsObj.mvaFall17V2Iso_WP90 >= 1) & 
-        ((eventsObj.mvaFall17V2Iso_WP80 >= 1) | (eventsObj.cutBased_HEEP >= 1)) & 
+        #(eventsObj.mvaFall17V2Iso_WP90 >= 1) & 
+        #((eventsObj.mvaFall17V2Iso_WP80 >= 1) | (eventsObj.cutBased_HEEP >= 1)) & 
         (abs(eventsObj.dxy) < DxyThsh) &
         (abs(eventsObj.dz)  < DzThsh)
     )
 
+      
     return eventsObj[maskSelElectrons]
 
 

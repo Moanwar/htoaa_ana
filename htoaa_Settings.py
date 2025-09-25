@@ -774,22 +774,22 @@ topTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
 WvsQCDTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
     Era_2016preVFP: {
         'PNetWZvsQCD': {
-            'T': 0.974, # 0.5% mistag rate: 0p5
+            'T': 0.9843, # 0.5% mistag rate: 0p5
         },
     },
     Era_2016postVFP: {
         'PNetWZvsQCD': {
-            'T': 0.974,
+            'T': 0.9843,
         },
     },
     Era_2017: {
         'PNetWZvsQCD': {
-            'T': 0.978,
+            'T': 0.9858,
         },
     },
     Era_2018: {
         'PNetWZvsQCD': {
-            'T': 0.98,
+            'T': 0.9873,
         },
     },    
 }
