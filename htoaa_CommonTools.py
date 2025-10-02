@@ -874,6 +874,49 @@ def getPURewgts_variation(events, year):
 
     return [puNom, puUp, puDown]
 
+def getHScaleAndResol(events):
+    n_events = len(events)
+    base_wt = np.ones(n_events)
+    rng = np.random.RandomState(12345)
+    # jet.PNet_massH_v2b (H scale)
+    sf_H_nom  = 0.992   # "nominal changed by 0.992"
+    sf_H_up   = 1.002   # up variation
+    sf_H_down = 0.982   # down variation
+    # jet.PNet_massH_v2b resolution
+    res_H_sigma = 0.03
+    # --- Build weight arrays ---
+    wgt_HScale_Nom  = base_wt * sf_H_nom
+    wgt_HScale_Up   = base_wt * sf_H_up
+    wgt_HScale_Down = base_wt * sf_H_down
+    rnd = rng.normal(loc=0.0, scale=1, size=n_events)
+    wgt_HResol_Nom  = base_wt * 1.0
+    wgt_HResol_Up   = base_wt * (1.0 + res_H_sigma * rnd)
+    wgt_HResol_Down = base_wt * (1.0 - res_H_sigma * rnd)
+    return (wgt_HScale_Nom, wgt_HScale_Up, wgt_HScale_Down,wgt_HResol_Nom,wgt_HResol_Up,wgt_HResol_Down)
+
+def getAScaleAndResol(events, mA_nom):    
+    rng = np.random.RandomState(12345)
+    n_events = len(mA_nom)
+    base_wt = np.ones(n_events)
+    # -----------------------
+    # Scale variations
+    # -----------------------
+    mA_up   = np.minimum(mA_nom * 1.05, 0.5 * (mA_nom + 63))/mA_nom
+    mA_down = np.maximum(mA_nom * 0.95, 0.5 * (mA_nom + 11))/mA_nom            
+    wgt_AScale_Nom  = base_wt 
+    wgt_AScale_Up   = base_wt * mA_up
+    wgt_AScale_Down = base_wt * mA_down            
+    # -----------------------
+    # Resolution (smearing) variations
+    # -----------------------
+    rand_a = rng.normal(loc=0.0, scale=1.0, size=n_events)  # random per event            
+    mA_smeared_up = np.minimum(np.maximum(mA_nom * (1.0 + 0.045 * rand_a), 0.5 * (mA_nom + 11)), 0.5 * (mA_nom + 63))/mA_nom
+    mA_smeared_down = np.minimum(np.maximum(mA_nom * (1.0 - 0.045 * rand_a), 0.5 * (mA_nom + 11)),0.5 * (mA_nom + 63))/mA_nom
+    
+    wgt_AResol_Nom  = base_wt 
+    wgt_AResol_Up   = base_wt * mA_smeared_up
+    wgt_AResol_Down = base_wt * mA_smeared_down
+    return (wgt_AScale_Nom, wgt_AScale_Up, wgt_AScale_Down,wgt_AResol_Nom,wgt_AResol_Up,wgt_AResol_Down)
 
 def getHToAATo4BLundPlaneRewgt(events):    
     if 'Lp' in events.fields:
@@ -1281,7 +1324,7 @@ def get_QCDScaleWeight(events, dataset):
             if any(x in dataset for x in ["VBF", "WH", "ZH"]):
                 up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
                 down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
-            elif any(x in dataset for x in ["TTH", "GGH"]):
+            elif any(x in dataset for x in ["TTH", "GluGluH"]):
                 up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
                 down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
             elif len(events.nLHEScaleWeight[0]) > 1:
@@ -1621,20 +1664,22 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
         
 
         btagWgt_perJet = ak.ones_like(jet.pt)
+
         btagWgt_perJet = ak.where(
             (jet.btagDeepFlavB > btagWPThsh), # b-tagged jets
             btagSF,
             btagWgt_perJet
         )
+
         btagWgt_perJet = ak.where(
             (jet.btagDeepFlavB <= btagWPThsh), # not b-tagged jets
             (1 - (btagSF*btagEffi)) / (1 - btagEffi),
             btagWgt_perJet
         )
-        
-        btagWgt_dict[syst_type] = ak.fill_none( ak.prod(btagWgt_perJet, axis=-1), 1)
+
 
         '''
+
         printVariable('jets %s '%syst_type, ak.zip([
             jet.pt,
             jet.eta,
@@ -1645,7 +1690,8 @@ def get_Ak4BtagSF(jet, btagWPThsh, year):
         ]))
         printVariable('jets %s '%syst_type, btagWgt_dict[syst_type])
         '''
-    
+    for syst, weights in btagWgt_dict.items():
+        print(f"{syst}: {weights}")
     return btagWgt_dict
 
 

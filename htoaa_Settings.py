@@ -1089,7 +1089,10 @@ SystNameConvs = {
     'FSR':                'ps_fsr',
     'QCDScale':           'QCDScale',
     'PDF':                'pdf_99',
-    
+    'massScaleH':         'CMS_NPS25005_scale_fj_massH',
+    'massResolH':	  'CMS_NPS25005_res_fj_massH',
+    'massScaleA':         'CMS_NPS25005_scale_fj_massA',
+    'massResolA':         'CMS_NPS25005_res_fj_massA',
 }
 
 massPseudoscalarA_windows_dict = OD([
