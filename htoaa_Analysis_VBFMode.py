@@ -257,7 +257,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_GenLHEPlots;           runMode_GenLHEPlots      =  False
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
         global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False # False
-        global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = False
+        global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = True
         global runMode_SignalGenCuts;         runMode_SignalGenCuts = True; # set False for final round. True for optimization studies.
         
         ak.behavior.update(nanoaod.behavior)
@@ -269,7 +269,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         self.datasetInfo['datasetName'] = datasetName_part1
         print(f"{datasetName_part1 = }")
         if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['full'] ):
-            self.datasetInfo['histogramSaveLevel'] = 1
+            self.datasetInfo['histogramSaveLevel'] = 0
         else:
             self.datasetInfo['histogramSaveLevel'] = histogramSaveLevel_0
         print(f"{self.datasetInfo['histogramSaveLevel'] = }")
@@ -452,10 +452,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #categories_dict["VBFLo"]   = [ "nak4jets_loose"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
         #categories_dict["VBFHi"]   = [ "nak4jets_tight"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
 
-        #categories_dict["VBFLoPTLo"]   = [ "leadingFatJetPt_VBFLoPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["VBFLoPTHi"]   = [ "leadingFatJetPt_VBFLoPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["VBFHiPTLo"]   = [ "leadingFatJetPt_VBFHiPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["VBFHiPTHi"]   = [ "leadingFatJetPt_VBFHiPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFLoPTLo"]   = [ "leadingFatJetPt_VBFLoPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFLoPTHi"]   = [ "leadingFatJetPt_VBFLoPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFHiPTLo"]   = [ "leadingFatJetPt_VBFHiPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFHiPTHi"]   = [ "leadingFatJetPt_VBFHiPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         #categories_dict["gg0lInclMsdLt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdLt50']
         #categories_dict["gg0lInclMsdGt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdGt50']
         
@@ -1499,6 +1499,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         self.systNameAK4JetJER+SystNameConvUp,
                         self.systNameAK4JetJER+SystNameConvDown,
                     ] )
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['mHScale', 'full'] ):
+                    systematics_shift.extend( [
+                        self.systNameHScale+SystNameConvUp,
+                        self.systNameHScale+SystNameConvDown,
+                    ] )
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['mHResol', 'full'] ):
+                    systematics_shift.extend( [
+                        self.systNameHResol+SystNameConvUp,
+                        self.systNameHResol+SystNameConvDown,
+                    ] )
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['mAScale', 'full'] ):
+                    systematics_shift.extend( [
+                        self.systNameAScale+SystNameConvUp,
+                        self.systNameAScale+SystNameConvDown,
+                    ] )                        
+                if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['mAResol', 'full'] ):
+                    systematics_shift.extend( [
+                        self.systNameAResol+SystNameConvUp,
+                        self.systNameAResol+SystNameConvDown,
+                    ] )
                 if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['jes', 'full'] ): 
                     systematics_shift.extend( [
                         self.systNameAK8JetJES+SystNameConvUp,
@@ -1560,7 +1580,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         FatJetsToUse = events.FatJet
         JetsToUse    = events.Jet
         METToUse     = events.MET
-
+        Avars = getAScaleAndResol(events.FatJet.PNet_34massAa)
+        Hvars = getHScaleAndResol(events.FatJet.PNet_massH_v2b)
         
         if 'PNet_X4b_v2a_Haa34b_score' not in FatJetsToUse.fields or CrossCheckEvtYieldsWithAndrew:
             FatJetsToUse['pt_toUse']        = FatJetsToUse.pt 
@@ -1574,62 +1595,79 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             ## NanoAOD v2: Depending up on systematics to run, set which branches to read 
             # SystNameConvUp SystNameConvDown
             # FatJet pt
-            if   shift_syst == self.systNameAK8JetJES+SystNameConvUp:            FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jesTotalUp
-            elif shift_syst == self.systNameAK8JetJES+SystNameConvDown:          FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jesTotalDown
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvUp:            FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jerUp
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvDown:          FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jerDown
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvUp:     FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jesHEMIssueUp
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvDown:   FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_jesHEMIssueDown
-            else:                                                                FatJetsToUse['pt_toUse'] = FatJetsToUse.pt_nom
-            # FatJet mass
-            if   shift_syst == self.systNameAK8JetJES+SystNameConvUp:            FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jesTotalUp
-            elif shift_syst == self.systNameAK8JetJES+SystNameConvDown:          FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jesTotalDown
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvUp:            FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jerUp
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvDown:          FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jerDown
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvUp:     FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jesHEMIssueUp
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvDown:   FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_jesHEMIssueDown
-            else:                                                                FatJetsToUse['mass_toUse'] = FatJetsToUse.mass_nom
-            # FatJet msoftdrop
-            if   shift_syst == self.systNameAK8JetJES+SystNameConvUp:            FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jesTotalUp
-            elif shift_syst == self.systNameAK8JetJES+SystNameConvDown:          FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jesTotalDown
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvUp:            FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jerUp
-            elif shift_syst == self.systNameAK8JetJER+SystNameConvDown:          FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jerDown
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvUp:     FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jesHEMIssueUp
-            #elif shift_syst == self.systName2018HEM1516Issue+SystNameConvDown:   FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_jesHEMIssueDown
-            else:                                                                FatJetsToUse['msoftdrop_toUse'] = FatJetsToUse.msoftdrop_nom
+            FatJetsToUse['massH_toUse'] = {
+                self.systNameHScale+SystNameConvUp:   Hvars["up_scaled"],
+                self.systNameHScale+SystNameConvDown: Hvars["down_scaled"],
+                self.systNameHResol+SystNameConvUp:   Hvars["resol_up"],
+                self.systNameHResol+SystNameConvDown: Hvars["resol_down"]
+            }.get(shift_syst, Hvars["nom_scaled"])
             
-            # AK4 Jet pt
-            if   shift_syst == self.systNameAK4JetJES+SystNameConvUp:            JetsToUse['pt_toUse'] = JetsToUse.pt_jesTotalUp
-            elif shift_syst == self.systNameAK4JetJES+SystNameConvDown:          JetsToUse['pt_toUse'] = JetsToUse.pt_jesTotalDown
-            elif shift_syst == self.systNameAK4JetJER+SystNameConvUp:            JetsToUse['pt_toUse'] = JetsToUse.pt_jerUp
-            elif shift_syst == self.systNameAK4JetJER+SystNameConvDown:          JetsToUse['pt_toUse'] = JetsToUse.pt_jerDown
-            else:                                                                JetsToUse['pt_toUse'] = JetsToUse.pt_nom   
-            # AK4 Jet mass
-            if   shift_syst == self.systNameAK4JetJES+SystNameConvUp:            JetsToUse['mass_toUse'] = JetsToUse.mass_jesTotalUp
-            elif shift_syst == self.systNameAK4JetJES+SystNameConvDown:          JetsToUse['mass_toUse'] = JetsToUse.mass_jesTotalDown
-            elif shift_syst == self.systNameAK4JetJER+SystNameConvUp:            JetsToUse['mass_toUse'] = JetsToUse.mass_jerUp
-            elif shift_syst == self.systNameAK4JetJER+SystNameConvDown:          JetsToUse['mass_toUse'] = JetsToUse.mass_jerDown
-            else:                                                                JetsToUse['mass_toUse'] = JetsToUse.mass_nom
+            FatJetsToUse['massA_toUse'] = {
+                self.systNameAScale+SystNameConvUp:   Avars["up_scaled"],
+                self.systNameAScale+SystNameConvDown: Avars["down_scaled"],
+                self.systNameAResol+SystNameConvUp:   Avars["resol_up"],
+                self.systNameAResol+SystNameConvDown: Avars["resol_down"]
+            }.get(shift_syst, Avars["nom"])
 
-            # MET pt
-            if   shift_syst == self.systNameMETJES+SystNameConvUp:               METToUse['pt_toUse'] = METToUse.T1Smear_pt_jesTotalUp
-            elif shift_syst == self.systNameMETJES+SystNameConvDown:             METToUse['pt_toUse'] = METToUse.T1Smear_pt_jesTotalDown
-            elif shift_syst == self.systNameMETJER+SystNameConvUp:               METToUse['pt_toUse'] = METToUse.T1Smear_pt_jerUp
-            elif shift_syst == self.systNameMETJER+SystNameConvDown:             METToUse['pt_toUse'] = METToUse.T1Smear_pt_jerDown
-            elif shift_syst == self.systNameMETUnclE+SystNameConvUp:             METToUse['pt_toUse'] = METToUse.T1Smear_pt_unclustEnUp
-            elif shift_syst == self.systNameMETUnclE+SystNameConvDown:           METToUse['pt_toUse'] = METToUse.T1Smear_pt_unclustEnDown
-            elif not self.datasetInfo['isMC']:                                   METToUse['pt_toUse'] = METToUse.T1_pt
-            else:                                                                METToUse['pt_toUse'] = METToUse.T1_pt               
-            # MET phi
-            if   shift_syst == self.systNameMETJES+SystNameConvUp:               METToUse['phi_toUse'] = METToUse.T1Smear_phi_jesTotalUp
-            elif shift_syst == self.systNameMETJES+SystNameConvDown:             METToUse['phi_toUse'] = METToUse.T1Smear_phi_jesTotalDown
-            elif shift_syst == self.systNameMETJER+SystNameConvUp:               METToUse['phi_toUse'] = METToUse.T1Smear_phi_jerUp
-            elif shift_syst == self.systNameMETJER+SystNameConvDown:             METToUse['phi_toUse'] = METToUse.T1Smear_phi_jerDown
-            elif shift_syst == self.systNameMETUnclE+SystNameConvUp:             METToUse['phi_toUse'] = METToUse.T1Smear_phi_unclustEnUp
-            elif shift_syst == self.systNameMETUnclE+SystNameConvDown:           METToUse['phi_toUse'] = METToUse.T1Smear_phi_unclustEnDown
-            elif not self.datasetInfo['isMC']:                                   METToUse['phi_toUse'] = METToUse.T1_phi
-            else:                                                                METToUse['phi_toUse'] = METToUse.T1_phi
-        
+            # AK8 pt/mass/msoftdrop variations
+            AK8_pt_map = {
+                self.systNameAK8JetJES + SystNameConvUp: FatJetsToUse.pt_jesTotalUp,
+                self.systNameAK8JetJES + SystNameConvDown: FatJetsToUse.pt_jesTotalDown,
+                self.systNameAK8JetJER + SystNameConvUp: FatJetsToUse.pt_jerUp,
+                self.systNameAK8JetJER + SystNameConvDown: FatJetsToUse.pt_jerDown,
+            }
+            AK8_mass_map = {
+                self.systNameAK8JetJES + SystNameConvUp: FatJetsToUse.mass_jesTotalUp,
+                self.systNameAK8JetJES + SystNameConvDown: FatJetsToUse.mass_jesTotalDown,
+                self.systNameAK8JetJER + SystNameConvUp: FatJetsToUse.mass_jerUp,
+                self.systNameAK8JetJER + SystNameConvDown: FatJetsToUse.mass_jerDown,
+            }
+            AK8_msoft_map = {
+                self.systNameAK8JetJES + SystNameConvUp: FatJetsToUse.msoftdrop_jesTotalUp,
+                self.systNameAK8JetJES + SystNameConvDown: FatJetsToUse.msoftdrop_jesTotalDown,
+                self.systNameAK8JetJER + SystNameConvUp: FatJetsToUse.msoftdrop_jerUp,
+                self.systNameAK8JetJER + SystNameConvDown: FatJetsToUse.msoftdrop_jerDown,
+            }
+            FatJetsToUse['pt_toUse']        = AK8_pt_map.get(shift_syst, FatJetsToUse.pt_nom)
+            FatJetsToUse['mass_toUse']      = AK8_mass_map.get(shift_syst, FatJetsToUse.mass_nom)
+            FatJetsToUse['msoftdrop_toUse'] = AK8_msoft_map.get(shift_syst, FatJetsToUse.msoftdrop_nom)
+            # --- AK4 Jets ---
+            AK4_pt_map = {
+                self.systNameAK4JetJES + SystNameConvUp: JetsToUse.pt_jesTotalUp,
+                self.systNameAK4JetJES + SystNameConvDown: JetsToUse.pt_jesTotalDown,
+                self.systNameAK4JetJER + SystNameConvUp: JetsToUse.pt_jerUp,
+                self.systNameAK4JetJER + SystNameConvDown: JetsToUse.pt_jerDown,
+            }
+            AK4_mass_map = {
+                self.systNameAK4JetJES + SystNameConvUp: JetsToUse.mass_jesTotalUp,
+                self.systNameAK4JetJES + SystNameConvDown: JetsToUse.mass_jesTotalDown,
+                self.systNameAK4JetJER + SystNameConvUp: JetsToUse.mass_jerUp,
+                self.systNameAK4JetJER + SystNameConvDown: JetsToUse.mass_jerDown,
+            }            
+            JetsToUse['pt_toUse']   = AK4_pt_map.get(shift_syst, JetsToUse.pt_nom)
+            JetsToUse['mass_toUse'] = AK4_mass_map.get(shift_syst, JetsToUse.mass_nom)
+            # --- MET ---
+            MET_pt_map = {
+                self.systNameMETJES + SystNameConvUp: METToUse.T1Smear_pt_jesTotalUp,
+                self.systNameMETJES + SystNameConvDown: METToUse.T1Smear_pt_jesTotalDown,
+                self.systNameMETJER + SystNameConvUp: METToUse.T1Smear_pt_jerUp,
+                self.systNameMETJER + SystNameConvDown: METToUse.T1Smear_pt_jerDown,
+                self.systNameMETUnclE + SystNameConvUp: METToUse.T1Smear_pt_unclustEnUp,
+                self.systNameMETUnclE + SystNameConvDown: METToUse.T1Smear_pt_unclustEnDown,
+            }
+            MET_phi_map = {
+                self.systNameMETJES + SystNameConvUp: METToUse.T1Smear_phi_jesTotalUp,
+                self.systNameMETJES + SystNameConvDown: METToUse.T1Smear_phi_jesTotalDown,
+                self.systNameMETJER + SystNameConvUp: METToUse.T1Smear_phi_jerUp,
+                self.systNameMETJER + SystNameConvDown: METToUse.T1Smear_phi_jerDown,
+                self.systNameMETUnclE + SystNameConvUp: METToUse.T1Smear_phi_unclustEnUp,
+                self.systNameMETUnclE + SystNameConvDown: METToUse.T1Smear_phi_unclustEnDown,
+            }
+            # default for data or missing systematics
+            default_MET_pt  = METToUse.T1_pt if not self.datasetInfo['isMC'] else METToUse.T1_pt
+            default_MET_phi = METToUse.T1_phi if not self.datasetInfo['isMC'] else METToUse.T1_phi
+            METToUse['pt_toUse']  = MET_pt_map.get(shift_syst, default_MET_pt)
+            METToUse['phi_toUse'] = MET_phi_map.get(shift_syst, default_MET_phi)
 
         if printLevel >= 100 :
             print(f"{shift_syst = }, {FatJetsToUse.fields = }")
@@ -2350,14 +2388,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ), False)
         '''
         # Iteration 2: Andrew's suggestions https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5255895/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=14
-        mask_HEM1516Issue = ak.fill_none((
+        mask_FatJetHEM1516Issue = ak.fill_none((
             (leadingFatJet.eta < -1.1) & 
             (np.abs(leadingFatJet.phi + 1.22) < 0.55)
         ), False)
-        mask_HEM1516Issue_Eta = ak.fill_none((
+        mask_FatJetHEM1516Issue_Eta = ak.fill_none((
             (leadingFatJet.eta < -1.1)
         ), False)
-        mask_HEM1516Issue_Phi = ak.fill_none((
+        mask_FatJetHEM1516Issue_Phi = ak.fill_none((
             (np.abs(leadingFatJet.phi + 1.22) < 0.55)
         ), False)       
         isRunAffectedBy2018HEM1516Issue = (
@@ -2550,7 +2588,64 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ak4Jets_mass_tight = ak.fill_none(ak4Jets_mass_tight, False)
 
         HTtrig = ak.sum(ak4Jets_nonoverlaping_leadingFatJet.pt_toUse, axis=-1) + leadingFatJet.pt_toUse
+        #maskHEMissueFor VBF
         
+        mask_HEM1516Issue = ak.fill_none(
+            (
+                (leadingFatJet.eta < -1.1) &
+                (np.abs(leadingFatJet.phi + 1.22) < 0.55)
+            ) |
+            ak.any(
+                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) &
+                  (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45) ),
+                axis=1
+            ),
+            False
+        )
+        mask_HEM1516Issue_Eta = ak.fill_none(
+            (leadingFatJet.eta < -1.1) |
+            ak.any(
+                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) ),
+                axis=1
+            ),
+            False
+        )
+        mask_HEM1516Issue_Phi = ak.fill_none(
+            (np.abs(leadingFatJet.phi + 1.22) < 0.55) |
+            ak.any(
+                (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45),
+                axis=1
+            ),
+            False
+        )
+
+        #for the VBF Ak4jet validation
+        mask_Ak4JetHEM1516Issue = ak.fill_none(
+            ak.any(
+                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) &
+                  (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45) ),
+                axis=1
+            ),
+            False
+        )
+
+        mask_Ak4JetHEM1516Issue_Eta = ak.fill_none(
+            ak.any(
+                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) ),
+                axis=1
+            ),
+            False
+        )
+
+        mask_Ak4JetHEM1516Issue_Phi = ak.fill_none(
+            (np.abs(leadingFatJet.phi + 1.22) < 0.55) |
+            ak.any(
+                (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45),
+		axis=1
+	    ),
+            False
+        )
+
 
         ## VBF jj
         ## 'AK8' Higgs category
@@ -3122,14 +3217,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             # MC HToAATo4B signal LundPlane reweighting
             wgt_LundPlane_Nom = wgt_LundPlane_Up = wgt_LundPlane_Down = None 
-            wgt_HScale_Nom = wgt_HScale_Up = wgt_HScale_Down = None
-            wgt_HResol_Nom = wgt_HResol_Up = wgt_HResol_Down = None
-            wgt_AScale_Nom = wgt_AScale_Up = wgt_AScale_Down = None
-            wgt_AResol_Nom = wgt_AResol_Up = wgt_AResol_Down = None
-            
             if self.datasetInfo['isSignal']:
-                wgt_HScale_Nom, wgt_HScale_Up, wgt_HScale_Down, wgt_HResol_Nom, wgt_HResol_Up, wgt_HResol_Down = getHScaleAndResol(events=events)
-                wgt_AScale_Nom, wgt_AScale_Up, wgt_AScale_Down, wgt_AResol_Nom, wgt_AResol_Up, wgt_AResol_Down = getAScaleAndResol(events=events, mA_nom=leadingFatJet.PNet_34massAa)
                 wgt_LundPlane_Nom, wgt_LundPlane_Up, wgt_LundPlane_Down = getHToAATo4BLundPlaneRewgt(
                     events = events
                 )
@@ -3282,32 +3370,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 )
             
             if self.datasetInfo['isSignal']:
-                weights.add(
-                    self.systNameHScale,
-                    weight     = wgt_HScale_Nom,
-                    weightUp   = copy.deepcopy(wgt_HScale_Up),
-                    weightDown = copy.deepcopy(wgt_HScale_Down)
-                )
-                weights.add(
-                    self.systNameHResol,
-                    weight     = wgt_HResol_Nom,
-                    weightUp   = copy.deepcopy(wgt_HResol_Up),
-                    weightDown = copy.deepcopy(wgt_HResol_Down)
-                )
-                weights.add(
-                    self.systNameAScale,
-                    weight     = wgt_AScale_Nom,
-                    weightUp   = copy.deepcopy(wgt_AScale_Up),
-                    weightDown = copy.deepcopy(wgt_AScale_Down)
-                )
-
-                weights.add(
-                    self.systNameAResol,
-                    weight     = wgt_AResol_Nom,
-                    weightUp   = copy.deepcopy(wgt_AResol_Up),
-                    weightDown = copy.deepcopy(wgt_AResol_Down)
-		)
-                
                 weights.add(
                     self.systNameLPRewgt,
                     weight     = wgt_LundPlane_Nom,
@@ -3467,31 +3529,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weightDown = copy.deepcopy(wgt_L1TPrefiring_dict['Down'])
                 )
             if self.datasetInfo['isSignal']:
-                weights_woHEM1516Fix.add(
-	            self.systNameHScale,
-	            weight     = wgt_HScale_Nom,
-                    weightUp   = copy.deepcopy(wgt_HScale_Up),
-	            weightDown = copy.deepcopy(wgt_HScale_Down)
-                )
-                weights_woHEM1516Fix.add(
-                    self.systNameHResol,
-	            weight     = wgt_HResol_Nom,
-                    weightUp   = copy.deepcopy(wgt_HResol_Up),
-                    weightDown = copy.deepcopy(wgt_HResol_Down)
-		)
-                weights_woHEM1516Fix.add(
-                    self.systNameAScale,
-                    weight     = wgt_AScale_Nom,
-                    weightUp   = copy.deepcopy(wgt_AScale_Up),
-                    weightDown = copy.deepcopy(wgt_AScale_Down)
-                )
-                weights_woHEM1516Fix.add(
-                    self.systNameAResol,
-                    weight     = wgt_AResol_Nom,
-                    weightUp   = copy.deepcopy(wgt_AResol_Up),
-                    weightDown = copy.deepcopy(wgt_AResol_Down)
-                )
-
                 weights_woHEM1516Fix.add(
                     self.systNameLPRewgt,
                     weight     = wgt_LundPlane_Nom,
@@ -3778,31 +3815,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             self.systNamePDF+SystNameConvDown,
                         ] )
                         
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['hScale', 'full'] ):
-                        systList.extend( [
-                            self.systNameHScale+SystNameConvUp,
-                            self.systNameHScale+SystNameConvDown,
-                        ] )
-
-                        
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['hResol', 'full'] ):
-                        systList.extend( [
-                            self.systNameHResol+SystNameConvUp,
-                            self.systNameHResol+SystNameConvDown,
-                        ] )
-
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['aScale', 'full'] ):
-                        systList.extend( [
-	                    self.systNameAScale+SystNameConvUp,
-                            self.systNameAScale+SystNameConvDown,
-			] )
-
-                    if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['aResol', 'full'] ):
-                        systList.extend( [
-                            self.systNameAResol+SystNameConvUp,
-                            self.systNameAResol+SystNameConvDown,
-                        ] )
-
                     if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['btag', 'full'] ):
                         if  kDatasetToAnalyze == DatasetToAnalyze.SingleYear:
                             systList.extend( [
@@ -3902,6 +3914,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.systNameAK4JetJES+SystNameConvUp,
                 self.systNameAK4JetJES+SystNameConvDown,
 
+                self.systNameHScale+SystNameConvUp,
+                self.systNameHScale+SystNameConvDown,
+                self.systNameHResol+SystNameConvUp,
+                self.systNameHResol+SystNameConvDown,
+                self.systNameAScale+SystNameConvUp,
+                self.systNameAScale+SystNameConvDown,
+                self.systNameAResol+SystNameConvUp,
+                self.systNameAResol+SystNameConvDown,
+                
                 self.systNameMETJES+SystNameConvUp,
                 self.systNameMETJES+SystNameConvDown,
                 self.systNameMETJER+SystNameConvUp,
@@ -4897,7 +4918,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             # mH vs mAa for different mH versions
                             output['hLeadingFatJetPNet_massH_v2b_vs_massAa'+sHExt].fill(
                                 dataset=dataset,
-                                Mass=(leadingFatJet.PNet_massH_v2b[sel_SR_forHExt]),
+                                Mass=(leadingFatJet.massH_toUse[sel_SR_forHExt]),
                                 Mass2=(leadingFatJet.PNet_massAa[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
@@ -4920,22 +4941,22 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             # mH vs mA34a for different mH versions
                             output['hLeadingFatJetPNet_massH_v2b_vs_massA34a'+sHExt].fill(
                                 dataset=dataset,
-                                Mass=(leadingFatJet.PNet_massH_v2b[sel_SR_forHExt]),
-                                Mass2=(leadingFatJet.PNet_34massAa[sel_SR_forHExt]),
+                                Mass=(leadingFatJet.massH_toUse[sel_SR_forHExt]),
+                                Mass2=(leadingFatJet.massA_toUse[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             )                    
                             output['hLeadingFatJetMass_vs_massA34a'+sHExt].fill(
                                 dataset=dataset,
                                 Mass=(leadingFatJet.mass_toUse[sel_SR_forHExt]),
-                                Mass2=(leadingFatJet.PNet_34massAa[sel_SR_forHExt]),
+                                Mass2=(leadingFatJet.massA_toUse[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             ) 
                             output['hLeadingFatJetMSoftDrop_vs_massA34a'+sHExt].fill(
                                 dataset=dataset,
                                 Mass=(leadingFatJet.msoftdrop_toUse[sel_SR_forHExt]),
-                                Mass2=(leadingFatJet.PNet_34massAa[sel_SR_forHExt]),
+                                Mass2=(leadingFatJet.massA_toUse[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             )
@@ -4982,7 +5003,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             )
                             output['hLeadingFatJetPNet_massH_v2b_vs_massA34d'+sHExt].fill(
                                 dataset=dataset,
-                                Mass=(leadingFatJet.PNet_massH_v2b[sel_SR_forHExt]),
+                                Mass=(leadingFatJet.massH_toUse[sel_SR_forHExt]),
                                 Mass2=(leadingFatJet.PNet_34massAd[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
@@ -5004,55 +5025,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             Weight=wgt_PUDown[sel_SR_forHExt]
                         )
                         if self.datasetInfo['isSignal']:
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massH_Nom'+sHExt].fill(
-				dataset=dataset,
-				Weight=wgt_HScale_Nom[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massH_Up'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_HScale_Up[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massH_Down'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_HScale_Down[sel_SR_forHExt]
-                            )                            
-                            output['hEventWeight_CMS_NPS25005_res_fj_massH_Nom'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_HResol_Nom[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_res_fj_massH_Up'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_HResol_Up[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_res_fj_massH_Down'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_HResol_Down[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massA_Nom'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_AScale_Nom[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massA_Up'+sHExt].fill(
-		                dataset=dataset,
-                                Weight=wgt_AScale_Up[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_scale_fj_massA_Down'+sHExt].fill(
-			        dataset=dataset,
-                                Weight=wgt_AScale_Down[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_res_fj_massA_Nom'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_AResol_Nom[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_res_fj_massA_Up'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_AResol_Up[sel_SR_forHExt]
-                            )
-                            output['hEventWeight_CMS_NPS25005_res_fj_massA_Down'+sHExt].fill(
-                                dataset=dataset,
-                                Weight=wgt_AResol_Down[sel_SR_forHExt]
-                            )
-
                             output['hEventWeight_LundPlane_Nom'+sHExt].fill(
                                 dataset=dataset,
                                 Weight=wgt_LundPlane_Nom[sel_SR_forHExt]
@@ -5506,7 +5478,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             ) '''
                             output['hLeadingFatJetMassH_v2b'+sHExt].fill(
                                 dataset=dataset,
-                                Mass=(leadingFatJet.PNet_massH_v2b[sel_SR_forHExt]),
+                                Mass=(leadingFatJet.massH_toUse[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]                                
                             )
@@ -5574,7 +5546,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             ) '''
                             output['hLeadingFatJetPNet_34massAa'+sHExt].fill(
                                 dataset=dataset,
-                                Mass1=(leadingFatJet.PNet_34massAa[sel_SR_forHExt]),
+                                Mass1=(leadingFatJet.massA_toUse[sel_SR_forHExt]),
                                 systematic=syst,
                                 weight=evtWeight[sel_SR_forHExt]
                             ) 
@@ -6687,21 +6659,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             )
 
                         # HEM1516Issue region
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight[ sel_tmp_ ]
                         ) 
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
@@ -6709,7 +6681,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             weight=evtWeight[ sel_tmp_ ]
                         )
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut'+sHExt].fill(
                                 dataset=dataset,
                                 Pt=(leadingAk4Jet.pt[
@@ -6721,7 +6693,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -6733,7 +6705,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -6746,7 +6718,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut'+sHExt].fill(
                                 dataset=dataset,
                                 Pt=(subleadingAk4Jet.pt[
@@ -6758,7 +6730,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -6770,7 +6742,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -6785,28 +6757,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
                         # HEM1516Issue region, DataPreHEM1516Issue
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
                         ) 
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -6819,7 +6791,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -6831,7 +6803,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -6843,7 +6815,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -6856,7 +6828,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -6868,7 +6840,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -6883,28 +6855,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                         
                         # HEM1516Issue region, DataWithHEM1516Issue
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ]
                         ) 
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -6917,7 +6889,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -6929,7 +6901,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -6942,7 +6914,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Pt=(subleadingAk4Jet.pt[
@@ -6954,7 +6926,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -6966,7 +6938,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -6981,28 +6953,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
                         # wo HEM1516 fix ------------------------------------------------------------------------------------
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )  
-                        sel_tmp_ =  sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi
+                        sel_tmp_ =  sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Phi
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516Fix'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516Fix'+sHExt].fill(
                             dataset=dataset,
-                            Phi=(leadingFatJet.phi[ sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta ]),
+                            Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
@@ -7015,7 +6987,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ =  sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ =  sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7027,7 +6999,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7039,7 +7011,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
@@ -7052,7 +7024,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7064,7 +7036,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta 
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta 
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -7078,28 +7050,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                             )
 
                         # wo HEM1516 fix, DataPreHEM1516Issue
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7112,7 +7084,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7124,7 +7096,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7136,7 +7108,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7149,7 +7121,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7161,7 +7133,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -7179,28 +7151,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                         
                         # wo HEM1516 fix, DataWithHEM1516Issue
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue     
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue     
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7213,7 +7185,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt &  mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7225,7 +7197,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7237,7 +7209,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7250,7 +7222,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt  & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt  & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7262,7 +7234,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_woSel2018HEM1516_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516Fix_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -7279,28 +7251,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                         
 
                         # w/ HEM1516 fix in data, but w/o HEM1516_MC_Reweights ------------------------------
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_HEM1516Issue_Phi
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )            
-                        sel_tmp_ =  sel_SR_forHExt & mask_HEM1516Issue_Phi
+                        sel_tmp_ =  sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                        sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
@@ -7313,7 +7285,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7325,7 +7297,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7337,7 +7309,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
@@ -7350,7 +7322,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7362,7 +7334,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -7377,28 +7349,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                         
                         # w/ HEM1516 fix in data (DataPreHEM1516Issue), but w/o HEM1516_MC_Reweights
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )            
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataPreHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7411,7 +7383,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7423,7 +7395,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7435,7 +7407,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7448,7 +7420,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7460,7 +7432,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataPreHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataPreHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataPreHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
@@ -7475,28 +7447,28 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                         
                         # w/ HEM1516 fix in data (DataWithHEM1516Issue), but w/o HEM1516_MC_Reweights
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Pt=(leadingFatJet.pt_toUse[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue 
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Phi & mask_DataWithHEM1516Issue 
                         output['hLeadingFatJetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Eta=(leadingFatJet.eta[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_FatJetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                         output['hLeadingFatJetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                             dataset=dataset,
                             Phi=(leadingFatJet.phi[ sel_tmp_ ]),
                             systematic=syst,
                             weight=evtWeight_woHEM1516Fix_DataWithHEM1516Issue[ sel_tmp_ ]
                         )
-                        sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                        sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         if ak.count(leadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7509,7 +7481,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(leadingAk4Jet.eta[
@@ -7521,7 +7493,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(leadingAk4Jet.phi[
@@ -7533,7 +7505,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(leadingAk4Jet.phi))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                         if ak.count(subleadingAk4Jet.pt[sel_SR_forHExt]) > 0:
                             output['hsubLeadingAk4JetPt_HEM1516IssueEtaPhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
@@ -7546,7 +7518,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.pt))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Phi & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Phi & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetEta_HEM1516IssuePhiCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Eta=(subleadingAk4Jet.eta[
@@ -7558,7 +7530,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                     sel_tmp_ &
                                     (~ak.is_none(subleadingAk4Jet.eta))]
                             )
-                            sel_tmp_ = sel_SR_forHExt & mask_HEM1516Issue_Eta & mask_DataWithHEM1516Issue
+                            sel_tmp_ = sel_SR_forHExt & mask_Ak4JetHEM1516Issue_Eta & mask_DataWithHEM1516Issue
                             output['hsubLeadingAk4JetPhi_HEM1516IssueEtaCut_woHEM1516MCRewgt_DataWithHEM1516Issue'+sHExt].fill(
                                 dataset=dataset,
                                 Phi=(subleadingAk4Jet.phi[
