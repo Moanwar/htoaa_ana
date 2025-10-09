@@ -849,6 +849,14 @@ def getPURewgts(PU_list, hPURewgt):
     #print(f"wgt_PU ({len(wgt_PU)}): {wgt_PU}")
     return wgt_PU
 
+def QCD_pT_reweighting(jet_pt):
+    """
+    Compute QCD pT reweighting for a given jet pT.    
+    """
+    #weight = 0.11697 + math.exp(-3.311e-4 * jet_pt)
+    weight = 0.11697 + np.exp(-3.311e-4 * jet_pt)
+    return weight
+
 
 def getPURewgts_variation(events, year):
 

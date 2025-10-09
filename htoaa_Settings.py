@@ -1071,8 +1071,8 @@ SystNameConvs = {
     'AK8JetJER':          'CMS_res_fj_$YEAR',
     'AK4JetJES':          'CMS_scale_j_$YEAR', 
     'AK4JetJER':          'CMS_res_j_$YEAR', 
-    'METJES':             'CMS_scale_met_$YEAR', 
-    'METJER':             'CMS_res_met_$YEAR', 
+    #'METJES':             'CMS_scale_met_$YEAR', 
+    #'METJER':             'CMS_res_met_$YEAR', 
     'METUnclE':           'CMS_scale_met_unclustered_energy_$YEAR', 
 
     ## Theoretical 
