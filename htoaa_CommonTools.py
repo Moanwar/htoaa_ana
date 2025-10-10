@@ -886,18 +886,14 @@ def getPURewgts_variation(events, year):
 def getHScaleAndResol(massH_nom):
     rng = np.random.RandomState(12345)
     n_events = len(massH_nom)
-
     sf_H_nom, sf_H_up, sf_H_down = 0.992, 1.002, 0.982
     massH_nom_scaled  = massH_nom * sf_H_nom
     massH_up_scaled   = massH_nom * sf_H_up
     massH_down_scaled = massH_nom * sf_H_down
-
     res_H_sigma = 0.03  # 3% resolution
     rnd = rng.normal(loc=0.0, scale=1.0, size=n_events)  # unit Gaussian
     massH_resol_up   = massH_nom_scaled * (1.0 + res_H_sigma * rnd)
     massH_resol_down = (massH_nom_scaled * massH_nom_scaled) / massH_resol_up
-
-    
     return {
         "nom_scaled": massH_nom_scaled,
         "up_scaled": massH_up_scaled,
@@ -910,16 +906,12 @@ def getHScaleAndResol(massH_nom):
 def getAScaleAndResol(mA_nom):
     rng = np.random.RandomState(12345)
     n_events = len(mA_nom)
-
     mA_nom_scaled = mA_nom 
     mA_up   = np.minimum(mA_nom * 1.05, 0.5 * (mA_nom + 63))
     mA_down = np.maximum(mA_nom * 0.95, 0.5 * (mA_nom + 11))
-
     rand_a = rng.normal(loc=0.0, scale=1, size=n_events)
     mA_resol_up = np.minimum(np.maximum(mA_nom * (1.0 + 0.045 * rand_a), 0.5 * (mA_nom + 11)), 0.5 * (mA_nom + 63))
     mA_resol_down = (mA_nom * mA_nom) / mA_resol_up
-
-
     return {
         "up_scaled": mA_up,
         "down_scaled": mA_down,
