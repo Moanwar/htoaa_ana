@@ -1597,20 +1597,21 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             # FatJet pt
             if self.datasetInfo['isMC']:
                 FatJetsToUse['massH_toUse'] = {
-                    self.systNameHScale+SystNameConvUp:   lambda: Hvars["up_scaled"],
-                    self.systNameHScale+SystNameConvDown: lambda: Hvars["down_scaled"],
-                    self.systNameHResol+SystNameConvUp:   lambda: Hvars["resol_up"],
-                    self.systNameHResol+SystNameConvDown: lambda: Hvars["resol_down"]
+                    self.systNameHScale+SystNameConvUp:   Hvars["up_scaled"],
+                    self.systNameHScale+SystNameConvDown: Hvars["down_scaled"],
+                    self.systNameHResol+SystNameConvUp:   Hvars["resol_up"],
+                    self.systNameHResol+SystNameConvDown: Hvars["resol_down"]
                 }.get(shift_syst, Hvars["nom_scaled"])
+                FatJetsToUse['massA_toUse'] = {
+                    self.systNameAScale+SystNameConvUp:   Avars["up_scaled"],
+                    self.systNameAScale+SystNameConvDown: Avars["down_scaled"],
+                    self.systNameAResol+SystNameConvUp:   Avars["resol_up"],
+                    self.systNameAResol+SystNameConvDown: Avars["resol_down"]
+                }.get(shift_syst, Avars["nom"])
+
             else:
                 FatJetsToUse['massH_toUse'] = FatJetsToUse.PNet_massH_v2b
-                
-            FatJetsToUse['massA_toUse'] = {
-                self.systNameAScale+SystNameConvUp:   lambda: Avars["up_scaled"],
-                self.systNameAScale+SystNameConvDown: lambda: Avars["down_scaled"],
-                self.systNameAResol+SystNameConvUp:   lambda: Avars["resol_up"],
-                self.systNameAResol+SystNameConvDown: lambda: Avars["resol_down"]
-            }.get(shift_syst, Avars["nom"])
+                FatJetsToUse['massA_toUse'] = FatJetsToUse.PNet_34massAa
             # AK8 pt/mass/msoftdrop variations
             AK8_pt_map = {
                 self.systNameAK8JetJES + SystNameConvUp: lambda: FatJetsToUse.pt_jesTotalUp,
@@ -3329,7 +3330,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 btagWPThsh  = self.objectSelector.Ak4JetDeepJetB_Thsh,
                 year = self.datasetInfo["era"]
             )
-            wgt_QCD_pT_reweighting = QCD_pT_reweighting(leadingFatJet.pt_toUse)
+            if self.datasetInfo['isQCD']:
+                wgt_QCD_pT_reweighting = QCD_pT_reweighting(leadingFatJet.pt_toUse)
             # L1 prefiring
             if self.datasetInfo["era"] != Era_2018:
                 wgt_L1TPrefiring_dict = get_L1TPrefiringWgt(events.L1PreFiringWeight)
