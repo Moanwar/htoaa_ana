@@ -536,12 +536,13 @@ def selectFatJets(FatJets, pT_Thsh=170, eta_Thsh=2.4, Msd_Thsh=20, JetID=6, shif
     return FatJets[maskJetsSelected]
 
 
-def getCandidateHiggs(FatJets, Xbb_Thsh=0):
+def getCandidateHiggs(FatJets, Xbb_Thsh=0, pT_Thsh=250):
     if 'particleNetMD_XbbvsQCD' not in FatJets.fields:
         logging.error(f'htoaa_CommonTools::getCandidateHiggs():: FatJet has no "particleNetMD_XbbvsQCD" branch. \n{FatJets.fields = }\n The code is not compatible with the input NanoAODs. \t\t **** ERROR **** \n\n')
         exit(0)
 
     maskJetsSelected = (
+        (FatJets.pt_toUse               >  pT_Thsh)    &
         (FatJets.particleNetMD_XbbvsQCD > Xbb_Thsh)
     )
     candHs = FatJets[maskJetsSelected]
@@ -549,12 +550,13 @@ def getCandidateHiggs(FatJets, Xbb_Thsh=0):
         candHs_PNet_X4b_v2_Haa34b = candHs.PNet_X4b_v2a_Haa34b_score + candHs.PNet_X4b_v2b_Haa34b_score
         idx_candHs_PNet_X4b_v2_Haa34b_max = ak.argmax(candHs_PNet_X4b_v2_Haa34b, axis=-1, keepdims=True)
         #candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa34b_max])
-
+        
         candHs_PNet_X4b_v2_Haa4b = 0.5*(candHs.PNet_X4b_v2a_Haa4b_score + candHs.PNet_X4b_v2b_Haa4b_score)
         idx_candHs_PNet_X4b_v2_Haa4b_max = ak.argmax(candHs_PNet_X4b_v2_Haa4b, axis=-1, keepdims=True)
         candH = ak.firsts(candHs[idx_candHs_PNet_X4b_v2_Haa4b_max])
 
     return candH, idx_candHs_PNet_X4b_v2_Haa4b_max
+
 
 
 def selectAK4Jets(Jets, era, pT_Thsh=0):
