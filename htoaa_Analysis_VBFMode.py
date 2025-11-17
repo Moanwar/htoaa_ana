@@ -1638,7 +1638,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 AK8_mass_map[shift_syst]() if shift_syst in AK8_mass_map else FatJetsToUse.mass_nom
             )
             FatJetsToUse['msoftdrop_toUse'] = (
-                AK8_msoft_map[shift_syst]() if shift_syst in AK8_msoft_map else FatJetsToUse.mass_nom
+                AK8_msoft_map[shift_syst]() if shift_syst in AK8_msoft_map else FatJetsToUse.msoftdrop_nom
             )
             # --- AK4 Jets ---
             AK4_pt_map = {
@@ -2457,7 +2457,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         ## non-HTo4B FatJet
         nonHto4bFatJet  = selFatJets[(selFatJets.delta_r(leadingFatJet) > 0.8)]
         nonHto4bFatWJet = selFatJets[(selFatJets.delta_r(leadingFatJet) > 0.05) & (selFatJets.pt_toUse > 250) & (selFatJets.msoftdrop_toUse > 50) & (selFatJets.msoftdrop_toUse < 220)]
-        nonHto4bFatTJet = selFatJets[(selFatJets.delta_r(leadingFatJet) > 0.05) & (selFatJets.pt > 300)]
+        nonHto4bFatTJet = selFatJets[(selFatJets.delta_r(leadingFatJet) > 0.05) & (selFatJets.pt_toUse > 300) & (selFatJets.msoftdrop_toUse > 50) & (selFatJets.msoftdrop_toUse < 220)]
 
         # Calculate W, Z, (W+Z)vsQCD scores from WvsQCD, ZvsQCD and QCD scores
         # Formulas from Andrew on Baylor slack: https://baylorhep.slack.com/archives/C013B0LRAEA/p1706815879028809
@@ -2508,6 +2508,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             np.full_like(leadingNonHto4bVFatJet_PNet_WZvsQCD, 1),
             np.full_like(leadingNonHto4bVFatJet_PNet_WZvsQCD, 0),
         ), 0)
+
+        #nleadingNonHto4bFatJet_WZvsQCD = ak.fill_none(ak.where(
+        #    ((leadingNonHto4bVFatJet_PNet_WZvsQCD>self.objectSelector.NonHto4bFatJetPNet_WZvsQCD_Thsh)& 
+        #   (leadingNonHto4bVFatJet.pt_toUse >  self.objectSelector.VFatJetPt_Vjj_MinThsh) &
+        #     (leadingNonHto4bVFatJet.pt_toUse <= self.objectSelector.VFatJetPt_Vjj_MaxThsh)),
+        #    np.full_like(leadingNonHto4bVFatJet_PNet_WZvsQCD, 1),
+        #    np.full_like(leadingNonHto4bVFatJet_PNet_WZvsQCD, 0),
+        #), 0)
         
         nleadingNonHto4bFatJet_TvsQCD = ak.fill_none(ak.where(
             (leadingNonHto4bVFatJet_PNet_TvsQCD > self.objectSelector.NonHto4bFatJetPNet_TvsQCD_Thsh),
