@@ -1528,10 +1528,10 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     ] )
                 if stringHasSubstring(self.datasetInfo['systematicsToRun'], ['met', 'full'] ): 
                     systematics_shift.extend( [
-                        self.systNameAK4JetJES+SystNameConvUp,
-                        self.systNameAK4JetJES+SystNameConvDown,
-                        self.systNameAK4JetJER+SystNameConvUp,
-                        self.systNameAK4JetJER+SystNameConvDown,
+                        #self.systNameAK4JetJES+SystNameConvUp,
+                        #self.systNameAK4JetJES+SystNameConvDown,
+                        #self.systNameAK4JetJER+SystNameConvUp,
+                        #self.systNameAK4JetJER+SystNameConvDown,
                         self.systNameMETUnclE+SystNameConvUp,
                         self.systNameMETUnclE+SystNameConvDown,
                     ] )
@@ -1661,18 +1661,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             )
             # --- MET ---
             MET_pt_map = {
-                self.systNameAK4JetJES + SystNameConvUp: lambda: METToUse.T1_pt_jesTotalUp,
-                self.systNameAK4JetJES + SystNameConvDown: lambda: METToUse.T1_pt_jesTotalDown,
-                self.systNameAK4JetJER + SystNameConvUp: lambda: METToUse.T1_pt_jerUp,
-                self.systNameAK4JetJER + SystNameConvDown: lambda: METToUse.T1_pt_jerDown,
+                #self.systNameAK4JetJES + SystNameConvUp: lambda: METToUse.T1_pt_jesTotalUp,
+                #self.systNameAK4JetJES + SystNameConvDown: lambda: METToUse.T1_pt_jesTotalDown,
+                #self.systNameAK4JetJER + SystNameConvUp: lambda: METToUse.T1_pt_jerUp,
+                #self.systNameAK4JetJER + SystNameConvDown: lambda: METToUse.T1_pt_jerDown,
                 self.systNameMETUnclE + SystNameConvUp: lambda: METToUse.T1_pt_unclustEnUp,
                 self.systNameMETUnclE + SystNameConvDown: lambda: METToUse.T1_pt_unclustEnDown,
             }
             MET_phi_map = {
-                self.systNameAK4JetJES + SystNameConvUp: lambda: METToUse.T1_phi_jesTotalUp,
-                self.systNameAK4JetJES + SystNameConvDown: lambda: METToUse.T1_phi_jesTotalDown,
-                self.systNameAK4JetJER + SystNameConvUp: lambda: METToUse.T1_phi_jerUp,
-                self.systNameAK4JetJER + SystNameConvDown: lambda: METToUse.T1_phi_jerDown,
+                #self.systNameAK4JetJES + SystNameConvUp: lambda: METToUse.T1_phi_jesTotalUp,
+                #self.systNameAK4JetJES + SystNameConvDown: lambda: METToUse.T1_phi_jesTotalDown,
+                #self.systNameAK4JetJER + SystNameConvUp: lambda: METToUse.T1_phi_jerUp,
+                #self.systNameAK4JetJER + SystNameConvDown: lambda: METToUse.T1_phi_jerDown,
                 self.systNameMETUnclE + SystNameConvUp: lambda: METToUse.T1Smear_phi_unclustEnUp,
                 self.systNameMETUnclE + SystNameConvDown: lambda: METToUse.T1Smear_phi_unclustEnDown,
             }
