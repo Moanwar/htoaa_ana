@@ -103,7 +103,7 @@ def fitHistogram(h, sFitFuncLocal, FitRangeLocal, sFitFull, FitRangeFull, sCanva
 
 
 
-def plotHistograms(histogram_dict, sCanvasName, xLable='', yLable='', setLogY=1):
+def plotHistograms(histogram_dict, sCanvasName, xLable='', yLable='', setLogY=1, xRange=[]):
     colors_list = [1, 2, 4, 6, 28, 46, 7, 3]
 
     c1 = TCanvas(sCanvasName, sCanvasName, 600,500)
@@ -111,19 +111,31 @@ def plotHistograms(histogram_dict, sCanvasName, xLable='', yLable='', setLogY=1)
     c1.SetGrid()
     c1.cd()
 
+    function_tmp_ = TF1()
+
     i = 0
     leg = TLegend(0.5,0.85,0.99,0.99)
     for sHistName, h_ in histogram_dict.items():
         h_.SetMarkerStyle(20)
         h_.SetMarkerSize(0.5)
         h_.SetMarkerColor(colors_list[i])
-        h_.SetLineColor(colors_list[i])     
-        if  xLable != '': h_.GetXaxis().SetTitle(xLable)
-        if  yLable != '': h_.GetYaxis().SetTitle(yLable)        
+        h_.SetLineColor(colors_list[i])  
+        if i==0:   
+            if  xLable != '': h_.GetXaxis().SetTitle(xLable)
+            if  yLable != '': h_.GetYaxis().SetTitle(yLable)   
+            if len(xRange)>0: h_.GetXaxis().SetRangeUser(xRange[0], xRange[1])     
 
-        if i == 0: h_.Draw()
-        else:      h_.Draw('same')  
-        leg.AddEntry(h_, sHistName, 'lep')
+        #if i == 0: h_.Draw()
+        #else:      h_.Draw('same')  
+        sDrawOption = ''
+        sLegendOption = ''
+        if i == 0: sDrawOption = ''
+        else:      sDrawOption = 'same'
+        if isinstance(h_, type(function_tmp_)): sDrawOption += 'R'
+        if isinstance(h_, type(function_tmp_)): sLegendOption = 'l'
+        else:                                   sLegendOption = 'lep'
+        h_.Draw(sDrawOption)
+        leg.AddEntry(h_, sHistName, sLegendOption)
         i += 1
 
     c1.cd()
@@ -265,48 +277,75 @@ def makeHqt_HiggsPt_Hist(sFInHqtHiggsSpectrum, sFOutHqtHiggsHist):
 #def calculateGGFHiggsPtRewgt(
 #    hHToAATo4B_Incl_list, hHToAATo4B_Excl_list,  hGGFHTo2B_Incl_list, 
 #):
-            
 
 
 
 
 
-    
+
 
 if __name__ == "__main__":
-    print("Running cal_HiggsPtRewgts", flush=True)
+    print("Running cal_HiggsPtRewgts_VBF", flush=True)
 
     parser = argparse.ArgumentParser(description='cal_HiggsPtRewgts')
     parser.add_argument('-era', dest='era',   type=str, default='2018',                    choices=['2016','2017','2018'], required=False)
-    parser.add_argument('-prodMode', dest='prodMode',   type=str, default='ggH',           choices=['ggH','VBFH', 'WH', 'WplusH','WminusH', 'ZH', 'ttH'], required=True)
-    parser.add_argument('-useHToAATo4TauSignal',  action='store_true', default=False, help='Use HToAATo4Tau signal for cross-checks')
+    #parser.add_argument('-prodMode', dest='prodMode',   type=str, default='ggH',           choices=['ggH','VBFH', 'WH', 'WplusH','WminusH', 'ZH', 'ttH'], required=True)
+    #parser.add_argument('-useHToAATo4TauSignal',  action='store_true', default=False, help='Use HToAATo4Tau signal for cross-checks')
     args=parser.parse_args()
     print("args: {}".format(args), flush=True)
     era                     = args.era
-    productionMode          = args.prodMode   
-    useHToAATo4TauSignal    = args.useHToAATo4TauSignal # Default: False
+    #productionMode          = args.prodMode   
+    #useHToAATo4TauSignal    = args.useHToAATo4TauSignal # Default: False
+    productionMode          = 'VBFH'
+    useHToAATo4TauSignal    = False
 
-
-    # Hqt Higgs cross-section in pT
-    # /afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV.out
-    sFInHqtHiggsSpectrum_mTopInfinite = "/afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV_pt1To2kGeVBin1GeV.out"
-    sFInHqtHiggsSpectrum_mTopFinite   = "/afs/cern.ch/work/s/ssawant/private/htoaa/HqT_HiggsPtCode/HqT2.0/HqTspectrum_13TeV_mTopFinite_pt1To2kGeVBin1GeV.out"
-    sFInHiggsSpectrum_GGH_NNLO        = "/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/GenHiggsPt_GGH_NNLO.root"
-    sOutDir                           = "/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/%s" % (era)
-    sFOutHqtHiggsHist_mTopInfinite    = "%s/Hqt_HiggsPtHist_mTopInfinite.root" % (sOutDir)
-    sFOutHqtHiggsHist_mTopFinite      = "%s/Hqt_HiggsPtHist_mTopFinite.root" % (sOutDir)
+    sOutDir                           = "/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts_v1/%s" % (era)
 
     sIpFileAllHist = '/eos/cms/store/user/ssawant/htoaa/analysis/20250603_CalHiggsPtRewgt_1/2018/analyze_htoaa_stage1.root'
     sHistNameShort_list = ['hGenHiggsPt_Nom'] # ['hGenHiggsPt_Nom', 'hGenHiggsLog2Pt_Nom']  'hGenHiggsPt_Nom', 'hGenHiggsPt_wHiggsPtRewgt_Nom'
-    nRebinX_dict = {'hGenHiggsPt_Nom': 10, 'hGenHiggsLog2Pt_Nom': 4}
+    nRebinX_dict = {'hGenHiggsPt_Nom': 50, 'hGenHiggsLog2Pt_Nom': 4}
+    xRange_dict = {'hGenHiggsPt_Nom': [200., 1000.], 'hGenHiggsLog2Pt_Nom': [math.log2(250.), math.log2(1200.)]}
+    xLabel_dict = {'hGenHiggsPt_Nom': r'Higgs pT [GeV]', 'hGenHiggsLog2Pt_Nom': r'log2(Higgs pT)'}
     HiggsPtPoint_toStitchHToAATo4BSamples = 300 # GeV
     HiggsPtPoint_toStitchHTo2BSamples     = 300 # GeV
     HiggsPt_fitRange                  = [150, 1100] # GeV
     HiggsPt_fullRange                 = [  1, 2000] # GeV
-    sFOutHiggsPtRewgt    = "%s/%sHiggsPtRewgt_%s.root" % (sOutDir, productionMode, 'HToAATo4Tau' if useHToAATo4TauSignal else 'HToAATo4B')
+    sFOutHiggsPtRewgt    = "%s/%sHiggsPtRewgt_%s_v20251216.root" % (sOutDir, productionMode, 'HToAATo4Tau' if useHToAATo4TauSignal else 'HToAATo4B')
     xsHiggs_dict = {
         'ggH': 48.61 * 1000, # 33.8 * 1000, # 48.61 * 1000, # fb
+        'VBFH': 3.888 * 1000, # Used in arXiv:2005.07762
     }
+
+    '''
+    xs_EFT_QCD = { # in fb 
+        ## EFT NNLO QCD + EWK from arXiv:2005.07762: https://docs.google.com/spreadsheets/d/1cxN35LaQAgTxWiECsH9Tv_72xcQimIartktx8mYPTuM/edit?usp=sharing
+        # pT:   [XS in fb, uncertainty]
+        425:	[5.20,	0.027],
+        475:	[2.74,	0.020],
+        525:	[1.50,	0.015],
+        575:	[0.86,	0.010],
+        625:	[0.51,	0.007],
+        675:	[0.31,	0.005],
+        725:	[0.20,	0.004],
+        775:	[0.12,	0.003],      
+    }
+    '''
+
+
+    xs_EFT_QCD = { # in fb 
+        ## EFT NNLO QCD + EWK from arXiv:2005.07762: https://docs.google.com/spreadsheets/d/1cxN35LaQAgTxWiECsH9Tv_72xcQimIartktx8mYPTuM/edit?usp=sharing
+        # pT:   [XS in fb, uncertainty]
+        425:	[6.17,	0.033],
+        475:	[3.31,	0.025],
+        525:	[1.85,	0.019],
+        575:	[1.08,	0.013],
+        625:	[0.65,	0.009],
+        675:	[0.4,	0.007],
+        725:	[0.26,	0.006],
+        775:	[0.16,	0.004],
+    }
+
+
     
 
 
@@ -321,17 +360,11 @@ if __name__ == "__main__":
     #if productionMode == 'ZH':      sProcessesHiggsNLO = ['ZHToBBX'] # powheg
     if productionMode == 'ZH':      sProcessesHiggsNLO = ['ZHToMuMuG'] # dalitz amcatnloFXFX
     if productionMode == 'ttH':     sProcessesHiggsNLO = ['ttH'] 
-    
 
-    
+
     os.makedirs( os.path.dirname( os.path.realpath(sFOutHiggsPtRewgt) ), exist_ok=True )
     if os.path.exists(sFOutHiggsPtRewgt): os.remove(sFOutHiggsPtRewgt) # Delete output file if it exists
 
-    if productionMode == 'ggH' and 0==1:
-        # Read Hqt Higgs Pt spectrum and store it into histogram
-        makeHqt_HiggsPt_Hist(sFInHqtHiggsSpectrum_mTopInfinite, sFOutHqtHiggsHist_mTopInfinite)
-        makeHqt_HiggsPt_Hist(sFInHqtHiggsSpectrum_mTopFinite,   sFOutHqtHiggsHist_mTopFinite)
-    
     for sHistNameShort in sHistNameShort_list:
         hHToAATo4B_Excl_list = []
         hHToAATo4B_Incl_list     = []
@@ -373,11 +406,7 @@ if __name__ == "__main__":
                 sHistName: 'evt/%s/%s'      % (sProcessHiggsNLO, sHistNameShort)
             })
 
-
-
         nRebinX = nRebinX_dict[sHistNameShort]
-        HiggsPtPoint_toStitchHToAATo4BSamples_toUse = math.log2(HiggsPtPoint_toStitchHToAATo4BSamples) if 'Log2Pt' in sHistNameShort else HiggsPtPoint_toStitchHToAATo4BSamples
-        HiggsPtPoint_toStitchHTo2BSamples_toUse     = math.log2(HiggsPtPoint_toStitchHTo2BSamples)     if 'Log2Pt' in sHistNameShort else HiggsPtPoint_toStitchHTo2BSamples
         HiggsPtPoint_toStitchHToAATo4BSamples_toUse = HiggsPtPoint_toStitchHToAATo4BSamples
         HiggsPtPoint_toStitchHTo2BSamples_toUse     = HiggsPtPoint_toStitchHTo2BSamples 
         HiggsPt_fitRange_toUse                      = HiggsPt_fitRange
@@ -409,224 +438,129 @@ if __name__ == "__main__":
 
         hHiggsNLO = None
         if productionMode == 'ggH':
-            ## GGFHTo2B histogram ------------
-            print(f"\n\nWorking with GGFHTo2B")
-            hGGFHTo2B_Excl = readAndAddHistsFromFile(hGGFHTo2B_Excl_list, '%s_GGFHTo2B_Excl'%(sHistNameShort), nRebinX=nRebinX)
-            hGGFHTo2B_Incl = readAndAddHistsFromFile(hGGFHTo2B_Incl_list, '%s_GGFHTo2B_Incl'%(sHistNameShort), nRebinX=nRebinX)
-            # Stitch hInclusive and hExclusive histograms
-            hGGFHTo2B_Incl, hGGFHTo2B_Excl, hGGFHTo2B_Stitch = stitchInclAndExclHistogramsAlongXaxis(
-                hInclusive = hGGFHTo2B_Incl, 
-                hExclusive = hGGFHTo2B_Excl, 
-                X_toStitchHistograms = HiggsPtPoint_toStitchHTo2BSamples_toUse
-                )
-            print(f"After: {histIntegralAndError(hGGFHTo2B_Incl) = }, {histIntegralAndError(hGGFHTo2B_Excl) = }, {histIntegralAndError(hGGFHTo2B_Stitch) = }, ")
-
-            ## Hqt Higgs Pt histogram
-            hGGFH_Hqt_stitched_mTopInfinite = readHistFromFile(sFOutHqtHiggsHist_mTopInfinite, '%s_HqtStitched'%(sHistNameShort), nRebinX=nRebinX) 
-            hGGFH_Hqt_stitched_mTopInfinite.Scale( 1./hGGFH_Hqt_stitched_mTopInfinite.Integral() ) # Normalize Hqt histogram to unit area
-            hGGFH_Hqt_stitched = readHistFromFile(sFOutHqtHiggsHist_mTopFinite, '%s_HqtStitched'%(sHistNameShort), nRebinX=nRebinX)            
-            hGGFH_Hqt_stitched.Scale( 1./hGGFH_Hqt_stitched.Integral() ) # Normalize Hqt histogram to unit area
-
-            ## GGFH NNLO MC (Yihui) histogram
-            hGGFH_NNLO = readHistFromFile(sFInHiggsSpectrum_GGH_NNLO, sHistNameShort, nRebinX=nRebinX)
-            hGGFH_NNLO.Scale( 1./hGGFH_NNLO.Integral() ) # Normalize Hqt histogram to unit area
-            hGGFH_NNLO.SetName('%s_GGFHTo2B_NNLO' % (hGGFH_NNLO.GetName()))
-
-
-            
-            hHiggsNLO = hGGFHTo2B_Stitch
-
-            hHToAATo4B_Stitch_cloneXSNorm               = hHToAATo4B_Stitch.Clone( '%s_XSNorm'%(hHToAATo4B_Stitch.GetName()))
-            hHiggsNLO_cloneXSNorm                       = hHiggsNLO.Clone(         '%s_XSNorm'%(hHiggsNLO.GetName()))
-            hGGFH_Hqt_stitched_cloneXSNorm              = hGGFH_Hqt_stitched.Clone('%s_XSNorm'%(hGGFH_Hqt_stitched.GetName()))
-            hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm = hGGFH_Hqt_stitched_mTopInfinite.Clone('%s_mTopInfinite_XSNorm'%(hGGFH_Hqt_stitched_mTopInfinite.GetName()))
-            hGGFH_NNLO_cloneXSNorm                      = hGGFH_NNLO.Clone('%s_XSNorm'%(hGGFH_NNLO.GetName()))
-            for h_ in [hHToAATo4B_Stitch_cloneXSNorm, hHiggsNLO_cloneXSNorm, hGGFH_Hqt_stitched_cloneXSNorm, hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm, hGGFH_NNLO_cloneXSNorm]:
-                h_.Scale( xsHiggs_dict['ggH'] )
-            histograms_dict_ = {
-                r"$gg\to H\to aa \to 4b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):            hHToAATo4B_Stitch_cloneXSNorm,
-                r"$gg\to H\to 2b, NLO, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):              hHiggsNLO_cloneXSNorm,
-                r"$gg\to H$ HqT2.0$, mTop infinite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000): hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm,
-                r"$gg\to H$ HqT2.0$, mTop finite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):   hGGFH_Hqt_stitched_cloneXSNorm,
-                r"$gg\to H\to 2b, NNLO, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):             hGGFH_NNLO_cloneXSNorm,
-            }
-            cCompareSamplesXSNorm = plotHistograms(histograms_dict_, 'c%s_CompareSamplesXSNorm'%(sHistNameShort), yLable=r'$\frac{d\sigma}{dpT}$')
-
-            # Plot cumulative differential cross-section in 10 GeV bins
-            hHToAATo4B_Stitch_cloneXSCumul  = makeCumulativeHist(hHToAATo4B_Stitch_cloneXSNorm)
-            hHiggsNLO_cloneXSCumul          = makeCumulativeHist(hHiggsNLO_cloneXSNorm)
-            hGGFH_Hqt_stitched_cloneXSCumul = makeCumulativeHist(hGGFH_Hqt_stitched_cloneXSNorm)
-            hGGFH_Hqt_stitched_mTopInfinite_cloneXSCumul = makeCumulativeHist(hGGFH_Hqt_stitched_mTopInfinite_cloneXSNorm)
-            histograms_dict_ = {
-                r"$gg\to H\to aa \to 4b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):            hHToAATo4B_Stitch_cloneXSCumul,
-                r"$gg\to H\to 2b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):                   hHiggsNLO_cloneXSCumul,
-                r"$gg\to H$ HqT2.0$, mTop finite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):                  hGGFH_Hqt_stitched_cloneXSCumul,
-                r"$gg\to H$ HqT2.0$, mTop infinite, $\sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):                  hGGFH_Hqt_stitched_mTopInfinite_cloneXSCumul,
-            }
-            cCompareSamplesXSCumul = plotHistograms(histograms_dict_, 'c%s_CompareSamplesXSCumulative'%(sHistNameShort), yLable=r'$\frac{d\sigma}{dpT}  [fb/GeV]$')
-
-            '''
-            # Plot cumulative differential cross-section in 50 GeV bins
-            hHToAATo4B_Stitch_cloneXSCumul_1  = hHToAATo4B_Stitch_cloneXSNorm.Clone('%s_50GeVBin'%(hHToAATo4B_Stitch_cloneXSNorm.GetName()))
-            hHiggsNLO_cloneXSCumul_1          = hHiggsNLO_cloneXSNorm.Clone('%s_50GeVBin'%(hHiggsNLO_cloneXSNorm.GetName()))
-            hGGFH_Hqt_stitched_cloneXSCumul_1 = hGGFH_Hqt_stitched_cloneXSNorm.Clone('%s_50GeVBin'%(hGGFH_Hqt_stitched_cloneXSNorm.GetName()))
-            nRebinsX_1 = int( 50 / nRebinX )
-            hHToAATo4B_Stitch_cloneXSCumul_1.Rebin( nRebinsX_1 )
-            hHiggsNLO_cloneXSCumul_1.Rebin( nRebinsX_1 )
-            hGGFH_Hqt_stitched_cloneXSCumul_1.Rebin( nRebinsX_1 ) 
-            hHToAATo4B_Stitch_cloneXSCumul_1  = makeCumulativeHist(hHToAATo4B_Stitch_cloneXSCumul_1)
-            hHiggsNLO_cloneXSCumul_1          = makeCumulativeHist(hHiggsNLO_cloneXSCumul_1)
-            hGGFH_Hqt_stitched_cloneXSCumul_1 = makeCumulativeHist(hGGFH_Hqt_stitched_cloneXSCumul_1)
-            histograms_dict_ = {
-                r"$gg\to H\to aa \to 4b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):            hHToAATo4B_Stitch_cloneXSCumul_1,
-                r"$gg\to H\to 2b, \sigma = %.2f pb$" %(xsHiggs_dict['ggH']/1000):                   hHiggsNLO_cloneXSCumul_1,
-                r"$gg\to H$ HqT2.0, \sigma = %.2f pb" %(xsHiggs_dict['ggH']/1000):                  hGGFH_Hqt_stitched_cloneXSCumul_1,
-            }
-            cCompareSamplesXSCumul_1 = plotHistograms(histograms_dict_, 'c%s_CompareSamplesXSCumulative_50GeVBin'%(sHistNameShort), yLable=r'$\frac{d\sigma}{dpT}$')
-            '''
-
-            
-            histograms_dict_ = {
-                r"$gg\to H\to aa \to 4b$":            hHToAATo4B_Stitch,
-                r"$gg\to H\to 2b$":                   hHiggsNLO,
-                r"$gg\to H$ HqT2.0":                  hGGFH_Hqt_stitched,
-            }
+            hHiggsNLO = None
         else: # Production modes other than ggH
             hHiggsNLO = readAndAddHistsFromFile(hHiggsNLO_list, '%s_HiggsNLO'%(sHistNameShort), nRebinX=nRebinX)
-            hHiggsNLO.Scale( 1./hHiggsNLO.Integral() )
-            histograms_dict_ = {
-                r"$%s\to aa \to 4b$" % (productionMode):            hHToAATo4B_Stitch,
-                r"%s (NLO)" % (productionMode):       hHiggsNLO,
-            }
+            #hHiggsNLO.Scale( 1./hHiggsNLO.Integral() )
 
+        
+        # Normalized histograms to particular cross-section
+        xs_toUse     = xsHiggs_dict[productionMode] if productionMode in xsHiggs_dict else 1
+        sXs_toUse    = r' \sigma = %.0f fb' % xsHiggs_dict[productionMode] if productionMode in xsHiggs_dict else ''
+        for h_ in [hHToAATo4B_Stitch, hHiggsNLO]: 
+            h_.Scale( xs_toUse/h_.Integral() )
 
-        ## Plot compare diffent samples
-        cCompareSamples = plotHistograms(histograms_dict_, 'c%s_CompareSamples'%(sHistNameShort), yLable='A.U.')
+        # Cross-section: EFT QCD+EWK
+        hHiggsEFT_QCD = TH1D('%s_EFT_QCD'%(sHistNameShort), '%s_EFT_QCD'%(sHistNameShort), hHiggsNLO.GetNbinsX(), hHiggsNLO.GetXaxis().GetXmin(), hHiggsNLO.GetXaxis().GetXmax())
+        for pt_, XS_ in xs_EFT_QCD.items():
+            ptBin = hHiggsEFT_QCD.FindBin(pt_)
+            hHiggsEFT_QCD.SetBinContent(ptBin, XS_[0])
+            hHiggsEFT_QCD.SetBinError(ptBin,   XS_[1])
+            
+
+        ## Plot compare different samples
+        histograms_dict_ = {
+            r"\text{VBF H (LO MC), } %s" % (sXs_toUse):            hHToAATo4B_Stitch,
+            r"\text{VBF H (NLO MC), } %s" % (sXs_toUse):               hHiggsNLO,
+            r"\text{VBF H (EFT NNLO MC), } %s" % (sXs_toUse):       hHiggsEFT_QCD,
+            
+        }
+        xRange_toUse = xRange_dict[sHistNameShort] if sHistNameShort in xRange_dict else []
+        yLable_toUse = r'$\frac{d\sigma}{dpT}  [fb/GeV]$' if productionMode in xsHiggs_dict else 'A.U.'
+        xLable_toUse = xLabel_dict[sHistNameShort] if sHistNameShort in xLabel_dict else ''    
+        print(f"{xLable_toUse = }")    
+        cCompareSamples = plotHistograms(histograms_dict_, 'c%s_CompareSamples'%(sHistNameShort), xLable=xLable_toUse, yLable=yLable_toUse, xRange=xRange_toUse)            
 
         ## Higgs Pt reweights: w/ NLO
-        hGGFHiggsPtReweights_NLO = makeRatioHist(
+        hHiggsPtReweights_NLO = makeRatioHist(
             hNume      = hHiggsNLO, 
             hDenom     = hHToAATo4B_Stitch, 
-            sRatioName = '%s_Wgt_NLO'%(sHistNameShort)
-            )
-        hGGFHiggsPtReweights_NLO_fit = hGGFHiggsPtReweights_NLO.Clone('%s_fit'%(hGGFHiggsPtReweights_NLO.GetName()))
-        
-        if productionMode == 'ggH':
-            ## Higgs Pt reweights: w/ Hqt
-            hGGFHiggsPtReweights_Hqt_stitched = makeRatioHist(
-                hNume      = hGGFH_Hqt_stitched, 
-                hDenom     = hHToAATo4B_Stitch, 
-                sRatioName = '%s_Wgt_Hqt'%(sHistNameShort)
-                )
-            hGGFHiggsPtReweights_Hqt_stitched_fit = hGGFHiggsPtReweights_Hqt_stitched.Clone('%s_fit'%(hGGFHiggsPtReweights_Hqt_stitched.GetName()))
-        
-            hGGFHiggsPtReweights_NLO_to_Hqt = makeRatioHist(
-                hNume      = hGGFH_Hqt_stitched, 
-                hDenom     = hHiggsNLO, 
-                sRatioName = '%s_Wgt_NLO_to_Hqt'%(sHistNameShort)
-                )
+            sRatioName = '%s_Wgt_NLO'%(sHistNameShort) 
+        )
+
+        hHiggsPtReweights_EFT_QCD_0 = makeRatioHist(
+            hNume      = hHiggsEFT_QCD, 
+            hDenom     = hHToAATo4B_Stitch, 
+            sRatioName = '%s_Wgt_EFT_QCD_0'%(sHistNameShort)
+        )
+        '''
+        Fit hHiggsPtReweights_EFT_QCDPlusEWK with pol1 in range 400-800 GeV. The fit parameters for EFT_QCD NNLO+EWK are as follows:
+        ****************************************
+        Minimizer is Linear / Migrad
+        Chi2                      =      2.72838
+        NDf                       =            6
+        p0                        =     0.718315   +/-   0.0219253   
+        p1                        = -9.13165e-05   +/-   4.38918e-05 
+        '''
+
+
+
+        '''
+        Fit hHiggsPtReweights_EFT_QCD with pol1 in range 400-800 GeV. The fit parameters for EFT_QCD NNLO are as follows:
+        ****************************************
+        Minimizer is Linear / Migrad
+        Chi2                      =      3.22453
+        NDf                       =            6
+        p0                        =      0.73389   +/-   0.0278091   
+        p1                        =  0.000171873   +/-   5.62878e-05 
+        '''
+
+        fHiggsPtReweights_EFT_QCD = TF1('f_%s_Wgt_EFT_QCD'%(sHistNameShort), 'pol1',0,2000)
+        ## fit parameters for EFT_QCD NNLO+EWK
+        #fHiggsPtReweights_EFT_QCD.SetParameter(0, 0.718315)
+        #fHiggsPtReweights_EFT_QCD.SetParameter(1, -9.13165e-05)
+        ## fit parameters for EFT_QCD NNLO
+        fHiggsPtReweights_EFT_QCD.SetParameter(0, 0.73389)
+        fHiggsPtReweights_EFT_QCD.SetParameter(1, 0.000171873)
+        histograms_dict_ = {
+            r"NLO MC":                              hHiggsPtReweights_NLO,
+            r"EFT NNLO MC":                     hHiggsPtReweights_EFT_QCD_0,
+            #r"EFT NNLO (extrapolate)":       fHiggsPtReweights_EFT_QCD,
             
-            hGGFHiggsPtReweights_NNLOMC = makeRatioHist(
-                hNume      = hGGFH_NNLO, 
-                hDenom     = hHToAATo4B_Stitch, 
-                sRatioName = '%s_Wgt_NNLOMC'%(sHistNameShort)
-                )
-            
+        }
         
-        
-        cFitWeights = fitHistogram(
-            h = hGGFHiggsPtReweights_NLO_fit, 
-            sFitFuncLocal = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
-            FitRangeLocal = HiggsPt_fitRange_toUse, 
-            sFitFull = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
-            FitRangeFull = HiggsPt_fullRange_toUse, 
-            sCanvasName = 'c%s_FitWeights'%(sHistNameShort))
-        
-        if productionMode == 'ggH':
-            cFitWeights_Hqt = fitHistogram(
-                h = hGGFHiggsPtReweights_Hqt_stitched_fit, 
-                sFitFuncLocal = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
-                FitRangeLocal = HiggsPt_fitRange_toUse, 
-                sFitFull = '[0] + [1]*x + [2]*pow(x,2) + [3]*pow(x,3)', 
-                FitRangeFull = HiggsPt_fullRange_toUse, 
-                sCanvasName = 'c%s_FitWeights_Hqt'%(sHistNameShort))            
-        
+        cKfactors = plotHistograms(histograms_dict_, 'c%s_kFactors'%(sHistNameShort), xLable=xLable_toUse, yLable='k-factor', xRange=xRange_toUse)  
+
+        ## Higgs pT reweights and uncertainty used for the analysis
+        hHiggsPtReweights_EFT_QCD = TH1D('h%s_Wgt_EFT_QCD'%(sHistNameShort), 'h%s_Wgt_EFT_QCD'%(sHistNameShort), 120, 0, 1200)
+        pt_Capping = 800.0
+        for iBin in range(1, hHiggsPtReweights_EFT_QCD.GetNbinsX()):
+            pt_ = hHiggsPtReweights_EFT_QCD.GetBinCenter(iBin)
+            iBin_CorserBins       = hHiggsPtReweights_NLO.FindBin(pt_)
+            pt_central_CorserBins = hHiggsPtReweights_NLO.GetXaxis().GetBinCenter(iBin_CorserBins)
+            wgt_NLO               = hHiggsPtReweights_NLO.GetBinContent(iBin_CorserBins)
+            wgt_NLO_uncrt         = hHiggsPtReweights_NLO.GetBinError(iBin_CorserBins)
+            wgt_EFT               = fHiggsPtReweights_EFT_QCD.Eval(pt_central_CorserBins)
+
+            hHiggsPtReweights_EFT_QCD.SetBinContent(iBin, wgt_EFT)
+            wgt_uncrt = abs(wgt_NLO - wgt_EFT)
+            wgt_uncrt = max(wgt_uncrt, wgt_NLO_uncrt)
+            # Statistical fluctuation in wgt_NLO about pt_Capping = 800.0 is high. 
+            # So use wgt_uncertainty calculated at pt_Capping = 800.0
+            if pt_ > pt_Capping:
+                wgt_uncrt = hHiggsPtReweights_EFT_QCD.GetBinError(hHiggsPtReweights_EFT_QCD.FindBin(pt_Capping) - 1)
+            hHiggsPtReweights_EFT_QCD.SetBinError(iBin, wgt_uncrt)
+            print(f"{pt_}, {pt_central_CorserBins} GeV:    EFT: {wgt_EFT},   NLO: {wgt_NLO}, {wgt_NLO_uncrt},   k-factor uncrt: {wgt_uncrt},  {wgt_uncrt/wgt_EFT*100}%")
+
 
         
-        
 
-        
-        
+
+
+
+
         fOutHiggsPtRewgt_GGF = TFile(sFOutHiggsPtRewgt, 'RECREATE')
         fOutHiggsPtRewgt_GGF.cd()
-        hHToAATo4B_Incl.Write()
-        hHToAATo4B_Excl.Write()
-        hHToAATo4B_Stitch.Write()
 
-        if productionMode == 'ggH':
-            hGGFHTo2B_Incl.Write()
-            hGGFHTo2B_Excl.Write()
-            #hGGFHTo2B_Stitch.Write()          
-            
-        hHiggsNLO.Write()
-        if productionMode == 'ggH':
-            hGGFH_NNLO.Write()
-
-        hGGFHiggsPtReweights_NLO.Write()
-        hGGFHiggsPtReweights_NLO_fit.Write()
-        if productionMode == 'ggH': 
-            hGGFH_Hqt_stitched_mTopInfinite.Write()
-            hGGFH_Hqt_stitched.Write()
-            hGGFHiggsPtReweights_Hqt_stitched.Write()
-            hGGFHiggsPtReweights_Hqt_stitched_fit.Write()
-            hGGFHiggsPtReweights_NLO_to_Hqt.Write()
-            hGGFHiggsPtReweights_NNLOMC.Write()
-            #cCompareSamplesXSNorm.Write()
-            #cCompareSamplesXSCumul.Write()
-            #cCompareSamplesXSCumul_1.Write()
+        cCompareSamples.Write()
+        hHiggsPtReweights_NLO.Write()
+        hHiggsPtReweights_EFT_QCD_0.Write()
+        fHiggsPtReweights_EFT_QCD.Write()
+        hHiggsPtReweights_EFT_QCD.Write()
+        cKfactors.Write()
         
-        #cCompareSamples.Write()
+
 
         fOutHiggsPtRewgt_GGF.Close()
-        print(f"\nWrote Higgs pT reweights histograms ({sHistNameShort}) into {sFOutHiggsPtRewgt}.") 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    
-
-
-
-
-
-        
-    
-
-    
+        print(f"\nWrote Higgs pT reweights histograms ({sHistNameShort}) into {sFOutHiggsPtRewgt}.")         
 
