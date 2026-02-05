@@ -69,7 +69,7 @@ def writeCondorExecFile(
         server,
         saveRunLsEvt
 ):
-    if not os.path.isfile(condor_exec_file):    
+    if not os.path.isfile(condor_exec_file) or 1==1:    
         with open(condor_exec_file, 'w') as f:
             f.write("#!/bin/bash  \n\n")
             #f.write("cd %s \n" % pwd)
@@ -126,8 +126,9 @@ def writeCondorExecFile(
             f.write("ls -lh \n")
             
             cp_commandToUse = ''
-            if server in ['lxplus']:
-                cp_commandToUse = 'eos cp' # works on lxplus
+            if server in ['lxplus']: 
+                #cp_commandToUse = 'eos cp' # works on lxplus. 15102025: Now working now
+                cp_commandToUse = 'xrdcp -f'
             else:
                 cp_commandToUse = 'cp'
             for sOpFile_to_use in sOpFileList_to_use:
@@ -184,6 +185,7 @@ def writeCondorSumitFile(
         #f.write("x509userproxy = /afs/cern.ch/user/s/ssawant/x509up_u108989 \n")
         #f.write("use_x509userproxy = true \n")
         f.write("X509_USER_PROXY = %s/x509up_u108989  \n" % (UserHomePath))
+        #f.write("X509_USER_PROXY = %s/x509Proxy  \n" % (UserHomePath))
         f.write("arguments = $(X509_USER_PROXY) %s \n"  % (sIpConfig_to_use) )       
         
         f.write("executable = %s \n" % condor_exec_file)
@@ -355,6 +357,7 @@ if __name__ == '__main__':
         
         # Primaru dataset for analyses
         if primaryDatasets_0 == '':
+            primaryDatasets = []
             if sAnalysis in [
                 "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py",
                 "htoaa_Analysis_CR_QCD4b.py"
@@ -413,15 +416,15 @@ if __name__ == '__main__':
 
         if sAnalysis in ["htoaa_Analysis_HiggsPtRewgt.py"]:
             selSamplesToRun_list.extend( [
-                'GluGluHToBB_Incl', 'GluGluHToBB_Pt-200ToInf', 
-                'VBFHToBB_powheg', 'VBFH_dipoleRecoilOn', 'VBFHToTauTau_powheg', #'VBFHToBB_herwig', 
-                'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'WHToMuMuG', 'WplusHToTauTau', 'WminusHToTauTau', 
-                'ZHToBBX', 'ZHToMuMuG', 'ZHToTauTau', 
-                'ttHToBB', 'ttHToTauTau', 
+                #'GluGluHToBB_Incl', 'GluGluHToBB_Pt-200ToInf', 
+                #'VBFHToBB_powheg', 'VBFH_dipoleRecoilOn', 'VBFHToTauTau_powheg', #'VBFHToBB_herwig', 
+                #'WplusHToBBQQ', 'WplusHToBBLNu', 'WminusHToBBQQ', 'WminusHToBBLNu', 'WHToMuMuG', 'WplusHToTauTau', 'WminusHToTauTau', 
+                #'ZHToBBX', 'ZHToMuMuG', 'ZHToTauTau', 
+                #'ttHToBB', 'ttHToTauTau', 
                 "ggHtoaato4b_mA",      "VBFHtoaato4b_mA",      "WHtoaato4b_mA",      "ZHtoaato4b_mA",      "ttHtoaato4b_mA", 
-                "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
+                #"ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA", 
                 #
-                'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
+                #'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All', 
             ] )
 
         ## ------------------------------------------------------------------------------------------
