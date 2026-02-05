@@ -40,7 +40,7 @@ def readHistFromFile(sFile, sHistNameFull, nRebinX=1, nRebinY=1, maintainScale=0
     return h
 
 
-def plotHistograms(histogram_dict, sCanvasName, sLegendHeader='', xLable='', yLable='', xRange=[], setLogY=1, saveAs='c.png'):
+def plotHistograms(histogram_dict, sCanvasName, sLegendHeader='', xLable='', yLable='', xRange=[], yRange=[], setLogY=1, saveAs='c.png'):
     colors_list = [1, 2, 4, 6, 28, 46, 7, 3]
 
     rnd = str(random.randint(0,10000))
@@ -66,7 +66,8 @@ def plotHistograms(histogram_dict, sCanvasName, sLegendHeader='', xLable='', yLa
         h_.SetLineColor(colors_list[i])     
         if  xLable != '': h_.GetXaxis().SetTitle(xLable)
         if  yLable != '': h_.GetYaxis().SetTitle(yLable) 
-        if xRange:        h_.GetXaxis().SetRangeUser(xRange[0], xRange[1])     
+        if xRange:        h_.GetXaxis().SetRangeUser(xRange[0], xRange[1]) 
+        if yRange:        h_.GetYaxis().SetRangeUser(yRange[0], yRange[1])     
         h_.GetXaxis().SetTitleSize(0.045) 
         h_.GetYaxis().SetTitleSize(0.045) 
         h_.GetYaxis().SetTitleOffset(1.1) 
@@ -104,9 +105,14 @@ if __name__ == "__main__":
     
     ## GGH ----------------------------------------------------------------------------------------------
     sFIn = '/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/ggHHiggsPtRewgt_HToAATo4B.root'
-    sHistName_Sig  = 'hGenHiggsPt_Nom_HToAATo4B_Stitch'
-    sHistName_Ref  = 'hGenHiggsPt_Nom_HqtStitched'
-    sHistName_kFct = 'hGenHiggsPt_Nom_Wgt_Hqt'
+    sHistName_Sig       = 'hGenHiggsPt_Nom_HToAATo4B_Stitch'
+    sHistName_Ref       = 'hGenHiggsPt_Nom_HqtStitched'
+    sHistName_Ref_NLO   = 'hGenHiggsPt_Nom_GGFHTo2B_Stitch'
+    sHistName_Ref_NNLO  = 'hGenHiggsPt_Nom_GGFHTo2B_NNLO'
+    sHistName_kFct             = 'hGenHiggsPt_Nom_Wgt_Hqt'
+    sHistName_kFct_NLO         = 'hGenHiggsPt_Nom_Wgt_NLO'
+    sHistName_kFct_NLO_to_NNLO = 'hGenHiggsPt_Nom_Wgt_NLO_to_Hqt'
+    sHistName_kFct_NNLOMC       = 'hGenHiggsPt_Nom_Wgt_NNLOMC'    
     sOpPlot_pt     = '%s/HiggsPt_ggH.png' % (sOpDir)
     sOpPlot_kFct   = '%s/kFactor_ggH.png' % (sOpDir)
     nRebinsX = 2
@@ -114,8 +120,10 @@ if __name__ == "__main__":
     
     # Pt
     h_dict = {
-        r'gg #rightarrow H signal (LO)': readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Sig, nRebinX=nRebinsX, maintainScale=1),
-        r'Hqt v2.0':                        readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Ref, nRebinX=nRebinsX, maintainScale=1),
+        r'gg #rightarrow H (LO MC)':           readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Sig,      nRebinX=nRebinsX, maintainScale=1),
+        r'gg #rightarrow H (NLO MC)':          readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Ref_NLO,  nRebinX=nRebinsX, maintainScale=1),
+        r'gg #rightarrow H (NNLO MC)':         readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Ref_NNLO, nRebinX=nRebinsX, maintainScale=1),
+        r'gg #rightarrow H (NNLO Hqt v2.0)':   readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_Ref,      nRebinX=nRebinsX, maintainScale=1),
     }
     plotHistograms(
         histogram_dict = h_dict, 
@@ -132,15 +140,19 @@ if __name__ == "__main__":
     # kFactor
     nRebinsX = 5
     h_dict = {
-        r'gg #rightarrow H signal (LO)': readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_kFct, nRebinX=nRebinsX, maintainScale=1)
+        r'LO  #rightarrow NLO':           readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_kFct_NLO,         nRebinX=nRebinsX, maintainScale=1),
+        r'LO  #rightarrow NNLO MC':       readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_kFct_NNLOMC,      nRebinX=nRebinsX, maintainScale=1),
+        r'LO  #rightarrow NNLO Hqt v2.0': readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_kFct,             nRebinX=nRebinsX, maintainScale=1),
+        #r'SM gg #rightarrow H: NLO  #rightarrow NNLO': readHistFromFile(sFile=sFIn, sHistNameFull=sHistName_kFct_NLO_to_NNLO, nRebinX=nRebinsX, maintainScale=1)
+
     }
     plotHistograms(
         histogram_dict = h_dict, 
         sCanvasName = r'ckFactor_ggH',
         sLegendHeader = '', 
         xLable='Higgs p_{T} [GeV]', yLable=r'k-factor', 
-        xRange = xRange,
-        setLogY=0,
+        xRange = xRange, yRange = [0.1, 5],
+        setLogY=1,
         saveAs=sOpPlot_kFct
     ) 
        
