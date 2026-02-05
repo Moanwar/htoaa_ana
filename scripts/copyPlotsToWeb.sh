@@ -12,7 +12,7 @@ DestinationDir=$2
 echo "copy from ${SourceDir} to ${DestinationDir}"
 Eras=("Run2" "2016preVFP" "2016postVFP" "2017" "2018" )
 #Categories=("gg0l" "Vjj" "Zvv" "tt0l")
-Categories=("Vjj" "Zvv" "tt0l")
+Categories=("tt0l")
 
 PWD=`pwd`
 for era in ${Eras[@]}; do 

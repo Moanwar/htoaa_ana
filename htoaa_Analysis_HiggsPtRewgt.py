@@ -66,7 +66,11 @@ from htoaa_CommonTools import (
     selectGenTop, selectGenAntiTop, selectGenQuarksFromHardScattering,
     selectMETFilters, selectFatJets, getCandidateHiggs, selectAK4Jets, selectMuons, selectElectrons,
     selGenPartsWithStatusFlag,
-    getHToAATo4BLundPlaneRewgt, getHiggsPtRewgtForGGToHToAATo4B, 
+    getHToAATo4BLundPlaneRewgt, #getHiggsPtRewgtForGGToHToAATo4B, 
+    getHiggsPtRewgtForGGH_HToAATo4B, getHiggsPtRewgtForVBFH_HToAATo4B, 
+    getHiggsPtRewgtForWH_HToAATo4B, getHiggsPtRewgtForZH_HToAATo4B,
+    getHiggsPtRewgtForTTH_HToAATo4B, 
+    add_HiggsEW_kFactors,
     getTopPtRewgt, getPURewgts, getHTReweight,
     getPURewgts_variation, get_jetTriggerSF, get_PSWeight, add_pdf_as_weight, get_QCDScaleWeight,
     get_JER_and_JES,
@@ -292,12 +296,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             self.datasetInfo['isSignalGGH']      = True if "SUSY_GluGluH_01J_HToAATo4B" in datasetName_part1 else False
             self.datasetInfo['isSignalVBFH']     = True if "SUSY_VBFH_HToAATo4B"        in datasetName_part1 else False
             self.datasetInfo['isSignalWH']       = True if "SUSY_WH_WToAll_HToAATo4B"   in datasetName_part1 else False
-            self.datasetInfo['isSignalVH']       = True if "SUSY_ZH_ZToAll_HToAATo4B"   in datasetName_part1 else False
+            self.datasetInfo['isSignalZH']       = True if "SUSY_ZH_ZToAll_HToAATo4B"   in datasetName_part1 else False
             self.datasetInfo['isSignalTTH']      = True if "SUSY_TTH_TTToAll_HToAATo4B" in datasetName_part1 else False
             self.datasetInfo['isSignal']         = (self.datasetInfo['isSignalGGH']   or \
                                                      self.datasetInfo['isSignalVBFH'] or \
                                                      self.datasetInfo['isSignalWH']   or \
-                                                     self.datasetInfo['isSignalVH']   or \
+                                                     self.datasetInfo['isSignalZH']   or \
                                                      self.datasetInfo['isSignalTTH'] )
             self.datasetInfo['isQCDIncl']        = True if kQCDIncl      in self.datasetInfo['sample_category'] else False
             self.datasetInfo['isQCD_bEnrich']    = True if kQCD_bEnrich  in self.datasetInfo['sample_category'] else False
@@ -478,7 +482,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             print(f"{self.SFs_ParticleNetMD_XbbvsQCD = }")
 
         
-        
+
+        ## Set Systematic names to use ----------------------------------------------------------
+
+        self.systNameLPRewgt = SystNameConvs['LPRewgt']
+        self.systNameGGHPtRewgt = SystNameConvs['ggHPtRewgt']
+        self.systNameVBFHPtRewgt = SystNameConvs['VBFHPtRewgt']
+        self.systNameWHPtRewgt = SystNameConvs['WHPtRewgt']
+        self.systNameZHPtRewgt = SystNameConvs['ZHPtRewgt']
+        self.systNameTTHPtRewgt = SystNameConvs['ttHPtRewgt']
+
+
         #dataset_axis = hist.axis.StrCategory(name="dataset", label="", categories=[], growth=True)
         #muon_axis = hist.axis.Regular(name="massT", label="Transverse Mass [GeV]", bins=50, start=15, stop=250)
         dataset_axis    = hist.Cat("dataset", "Dataset")
@@ -1182,12 +1196,36 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             #)
 
 
+            
             # MC GGF HToAATo4B Higgs pT reweight
-            wgt_GGH_HiggsPt = wgt_GGH_HiggsPtUp = wgt_GGH_HiggsPtDown = None
             if self.datasetInfo['isSignalGGH']:
-                wgt_GGH_HiggsPt, wgt_GGH_HiggsPtUp, wgt_GGH_HiggsPtDown = getHiggsPtRewgtForGGToHToAATo4B(
-                    GenHiggsPt_list = genHiggs.pt #ak.firsts(genHiggs.pt)
+                wgt_GGHaa_HiggsPt, wgt_GGHaa_HiggsPtUp, wgt_GGHaa_HiggsPtDown = getHiggsPtRewgtForGGH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
                 )
+            if self.datasetInfo['isSignalVBFH']:
+                wgt_VBFHaa_HiggsPt, wgt_VBFHaa_HiggsPtUp, wgt_VBFHaa_HiggsPtDown = getHiggsPtRewgtForVBFH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
+                )
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "VBF")
+            if self.datasetInfo['isSignalWH']:
+                wgt_WHaa_HiggsPt, wgt_WHaa_HiggsPtUp, wgt_WHaa_HiggsPtDown = getHiggsPtRewgtForWH_HToAATo4B(
+                    genHiggs = genHiggs,
+                    genW = genW
+                )
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "WH")
+            if self.datasetInfo['isSignalZH']:
+                wgt_ZHaa_HiggsPt, wgt_ZHaa_HiggsPtUp, wgt_ZHaa_HiggsPtDown = getHiggsPtRewgtForZH_HToAATo4B(
+                    genHiggs = genHiggs,
+                    genZ = genZ
+                )
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "ZH")
+            if self.datasetInfo['isSignalTTH']:
+                wgt_TTHaa_HiggsPt, wgt_TTHaa_HiggsPtUp, wgt_TTHaa_HiggsPtDown = getHiggsPtRewgtForTTH_HToAATo4B(
+                    GenHiggsPt_list = genHiggs.pt
+                )
+                EWcorr = add_HiggsEW_kFactors(events.GenPart, dataset = "TTH")
+
+
 
 
             weights.add(
@@ -1198,23 +1236,46 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 "genWeight",
                 weight = np.copysign(np.ones(len(events)), events.genWeight)
             )
-            
-            #weights.add(
-            #    "PU",
-            #    weight     = wgt_PU,
-            #    weightUp   = wgt_PUUp,
-            #    weightDown = wgt_PUDown
-            #)
-
-            '''
             if self.datasetInfo['isSignalGGH']:
                 weights.add(
-                    "GGHPtRewgt",
-                    weight     = wgt_GGH_HiggsPt,
-                    weightUp   = wgt_GGH_HiggsPtUp,
-                    weightDown = wgt_GGH_HiggsPtDown
-                )
-            '''
+                    self.systNameGGHPtRewgt,
+                    weight     = copy.deepcopy(wgt_GGHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_GGHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_GGHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalVBFH']:
+                weights.add(
+                    self.systNameVBFHPtRewgt,
+                    weight     = copy.deepcopy(wgt_VBFHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_VBFHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_VBFHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalWH']:
+                weights.add(
+                    self.systNameWHPtRewgt,
+                    weight     = copy.deepcopy(wgt_WHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_WHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_WHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalZH']:
+                weights.add(
+                    self.systNameZHPtRewgt,
+                    weight     = copy.deepcopy(wgt_ZHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_ZHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_ZHaa_HiggsPtDown)
+                )              
+            if self.datasetInfo['isSignalTTH']:
+                weights.add(
+                    self.systNameTTHPtRewgt,
+                    weight     = copy.deepcopy(wgt_TTHaa_HiggsPt),
+                    weightUp   = copy.deepcopy(wgt_TTHaa_HiggsPtUp),
+                    weightDown = copy.deepcopy(wgt_TTHaa_HiggsPtDown)
+                )            
+            #if self.datasetInfo['isSignal'] and (not self.datasetInfo['isSignalGGH']) :  
+            #    weights.add(
+            #        "HiggsEW_kFactors",
+            #        weight = EWcorr
+            #    )
 
 
 
