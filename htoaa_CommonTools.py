@@ -55,7 +55,9 @@ def calculate_deltaPhi(phi1, phi2):
     return (phi1 - phi2 + np.pi) % (2 * np.pi) - np.pi
 
 def calculate_AbsDeltaPhi(phi1, phi2):
-    return calculate_deltaPhi(phi1, phi2)
+    #return calculate_deltaPhi(phi1, phi2)
+    return np.absolute(calculate_deltaPhi(phi1, phi2))
+
 
 
 def getSampleHTRange(sample_datasetNameFull):
@@ -197,9 +199,12 @@ def getNanoAODFile(
         if  xrdcpFile(fileName_EOS, fileNameLocal, nTry = 3, cp_command = 'eos cp'):
             print(f"Forced xrdcp for {fileName_EOS = } successful.")
             print(f"htoaa_CommonTools::getNanoAODFile() here3 {datetime.now() = }"); sys.stdout.flush()
+        elif xrdcpFile(fileName_EOS, fileNameLocal, nTry = 3, cp_command = 'xrdcp'):
+            print(f"Forced xrdcp for {fileName_EOS = } successful.")
+            print(f"htoaa_CommonTools::getNanoAODFile() here3p1 {datetime.now() = }"); sys.stdout.flush()
         print(f"{fileNameLocal = }: {os.path.exists(fileNameLocal) = } ")            
-        print(f"List directory {os.path.dirname(fileNameLocal) = }:  {os.listdir(os.path.dirname(fileNameLocal)) = }")
         if os.path.exists(fileNameLocal):
+            print(f"List directory {os.path.dirname(fileNameLocal) = }:  {os.listdir(os.path.dirname(fileNameLocal)) = }")
             return fileNameLocal, True
 
     print(f"htoaa_CommonTools::getNanoAODFile() here4 {datetime.now() = }"); sys.stdout.flush()
@@ -965,9 +970,14 @@ def getHiggsPtRewgtForGGH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     extractor_ = extractor()
     extractor_.add_weight_sets([
         "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['inputFile']
+            ),
+        "HiggsPtRewgtUncertainty %s %s" % (
             Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramNameForUncertainty'],
             Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['inputFile']
             )
+            ),
         ])    
     extractor_.finalize()
     evaluator_ = extractor_.make_evaluator()

@@ -513,6 +513,221 @@ Triggers_perEra = {
 }
 Triggers_perEra[Era_2016preVFP ] = Triggers_perEra[Era_2016]
 Triggers_perEra[Era_2016postVFP] = Triggers_perEra[Era_2016]
+
+'''
+Triggers_perEra_test = {
+    Era_2016preVFP: {
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet450':                                    [], # 36.47 / 36.47
+                #'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
+                'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
+                'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
+                'HLT_PFHT800':                                     [], # 27.71 / 36.47
+                'HLT_PFHT900':                                     [], # 36.47 / 36.47
+                #
+                'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
+                #'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
+                #'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
+                'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
+                #
+                #'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
+                'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
+                'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
+                'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
+                #'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
+            },
+            'BTagCSV': { # BTagCSV primary dataset
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
+                'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47
+                'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
+                # VBF triggers
+                #'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500': [], # 36.47 / 36.47
+                #'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240': [], # 36.47 / 36.47
+            },
+        },
+        'Trg_Combo_MET': {
+            'MET': { # MET primary dataset
+                'HLT_MET200':                                               [], # 36.47 / 36.47
+                'HLT_PFMET110_PFMHT110_IDTight':                            [], # 35.83 / 36.47
+                'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                    [], # 35.83 / 36.47
+                'HLT_PFMET120_PFMHT120_IDTight':                            [], # 36.47 / 36.47
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 36.47 / 36.47
+                'HLT_PFMET170_HBHECleaned':                                 [], # 36.47 / 36.47
+                'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight': [], # 36.47 / 36.47
+            },
+        },
+        'Trg_Combo_Mu': {
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24':   [], # ['L1_SingleMu22'], # 36.47
+                'HLT_IsoTkMu24': [], 
+                'HLT_IsoMu27':   [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_Mu50':      [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_TkMu50':    [],
+            },
+        },
+    },
+    Era_2016postVFP: {
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet450':                                    [], # 36.47 / 36.47
+                'HLT_DiCentralPFJet430':                           [], # 33.64 / 36.47
+                'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5':              [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 28%
+                #'HLT_PFHT750_4JetPt50':                            [], # 27.71 / 36.47
+                #'HLT_PFHT800':                                     [], # 27.71 / 36.47
+                'HLT_PFHT900':                                     [], # 36.47 / 36.47
+                #
+                'HLT_AK8PFJet360_TrimMass30':                      [], # 36.47 / 36.47
+                'HLT_AK8PFJet450':                                 [], # 33.64 / 36.47
+                #'HLT_AK8PFHT650_TrimR0p1PT0p03Mass50':             [], # 20.2 / 36.47
+                'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50':             [], # 36.47 / 36.47   # GGH->aa->4b efficiency: 61%
+                #
+                #'HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV_p20':    [], # 20.2 / 36.47
+                'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20':    [], # 36.47 / 36.47
+                'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056':         [], # 36.47 / 36.47
+                'HLT_PFHT450_SixJet40_BTagCSV_p056':               [], # 36.47 / 36.47
+                #'HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV_p20': [], # 20.2 / 36.47
+            },
+            'BTagCSV': { # BTagCSV primary dataset
+                #'HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6': [], # 36.27 / 36.47
+                #'HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160': [], # 36.27 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6': [], # 36.47 / 36.47
+                'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172': [], # 36.47 / 36.47
+                'HLT_DoubleJet90_Double30_TripleBTagCSV_p08': [], # 36.47 / 36.47
+                'HLT_QuadJet45_TripleBTagCSV_p087': [], # 36.47 / 36.47
+                # VBF triggers
+                #'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500': [], # 36.47 / 36.47
+                #'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200': [], # 25.36 / 36.47
+                'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240': [], # 36.47 / 36.47
+            },
+        },
+        'Trg_Combo_MET': {
+            'MET': { # MET primary dataset
+                'HLT_MET200':                                               [], # 36.47 / 36.47
+                'HLT_PFMET110_PFMHT110_IDTight':                            [], # 35.83 / 36.47
+                'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight':                    [], # 35.83 / 36.47
+                'HLT_PFMET120_PFMHT120_IDTight':                            [], # 36.47 / 36.47
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 36.47 / 36.47
+                'HLT_PFMET170_HBHECleaned':                                 [], # 36.47 / 36.47
+                'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight': [], # 36.47 / 36.47
+            },
+        },
+        'Trg_Combo_Mu': {
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24':   [], # ['L1_SingleMu22'], # 36.47
+                'HLT_IsoTkMu24': [], 
+                'HLT_IsoMu27':   [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_Mu50':      [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 36.47
+                'HLT_TkMu50':    [],
+            },
+        },
+    },
+    Era_2017: {
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  [], # 41.54 
+                #'HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2':                    [], # 36.75  
+                #'HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2':                [], # 
+                #'HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5':                          [], # 
+                'HLT_PFHT1050':                                                  [], # 41.54           
+                #'HLT_AK8PFHT750_TrimMass50':                                     [], # 30.96 / 41.54   # GGH->aa->4b efficiency: 43%
+                #'HLT_AK8PFHT800_TrimMass50':                                     [], # 36.49 / 41.54   # GGH->aa->4b efficiency: 37%
+                'HLT_AK8PFJet500':                                               [], # 41.54            
+                #'HLT_AK8PFJet360_TrimMass30':                                    [], # 28.30 / 41.54  # GGH->aa->4b efficiency: 59%
+                #'HLT_AK8PFJet380_TrimMass30':                                    [], # 31.22 / 41.54  # GGH->aa->4b efficiency: 52%
+                #'HLT_AK8PFJet400_TrimMass30':                                    [], # 36.75 / 41.54  # GGH->aa->4b efficiency: 45%     
+            },     
+            'BTagCSV': { # BTagCSV primary dataset
+                #'HLT_AK8PFJet330_PFAK8BTagCSV_p17':                             [], # 7.73 / 41.54  BTagCSV dataset
+                #
+                #'HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33':          [], # 36.34 / 41.54  BTagCSV dataset
+                #'HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0':    [], # 36.75 / 41.54   BTagCSV dataset           
+                # VBF triggers:
+                #'HLT_QuadPFJet98_83_71_15_DoubleBTagCSV_p013_p08_VBF1':          [], # 7.73 / 41.54  BTagCSV dataset
+                #'HLT_QuadPFJet98_83_71_15_BTagCSV_p013_VBF2':                    [], # 7.73 / 41.54  BTagCSV dataset
+            },
+        },       
+        'Trg_Combo_MET': { 
+            'MET': { # MET primary dataset
+                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagCSV_3p1':            [], # 36.75 / 41.54     
+                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':                     [], # 36.75 / 41.54   
+                'HLT_PFMET120_PFMHT120_IDTight':                            [], # 40.67 / 41.54 
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':             [], # 36.75 / 41.54 
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight':                    [], # 40.67 / 41.54 
+                'HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60':              [], # 36.75 / 41.54    
+                'HLT_PFMETTypeOne120_PFMHT120_IDTight':                     [], # 40.67 / 41.54 
+                'HLT_PFMET140_PFMHT140_IDTight': [], # 41.54 / 41.54 
+                'HLT_PFMETTypeOne140_PFMHT140_IDTight': [], # 41.54 / 41.54 
+                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':                 [], # 36.75 / 41.54 
+                'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # 41.54 / 41.54 
+            },            
+        },        
+        'Trg_Combo_Mu': {
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24': [], # ['L1_SingleMu22'], # 38.06 / 41.54
+                'HLT_IsoMu27': [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_Mu50':    [], # ['L1_SingleMu22', 'L1_SingleMu25'], # 41.54
+                'HLT_OldMu100': [],
+                'HLT_TkMu100': [],  
+            },
+        },        
+    },
+    Era_2018: {
+        'Trg_Combo_AK4AK8Jet_HT_VBF': {
+            'JetHT': { # JetHT primary dataset
+                'HLT_PFJet500':                                                  [], # ['L1_SingleJet180'], 
+                'HLT_PFHT1050':                                                  [], # ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFHT800_TrimMass50':                                     [], # ['L1_SingleJet180', 'L1_HTT360er'],
+                'HLT_AK8PFJet500':                                               [], # ['L1_SingleJet180'],
+                'HLT_AK8PFJet400_TrimMass30':                                    [], # ['L1_SingleJet180'],
+                #'HLT_AK8PFJet330_TrimMass30_PFAK8BoostedDoubleB_np4':            [], # ['L1_SingleJet180'],
+                #
+                #'HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71':       [], # ['L1_DoubleJet112er2p3_dEta_Max1p6', 'L1_DoubleJet150er2p5'],
+                'HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5': [], # ['L1_HTT320er', 'L1_HTT360er', 'L1_HTT400er', 'L1_ETT2000', 'L1_HTT320er_QuadJet_70_55_40_40_er2p4', 'L1_HTT320er_QuadJet_80_60_er2p1_45_40_er2p3' ],
+                #
+                #'HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepCSV_1p3_7p7_VBF1':    [], # ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],
+                #'HLT_QuadPFJet103_88_75_15_PFBTagDeepCSV_1p3_VBF2':              [], # ['L1_SingleJet180', 'L1_HTT320er', 'L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5'],      
+            },      
+        },
+        'Trg_Combo_MET': { # https://indico.cern.ch/event/1424480/#17-andrew-brinkerhoff
+            'MET': { # MET primary dataset
+                'HLT_PFMET120_PFMHT120_IDTight_PFHT60':               [], # ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'], 
+                #'HLT_PFMET120_PFMHT120_IDTight': [],
+                'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60':       [], # ['L1_ETMHF90_HTT60er', 'L1_ETMHF100_HTT60er', 'L1_ETMHF110_HTT60er'],
+                #'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight': [],
+                'HLT_PFMET110_PFMHT110_IDTight_CaloBTagDeepCSV_3p1':  [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                'HLT_PFMETTypeOne200_HBHE_BeamHaloCleaned':           [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                #'HLT_PFMET200_HBHE_BeamHaloCleaned': [],
+                'HLT_PFMETTypeOne140_PFMHT140_IDTight':               [], # ['L1_ETMHF100', 'L1_ETMHF110', 'L1_ETMHF120', 'L1_ETMHF130'], 
+                #'HLT_PFMET140_PFMHT140_IDTight': [],
+                #'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight': [], # ZH->aa->4b+MET efficiency 99%
+            },
+        },        
+        'Trg_Combo_Mu': {
+            'SingleMuon': { # SingleMuon primary dataset
+                'HLT_IsoMu24': [], # ['L1_SingleMu22'],
+                'HLT_IsoMu27': [], # ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_Mu50':    [], # ['L1_SingleMu22', 'L1_SingleMu25'],
+                'HLT_OldMu100': [],
+                'HLT_TkMu100': [],                
+            },
+        },
+    }
+}
+'''
+
+
+
+
+
+
+
 '''
 ## Andrew's slides on triggers https://indico.cern.ch/event/1479951/contributions/6234638/attachments/2968060/5241665/2024_11_15_HToAATo4B_selection_catgories_NanoAODTools.pdf#page=11
 trigFat :
@@ -774,22 +989,22 @@ topTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
 WvsQCDTagWPs = { # https://twiki.cern.ch/twiki/bin/viewauth/CMS/ParticleNetSFs
     Era_2016preVFP: {
         'PNetWZvsQCD': {
-            'T': 0.9843, # 0.5% mistag rate: 0p5
+            'T': 0.9843, #0.974, # 0.5% mistag rate: 0p5
         },
     },
     Era_2016postVFP: {
         'PNetWZvsQCD': {
-            'T': 0.9843,
+            'T': 0.9843, #0.974,
         },
     },
     Era_2017: {
         'PNetWZvsQCD': {
-            'T': 0.9858,
+            'T': 0.9858, #0.978,
         },
     },
     Era_2018: {
         'PNetWZvsQCD': {
-            'T': 0.9873,
+            'T': 0.9873, #0.98,
         },
     },    
 }
@@ -890,8 +1105,9 @@ Corrections = {
     "HiggsPtRewgt": {
         "GGH_HToAATo4B": {
             'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/ggHHiggsPtRewgt_HToAATo4B_TH1D.root', #'/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/ggHHiggsPtRewgt_HToAATo4B.root', 
-            'histogramName': 'hGenHiggsPt_Nom_Wgt_Hqt',
-            'xAxisRange': [20, 800], # pT(GenHiggs)
+            'histogramName':               'hGenHiggsPt_Nom_Wgt_NLO',
+            #'histogramNameForUncertainty': 'hGenHiggsPt_Nom_Wgt_NLO_to_Hqt', # Down: Nom * (0.927853 - (7.60259e-05 * Higgs pT)), Up: Nom^2/Down
+            'xAxisRange': [150, 1000], # pT(GenHiggs)
         },
         "VBFH_HToAATo4B": {
             'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/VBFHHiggsPtRewgt_HToAATo4B_TH1D.root', # /eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/VBFHHiggsPtRewgt_HToAATo4B.root
@@ -899,16 +1115,18 @@ Corrections = {
             'xAxisRange': [20, 650], # pT(GenHiggs)
         },
         "WH_HToAATo4B": {
-            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/WH_2D_weight_18.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/WH_2D_weight_$ERA.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
             'histogramName': 'WH_weights_histo',
             'xAxisRange': [-1.10, 1.10], # log2( (2*pT_H) / (pT_H + pT_W) )
             'yAxisRange': [ 7.0 , 9.6 ], # log2( pT_H )
+            'kFactorNLONorm': 1.035, # https://hboucham.web.cern.ch/Haa4b_plots/index.html#04/01/2025
         },
         "ZH_HToAATo4B": {
-            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/ZH_2D_weight_18.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
+            'inputFile':     'data/correction/mc/HiggsPtRewgt/WH_ZH_wgts_Hichem/ZH_2D_weight_$ERA.root', # Hichem's file share on 01/07/2025: /afs/cern.ch/user/h/hboucham/public/commonFiles/VH_pt_SF/
             'histogramName': 'ZH_weights_histo',
             'xAxisRange': [-1.10, 1.10], # log2( (2*pT_H) / (pT_H + pT_W) )
             'yAxisRange': [ 7.0 , 9.6 ], # log2( pT_H )
+            'kFactorNLONorm': 1.042, # https://hboucham.web.cern.ch/Haa4b_plots/index.html#04/01/2025
         },
         "TTH_HToAATo4B": {
             'inputFile':     'data/correction/mc/HiggsPtRewgt/2018/ttHHiggsPtRewgt_HToAATo4B_TH1D.root', # /eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/ttHHiggsPtRewgt_HToAATo4B.root.
@@ -1064,8 +1282,8 @@ SystNameConvs = {
     'Btag':               'CMS_btag_fixedWP_comb_bc_$YEAR',    
     'BtagCorr':           'CMS_btag_fixedWP_comb_bc_correlated',
     'BtagUncorr':         'CMS_btag_fixedWP_comb_bc_uncorrelated_$YEAR',
-    'AK8JetPNetWZTag':    'CMS_eff_fj_ParticleNet_WZ_Nominal',
-    'AK8JetPNetTopTag':   'CMS_eff_fj_ParticleNet_Top_Nominal',    
+    'AK8JetPNetWZTag':    'CMS_eff_fj_ParticleNet_WZ_Nominal_$YEAR',
+    'AK8JetPNetTopTag':   'CMS_eff_fj_ParticleNet_Top_Nominal_$YEAR',    
 
     'AK8JetJES':          'CMS_scale_fj_$YEAR', 
     'AK8JetJER':          'CMS_res_fj_$YEAR',
@@ -1090,9 +1308,10 @@ SystNameConvs = {
     'QCDScale':           'QCDScale',
     'PDF':                'pdf_99',
     'massScaleH':         'CMS_NPS25005_scale_fj_massH',
-    'massResolH':	  'CMS_NPS25005_res_fj_massH',
+    'massResolH':        'CMS_NPS25005_res_fj_massH',
     'massScaleA':         'CMS_NPS25005_scale_fj_massA',
     'massResolA':         'CMS_NPS25005_res_fj_massA',
+    
 }
 
 massPseudoscalarA_windows_dict = OD([
