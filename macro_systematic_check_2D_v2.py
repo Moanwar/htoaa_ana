@@ -5,8 +5,17 @@ import os
 
 def plot_systematics_2D(rootfile, outdir="plots", histname="hLeadingFatJetPNet_massH_v2b_vs_massA34a_VBFIncl_Xto4bv2_SRWP40_Nom"):
     f = uproot.open(rootfile)
-    sample_dir = f["evt/VBFHtoaato4b_mA_40"]
 
+    #if "evt" in f.keys():
+    # e.g. f["evt/VBFHtoaato4b_mA_40"]
+    #sample_dir = f["evt/ggHtoaato4b_mA_30"]
+    sample_dir = f["evt/VBFHtoaato4b_mA_30"]
+
+    #else:
+    # No directory: histograms live at the top level
+    #sample_dir = f
+        
+    # Now you can safely do:
     # --- Nominal histogram (2D) ---
     h2_nom = sample_dir[histname]
     nom_values_2d, x_edges, y_edges = h2_nom.to_numpy()
@@ -88,7 +97,13 @@ def plot_systematics_2D(rootfile, outdir="plots", histname="hLeadingFatJetPNet_m
         plt.close()
         print(f"Saved {outname_y}")
 plot_systematics_2D(
-    rootfile="analyze_htoaa_SUSY_VBFH_HToAATo4B_Pt150_M-40_TuneCP5_13TeV_madgraph_pythia8_0_0.root",
+    rootfile="analyze_htoaa_SUSY_VBFH_HToAATo4B_Pt150_M-30_TuneCP5_13TeV_madgraph_pythia8_0_0.root",
     outdir="plots_massH_1D_massA_1D",
     histname="hLeadingFatJetPNet_massH_v2b_vs_massA34a_VBFIncl_Xto4bv2_SRWP40_Nom"
 )
+#hLeadingFatJetPNet_massH_v2b_vs_massA34a_VBFIncl_Xto4bv2_SRWP40_Nom
+#hLeadingFatJetPNet_massH_v2b_vs_massA34a_gg0lHi_Xto4bv2_SRWP40_Nom
+
+#"/afs/cern.ch/work/m/moanwar/public/hto2ato4b/2DAlphabetfiles_VBF_sys_v2/20251021_DataMC/2018/VBFjj/2DAlphabet_inputFiles/VBFHiPTHi/VBFHiPTHi_VBFHtoaato4b_mA_50_2018.root"
+#    histname="VBFHiPTHi_VBFHtoaato4b_mA_50_2018_pnet_34a_WP40_Pass_Nom"
+#"/afs/cern.ch/work/m/moanwar/private/siddhesh86/analysis/20251021_DataMC/2018/VBFjj/analyze_htoaa_stage1.root"

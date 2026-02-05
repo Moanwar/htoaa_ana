@@ -26,6 +26,7 @@ from parse import *
 print(f"htoaa_Analysis_VBFMode:: here4.1 {datetime.now() = }"); sys.stdout.flush()
 import logging
 print(f"htoaa_Analysis_VBFMode:: here5 {datetime.now() = }"); sys.stdout.flush()
+from collections import OrderedDict
 
 # comment test3
 '''
@@ -526,16 +527,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #for iCondition in range(self.sel_names_all["Presel"].index("nPV"), len(self.sel_names_all["Presel"]) - 1):
         #    conditionName = self.sel_names_all["Presel"][iCondition]
         #    self.sel_names_all["sel_%s" % conditionName] = self.sel_names_all["Presel"][0 : (iCondition+1)]
-        
-        self.sel_names_all.pop("Presel", None)
-
+        #self.sel_names_all.pop("Presel", None)
         self.sel_conditions_all_list = set()
         for sel_conditions_ in self.sel_names_all.values():
             self.sel_conditions_all_list.update( sel_conditions_ )
         print(f"{self.sel_conditions_all_list = }")
-
+        
         print(f"self.sel_names_all: {json.dumps(self.sel_names_all, indent=4)}")
-
+        
         self.evtWeights_list = ['PU', ]
         if self.datasetInfo['isSignalGGH']:
             self.evtWeights_list.extend( ['GGHHiggsPt'] )
@@ -687,6 +686,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         jetN3_axis            = hist.Bin("N3",                     r"N3b1",                      100,       0,       5)
         jetTau_axis           = hist.Bin("TauN",                   r"TauN",                      100,       0,       1)
         deltaR_axis           = hist.Bin("deltaR",                 r"$delta$ r ",                500,       0,       5)
+        ConeSize_axis         = hist.Bin("ConeSize",                 r"$delta$ r ",                500,     0,       1.5)
         deltaPhi_axis         = hist.Bin("deltaPhi",               r"$delta$ phi ",             1000,       0,       3.14) # <<<<<<<<<
         #HT_axis               = hist.Bin("HT",                     r"HT",                       3000,       0,    3000)
         HT_axis               = hist.Bin("HT",                     r"HT",                       4000,       0,    4000)
@@ -786,7 +786,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                                                                     sYaxis: deltaR_axis,      sYaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
                 ('hMassGenALight_vs_maxDRGenHGenB_all',            {sXaxis: mass_axis,       sXaxisLabel: r"m (GEN A light) [GeV]",
                                                                     sYaxis: deltaR_axis,      sYaxisLabel: r"$Delta$r (GEN H, GEN B)_{max}"}),
-
+                ('hGenHiggsPt_vs_4bConeSize',                       {sXaxis: pt_axis,       sXaxisLabel:r"pt (GEN H) [GeV]",
+                                                                     sYaxis: ConeSize_axis,      sYaxisLabel: r"4b Cone Size (DR)"}),
             ]))
 
         if self.datasetInfo['isQCD'] and runMode_QCDGenValidation:
@@ -1826,11 +1827,26 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 },
                 with_name="PtEtaPhiMLorentzVector",
                 behavior=vector.behavior,
-            )            
+            )
+            LVGenB_0_asSingleton = ak.singletons(LVGenB_0)
+            LVGenB_1_asSingleton = ak.singletons(LVGenB_1)
+            LVGenBbar_0_asSingleton = ak.singletons(LVGenBbar_0)
+            LVGenBbar_1_asSingleton = ak.singletons(LVGenBbar_1)
 
-            dr_GenH_GenB = ak.concatenate([genHiggs.delta_r(LVGenB_0), genHiggs.delta_r(LVGenBbar_0), genHiggs.delta_r(LVGenB_1), genHiggs.delta_r(LVGenBbar_1)], axis=-1)
+            dR_4b = ak.concatenate([
+                LVGenB_0_asSingleton.delta_r(LVGenB_1_asSingleton),
+                LVGenB_0_asSingleton.delta_r(LVGenBbar_0_asSingleton),
+                LVGenB_0_asSingleton.delta_r(LVGenBbar_1_asSingleton),
+                LVGenB_1_asSingleton.delta_r(LVGenBbar_0_asSingleton),
+                LVGenB_1_asSingleton.delta_r(LVGenBbar_1_asSingleton),
+                LVGenBbar_0_asSingleton.delta_r(LVGenBbar_1_asSingleton)
+            ], axis=-1)
+            cone_size_4b = ak.max(dR_4b, axis=-1)
+            genHiggs_asSingletons = ak.singletons(genHiggs)
+            dr_GenH_GenB = ak.concatenate([genHiggs_asSingletons.delta_r(LVGenB_0), genHiggs_asSingletons.delta_r(LVGenBbar_0), genHiggs_asSingletons.delta_r(LVGenB_1), genHiggs_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)    
             mask_SignalHToAATo4B_Boosted = (max_dr_GenH_GenB < 0.8)
+
 
             if printLevel >= 10:
                 printVariable("\n genBBar_pairs['b']", genBBar_pairs['b'])  
@@ -2685,7 +2701,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         
         # reconstruction level cuts for cut-flow table. Order of cuts is IMPORTANT
         #cuts_reco = ["dR_LeadingFatJet_GenB_0p8"] + self.sel_names_all["Presel"] #.copy()
-
        
         # create a PackedSelection object
         # this will help us later in composing the boolean selections easily
@@ -3134,9 +3149,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         #print(f'{self.sel_names_all["Presel"] = }')
         #sel_SR          = selection.all("nPV", "FatJetGet")
         sel_SR           = None #selection.all(* self.sel_names_all["Presel"])
-        sel_GenHToAATo4B = None
-
-        if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] and 1==0:
+        #sel_GenHToAATo4B = None
+        if self.datasetInfo['isMC'] and self.datasetInfo['isSignal'] :
+            sel_GenHToAATo4B = None
             # max. dR(sel_leadingFatJet, GEN 4B from H->aa)
             dr_LeadingFatJet_GenB = ak.concatenate([leadingFatJet_asSingletons.delta_r(LVGenB_0), leadingFatJet_asSingletons.delta_r(LVGenBbar_0), leadingFatJet_asSingletons.delta_r(LVGenB_1), leadingFatJet_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_LeadingFatJet_GenB = ak.max(dr_LeadingFatJet_GenB, axis=-1)
@@ -3145,15 +3160,17 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 printVariable("\n leadingFatJet_asSingletons.delta_r(LVGenB_0)", leadingFatJet_asSingletons.delta_r(LVGenB_0))
                 printVariable("\n dr_LeadingFatJet_GenB", dr_LeadingFatJet_GenB)
                 printVariable("\n max_dr_LeadingFatJet_GenB", max_dr_LeadingFatJet_GenB)
-                
+
             # GEN level selection
-            selection.add("1GenHiggs", ak.num(genHiggs) == 1)
+            selection.add("1GenHiggs", ak.num(genHiggses) == 1)
             selection.add("2GenA", ak.num(genACollection) == 2)
             selection.add("2GenAToBBbarPairs", ak.num(genBBar_pairs) == 2)
             selection.add("dR_GenH_GenB_0p8", max_dr_GenH_GenB < 0.8)
             selection.add("dR_LeadingFatJet_GenB_0p8", max_dr_LeadingFatJet_GenB < 0.8)
+            selection.add("dR_4GenB_ConeSize_0p8", cone_size_4b < 0.8)
 
-            # 
+            #
+            '''
             sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8"]
             self.sel_names_all.update( OD([
                 ("GenHToAATo4B_1", ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]),
@@ -3167,11 +3184,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 else:
                     self.sel_names_all.update( OD([
                         ("GenSR_%d" % (idx+1),  [*self.sel_names_all["GenSR_%d" % (idx)], cutName]),
-                    ]) ) 
-            
+                    ]) )             
             sel_GenHToAATo4B = selection.all(* self.sel_names_all["GenHToAATo4B"])
-        
-        
+            '''
+            # --- define gen-level selections locally ---
+            #sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8", "dR_4GenB_ConeSize_0p8","dR_LeadingFatJet_GenB_0p8"]
+            sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8", "dR_LeadingFatJet_GenB_0p8"]
+            # --- local dictionary to mimic sel_names_all structure ---
+            local_sel_names = OrderedDict()
+            #local_sel_names["GenHToAATo4B_1"] = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]
+            local_sel_names["GenHToAATo4B"]   = sel_names_GEN.copy()
+            sel_GenHToAATo4B = selection.all(*local_sel_names["GenHToAATo4B"])
+
         # useful debugger for selection efficiency
         if shift_syst is None and printLevel >= 5:
             print(dataset)
@@ -3983,6 +4007,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             if self.datasetInfo['histogramSaveLevel'] >= 1: # hCutFlowPerCat
                 # For each selection, yields after every cut
+                self.sel_names_all.pop("Presel", None)                
                 for iSelection in self.sel_names_all.keys():
                     for iCut in range(0, len(self.sel_names_all[iSelection])+1):
                         if iCut == 0:
@@ -4123,7 +4148,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
             ## isMC && isSignal ------------------------------------------------------------------------------------------------------------
 
-            if self.datasetInfo['isSignal'] and runMode_SignalGenChecks and syst == "Nom": 
+            if self.datasetInfo['isSignal'] and runMode_SignalGenChecks and syst == "Nom":
                 output['hGenHiggsPt_GenHToAATo4B'].fill(
                     dataset=dataset,
                     Pt=genHiggs.pt[sel_GenHToAATo4B],
@@ -4299,7 +4324,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
 
-
+                output['hGenHiggsPt_vs_4bConeSize'].fill(
+                    dataset=dataset,
+                    Pt=(genHiggs.pt[sel_GenHToAATo4B]),
+                    ConeSize=(cone_size_4b[sel_GenHToAATo4B]),
+                    systematic=syst,
+                    weight=evtWeight_gen[sel_GenHToAATo4B]
+                )
 
             # QCD MC ----------------------------------------------
             if self.datasetInfo['isQCD'] and runMode_QCDGenValidation and syst == "Nom":

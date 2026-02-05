@@ -20,7 +20,7 @@ DEBUG   = False
 
 ## Location of postprocessed input files
 IN_DIRS  = '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/YEAR/MC/'
-IN_FILES = 'SUSY_GluGluH_01J_HToAATo4B_Pt150_M-mA_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9/r1/PNet_v2_skim.root'
+IN_FILES = 'SUSY_GluGluH_01J_HToAATo4B_Pt250_M-mA_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18NanoAODv9/r1/PNet_v2_Skim.root'
 
 
 #YEARS  = ['2016APV','2016','2017','2018']
@@ -108,13 +108,13 @@ for year in YEARS:
         if iH < 0: continue
         if ch.FatJet_pt[iH] < 250.0: continue
         count[year]['iH'] += 1
-        ## Higgs AK8 must pass X4b WP60
+        ## Higgs AK8 must pass X4b WP60 0.93 , but loose it for now to be 0.66
         if ch.FatJet_PNet_X4b_v2a_Haa4b_score[iH] + \
-           ch.FatJet_PNet_X4b_v2b_Haa4b_score[iH] < 2.0*0.93: continue  ## Higgs signal must pass WP60
+           ch.FatJet_PNet_X4b_v2b_Haa4b_score[iH] < 2.0*0.66: continue## Higgs signal must pass WP60 0.93
         count[year]['X4b'] += 1
         ## Higgs AK8 must contain 4 GEN-level b-hadrons and quarks
         if ch.FatJet_nBHadrons[iH] < 4: continue
-        #if ch.Haa4b_FatH_nBQuarks  < 4: continue
+        if ch.Haa4b_FatH_nBQuarks  < 4: continue
         count[year]['4B'] += 1
         ## Event must have good GEN "a" bosons
         iA1 = ch.GEN_a1_idx
