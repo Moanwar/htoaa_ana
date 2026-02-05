@@ -8,7 +8,8 @@ from htoaa_Settings import *
 # Luminosities_perTrigger, Triggers_perEra
 
 #sTriggerSet = 'Trg_Combo_AK4AK8Jet_HT_VBF';  Datasets = ['JetHT', 'BTagCSV']
-sTriggerSet = 'Trg_Combo_MET';  Datasets = ['MET']
+sTriggerSet = 'Trg_Combo_AK4AK8Jet_HT_VBF';  Datasets = ['BTagCSV'] # ['JetHT', 'BTagCSV']
+#sTriggerSet = 'Trg_Combo_MET';  Datasets = ['MET']
 
 triggers_set = set()
 
