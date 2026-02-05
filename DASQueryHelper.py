@@ -4,6 +4,10 @@ import json
 printLevel = 0
 
 def getDASDatasetFiles(dataset):
+    # DAS query for dataset name with '.' (for private MC) gives validation error. 
+    # Hence turn-around for it
+    if '.' in dataset:  dataset = dataset.replace('.', 'p')
+
     cmd1 = ['bash','-c', 'dasgoclient --query="file dataset=%s" --format=json'%(dataset)]
     if printLevel >= 10:
         print(f"cmd1: {cmd1}")
