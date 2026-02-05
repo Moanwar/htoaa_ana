@@ -90,7 +90,9 @@ if __name__ == '__main__':
     if era == Era_2017:          list_datasets = list_datasets_2017
     if era == Era_2018:          list_datasets = list_datasets_2018
 
-
+    print("\nlist_datasets::")
+    for list_dataset in list_datasets:
+        print(f'\t {list_dataset}')
         
     sFileSamplesInfo_toUse = sFileSamplesInfo[era]
     sFileSamplesInfo_toUse = sFileSamplesInfo_toUse.replace('.json', '_v0.json')
@@ -161,6 +163,7 @@ if __name__ == '__main__':
             # temperary fix
             #if "skimmedNanoAOD_nFiles" in samples_details[sampleName_]:
             #    samples_details[sampleName_].pop("skimmedNanoAOD_nFiles", None)
+            
 
     if checkSampleDASName:
         print(f"Running with checkSampleDASName mode:\n")
@@ -178,6 +181,9 @@ if __name__ == '__main__':
             print(json.dumps(datasetNameNeedCorrection_dict, indent=4))
         exit(0)
             
+    print("\nsamples_details::")
+    for sample_details in samples_details:
+        print(f'\t {sample_details}')
 
     # Now calculate..
     for datasetName, datasetDetails in list_datasets.items():

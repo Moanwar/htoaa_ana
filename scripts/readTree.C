@@ -36,7 +36,7 @@ void readTrees() {
     TTree *Events = getTTreeFromTChain("/eos/cms/store/group/phys_susy/HToaaTo4b/GluGluH_MINNLO_NANOGEN/glugluH_minnlo_2/Run3Summer22_nanogen/250608_105711/0000/wmLHEGS_glugluH_minnlo_*.root", "Events");
 
 
-    TFile *fOut               = new TFile("/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/GenHiggsPt_GGH_NNLO.root", "recreate");
+    TFile *fOut               = new TFile("/eos/cms/store/user/ssawant/htoaa/analysis/HiggsPtRewgts/2018/GenHiggsPt_GGH_NNLO_tmp.root", "recreate");
 
     TH1F *hGenHiggsPt_Nom     = new TH1F("hGenHiggsPt_Nom", "", 2000,            0,               2000);
     TH1F *hGenHiggsLog2Pt_Nom = new TH1F("hGenHiggsLog2Pt_Nom", "", 200,  TMath::Log2(1),    TMath::Log2(2000));
