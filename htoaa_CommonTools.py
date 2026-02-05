@@ -959,12 +959,13 @@ def getHiggsPtRewgtForGGH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
         np.ones_like(wgt_HiggsPtSystVarDown),
         wgt_HiggsPtSystVarDown)
     '''
-    
+
+    '''
     ## v2: Higgs pT reweighting w.r.t. HqTv2.0. Reweights are stored in histogram
     extractor_ = extractor()
     extractor_.add_weight_sets([
         "HiggsPtRewgt %s %s" % (
-            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramNameForUncertainty'],
             Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['inputFile']
             )
         ])    
@@ -988,10 +989,46 @@ def getHiggsPtRewgtForGGH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     ) 
 
     wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](Higgs_pt_toUse)
+    wgtUncert_HiggsPt      = evaluator_['HiggsPtRewgtUncertainty'](Higgs_pt_toUse)
 
     # Up: wgt^2
-    wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
-    wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+    #wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
+    #wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
+    wgt_HiggsPtSystVarUp   = wgt_HiggsPt * wgtUncert_HiggsPt
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt / wgtUncert_HiggsPt
+    '''
+
+    ## v2_1: Higgs pT reweighting w.r.t. NLO MC. Reweights are stored in histogram. Systematics uncertainty calculated with parametric function
+    extractor_ = extractor()
+    extractor_.add_weight_sets([
+        "HiggsPtRewgt %s %s" % (
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['histogramName'],
+            Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['inputFile']
+            ),        
+        ])    
+    extractor_.finalize()
+    evaluator_ = extractor_.make_evaluator()
+
+    xRangeMin = Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['xAxisRange'][0]
+    xRangeMax = Corrections['HiggsPtRewgt']['GGH_HToAATo4B']['xAxisRange'][1]
+
+    Higgs_pt_toUse = GenHiggsPt_list
+    # Cap jet_pt in [xRangeMin, xRangeMax]
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse < xRangeMin),
+        ak.full_like(Higgs_pt_toUse, xRangeMin),
+        Higgs_pt_toUse
+    )
+    Higgs_pt_toUse = ak.where(
+        (Higgs_pt_toUse > xRangeMax),
+        ak.full_like(Higgs_pt_toUse, xRangeMax),
+        Higgs_pt_toUse
+    ) 
+
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](Higgs_pt_toUse)
+    wgt_HiggsPtSystVarDown = wgt_HiggsPt * (0.927853 - (7.60259e-05 * Higgs_pt_toUse))
+    wgt_HiggsPtSystVarUp   = wgt_HiggsPt * wgt_HiggsPt / wgt_HiggsPtSystVarDown
+
 
     #printVariable('htoaa_CommonTools::getHiggsPtRewgtForGGH_HToAATo4B(): ', ak.zip([GenHiggsPt_list, wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]))
 
@@ -1038,13 +1075,23 @@ def getHiggsPtRewgtForVBFH_HToAATo4B(GenHiggsPt_list): # GenHiggsPt_list
     return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]
     
 
-def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW):
+def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW, Era):
     # v0: Higgs pT reweights calculated by Hichem
+
+    EraYear='18'
+    if   "16" in Era and "APV" in Era:  EraYear = "16APV"
+    elif "16" in Era:                   EraYear = "16"
+    elif "17" in Era:                   EraYear = "17"
+    elif "18" in Era:                   EraYear = "18"
+    
+    inputFile_ = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
+    inputFile_ = inputFile_.replace('$ERA', EraYear)
+
     extractor_ = extractor()
     extractor_.add_weight_sets([
         "HiggsPtRewgt %s %s" % (
             Corrections['HiggsPtRewgt']['WH_HToAATo4B']['histogramName'],
-            Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
+            inputFile_ #Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
             )
         ])    
     extractor_.finalize()
@@ -1054,6 +1101,8 @@ def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW):
     xRangeMax = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['xAxisRange'][1]
     yRangeMin = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['yAxisRange'][0]
     yRangeMax = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['yAxisRange'][1]
+
+    kFactor_NormalizationNLO = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['kFactorNLONorm']  # From Hichem, https://hboucham.web.cern.ch/Haa4b_plots/index.html#04/01/2025
 
     HiggsPt = genHiggs.pt
     WPt     = genW.pt
@@ -1084,8 +1133,7 @@ def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW):
         y_toUse
     ) 
 
-    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse)
-
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse) * kFactor_NormalizationNLO # LOToNLO wgt = shape * normalization
     # Up: wgt^2
     wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
     wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
@@ -1095,13 +1143,24 @@ def getHiggsPtRewgtForWH_HToAATo4B(genHiggs, genW):
     return [wgt_HiggsPt, wgt_HiggsPtSystVarUp, wgt_HiggsPtSystVarDown]    
     
 
-def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ):
+def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ, Era):
     # v0: Higgs pT reweights calculated by Hichem
+    
+    EraYear='18'
+    if   "16" in Era and "APV" in Era:  EraYear = "16APV"
+    elif "16" in Era:                   EraYear = "16"
+    elif "17" in Era:                   EraYear = "17"
+    elif "18" in Era:                   EraYear = "18"
+
+    inputFile_ = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
+    inputFile_ = inputFile_.replace('$ERA', EraYear)
+
+    
     extractor_ = extractor()
     extractor_.add_weight_sets([
         "HiggsPtRewgt %s %s" % (
             Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['histogramName'],
-            Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['inputFile']
+            inputFile_ #Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['inputFile']
             )
         ])    
     extractor_.finalize()
@@ -1111,6 +1170,8 @@ def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ):
     xRangeMax = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['xAxisRange'][1]
     yRangeMin = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['yAxisRange'][0]
     yRangeMax = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['yAxisRange'][1]
+
+    kFactor_NormalizationNLO = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['kFactorNLONorm']  # From Hichem, https://hboucham.web.cern.ch/Haa4b_plots/index.html#04/01/2025
 
     HiggsPt = genHiggs.pt
     ZPt     = genZ.pt
@@ -1141,8 +1202,7 @@ def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ):
         y_toUse
     ) 
 
-    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse)
-
+    wgt_HiggsPt            = evaluator_['HiggsPtRewgt'](x_toUse, y_toUse) * kFactor_NormalizationNLO # LOToNLO wgt = shape * normalization
     # Up: wgt^2
     wgt_HiggsPtSystVarUp   = np.ones_like(wgt_HiggsPt)
     wgt_HiggsPtSystVarDown = wgt_HiggsPt * wgt_HiggsPt
@@ -1800,7 +1860,10 @@ def get_L1TPrefiringWgt(L1PreFiringWeight):
     wgt_L1TPrefiring_dict['Down'] = L1PreFiringWeight.Dn
 
     return wgt_L1TPrefiring_dict
-    
+
+def get_QCDPtWgt(pt_HiggsCandidateAK8Jet):
+    return 0.11697 + np.exp(-3.311E-04 * pt_HiggsCandidateAK8Jet)
+
     
 def selGenPartsWithStatusFlag(GenPart_StatusFlags_list, statusFlag_toSelect):  
     # Check if statusFlag_toSelect th bit is 1 in binary version of GenPart_StatusFlags
@@ -2523,4 +2586,5 @@ def get_directory_size(start_path = '.'):
             if not os.path.islink(fp):
                 total_size += os.path.getsize(fp)
 
+                
     return total_size
