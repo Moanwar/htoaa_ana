@@ -983,29 +983,6 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
 
                     #fig.savefig('%s/%s_%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic,sData, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
                     fig.savefig('%s/%s_%s_%s.png' % (sOpDir_toUse,histo_name_toUse.replace('_%s'%selectionTag, ''),systematic, yAxisScale), transparent=False, dpi=80, bbox_inches="tight")
-                    '''
-                    # ---- ADD THE ROOT SAVING CODE HERE ----
-                    root_output_filename = '%s/%s_%s_%s.root' % (sOpDir_toUse, histo_name_toUse.replace('_%s'%selectionTag, ''), systematic, yAxisScale)
-                    
-                    hists_to_save = {}
-                    if hData is not None:
-                        hists_to_save['Data'] = hData
-
-                    for idx, (name, hist_obj) in enumerate(histos_dict.items()):
-                        if name != 'Data':
-                            hists_to_save[name] = hist_obj
-
-                    if hBkgTot_values is not None and len(hBkgTot_values) > 0:
-                        total_bkg_hist = hist.Hist(hist.axis.Variable(hStack_edges), storage=hist.storage.Weight())
-                        total_bkg_hist.values()[...] = hBkgTot_values
-                        total_bkg_hist.variances()[...] = hBkgTot_variance
-                        hists_to_save['TotalBkg'] = total_bkg_hist
-                        
-                    with uproot.recreate(root_output_filename) as f:
-                        for name, hist_obj in hists_to_save.items():
-                            f[name] = hist_obj
-                    '''
-                    # ... your existing code ...
 
                     # Save histograms to ROOT file
 
@@ -1023,7 +1000,7 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                         if name != 'Data':
                             hists_to_save[name] = hist_obj
 
-                    # Add signal histograms - CORRECTED VERSION
+                    # Add signal histograms 
                     if len(MCSig_list) > 0:
                         for iSig, (dataset, sig_hist) in enumerate(zip(MCSig_list, hSig_list)):
                             sig_name = sLableSig[iSig] if iSig < len(sLableSig) else dataset
@@ -1043,7 +1020,6 @@ for sDatasetName, YearsToRun_list in YearsToRun_dict.items():
                             f[name] = hist_obj
         
                     print(f"Saved ROOT file: {root_output_filename} with histograms: {list(hists_to_save.keys())}")
-
 
                     # ---- END OF ROOT SAVING ----
     
