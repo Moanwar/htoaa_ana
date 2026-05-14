@@ -1,0 +1,114 @@
+{
+    "BTagCSV_Run2017B": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017B/PNet_v1_Skim_0.root"
+    ],
+    "BTagCSV_Run2017C": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017C/PNet_v1_Skim_6.root"
+    ],
+    "BTagCSV_Run2017D": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017D/PNet_v1_Skim_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017D/PNet_v1_Skim_1.root"
+    ],
+    "BTagCSV_Run2017E": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017E/PNet_v1_Skim_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017E/PNet_v1_Skim_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017E/PNet_v1_Skim_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017E/PNet_v1_Skim_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017E/PNet_v1_Skim_4.root"
+    ],
+    "BTagCSV_Run2017F": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_10.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_11.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_12.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_13.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_14.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_15.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_16.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_17.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_18.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_19.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_20.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_21.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_22.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_23.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_24.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/BTagCSV/r1_Run2017F/PNet_v1_Skim_9.root"
+    ],
+    "JetHT_Run2017B_part1": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_0.root"
+    ],
+    "JetHT_Run2017B_part2": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017B/PNet_v1_Skim_0_9.root"
+    ],
+    "JetHT_Run2017C": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017C/PNet_v1_Skim_0_9.root"
+    ],
+    "JetHT_Run2017D": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017D/PNet_v1_Skim_0_9.root"
+    ],
+    "JetHT_Run2017E": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017E/PNet_v1_Skim_0_9.root"
+    ],
+    "JetHT_Run2017F": [
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_0.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_1.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_2.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_3.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_4.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_5.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_6.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_7.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_8.root",
+        "/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2017/data/PNet_v2_2024_11_22/JetHT/r1_Run2017F/PNet_v1_Skim_9.root"
+    ]
+}
