@@ -383,6 +383,8 @@ if __name__ == '__main__':
         if sAnalysis in [
             "htoaa_Analysis_GGFMode.py", "htoaa_Analysis_VBFMode.py", "htoaa_Analysis_VHHadronicMode.py", "htoaa_Analysis_ttHHadronicMode.py", "htoaa_Analysis_CR_QCD4b.py",
             ]:
+            selSamplesToRun_list.extend( ["QCD*","VBFHtoaato4b_mA"])
+            '''
             # exclude irrelevant samples from running
             selSamplesToExclude_list.extend( [
                 "SingleMuon_Run2016*", "SingleMuon_Run2017*", "SingleMuon_Run2018*", #"SingleMuon_Run2018A", "SingleMuon_Run2018B", "SingleMuon_Run2018C", "SingleMuon_Run2018D", 
@@ -391,7 +393,7 @@ if __name__ == '__main__':
                 "ggHtoaato4b_Incl_mA", "VBFHtoaato4b_Incl_mA", "WHtoaato4b_Incl_mA", "ZHtoaato4b_Incl_mA", "ttHtoaato4b_Incl_mA",  
                 'ggHtoaato4tau_mA_All', 'VBFHtoaato4tau_mA_All', 'VHtoaato4tau_mA_All', 'ttHtoaato4tau_mA_All',      
             ] )
-
+            '''
         #  Settings for GGF H->aa->4b trigger study
         if sAnalysis in ["htoaa_triggerStudy_GGFMode.py", "htoaa_Analysis_triggerEffi.py"]:
             # exclude irrelevant samples from running

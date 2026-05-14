@@ -856,6 +856,7 @@ def getPURewgts(PU_list, hPURewgt):
     #print(f"wgt_PU ({len(wgt_PU)}): {wgt_PU}")
     return wgt_PU
 
+
 def QCD_pT_reweighting(jet_pt):
     """
     Compute QCD pT reweighting for a given jet pT.    
@@ -910,12 +911,13 @@ def getHScaleAndResol(massH_nom):
         "resol_down": massH_resol_down
     }
 
+
 def getAScaleAndResol(mA_nom):
     rng = np.random.RandomState(12345)
     n_events = len(mA_nom)
     mA_nom_scaled = mA_nom 
-    mA_up   = np.minimum(mA_nom * 1.05, 0.5 * (mA_nom + 63))
-    mA_down = np.maximum(mA_nom * 0.95, 0.5 * (mA_nom + 11))
+    mA_up   = np.minimum(mA_nom * 1.025, 0.5 * (mA_nom + 63))
+    mA_down = np.maximum(mA_nom * 0.975, 0.5 * (mA_nom + 11))
     rand_a = rng.normal(loc=0.0, scale=1, size=n_events)
     mA_resol_up = np.minimum(np.maximum(mA_nom * (1.0 + 0.045 * rand_a), 0.5 * (mA_nom + 11)), 0.5 * (mA_nom + 63))
     mA_resol_down = (mA_nom * mA_nom) / mA_resol_up
@@ -1162,7 +1164,7 @@ def getHiggsPtRewgtForZH_HToAATo4B(genHiggs, genZ, Era):
     elif "17" in Era:                   EraYear = "17"
     elif "18" in Era:                   EraYear = "18"
 
-    inputFile_ = Corrections['HiggsPtRewgt']['WH_HToAATo4B']['inputFile']
+    inputFile_ = Corrections['HiggsPtRewgt']['ZH_HToAATo4B']['inputFile']
     inputFile_ = inputFile_.replace('$ERA', EraYear)
 
     
@@ -1329,9 +1331,7 @@ def add_pdf_as_weight(events, dataset):
     nom = np.ones(len(events))
     up_pdfas   = up_aS   = up_pdf    = np.ones(len(events))
     down_pdfas = down_aS = down_pdf  = np.ones(len(events))
-
     
-
 
     # NNPDF31_nnlo_as_0118_nf_4_mc_hessian
     # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_as_0118_nf_4_mc_hessian/NNPDF31_nnlo_as_0118_nf_4_mc_hessian.info
@@ -1343,13 +1343,22 @@ def add_pdf_as_weight(events, dataset):
         #docstring = pdf_weights.__doc__
         #docstring = events.LHEPdfWeight.__doc__
         #arg = pdf_weights[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
-        arg = events.LHEPdfWeight[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
+        mask_LHEPdfWeight   = (ak.count(events.LHEPdfWeight, axis=1) == 101)
+        events_LHEPdfWeight = ak.mask(events.LHEPdfWeight, mask_LHEPdfWeight)
+        
+        #arg = events.LHEPdfWeight[:,1:]-np.ones((len(events),100)) #np.ones((len(events),100))
+        arg = events_LHEPdfWeight[:,1:]-np.ones((len(events),100))
         summed = ak.sum(np.square(arg),axis=1)
         #pdf_unc = np.sqrt( (1./99.) * summed )
         pdf_unc = np.sqrt( summed )
         up_pdf   = nom + pdf_unc
         down_pdf = nom - pdf_unc
-
+        for wgt_  in [up_pdf, down_pdf]:
+            wgt_ = ak.where(
+                (~ mask_LHEPdfWeight),
+                np.ones(len(events)),
+                wgt_
+            )
     #anther pdf unc definition 
     #pdfUnc = ak.std(events.LHEPdfWeight,axis=1)/ak.mean(events.LHEPdfWeight,axis=1) 
     #pdfUnc = ak.fill_none(pdfUnc, 0.00)
@@ -1378,6 +1387,9 @@ def get_QCDScaleWeight(events, dataset):
     nom  = up = down = np.ones(nEvents)
 
     if hasattr(events, 'LHEScaleWeight') and "HToAATo4B" in dataset:
+        mask_LHEScaleWeight   = (ak.count(events.LHEScaleWeight, axis=1) == 9)
+        events_LHEScaleWeight = ak.mask(events.LHEScaleWeight, mask_LHEScaleWeight)
+
         if len(events.LHEScaleWeight[0]) == 9:
             # https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2018UL/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1.html#LHEPdfWeight
             # LHEScaleWeight	Float_t	LHE scale variation weights (w_var / w_nominal);
@@ -1395,14 +1407,24 @@ def get_QCDScaleWeight(events, dataset):
             # Define relevant indices for each channel
             vbf_vh_indices  = [0, 8]  # VBF, WH, ZH
             ggh_tth_indices = [0, 1, 3, 5, 7, 8]  # ggH, ttH
-            if any(x in dataset for x in ["VBF", "WH", "ZH"]):
-                up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
-                down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in vbf_vh_indices])
-            elif any(x in dataset for x in ["TTH", "GluGluH"]):
-                up   = np.maximum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
-                down = np.minimum.reduce([events.LHEScaleWeight[:, i] for i in ggh_tth_indices])
-            elif len(events.nLHEScaleWeight[0]) > 1:
-                print("LHEScaleWeight vector has length", len(events.nLHEScaleWeight[0]))
+            indices_touse = None
+            if   any(x in dataset for x in ["VBF", "WH", "ZH"]):  indices_touse = vbf_vh_indices
+            elif any(x in dataset for x in ["TTH", "GluGluH"]):   indices_touse = ggh_tth_indices
+            max_wgt_ = np.full_like(nom, -99999.0)
+            min_wgt_ = np.full_like(nom,  99999.0)     
+            for i in indices_touse:
+                max_wgt_ = np.maximum(events_LHEScaleWeight[:, i], max_wgt_)
+                min_wgt_ = np.minimum(events_LHEScaleWeight[:, i], min_wgt_)            
+                up   = max_wgt_
+            down = min_wgt_
+            for wgt_ in [up, down]:
+                wgt_ = ak.where(
+                    (~ mask_LHEScaleWeight),
+                    np.ones(len(events)),
+                    wgt_
+                )
+        elif len(events.nLHEScaleWeight[0]) > 1:
+            print("LHEScaleWeight vector has length", len(events.nLHEScaleWeight[0]))
 
     return [nom, up, down]
 

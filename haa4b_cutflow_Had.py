@@ -17,7 +17,7 @@ YEAR = '2018'  ## 2016APV, 2016, 2017, 2018
 
 IN_DIR = '/eos/cms/store/user/abrinke1/NanoPostv2/%s/' % YEAR
 #SAMPS = ['GluGluH_M-55','VBFH_M-15','WH_M-15','ZH_M-30','TTH_M-55']
-SAMPS = ['TTH_M-55']
+SAMPS = ['VBFH_M-15']
 
 # SAMPS = ['SingleMuon']
 # IN_DIR = '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/%s/data/PNet_v2_2024_11_22/SingleMuon/r1_Run%sC/' % (YEAR,YEAR)

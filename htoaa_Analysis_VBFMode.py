@@ -68,14 +68,15 @@ from htoaa_CommonTools import (
     selectMETFilters, selectFatJets, getCandidateHiggs, selectAK4Jets, selectMuons, selectElectrons,
     selGenPartsWithStatusFlag,getHScaleAndResol, getAScaleAndResol,
     getHToAATo4BLundPlaneRewgt, 
-    add_HiggsEW_kFactors,
+    add_HiggsEW_kFactors,QCD_pT_reweighting,
     getHiggsPtRewgtForGGH_HToAATo4B, getHiggsPtRewgtForVBFH_HToAATo4B, 
     getHiggsPtRewgtForWH_HToAATo4B, getHiggsPtRewgtForZH_HToAATo4B,
     getHiggsPtRewgtForTTH_HToAATo4B, 
-    getTopPtRewgt, getPURewgts, getHTReweight, QCD_pT_reweighting,
+    getTopPtRewgt, getPURewgts, getHTReweight, 
     getPURewgts_variation, get_jetTriggerSF, get_PSWeight, add_pdf_as_weight, get_QCDScaleWeight,
     get_JER_and_JES,
     get_Ak4BtagSF, get_L1TPrefiringWgt,
+    get_QCDPtWgt,
     calculateAverageOfArrays, calculateMaxOfTwoArrays, calculateMaxOfArrays,  array_PutLowerBound,
     ak_drop_none,
     fillCoffeaHist, fillCoffeaHist_1,
@@ -93,6 +94,7 @@ frameinfo = getframeinfo(currentframe())
 print(f"htoaa_Analysis_VBFMode:: here13 {datetime.now() = }"); sys.stdout.flush()
 
 
+
 # use GOldenJSON
 
 
@@ -107,6 +109,38 @@ flushStdout = True
 
 CrossCheckEvtYieldsWithAndrew = False
 LumiSecSelThsh_list = [] # [20, 40, 60, 80, 100]
+
+RunOnSelectedEvents_rle = [
+    '1:13:71598',
+    '1:13:71714',
+    '1:13:72141',
+    '1:13:72422',
+    '1:13:72515'
+]
+
+RunOnSelectedEvents_rle = [
+    '1:13:71853',
+    '1:13:74322',
+    '1:13:74661',
+    '1:13:75774',
+    '1:13:75950',
+    '1:13:76786',
+    '1:14:79555',
+    '1:14:80406',
+    '1:14:80541',
+    '1:14:80549',
+    '1:14:80947',
+    '1:14:81523',
+    '1:14:83003',
+    '1:69:403370',
+    '1:69:403528',
+    '1:69:404571',
+    '1:69:405052',
+    '1:69:405588',
+
+
+]
+RunOnSelectedEvents_rle = []
 
 #print("".format())
 
@@ -201,6 +235,10 @@ class ObjectSelection:
         self.GenHTThsh  = 100.0
         self.LHEHTThsh  = 100.0
         
+        self.mHWindows = {
+            'mHInclusive': [70, 9999.],
+            'mHHiggs':     [110, 140.],
+        }
 
 
     def selectGenHiggs(self, events):
@@ -259,7 +297,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         global runMode_SignificancsScan2D;    runMode_SignificancsScan2D = False
         global runMode_OptimizePNetTaggerCut; runMode_OptimizePNetTaggerCut = False # False
         global runMode_2018HEM1516IssueValidation; runMode_2018HEM1516IssueValidation = False
-        global runMode_SignalGenCuts;         runMode_SignalGenCuts = True; # set False for final round. True for optimization studies.
+        global runMode_SignalGenCuts;         runMode_SignalGenCuts = False; # set False for final round. True for optimization studies.
         
         ak.behavior.update(nanoaod.behavior)
 
@@ -432,8 +470,16 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.sel_names_all["Presel"] = insertInListBeforeThisElement(
                     list1                  = self.sel_names_all["Presel"], 
                     sConditionToAdd        = "QCDStitch", 
-                    addBeforeThisCondition = "METFilters")                
-               
+                    addBeforeThisCondition = "METFilters")
+                
+            if ((('SUSY_VBFH_HToAATo4B_Pt150_M-21.5'        in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2017)) or 
+                (('SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-57.5' in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2017)) or 
+                (('SUSY_VBFH_HToAATo4B_Pt150_M-32.5'        in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2018))    ):
+                self.sel_names_all["Presel"] = insertInListBeforeThisElement(
+                    list1                  = self.sel_names_all["Presel"], 
+                    sConditionToAdd        = "BlackListedEvts", 
+                    addBeforeThisCondition = "METFilters")
+                
 
         if self.datasetInfo["era"] == Era_2018:
             # 2018HEM1516Issue ----------------
@@ -450,16 +496,18 @@ class HToAATo4bProcessor(processor.ProcessorABC):
         categories_dict = OD()
         #categories_dict["gg0lIncl"] = [ "leadingFatJetPt_gg0lIncl" if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         categories_dict["VBFIncl"] = [ "nak4jets_incl"    if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["VBFLo"]   = [ "nak4jets_loose"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["VBFHi"]   = [ "nak4jets_tight"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFLo"]   = [ "nak4jets_loose"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
+        categories_dict["VBFHi"]   = [ "nak4jets_tight"   if s_ == "nak4jets" else s_     for s_ in self.sel_names_all["Presel"] ]
 
         categories_dict["VBFLoPTLo"]   = [ "leadingFatJetPt_VBFLoPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         categories_dict["VBFLoPTHi"]   = [ "leadingFatJetPt_VBFLoPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         categories_dict["VBFHiPTLo"]   = [ "leadingFatJetPt_VBFHiPTLo"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
         categories_dict["VBFHiPTHi"]   = [ "leadingFatJetPt_VBFHiPTHi"   if s_ == "leadingFatJetPt" else s_     for s_ in self.sel_names_all["Presel"] ]
-        #categories_dict["gg0lInclMsdLt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdLt50']
-        #categories_dict["gg0lInclMsdGt50"] = categories_dict["gg0lIncl"] + ['leadingFJMsdGt50']
-        
+        ## NoTrg categories for ARC review 06/05/2026
+        for sCat_ in ["VBFIncl", "VBFLo", "VBFHi", "VBFLoPTLo", "VBFLoPTHi", "VBFHiPTLo", "VBFHiPTHi"]:
+            sCatNoTrg_ = '%sNoTrg' % sCat_
+            categories_dict[sCatNoTrg_] = [s_ for s_ in categories_dict[sCat_]  if s_ != sTrgSelection]
+
 
         for sCatName, catSels in categories_dict.items():
             if self.datasetInfo['histogramSaveLevel'] >= 1:
@@ -469,24 +517,6 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.sel_names_all["%s_SRWP40" % (sCatName)] = catSels + [
                     "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP40"
                 ]    
-            '''        
-            self.sel_names_all["%s_SRWP60" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP60"
-            ]
-            self.sel_names_all["%s_SRWP80" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP80"
-            ]
-            self.sel_names_all["%s_SBWP80to40" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP80to40"
-            ]
-            self.sel_names_all["%s_SBWP95to60" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP95to60"
-            ]
-            self.sel_names_all["%s_SBWP99to80" % (sCatName)] = catSels + [
-                "leadingFatJetPNet_Xto4bv1_Htoaa4bOverQCD_WP99to80"
-            ]
-            '''
-
             
             for wp_ in self.objectSelector.FatJetPNetXto4bv2WorkingPoints:                 
                 self.sel_names_all["%s_Xto4bv2_SRWP%s" % (sCatName, wp_)] = catSels + [ # signal region
@@ -498,6 +528,12 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 self.sel_names_all["%s_Xto4bv2_SBplusSRWP%s" % (sCatName, wp_)] = catSels + [ # side band + signal region
                     "leadingFatJetPNet_Xto4bv2_Htoaa4b_SBplusSRWP%s" % (wp_)
                 ]
+                
+            for sMHWindow_ in self.objectSelector.mHWindows:
+                self.sel_names_all["%s_%s" % (sCatName, sMHWindow_)] = catSels + [ 
+                    "leadingFatJetPNet_massH_%s" % (sMHWindow_)
+                ]                
+
 
         if self.datasetInfo['saveRunLsEvt']:
             global sCat_save_rle; sCat_save_rle = "gg0lIncl_Xto4bv2_SBplusSRWP40";
@@ -1567,7 +1603,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
 
         
-
+        nEvents     = len(events)
         ones_list   = np.ones(len(events))
         zeros_list  = np.zeros(len(events))
         trues_list  = np.ones(len(events), dtype=bool)
@@ -1832,17 +1868,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             LVGenB_1_asSingleton = ak.singletons(LVGenB_1)
             LVGenBbar_0_asSingleton = ak.singletons(LVGenBbar_0)
             LVGenBbar_1_asSingleton = ak.singletons(LVGenBbar_1)
+            genHiggs_asSingletons = ak.singletons(genHiggs)
 
             dR_4b = ak.concatenate([
-                LVGenB_0_asSingleton.delta_r(LVGenB_1_asSingleton),
-                LVGenB_0_asSingleton.delta_r(LVGenBbar_0_asSingleton),
-                LVGenB_0_asSingleton.delta_r(LVGenBbar_1_asSingleton),
-                LVGenB_1_asSingleton.delta_r(LVGenBbar_0_asSingleton),
-                LVGenB_1_asSingleton.delta_r(LVGenBbar_1_asSingleton),
-                LVGenBbar_0_asSingleton.delta_r(LVGenBbar_1_asSingleton)
+                LVGenB_0_asSingleton.delta_r(genHiggs_asSingletons),
+                LVGenBbar_0_asSingleton.delta_r(genHiggs_asSingletons),
+                LVGenB_1_asSingleton.delta_r(genHiggs_asSingletons),
+                LVGenBbar_1_asSingleton.delta_r(genHiggs_asSingletons),
             ], axis=-1)
             cone_size_4b = ak.max(dR_4b, axis=-1)
-            genHiggs_asSingletons = ak.singletons(genHiggs)
             dr_GenH_GenB = ak.concatenate([genHiggs_asSingletons.delta_r(LVGenB_0), genHiggs_asSingletons.delta_r(LVGenBbar_0), genHiggs_asSingletons.delta_r(LVGenB_1), genHiggs_asSingletons.delta_r(LVGenBbar_1)], axis=-1)
             max_dr_GenH_GenB = ak.max(dr_GenH_GenB, axis=-1)    
             mask_SignalHToAATo4B_Boosted = (max_dr_GenH_GenB < 0.8)
@@ -2636,56 +2670,60 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 (leadingFatJet.eta < -1.1) &
                 (np.abs(leadingFatJet.phi + 1.22) < 0.55)
             ) |
-            ak.any(
-                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) &
-                  (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45) ),
-                axis=1
+            (
+                (leadingAk4Jet.eta > -3.2) & (leadingAk4Jet.eta < -1.2) &
+                (np.abs(leadingAk4Jet.phi + 1.22) < 0.45)
+            ) |
+            (
+                (subleadingAk4Jet.eta > -3.2) & (subleadingAk4Jet.eta < -1.2) &
+                (np.abs(subleadingAk4Jet.phi + 1.22) < 0.45)
             ),
             False
         )
+
         mask_HEM1516Issue_Eta = ak.fill_none(
             (leadingFatJet.eta < -1.1) |
-            ak.any(
-                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) ),
-                axis=1
-            ),
+            (leadingAk4Jet.eta > -3.2) & (leadingAk4Jet.eta < -1.2) |
+            (subleadingAk4Jet.eta > -3.2) & (subleadingAk4Jet.eta < -1.2),
             False
         )
+        
+        # Combined mask for Phi
         mask_HEM1516Issue_Phi = ak.fill_none(
             (np.abs(leadingFatJet.phi + 1.22) < 0.55) |
-            ak.any(
-                (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45),
-                axis=1
-            ),
+            (np.abs(leadingAk4Jet.phi + 1.22) < 0.45) |
+            (np.abs(subleadingAk4Jet.phi + 1.22) < 0.45),
             False
         )
-
-        #for the VBF Ak4jet validation
+        
+        # VBF Ak4Jet mask (both Eta and Phi)
         mask_Ak4JetHEM1516Issue = ak.fill_none(
-            ak.any(
-                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) &
-                  (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45) ),
-                axis=1
+            (
+                ((leadingAk4Jet.eta > -3.2) & (leadingAk4Jet.eta < -1.2) &
+                 (np.abs(leadingAk4Jet.phi + 1.22) < 0.45))
+            ) |
+            (
+                ((subleadingAk4Jet.eta > -3.2) & (subleadingAk4Jet.eta < -1.2) &
+                 (np.abs(subleadingAk4Jet.phi + 1.22) < 0.45))
             ),
             False
         )
-
+        
+        # VBF Ak4Jet Eta only
         mask_Ak4JetHEM1516Issue_Eta = ak.fill_none(
-            ak.any(
-                ( (Ak4VBFJets_bveto.eta > -3.2) & (Ak4VBFJets_bveto.eta < -1.2) ),
-                axis=1
-            ),
+            ((leadingAk4Jet.eta > -3.2) & (leadingAk4Jet.eta < -1.2)) |
+            ((subleadingAk4Jet.eta > -3.2) & (subleadingAk4Jet.eta < -1.2)),
             False
         )
-
+        
+        # VBF Ak4Jet Phi only (including leading FatJet)
         mask_Ak4JetHEM1516Issue_Phi = ak.fill_none(
             (np.abs(leadingFatJet.phi + 1.22) < 0.55) |
-            ak.any(
-                (np.abs(Ak4VBFJets_bveto.phi + 1.22) < 0.45),
-		axis=1
-	    ),
+            (np.abs(leadingAk4Jet.phi + 1.22) < 0.45) |
+            (np.abs(subleadingAk4Jet.phi + 1.22) < 0.45),
             False
         )
+
 
 
         ## VBF jj
@@ -2717,6 +2755,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 runNumber_list       = events.run, 
                 luminosityBlock_list = events.luminosityBlock 
                 ))
+        if "BlackListedEvts" in self.sel_conditions_all_list:
+            if ((('SUSY_VBFH_HToAATo4B_Pt150_M-21.5'        in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2017)) or 
+                (('SUSY_TTH_TTToAll_HToAATo4B_Pt150_M-57.5' in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2017)) or 
+                (('SUSY_VBFH_HToAATo4B_Pt150_M-32.5'        in self.datasetInfo['datasetName']) and (self.datasetInfo["era"] == Era_2018))    ):
+                mask_LHEPdfWeight   = (ak.count(events.LHEPdfWeight,   axis=1) == 101)
+                mask_LHEScaleWeight = (ak.count(events.LHEScaleWeight, axis=1) == 9)
+                mask_BlackListedEvts = (mask_LHEPdfWeight & mask_LHEScaleWeight)
+                # BlackListedEvts
+                selection.add("BlackListedEvts", mask_BlackListedEvts)
 
         if "nPV" in self.sel_conditions_all_list:
             # nPVGood >= 1
@@ -3110,7 +3157,13 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 mask_Trgs
             )
 
-
+            ## For events not fired by any triggers from trigger soup, set luminosity to maximum luminosity for that year
+            luminosity_max_forEra_ = Luminosities_TotalPerYear[self.datasetInfo["era"]][sTrgSelection][0]
+            luminosity_firedTrgs = np.where(
+                ((~mask_Trgs) & (luminosity_firedTrgs < 1e-6)),
+                np.full_like(luminosity_firedTrgs, luminosity_max_forEra_),
+                luminosity_firedTrgs
+            )
 
         if "2018HEM1516Issue" in self.sel_conditions_all_list:
             if not self.datasetInfo['isMC']: # 2018 data
@@ -3142,6 +3195,15 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                 mask_QCD_stitch_eventwise
             )
 
+        for sMHWindow_, mHWindowRange_ in self.objectSelector.mHWindows.items():  
+            if "leadingFatJetPNet_massH_%s" % (sMHWindow_) in self.sel_conditions_all_list:      
+                selection.add(
+                   "leadingFatJetPNet_massH_%s" % (sMHWindow_),
+                    (
+                        (leadingFatJet.massH_toUse > mHWindowRange_[0]) & 
+                        (leadingFatJet.massH_toUse < mHWindowRange_[1])
+                    ) 
+                )
 
 
             
@@ -3165,9 +3227,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             selection.add("1GenHiggs", ak.num(genHiggses) == 1)
             selection.add("2GenA", ak.num(genACollection) == 2)
             selection.add("2GenAToBBbarPairs", ak.num(genBBar_pairs) == 2)
-            selection.add("dR_GenH_GenB_0p8", max_dr_GenH_GenB < 0.8)
-            selection.add("dR_LeadingFatJet_GenB_0p8", max_dr_LeadingFatJet_GenB < 0.8)
-            selection.add("dR_4GenB_ConeSize_0p8", cone_size_4b < 0.8)
+            #selection.add("dR_GenH_GenB_0p8", max_dr_GenH_GenB < 0.8)
+            #selection.add("dR_LeadingFatJet_GenB_0p8", max_dr_LeadingFatJet_GenB < 0.8)
+            #selection.add("dR_4GenB_ConeSize_0p8", cone_size_4b < 0.8)
 
             #
             '''
@@ -3189,7 +3251,9 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             '''
             # --- define gen-level selections locally ---
             #sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8", "dR_4GenB_ConeSize_0p8","dR_LeadingFatJet_GenB_0p8"]
-            sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8", "dR_LeadingFatJet_GenB_0p8"]
+            #sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs", "dR_GenH_GenB_0p8", "dR_LeadingFatJet_GenB_0p8"]
+            sel_names_GEN = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]
+
             # --- local dictionary to mimic sel_names_all structure ---
             local_sel_names = OrderedDict()
             #local_sel_names["GenHToAATo4B_1"] = ["1GenHiggs", "2GenA", "2GenAToBBbarPairs"]
@@ -3289,12 +3353,14 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo['isSignalWH']:
                 wgt_WHaa_HiggsPt, wgt_WHaa_HiggsPtUp, wgt_WHaa_HiggsPtDown = getHiggsPtRewgtForWH_HToAATo4B(
                     genHiggs = genHiggs,
-                    genW = genW
+                    genW = genW,
+                    Era = self.datasetInfo["era"]
                 )
             if self.datasetInfo['isSignalZH']:
                 wgt_ZHaa_HiggsPt, wgt_ZHaa_HiggsPtUp, wgt_ZHaa_HiggsPtDown = getHiggsPtRewgtForZH_HToAATo4B(
                     genHiggs = genHiggs,
-                    genZ = genZ
+                    genZ = genZ,
+                    Era = self.datasetInfo["era"]
                 )
             if self.datasetInfo['isSignalTTH']:
                 wgt_TTHaa_HiggsPt, wgt_TTHaa_HiggsPtUp, wgt_TTHaa_HiggsPtDown = getHiggsPtRewgtForTTH_HToAATo4B(
@@ -3488,7 +3554,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo['isQCD_bGen']:
                 weights.add(
                     "HTRewgt",
-                    weight = wgt_HT
+                    weight = copy.deepcopy(wgt_HT)
                 )            
             if self.datasetInfo['isTTbar']:
                 weights.add(
@@ -3647,7 +3713,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo['isQCD_bGen']:
                 weights_woHEM1516Fix.add(
                     "HTRewgt",
-                    weight = wgt_HT
+                    weight = copy.deepcopy(wgt_HT)
                 )  
             if self.datasetInfo['isTTbar']:
                 weights_woHEM1516Fix.add(
@@ -3660,7 +3726,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.SFs_ParticleNetMD_XbbvsQCD != None:
                 weights_woHEM1516Fix.add(
                     "SF_ParticleNetMD_XbbvsQCD",
-                    weight = wgt_ParticleNetMD_XbbvsQCD
+                    weight = copy.deepcopy(wgt_ParticleNetMD_XbbvsQCD)
                 )
             weights_woHEM1516Fix.add(
                 self.systNameISR,
@@ -3778,7 +3844,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
             if self.datasetInfo['isQCD_bGen']:
                 weights_gen.add(
                     "HTRewgt",
-                    weight = wgt_HT
+                    weight = copy.deepcopy(wgt_HT)
                 )
             if self.datasetInfo['isTTbar']:
                 weights_gen.add(
@@ -4158,6 +4224,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
 
                 
                 # m(2b from ATo2B) and m(4b from HToAATo4b) --------------                   
+                '''
                 output['hGenHiggsMass_all_0'].fill(
                     dataset=dataset,
                     Mass=(ak.flatten(genHiggs.mass)),
@@ -4198,7 +4265,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
-               
+
+                '''
                 '''
                 output['hMass_GenA_all'].fill(
                     dataset=dataset,
@@ -4207,6 +4275,8 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     weight=evtWeight_gen
                 )
                 '''
+
+                
                 output['hMass_GenAApair_all'].fill(
                     dataset=dataset,
                     Mass=((genA_First + genA_Second).mass[sel_GenHToAATo4B]),
@@ -4268,7 +4338,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
-
+                '''
                 output['hMass_GenH_vs_GenAHeavy_all'].fill(
                     dataset=dataset,
                     Mass=(ak.flatten(genHiggs.mass[sel_GenHToAATo4B])),
@@ -4323,7 +4393,7 @@ class HToAATo4bProcessor(processor.ProcessorABC):
                     systematic=syst,
                     weight=evtWeight_gen[sel_GenHToAATo4B]
                 )
-
+                '''
                 output['hGenHiggsPt_vs_4bConeSize'].fill(
                     dataset=dataset,
                     Pt=(genHiggs.pt[sel_GenHToAATo4B]),

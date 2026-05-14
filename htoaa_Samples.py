@@ -13,9 +13,9 @@ QCDInclMode = 2 # 1: run "QCD_Incl", 2: run "QCD_Incl_PSWeight", 0: run both "QC
 SamplesMC = OD([
    
     (kQCD_bEnrich,[
-        "QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",
-        "QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8",
-        "QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT500to700_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT700to1000_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8",
@@ -24,9 +24,9 @@ SamplesMC = OD([
     ]),
 
     (kQCD_bGen, [
-        "QCD_HT100to200_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
-        "QCD_HT200to300_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
-        "QCD_HT300to500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_HT100to200_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_HT200to300_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
+        #"QCD_HT300to500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_HT500to700_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_HT700to1000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
         "QCD_HT1000to1500_BGenFilter_TuneCP5_13TeV-madgraph-pythia8",
@@ -35,10 +35,10 @@ SamplesMC = OD([
     ]),
 
     ("QCD_Incl", [
-        "QCD_HT50to100_TuneCP5_13TeV-madgraphMLM-pythia8",
-        "QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8",
-        "QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8",
-        "QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8",
+        #"QCD_HT50to100_TuneCP5_13TeV-madgraphMLM-pythia8",
+        #"QCD_HT100to200_TuneCP5_13TeV-madgraphMLM-pythia8",
+        #"QCD_HT200to300_TuneCP5_13TeV-madgraphMLM-pythia8",
+        #"QCD_HT300to500_TuneCP5_13TeV-madgraphMLM-pythia8",
         "QCD_HT500to700_TuneCP5_13TeV-madgraphMLM-pythia8",
         "QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8",
         "QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8",
@@ -47,10 +47,10 @@ SamplesMC = OD([
     ]),
 
     ("QCD_Incl_PSWeight", [
-        "QCD_HT50to100_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
-        "QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
-        "QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
-        "QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
+        #"QCD_HT50to100_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
+        #"QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
+        #"QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
+        #"QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
         "QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
         "QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
         "QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraph-pythia8",
@@ -261,7 +261,7 @@ SamplesMC = OD([
     ('GluGluHToBB_Pt-200ToInf', [
         "GluGluHToBB_Pt-200ToInf_M-125_TuneCP5_MINLO_13TeV-powheg-pythia8",
     ]),
-    #('VBFHToBB_powheg', [
+    #('VBHToBB_powheg', [
     #    "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8",
     #]),
     #('VBFHToBB_herwig', [
